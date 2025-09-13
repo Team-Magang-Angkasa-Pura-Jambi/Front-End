@@ -1,103 +1,127 @@
 "use client";
-import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import {
-  IconArrowLeft,
-  IconBrandTabler,
-  IconSettings,
-  IconUserBolt,
-} from "@tabler/icons-react";
-import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import { LogoIcon } from "./components/LogoIcon";
+import { useAuthStore } from "@/stores/authStore";
+import { usePathname, useRouter } from "next/navigation";
+import { Logo } from "./components/logo";
+import { Button } from "@/components/ui/button";
+import {
+  Database,
+  LayoutDashboard,
+  LogOut,
+  SquarePen,
+  Users,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 
-export function AuthLayouts({ children }) {
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { type: "spring", stiffness: 400, damping: 25 },
+  },
+};
+
+export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
+  const [open, setOpen] = useState(false);
+  const { logout } = useAuthStore();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const links = [
     {
       label: "Dashboard",
-      href: "#",
-      icon: (
-        <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      href: "/",
+      icon: <LayoutDashboard className="h-5 w-5 shrink-0" />,
     },
     {
-      label: "Profile",
-      href: "#",
-      icon: (
-        <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      label: "Enter Data",
+      href: "/enter-data",
+      icon: <SquarePen className="h-5 w-5 shrink-0" />,
     },
     {
-      label: "Settings",
-      href: "#",
-      icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      label: "Data Master",
+      href: "/data-master",
+      icon: <Database className="h-5 w-5 shrink-0" />,
     },
     {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      label: "User Management",
+      href: "/user-management",
+      icon: <Users className="h-5 w-5 shrink-0" />,
     },
   ];
-  const [open, setOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/auth/login");
+  };
+
   return (
     <div
       className={cn(
-        " flex w-full overflow-hidden rounded-md border border-neutral-200  md:flex-row dark:border-neutral-700 dark:bg-neutral-800",
-        "h-screen" // for your use case, use `h-screen` instead of `h-[60vh]`
+        "flex h-screen w-full overflow-hidden rounded-md border md:flex-row"
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            {open ? <Logo /> : <LogoIcon />}
-            <div className="mt-8 flex flex-col gap-2">
-              {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
-              ))}
-            </div>
+          <div className="flex flex-1 flex-col overflow-y-auto overflow-hidden">
+            <Logo />
+            <motion.div
+              className="mt-8 flex flex-col gap-2"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {links.map((link) => {
+                // PENYEMPURNAAN: Logika isActive yang lebih cerdas
+                // Untuk href "/", harus sama persis. Untuk yang lain, cek apakah path dimulai dengan href tersebut.
+                const isActive =
+                  link.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(link.href);
+
+                return (
+                  <motion.div
+                    key={link.href}
+                    variants={itemVariants}
+                    className="relative"
+                  >
+                    <SidebarLink link={link} isActive={isActive} open={open} />
+                  </motion.div>
+                );
+              })}
+            </motion.div>
           </div>
-          <div>
-            <SidebarLink
-              link={{
-                label: "Manu Arora",
-                href: "#",
-                icon: (
-                  <Image
-                    src="https://assets.aceternity.com/manu.png"
-                    className="h-7 w-7 shrink-0 rounded-full"
-                    width={50}
-                    height={50}
-                    alt="Avatar"
-                  />
-                ),
-              }}
-            />
-          </div>
+
+          <motion.div
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              className="w-full justify-start mt-2"
+            >
+              <LogOut className="h-5 w-5 shrink-0 mr-2" />
+              <span className={cn("font-medium", !open && "hidden")}>
+                Logout
+              </span>
+            </Button>
+          </motion.div>
         </SidebarBody>
       </Sidebar>
-      <div className="overflow-y-auto">{children}</div>
+      <main className="flex-1 overflow-y-auto p-8">{children}</main>
     </div>
-  );
-}
-export const Logo = () => {
-  return (
-    <a
-      href="#"
-      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-    >
-      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="font-medium whitespace-pre text-black dark:text-white"
-      >
-        Angkasa Pura x Sentinel
-      </motion.span>
-    </a>
   );
 };

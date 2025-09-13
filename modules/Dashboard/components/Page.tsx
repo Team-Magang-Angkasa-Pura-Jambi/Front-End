@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "framer-motion"; // <-- [FIX] Impor yang benar untuk varian animasi
+import { motion } from "motion/react"; // <-- [FIX] Impor yang benar untuk varian animasi
 import { NotificationCard } from "./NotificationCard";
 import { StatCard } from "./StatCard";
 import { AnalysisChart } from "./AnalysisChart";
