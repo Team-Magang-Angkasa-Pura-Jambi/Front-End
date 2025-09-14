@@ -8,13 +8,29 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+export interface DialogDetails {
+  title: string;
+  description: string;
+  form: React.ReactNode;
+}
+
+export interface EntryDataProps {
+  isOpen: boolean;
+  onClose: () => void;
+  details: DialogDetails | null;
+
+  onSubmit: (e: React.FormEvent) => void;
+
+  isSubmitting: boolean;
+}
+
 export const DataEntryDialog = ({
   isOpen,
   onClose,
   details,
   onSubmit,
   isSubmitting,
-}) => {
+}: EntryDataProps) => {
   if (!details) return null;
 
   return (

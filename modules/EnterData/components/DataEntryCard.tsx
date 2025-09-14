@@ -8,7 +8,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-export const DataEntryCard = ({ icon, title, description, onClick }) => (
+
+interface DataEntryCardProops {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  onClick: () => void;
+}
+export const DataEntryCard = ({
+  icon,
+  title,
+  description,
+  onClick,
+}: DataEntryCardProops) => (
   <motion.div
     whileHover={{ scale: 1.03 }}
     transition={{ type: "spring", stiffness: 300 }}

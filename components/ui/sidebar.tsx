@@ -3,11 +3,17 @@ import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { IconMenu2, IconX } from "@tabler/icons-react";
+import Link from "next/link";
 
 interface Links {
   label: string;
   href: string;
   icon: React.JSX.Element | React.ReactNode;
+}
+interface SidebarLinkProps {
+  link: Links;
+  className?: string;
+  isActive?: boolean;
 }
 
 interface SidebarContextProps {
@@ -157,24 +163,23 @@ export const MobileSidebar = ({
 export const SidebarLink = ({
   link,
   className,
-  ...props
-}: {
-  link: Links;
-  className?: string;
-}) => {
+  isActive, // 1. Destructure `isActive` directly from the props
+  ...rest // 2. Collect all OTHER props into a `rest` object
+}: SidebarLinkProps & React.ComponentProps<typeof Link>) => {
+  // You can improve typing like this
   const { open, animate } = useSidebar();
   return (
-    <a
+    <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-2 group/sidebar py-2 px-1 rounded-lg", // Tambahkan px-2 dan rounded-lg untuk latar belakang
-        "transition-colors duration-200", // Tambahkan transisi yang mulus
-        props.isActive
+        "flex items-center justify-start gap-2 group/sidebar py-2 px-1 rounded-lg",
+        "transition-colors duration-200",
+        isActive // 3. Use the destructured `isActive` variable here
           ? "bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 font-medium"
           : "text-neutral-500 hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-neutral-700",
         className
       )}
-      {...props}
+      {...rest} // 4. Spread the `rest` object, which no longer contains `isActive`
     >
       {link.icon}
 
@@ -187,6 +192,6 @@ export const SidebarLink = ({
       >
         {link.label}
       </motion.span>
-    </a>
+    </Link>
   );
 };
