@@ -1,72 +1,40 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { InputData } from "./InputData";
-import { DialogType } from "../types/inde";
+// import { InputData } from "./InputData";
+import { DialogType } from "../types";
+import { FormReadingElectric } from "./formElectricty";
+import { FormReadingWater } from "./formWater";
+import { FormReadingFuel } from "./formFuel";
+import { FormReadingPax } from "./formPax";
 
 export const getDialogDetails = (openDialog: DialogType) => {
   switch (openDialog) {
-    case "listrik":
+    case "Electricity":
       return {
         title: "Input Data Pemakaian Listrik",
         description: "Masukkan total pemakaian listrik (kWh) untuk hari ini.",
-        form: (
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="pemakaian-kwh" className="text-right">
-                Pemakaian (kWh)
-              </Label>
-              <InputData digits={7} />
-            </div>
-          </div>
-        ),
+        form: <FormReadingElectric type_name="Electricity" />,
       };
-    case "air":
+    case "Water":
       return {
         title: "Input Data Pemakaian Air",
         description: "Masukkan total pemakaian air (m³) untuk hari ini.",
-        form: (
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="pemakaian-air" className="text-right">
-                Pemakaian (m³)
-              </Label>
-              <InputData digits={5} />
-            </div>
-          </div>
-        ),
+        form: <FormReadingWater type_name="water" />,
       };
-    case "bbm":
+    case "Fuel":
       return {
         title: "Input Data Pemakaian BBM Solar  ",
         description: "Masukkan total pemakaian dalam liter.",
-        form: (
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="pemakaian-liter" className="text-right">
-                Pemakaian (Liter)
-              </Label>
-              <InputData digits={5} />
-            </div>
-          </div>
-        ),
+        form: <FormReadingFuel type_name="Fuel" />,
       };
-    case "pax":
+    case "Pax":
       return {
         title: "Input Data Penumpang (PAX)",
         description: "Masukkan jumlah penumpang keberangkatan dan kedatangan.",
-        form: (
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="pax-datang" className="text-right">
-                Kedatangan
-              </Label>
-              <InputData digits={5} />
-            </div>
-          </div>
-        ),
+        form: <FormReadingPax />,
       };
-    case "log":
+    case "Log":
       return {
         title: "Catat Aktivitas/Kejadian Penting",
         description:

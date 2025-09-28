@@ -5,7 +5,7 @@ import { DataEntryCard } from "./DataEntryCard";
 import { DataEntryDialog } from "./DataEntryDialog";
 import { getDialogDetails } from "./getDialogDetails";
 import { cardData } from "../constant/cardData";
-import { DialogType } from "../types/inde";
+import { DialogType } from "../types";
 
 export const Page = () => {
   const [openDialog, setOpenDialog] = useState<DialogType>(null);

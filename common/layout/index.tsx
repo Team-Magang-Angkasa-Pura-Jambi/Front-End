@@ -6,6 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "./components/logo";
 import { Button } from "@/components/ui/button";
 import {
+  BadgeDollarSign,
+  ClipboardList,
   Database,
   LayoutDashboard,
   LogOut,
@@ -50,10 +52,16 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
       icon: <SquarePen className="h-5 w-5 shrink-0" />,
     },
     {
+      label: "Recap Data",
+      href: "/recap-data",
+      icon: <ClipboardList className="h-5 w-5 shrink-0" />,
+    },
+    {
       label: "Data Master",
       href: "/data-master",
       icon: <Database className="h-5 w-5 shrink-0" />,
     },
+
     {
       label: "User Management",
       href: "/user-management",

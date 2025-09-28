@@ -31,7 +31,7 @@ export const MachineLearningAnalysis = () => {
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm col-span-1">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-lg text-gray-800">Hasil Analisis AI</h3>
+        <h3 className="font-bold text-lg text-gray-800">Hasil Analisis </h3>
         <button className="text-sm text-gray-500 flex items-center">
           Bulan Ini <ChevronDown className="w-4 h-4 ml-1" />
         </button>

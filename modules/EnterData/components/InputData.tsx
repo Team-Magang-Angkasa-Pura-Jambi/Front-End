@@ -6,8 +6,11 @@ import {
 
 interface InputDataProps {
   digits: number;
+  value: void;
+  setValue: void;
 }
-export const InputData = ({ digits }: InputDataProps) => {
+
+export const InputData = ({ digits, value, setValue }: InputDataProps) => {
   return (
     <InputOTP maxLength={digits} pattern="^[0-9]+$">
       <InputOTPGroup>

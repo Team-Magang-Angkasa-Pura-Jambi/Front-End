@@ -14,6 +14,13 @@ const nextConfig = {
       },
     ],
   },
+
+  typescript: {
+    // ## INI BAGIAN PENTING ##
+    // Hanya abaikan error build jika environment variable VERCEL_ENV adalah 'preview'.
+    // Untuk build produksi (saat VERCEL_ENV adalah 'production'), nilai ini akan menjadi 'false'.
+    // ignoreBuildErrors: true,
+  },
 };
 
 module.exports = nextConfig;
