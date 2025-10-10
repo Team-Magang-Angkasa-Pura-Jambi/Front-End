@@ -3,12 +3,14 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https,"
+        // Koma (,) seharusnya TIDAK ADA di sini setelah "https"
+        protocol: "https", 
         hostname: "assets.aceternity.com",
         pathname: "/**",
       },
       {
-        protocol: "https,"
+        // Koma (,) seharusnya TIDAK ADA di sini setelah "https"
+        protocol: "https", 
         hostname: "ui-avatars.com",
         pathname: "/**",
       },
