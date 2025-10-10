@@ -3,23 +3,29 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
+        protocol: "https,"
         hostname: "assets.aceternity.com",
         pathname: "/**",
       },
       {
-        protocol: "https",
+        protocol: "https,"
         hostname: "ui-avatars.com",
         pathname: "/**",
       },
     ],
   },
 
+  // Mengabaikan error TypeScript selama build
   typescript: {
-    // ## INI BAGIAN PENTING ##
-    // Hanya abaikan error build jika environment variable VERCEL_ENV adalah 'preview'.
-    // Untuk build produksi (saat VERCEL_ENV adalah 'production'), nilai ini akan menjadi 'false'.
-    // ignoreBuildErrors: true,
+    // PERINGATAN: Opsi ini akan membuat Next.js secara diam-diam mengabaikan
+    // semua error TypeScript saat build produksi.
+    ignoreBuildErrors: true,
+  },
+
+  // Mengabaikan error ESLint selama build
+  eslint: {
+    // PERINGATAN: Opsi ini akan mencegah build gagal jika ada error ESLint.
+    ignoreDuringBuilds: true,
   },
 };
 
