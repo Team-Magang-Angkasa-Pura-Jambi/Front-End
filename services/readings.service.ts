@@ -56,10 +56,11 @@ export const submitReadingApi = async (payload: ReadingPayload) => {
 // Tambahkan fungsi ini
 export const getLastReadingApi = async (
   meterId: number,
-  readingTypeId: number
+  readingTypeId: number,
+  date: string
 ): Promise<{ data: { value: number } | null }> => {
   const response = await api.get(
-    `/readings/last?meterId=${meterId}&readingTypeId=${readingTypeId}`
+    `/readings/last?meterId=${meterId}&readingTypeId=${readingTypeId}&readingDate=${date}`
   );
   return response.data;
 };

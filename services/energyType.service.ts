@@ -40,7 +40,7 @@ export interface EnergyTypesApiResponse {
  * Mengambil semua jenis energi dari API.
  */
 export const getEnergyTypesApi = async (
-  typeName: string
+  typeName?: string
 ): Promise<EnergyTypesApiResponse> => {
   let prefix = "/energy-types";
   // Ganti '/energy-types' dengan endpoint Anda yang sebenarnya

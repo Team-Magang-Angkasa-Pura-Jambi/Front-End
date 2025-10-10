@@ -6,16 +6,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "./components/logo";
 import { Button } from "@/components/ui/button";
 import {
-  BadgeDollarSign,
   ClipboardList,
   Database,
+  Loader2,
   LayoutDashboard,
   LogOut,
+  Notebook,
   SquarePen,
   Users,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useMemo, useState } from "react"; // Import useMemo
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,45 +35,94 @@ const itemVariants = {
   },
 };
 
+// PENYEMPURNAAN: Gunakan string enum agar lebih jelas dan aman
+enum Role {
+  Technician = "Technician",
+  Admin = "Admin",
+  SuperAdmin = "SuperAdmin",
+}
+
+// LANGKAH 1: Definisikan SEMUA kemungkinan link beserta role yang diizinkan
+const allLinks = [
+  {
+    label: "Dashboard",
+    href: "/",
+    icon: <LayoutDashboard className="h-5 w-5 shrink-0" />,
+    allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin], // Semua bisa lihat
+  },
+  {
+    label: "Enter Data",
+    href: "/enter-data",
+    icon: <SquarePen className="h-5 w-5 shrink-0" />,
+    allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin], // Semua bisa lihat
+  },
+  {
+    label: "Recap Data",
+    href: "/recap-data",
+    icon: <ClipboardList className="h-5 w-5 shrink-0" />,
+    allowedRoles: [Role.Admin, Role.SuperAdmin,Role.Technician], // Hanya Admin & SuperAdmin
+  },
+  {
+    label: "Recap Reading",
+    href: "/recap-reading",
+    icon: <Notebook className="h-5 w-5 shrink-0" />,
+    allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician], // Hanya Admin & SuperAdmin
+  },
+  {
+    label: "Data Master",
+    href: "/data-master",
+    icon: <Database className="h-5 w-5 shrink-0" />,
+    allowedRoles: [Role.SuperAdmin, Role.Admin], // Hanya SuperAdmin
+  },
+  {
+    label: "User Management",
+    href: "/user-management",
+    icon: <Users className="h-5 w-5 shrink-0" />,
+    allowedRoles: [Role.SuperAdmin], // Hanya SuperAdmin
+  },
+];
+
 export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
   const [open, setOpen] = useState(false);
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
-  const links = [
-    {
-      label: "Dashboard",
-      href: "/",
-      icon: <LayoutDashboard className="h-5 w-5 shrink-0" />,
-    },
-    {
-      label: "Enter Data",
-      href: "/enter-data",
-      icon: <SquarePen className="h-5 w-5 shrink-0" />,
-    },
-    {
-      label: "Recap Data",
-      href: "/recap-data",
-      icon: <ClipboardList className="h-5 w-5 shrink-0" />,
-    },
-    {
-      label: "Data Master",
-      href: "/data-master",
-      icon: <Database className="h-5 w-5 shrink-0" />,
-    },
-
-    {
-      label: "User Management",
-      href: "/user-management",
-      icon: <Users className="h-5 w-5 shrink-0" />,
-    },
-  ];
+  // LANGKAH 2: Filter link berdasarkan role user yang sedang login
+  // useMemo digunakan agar proses filter tidak berjalan di setiap render,
+  // hanya ketika role user berubah.
+  const visibleLinks = useMemo(() => {
+    if (!user?.role) return []; // Jika user belum ada, jangan tampilkan link
+    return allLinks.filter((link) =>
+      link.allowedRoles.includes(user.role as Role)
+    );
+  }, [user?.role]);
 
   const handleLogout = () => {
     logout();
     router.push("/auth/login");
   };
+
+  // Jika user tidak ditemukan, bisa tampilkan loading atau null
+  if (!user) {
+    // PERBAIKAN: Tampilan loading layar penuh yang lebih menarik
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm"
+        >
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="mt-4 text-lg font-medium text-muted-foreground">
+            Memuat Sesi...
+          </p>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
 
   return (
     <div
@@ -90,9 +140,8 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
               initial="hidden"
               animate="visible"
             >
-              {links.map((link) => {
-                // PENYEMPURNAAN: Logika isActive yang lebih cerdas
-                // Untuk href "/", harus sama persis. Untuk yang lain, cek apakah path dimulai dengan href tersebut.
+              {/* LANGKAH 3: Gunakan link yang sudah difilter */}
+              {visibleLinks.map((link) => {
                 const isActive =
                   link.href === "/"
                     ? pathname === "/"

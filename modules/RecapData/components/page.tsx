@@ -9,8 +9,9 @@ import { Loader2, ListFilter, AlertTriangle } from "lucide-react";
 
 import { createColumns } from "./ColumnTable";
 import { RecapHeader } from "./Header";
-import { RecapTable } from "./Table";
+import { RecapTable } from "../components/Table";
 import { getRecapDataApi } from "@/services/recap.service";
+import { RecapMeta } from "../type"; // Import RecapMeta
 
 type DataType = "Electricity" | "Water" | "Fuel";
 
@@ -18,14 +19,17 @@ export const Page = () => {
   const [filters, setFilters] = useState<{
     type: DataType;
     date: DateRange | undefined;
-    sortBy: "highest" | "lowest" | undefined;
+    sortBy: "highest" | "lowest" | undefined; // Disesuaikan dengan opsi di Header
+    meterId: number | undefined;
   }>({
     type: "Electricity",
     date: { from: subDays(new Date(), 30), to: new Date() },
-    sortBy: undefined,
+    sortBy: "date", // Memberikan nilai default
+    meterId: undefined,
   });
 
-  const { type, date, sortBy } = filters;
+  // DIUBAH: 'meterId' sekarang di-destructure agar bisa digunakan
+  const { type, date, sortBy, meterId } = filters;
 
   const {
     data: queryData,
@@ -33,15 +37,18 @@ export const Page = () => {
     isFetching,
     isError,
   } = useQuery({
-    queryKey: ["recapData", type, date, sortBy],
+    // DIUBAH: 'meterId' ditambahkan ke queryKey agar query menjadi reaktif
+    queryKey: ["recapData", type, date, sortBy, meterId],
     queryFn: () =>
       getRecapDataApi({
         type,
+        // Non-null assertion (!) aman di sini karena ada `enabled`
         startDate: date!.from!.toISOString(),
         endDate: date!.to!.toISOString(),
         sortBy,
+        meterId,
       }),
-
+    // Query hanya akan berjalan jika tanggal sudah terisi
     enabled: !!date?.from && !!date?.to,
   });
 
@@ -78,15 +85,14 @@ export const Page = () => {
       );
     }
 
-    if (!queryData?.data || queryData.data.length === 0) {
+    if (!queryData?.data?.data || queryData.data.data.length === 0) {
       return (
         <Card className="flex flex-col items-center justify-center text-center h-96">
           <CardContent className="p-6">
             <ListFilter className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">Data Tidak Ditemukan</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Tidak ada data yang cocok dengan filter yang Anda pilih. Coba ubah
-              periode tanggal.
+              Tidak ada data yang cocok dengan filter yang Anda pilih.
             </p>
           </CardContent>
         </Card>
@@ -96,10 +102,10 @@ export const Page = () => {
     return (
       <RecapTable
         columns={columns}
-        data={queryData.data}
+        data={queryData.data.data}
         isLoading={isFetching}
         dataType={filters.type}
-        meta={queryData.meta}
+        meta={queryData.data.meta}
       />
     );
   };
@@ -108,11 +114,11 @@ export const Page = () => {
     <div className="space-y-6">
       <RecapHeader
         columns={columns}
-        summary={queryData?.meta}
+        summary={queryData?.data?.meta} // Cast to RecapMeta
         filters={filters}
         setFilters={setFilters}
         isFetching={isFetching}
-        dataToExport={queryData?.data || []}
+        dataToExport={queryData?.data?.data || []}
       />
       {renderContent()}
     </div>

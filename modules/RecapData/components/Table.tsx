@@ -170,7 +170,20 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
                       {meta?.totalPax ? formatInt(meta.totalPax) : "-"}
                     </TableCell>
                     <TableCell className="font-bold ">
-                      {meta?.totalCost ? formatCurrency(meta.totalCost) : "-"}
+                      <div>
+                        <span className="text-xs font-normal text-muted-foreground">
+                          Sblm Pajak:
+                        </span>{" "}
+                        {meta?.totalCostBeforeTax
+                          ? formatCurrency(meta.totalCostBeforeTax)
+                          : "-"}
+                      </div>
+                      <div>
+                        <span className="text-xs font-normal text-muted-foreground">
+                          Stlh Pajak:
+                        </span>{" "}
+                        {meta?.totalCost ? formatCurrency(meta.totalCost) : "-"}
+                      </div>
                     </TableCell>
                   </>
                 ) : (

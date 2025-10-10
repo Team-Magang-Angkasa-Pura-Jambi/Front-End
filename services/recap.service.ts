@@ -6,6 +6,7 @@ export interface RecapQueryParams {
   startDate: string; // ISO string
   endDate: string; // ISO string
   sortBy?: "highest" | "lowest";
+  meterId: number | null;
 }
 export interface RecapRecord {
   date: string; // Tanggal dalam format string ISO (e.g., "2025-09-24T00:00:00.000Z")
@@ -34,6 +35,7 @@ export const getRecapDataApi = async (
     energyType: params.type,
     startDate: params.startDate,
     endDate: params.endDate,
+    ...(params.meterId && { meterId: params.meterId.toString() }),
   });
 
   // Tambahkan sortBy jika ada
@@ -45,5 +47,18 @@ export const getRecapDataApi = async (
   const response = await api.get(`/recap?${queryParams.toString()}`);
 
   // Kembalikan seluruh isi respons (yang seharusnya sudah cocok dengan tipe RecapApiResponse)
+  return response.data;
+};
+export const recalculateRecapApi = async (params: {
+  startDate: string;
+  endDate: string;
+  meterId?: number | null;
+}) => {
+  const payload = {
+    startDate: params.startDate,
+    endDate: params.endDate,
+    meterId: params.meterId,
+  };
+  const response = await api.post("/recap/recalculate", payload);
   return response.data;
 };

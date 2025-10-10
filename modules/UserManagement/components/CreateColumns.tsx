@@ -37,7 +37,7 @@ export const createColumns = (
   {
     accessorKey: "role",
     header: "Peran",
-    cell: ({ row }) => row.original.role.role_name,
+    cell: ({ row }) => row.original.role?.role_name,
   },
   {
     accessorKey: "is_active",

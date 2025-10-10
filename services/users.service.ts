@@ -20,6 +20,10 @@ export const getUsersApi = async (): Promise<UserApiResponse> => {
   const response = await api.get("/users");
   return response.data;
 };
+export const getUserApi = async (id: number): Promise<UserApiResponse> => {
+  const response = await api.get(`/users/${id}`);
+  return response.data;
+};
 
 /**
  * Membuat pengguna baru.

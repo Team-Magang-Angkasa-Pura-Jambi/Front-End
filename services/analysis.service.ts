@@ -20,9 +20,12 @@ interface AnalysisApiResponse {
 // Fungsi untuk mengambil data analisis berdasarkan tipe (listrik, air, atau fuel)
 export const analysisApi = async (
   type: "Electricity" | "Water" | "Fuel",
-  mount: string
+  mount: string,
+  meterId: number
 ): Promise<AnalysisApiResponse> => {
   // Ganti '/analysis' dengan endpoint API Anda, sambil mengirimkan tipe sebagai query param
-  const response = await api.get(`/analysis?energyType=${type}&month=${mount}`);
+  const response = await api.get(
+    `/analysis?energyType=${type}&month=${mount}&meterId=${meterId}`
+  );
   return response.data;
 };

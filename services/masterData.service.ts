@@ -64,6 +64,7 @@ export const masterData = {
   tax: createApiMethods("tax"),
   meter: createApiMethods("meters"),
   readingType: createApiMethods("reading-types"),
+  tariffGroup: createApiMethods("tariff-groups"),
   priceScheme: createApiMethods("price-schemes"),
   efficiencyTarget: createApiMethods("efficiency-targets"),
   // Anda bisa tambahkan endpoint lain di sini sesuai kebutuhan

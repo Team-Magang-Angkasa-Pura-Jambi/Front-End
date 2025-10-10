@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { addDays, subDays } from "date-fns";
+import { useMemo, useEffect, useState } from "react";
 import {
   useMutation,
   useQueries,
@@ -11,7 +12,12 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, PlusCircleIcon, XCircleIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ClipboardPaste,
+  PlusCircleIcon,
+  XCircleIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -78,6 +84,7 @@ export const FormReadingElectric = ({
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const canChangeDate = user?.role === "Admin" || user?.role === "SuperAdmin";
+  const [lastReadingDate, setLastReadingDate] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -114,6 +121,29 @@ export const FormReadingElectric = ({
 
   const selectedMeterId = form.watch("meter_id");
   const detailsValues = form.watch("details");
+  const readingDate = form.watch("reading_date");
+
+  // ✅ GANTI useQuery menjadi useQueries
+  // Ini akan membuat satu query untuk setiap baris di `detailsValues`
+  const lastReadingQueries = useQueries({
+    queries: detailsValues.map((detail) => ({
+      queryKey: [
+        "lastReading",
+        selectedMeterId,
+        detail.reading_type_id,
+        readingDate, // Tambahkan tanggal ke queryKey
+      ],
+      queryFn: () =>
+        getLastReadingApi(
+          parseInt(selectedMeterId),
+          parseInt(detail.reading_type_id), // Gunakan ID yang sesuai
+          readingDate.toISOString()
+        ),
+      // Aktifkan query hanya jika meter dan jenis pada baris ini sudah dipilih
+      enabled: !!selectedMeterId && !!detail.reading_type_id && !!readingDate,
+      // retry: false, // Tidak perlu coba lagi jika 404 (data tidak ada)
+    })),
+  });
 
   useEffect(() => {
     if (selectedMeterId) {
@@ -121,21 +151,39 @@ export const FormReadingElectric = ({
         { reading_type_id: "", value: undefined as any },
       ]);
     }
-  }, [selectedMeterId, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMeterId, form.setValue]);
 
-  const selectedTypeIds = detailsValues.map((d) => d.reading_type_id);
+  // Efek untuk menampilkan notifikasi jika data sebelumnya tidak ada
+  useEffect(() => {
+    lastReadingQueries.forEach((query) => {
+      // Cek jika query sudah selesai (bukan fetching) dan hasilnya error
+      if (
+        !query.isFetching &&
+        ((query.isSuccess && !query.data?.data) || query.isError)
+      ) {
+        toast.error("Data hari sebelumnya belum diinput.", {
+          description: "Silakan isi data untuk tanggal yang benar.",
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastReadingQueries.map((q) => q.status).join(",")]); // Bergantung pada status semua query
 
-  const lastReadingsQueries = useQueries({
-    queries: (fields || []).map((field, index) => {
-      const readingTypeId = detailsValues[index]?.reading_type_id;
-      return {
-        queryKey: ["lastReading", selectedMeterId, readingTypeId],
-        queryFn: () =>
-          getLastReadingApi(parseInt(selectedMeterId), parseInt(readingTypeId)),
-        enabled: !!selectedMeterId && !!readingTypeId,
-      };
-    }),
-  });
+  useEffect(() => {
+    const lastDate = lastReadingQueries[0]?.data?.data?.session?.reading_date;
+    if (lastDate) {
+      setLastReadingDate(format(new Date(lastDate), "PPP"));
+    } else {
+      setLastReadingDate(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastReadingQueries[0]?.data]);
+
+  const selectedTypeIds = useMemo(
+    () => detailsValues.map((d) => d.reading_type_id),
+    [detailsValues]
+  );
 
   const { mutate, isPending } = useMutation({
     mutationFn: (readingData: ReadingPayload) => submitReadingApi(readingData),
@@ -223,7 +271,11 @@ export const FormReadingElectric = ({
                         className={`w-full justify-start text-left font-normal ${
                           !field.value && "text-muted-foreground"
                         }`}
-                        disabled={!canChangeDate}
+                        // disabled={
+                        //   !canChangeDate ||
+                        //   !selectedMeterId ||
+                        //   !detailsValues[0]?.reading_type_id
+                        // }
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {field.value ? (
@@ -239,13 +291,25 @@ export const FormReadingElectric = ({
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("2000-01-01")
-                      }
+                      disabled={(date) => {
+                        // ✅ Gunakan hasil query pertama untuk validasi tanggal
+                        const lastDate =
+                          lastReadingQueries[0]?.data?.data?.session
+                            ?.reading_date;
+                        return (
+                          date > new Date() ||
+                          (lastDate ? date <= new Date(lastDate) : false)
+                        );
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
+                <FormDescription>
+                  {lastReadingDate
+                    ? `Data terakhir diinput: ${lastReadingDate}`
+                    : "Pilih tanggal pembacaan."}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -256,7 +320,10 @@ export const FormReadingElectric = ({
 
         <div className="space-y-4">
           {fields.map((field, index) => {
-            const lastReadingQuery = lastReadingsQueries[index];
+            // ✅ Ambil hasil query yang sesuai untuk baris ini
+            const lastReadingQuery = lastReadingQueries[index];
+            const lastReadingValue = lastReadingQuery?.data?.data?.value;
+
             return (
               <div
                 key={field.id}
@@ -325,21 +392,39 @@ export const FormReadingElectric = ({
                         <FormLabel className={index > 0 ? "sr-only" : ""}>
                           Nilai Pembacaan ({unit})
                         </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="0.00"
-                            min={lastReadingQuery?.data?.data?.value}
-                            {...field}
-                            disabled={!selectedMeterId}
-                          />
-                        </FormControl>
+                        <div className="relative">
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={lastReadingValue} // ✅ Gunakan nilai dari query yang sesuai
+                              placeholder="0.00"
+                              className="pr-10"
+                              {...field}
+                              disabled={!detailsValues[index]?.reading_type_id}
+                            />
+                          </FormControl>
+                          {lastReadingValue && ( // ✅ Gunakan nilai dari query yang sesuai
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-primary"
+                              onClick={() =>
+                                form.setValue(
+                                  `details.${index}.value`,
+                                  lastReadingValue as any
+                                )
+                              }
+                            >
+                              <ClipboardPaste className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                         <FormDescription>
+                          {/* ✅ Gunakan status dari query yang sesuai */}
                           {lastReadingQuery?.isFetching
                             ? "Mencari..."
-                            : lastReadingQuery?.data?.data?.value
-                            ? `Angka terakhir: ${lastReadingQuery.data.data.value}`
-                            : "Belum ada data sebelumnya."}
+                            : `Angka terakhir: ${lastReadingValue || "-"}`}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

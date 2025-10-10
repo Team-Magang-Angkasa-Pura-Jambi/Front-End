@@ -1,7 +1,6 @@
 "use client";
-import { analysisApi, DailyRecord } from "@/services/analysis.service";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
 import {
   LineChart,
   Line,
@@ -12,43 +11,96 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { AnalysisChartSkeleton } from "./analystChartSkeleton";
+
+import { analysisApi } from "@/services/analysis.service";
+import { getMetersApi } from "@/services/meter.service";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"; // Impor komponen Select
+import { AnalysisChartSkeleton } from "./analystChartSkeleton";
 
-type ActiveTab = "Water" | "Electricity" | "Fuel";
+type MeterInfo = {
+  meter_id: number;
+  meter_code: string;
+};
 
-export const AnalysisChart = () => {
-  const [activeTab, setActiveTab] = useState<ActiveTab>("Electricity");
+// Palet warna sekarang bisa lebih sederhana karena hanya ada beberapa garis statis
+const COLORS = {
+  pemakaian: "#3b82f6", // blue-500
+  prediksi: "#22c55e", // green-500
+  target: "#a1a1aa", // zinc-400
+};
 
+export const AnalysisChart = ({
+  typeEnergy,
+}: {
+  typeEnergy: "Electricity" | "Water" | "Fuel";
+}) => {
   const [thisMonth, setThisMonth] = useState(() => new Date());
+
+  // PERBAIKAN: Gunakan string untuk state ID agar sesuai dengan komponen Select
+  const [selectedMeterId, setSelectedMeterId] = useState<string | null>(null);
 
   const year = thisMonth.getFullYear();
   const month = String(thisMonth.getMonth() + 1).padStart(2, "0");
   const formattedMonth = `${year}-${month}`;
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["analysisData", activeTab, formattedMonth],
-
-    queryFn: () => analysisApi(activeTab, formattedMonth),
+  // 1. Ambil daftar meter untuk mengisi dropdown
+  const { data: metersData, isLoading: isMetersLoading } = useQuery({
+    queryKey: ["meters", typeEnergy],
+    queryFn: () => getMetersApi(typeEnergy),
+    enabled: !!typeEnergy,
   });
 
-  const chartData = useMemo(() => {
-    if (!data?.data) return [];
+  // 2. Ambil data analisis HANYA untuk meter yang dipilih
+  const {
+    data: analysisData,
+    isLoading: isAnalysisLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["analysisData", typeEnergy, formattedMonth, selectedMeterId],
+    // API tetap menerima array, jadi kita konversi string ID ke number
+    queryFn: () =>
+      analysisApi(typeEnergy, formattedMonth, [Number(selectedMeterId!)]),
+    enabled: !!selectedMeterId, // Hanya aktif jika ada meter yang dipilih
+  });
 
-    return data.data.map((record) => ({
+  // Efek untuk mengisi daftar meter dan memilih meter pertama sebagai default
+  useEffect(() => {
+    const meters = metersData?.data;
+    // PERBAIKAN: Logika disederhanakan. Jika meteran ada dan belum ada yang dipilih,
+    // set meteran pertama sebagai default.
+    if (meters && meters.length > 0 && !selectedMeterId) {
+      // Konversi ke string saat menyimpan ke state
+      setSelectedMeterId(String(meters[0].meter_id));
+    }
+  }, [metersData, selectedMeterId]); // Hapus selectedMeterId dari dependency untuk mencegah loop
+
+  // Logika untuk mengubah data API (yang sekarang hanya berisi 1 meter) menjadi format grafik
+  const chartData = useMemo(() => {
+    if (!analysisData?.data || analysisData.data.length === 0) return [];
+
+    // Karena API hanya mengembalikan data untuk 1 meter, kita ambil elemen pertama
+    const meterTimeSeries = analysisData.data[0].data;
+
+    return meterTimeSeries.map((record) => ({
       name: new Date(record.date).toLocaleDateString("id-ID", {
         day: "numeric",
         month: "short",
       }),
-      pemakaian: record.actual_consumption
-        ? record.actual_consumption / 100
-        : null,
-      target: record.efficiency_target ? record.efficiency_target / 100 : null,
-      prediksi: record.actual_consumption
-        ? record.actual_consumption / 100
-        : null,
+      pemakaian: record.actual_consumption,
+      prediksi: record.prediction,
+      target: record.efficiency_target,
     }));
-  }, [data]);
+  }, [analysisData]);
+
+  const isLoading = isMetersLoading || (isAnalysisLoading && !!selectedMeterId);
 
   if (isLoading) return <AnalysisChartSkeleton />;
   if (isError)
@@ -58,106 +110,89 @@ export const AnalysisChart = () => {
       </Card>
     );
 
+  // Ambil data meter langsung dari hasil query, tidak perlu state terpisah
+  const allMeters: MeterInfo[] = metersData?.data || [];
+  const selectedMeterName =
+    allMeters.find((m) => m.meter_id === Number(selectedMeterId))?.meter_code ||
+    "";
+
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Analisis Pemakaian Sumber Daya</CardTitle>
-          <div className="flex items-center border rounded-lg p-1 space-x-1">
-            <button
-              onClick={() => setActiveTab("Water")}
-              className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
-                activeTab === "Water"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-accent"
-              }`}
-            >
-              Air
-            </button>
-            <button
-              onClick={() => setActiveTab("Electricity")}
-              className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
-                activeTab === "Electricity"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-accent"
-              }`}
-            >
-              Listrik
-            </button>
-            <button
-              onClick={() => setActiveTab("Fuel")}
-              className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${
-                activeTab === "Fuel"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-accent"
-              }`}
-            >
-              Fuel
-            </button>
-          </div>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+          <CardTitle>
+            Analisis Pemakaian {typeEnergy}:{" "}
+            <span className="text-primary">{selectedMeterName}</span>
+          </CardTitle>
+          {/* Ganti Checkbox dengan Dropdown */}
+          <Select
+            value={selectedMeterId ?? ""}
+            onValueChange={(value) => setSelectedMeterId(value)}
+          >
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder="Pilih Meter..." />
+            </SelectTrigger>
+            <SelectContent>
+              {allMeters?.map((meter) => (
+                <SelectItem key={meter.meter_id} value={String(meter.meter_id)}>
+                  {meter.meter_code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </CardHeader>
       <CardContent>
-        <div style={{ width: "100%", height: 320 }}>
+        <div style={{ width: "100%", height: 350 }}>
           <ResponsiveContainer>
             <LineChart
               data={chartData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }} // Tambah margin kiri untuk label
+              margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="hsl(var(--border))"
               />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-
-              {/* PERBAIKAN 2: Tambahkan label ke sumbu Y */}
-              <YAxis
-                tick={{ fontSize: 12 }}
-                label={{
-                  value: "(dalam ratusan)",
-                  angle: -90,
-                  position: "insideLeft",
-                  style: { textAnchor: "middle" },
-                }}
-              />
-
+              <YAxis tick={{ fontSize: 12 }} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--background))",
                   border: "1px solid hsl(var(--border))",
                 }}
-                // Formatter untuk menampilkan nilai asli di tooltip
-                formatter={(value: number) =>
-                  (value * 100).toLocaleString("id-ID")
-                }
               />
               <Legend wrapperStyle={{ fontSize: "14px", paddingTop: "20px" }} />
+
+              {/* Garis-garis sekarang statis karena hanya ada 1 set data */}
               <Line
                 type="monotone"
                 dataKey="pemakaian"
-                name="Pemakaian"
-                stroke="#3b82f6"
+                name="Pemakaian Aktual"
+                stroke={COLORS.pemakaian}
                 strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+                connectNulls={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="prediksi"
+                name="Prediksi Konsumsi"
+                stroke={COLORS.prediksi}
+                strokeWidth={2}
+                strokeDasharray="3 3"
+                dot={false}
+                activeDot={{ r: 5 }}
                 connectNulls={false}
               />
               <Line
                 type="monotone"
                 dataKey="target"
                 name="Target Efisiensi"
-                stroke="#a1a1aa"
+                stroke={COLORS.target}
                 strokeWidth={2}
                 strokeDasharray="5 5"
-                connectNulls={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="prediksi"
-                name="Prediksi"
-                stroke="#22c55e"
-                strokeWidth={2}
-                connectNulls={false}
+                dot={false}
               />
             </LineChart>
           </ResponsiveContainer>

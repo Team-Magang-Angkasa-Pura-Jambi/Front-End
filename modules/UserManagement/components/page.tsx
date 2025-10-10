@@ -18,6 +18,7 @@ import {
 } from "@/types/users.types";
 
 // --- Komponen UI ---
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createColumns } from "./CreateColumns";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -32,6 +33,7 @@ import { toast } from "sonner";
 import { UserForm } from "./UserForm";
 import { DeleteUserDialog } from "./DeleteUserDialog";
 import { DataTable } from "./DataTable";
+import RolesPage from "./role";
 
 // PERBAIKAN: Definisikan skema Zod untuk create dan update
 const createUserSchema = z.object({
@@ -132,12 +134,38 @@ export const Page = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        {/* ... (Header tidak berubah) ... */}
+      <h2 className="text-3xl font-bold tracking-tight">
+        Manajemen Pengguna & Peran
+      </h2>
+      <p className="text-muted-foreground">
+        Kelola semua akun pengguna dan peran yang terdaftar di sistem.
+      </p>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start ">
+        {/* --- Tabel Pengguna --- */}
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle>Daftar Pengguna</CardTitle>
+              <Button size="sm" onClick={() => handleOpenForm(null)}>
+                <PlusCircle className="mr-2 h-4 w-4" /> Tambah Pengguna
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <DataTable columns={columns} data={users} isLoading={isLoading} />
+          </CardContent>
+        </Card>
+
+        {/* --- Tabel Peran --- */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Daftar Peran</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RolesPage />
+          </CardContent>
+        </Card>
       </div>
-
-      <DataTable columns={columns} data={users} isLoading={isLoading} />
-
       {/* Dialog untuk Tambah/Edit Pengguna */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
@@ -146,7 +174,7 @@ export const Page = () => {
               {selectedUser ? "Edit Pengguna" : "Tambah Pengguna Baru"}
             </DialogTitle>
             <DialogDescription>
-              {/* ... (Deskripsi tidak berubah) ... */}
+              Kelola semua akun pengguna yang terdaftar di sistem.
             </DialogDescription>
           </DialogHeader>
           <UserForm
@@ -158,7 +186,6 @@ export const Page = () => {
           />
         </DialogContent>
       </Dialog>
-
       {/* Dialog Konfirmasi Hapus */}
       {selectedUser && (
         <DeleteUserDialog

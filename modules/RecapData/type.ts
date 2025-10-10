@@ -2,14 +2,17 @@ export interface RecapDataRow {
   date: string; // ISO String
   wbp: number | null;
   lwbp: number | null;
+  consumption: number | null;
   target: number | null;
   pax: number | null;
   cost: number | null;
+  classification: "HEMAT" | "NORMAL" | "BOROS" | "UNKNOWN" | null;
 }
 
 export interface RecapMeta {
   totalCost: number;
   totalTarget: number;
+  totalCostBeforeTax: number;
   totalConsumption: number;
   totalPax: number;
 }
@@ -22,6 +25,9 @@ export interface RecapApiResponse {
 export interface RecapSummary {
   /** Total biaya finansial untuk seluruh periode. */
   totalCost: number;
+
+  /** Total biaya sebelum pajak. */
+  totalCostBeforeTax: number;
 
   /** Total target efisiensi yang telah disesuaikan (prorata) untuk periode yang dipilih. */
   totalTarget: number;

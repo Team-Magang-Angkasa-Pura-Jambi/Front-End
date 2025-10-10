@@ -2,6 +2,7 @@
 
 import { Column, ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { RecapDataRow } from "../type"; // Ganti 'RecapRecord' ke 'RecapDataRow' agar konsisten
 
@@ -60,6 +61,31 @@ const SortableHeader = ({
   </Button>
 );
 
+/**
+ * Komponen untuk menampilkan badge klasifikasi pemakaian.
+ */
+const ClassificationBadge = ({
+  classification,
+}: {
+  classification: RecapDataRow["classification"];
+}) => {
+  if (!classification || classification === "UNKNOWN") {
+    return <span className="text-muted-foreground">-</span>;
+  }
+
+  const variantMap: {
+    [key in "HEMAT" | "NORMAL" | "BOROS"]:
+      | "success"
+      | "default"
+      | "destructive";
+  } = {
+    HEMAT: "success",
+    NORMAL: "default",
+    BOROS: "destructive",
+  };
+
+  return <Badge variant={variantMap[classification]}>{classification}</Badge>;
+};
 /**
  * Membuat definisi kolom untuk tabel rekap berdasarkan jenis data.
  * @param dataType Jenis energi ('Electricity', 'Water', atau 'Fuel').
@@ -167,6 +193,15 @@ export const createColumns = (
 
   // Kolom yang selalu ada di akhir
   const commonEndColumns: ColumnDef<RecapDataRow>[] = [
+    {
+      accessorKey: "classification",
+      header: ({ column }) => (
+        <SortableHeader column={column} title="Klasifikasi" />
+      ),
+      cell: ({ row }) => (
+        <ClassificationBadge classification={row.getValue("classification")} />
+      ),
+    },
     {
       accessorKey: "cost",
       header: ({ column }) => <SortableHeader column={column} title="Biaya" />,

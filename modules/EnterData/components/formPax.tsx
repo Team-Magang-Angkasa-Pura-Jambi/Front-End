@@ -72,8 +72,15 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
   });
 
   const onSubmit = (values: FormValues) => {
+    // Ambil tanggal dari form
+    const date = values.data_date;
+    // Buat tanggal baru dengan mengabaikan zona waktu lokal untuk menghindari pergeseran hari
+    const dateInUTC = new Date(
+      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+    );
+
     const payload: PaxPayload = {
-      data_date: values.data_date.toISOString(),
+      data_date: dateInUTC.toISOString(),
       total_pax: values.total_pax,
     };
     mutate(payload);

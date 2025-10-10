@@ -6,6 +6,7 @@ export interface User {
     role_id: number;
     role_name: string;
   };
+  photo_profile_url?: stirng;
   is_active: boolean;
   created_at: string; // ISO string date
 }
@@ -15,6 +16,7 @@ export interface CreateUserPayload {
   username: string;
   password?: string; // Opsional saat membuat, wajib di form
   role_id: number;
+  photo_profile_url?: string;
 }
 
 // Tipe untuk payload saat memperbarui pengguna

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import {
   useMutation,
   useQueries,
@@ -84,6 +84,7 @@ export const FormReadingWater = ({
   // --- Hooks ---
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+  const [lastReadingDate, setLastReadingDate] = useState<string | null>(null);
   const canChangeDate = user?.role === "Admin" || user?.role === "SuperAdmin";
 
   const form = useForm<FormValues>({
@@ -124,6 +125,7 @@ export const FormReadingWater = ({
   // --- Form State & Effects ---
   const selectedMeterId = form.watch("meter_id");
   const detailsValues = form.watch("details");
+  const readingDate = form.watch("reading_date");
 
   useEffect(() => {
     if (selectedMeterId) {
@@ -131,22 +133,57 @@ export const FormReadingWater = ({
         { reading_type_id: "", value: undefined as any },
       ]);
     }
-  }, [selectedMeterId, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMeterId, form.setValue]);
 
-  const selectedTypeIds = detailsValues.map((d) => d.reading_type_id);
+  const selectedTypeIds = useMemo(
+    () => detailsValues.map((d) => d.reading_type_id),
+    [detailsValues]
+  );
 
   // --- Data Fetching Dependen (Last Reading) ---
   const lastReadingsQueries = useQueries({
-    queries: (fields || []).map((field, index) => {
-      const readingTypeId = detailsValues[index]?.reading_type_id;
+    queries: detailsValues.map((detail) => {
       return {
-        queryKey: ["lastReading", selectedMeterId, readingTypeId],
+        queryKey: [
+          "lastReading",
+          selectedMeterId,
+          detail.reading_type_id,
+          readingDate,
+        ],
         queryFn: () =>
-          getLastReadingApi(parseInt(selectedMeterId), parseInt(readingTypeId)),
-        enabled: !!selectedMeterId && !!readingTypeId,
+          getLastReadingApi(
+            parseInt(selectedMeterId),
+            parseInt(detail.reading_type_id),
+            readingDate.toISOString()
+          ),
+        enabled: !!selectedMeterId && !!detail.reading_type_id && !!readingDate,
       };
     }),
   });
+
+  // Efek untuk menampilkan notifikasi jika data sebelumnya tidak ada
+  useEffect(() => {
+    lastReadingsQueries.forEach((query) => {
+      // Cek jika query sudah selesai (bukan fetching) dan hasilnya error
+      if (!query.isFetching && query.isError) {
+        toast.error("Data hari sebelumnya belum diinput.", {
+          description: "Silakan isi data untuk tanggal yang benar.",
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastReadingsQueries.map((q) => q.status).join(",")]); // Bergantung pada status semua query
+
+  useEffect(() => {
+    const lastDate = lastReadingsQueries[0]?.data?.data?.session?.reading_date;
+    if (lastDate) {
+      setLastReadingDate(format(new Date(lastDate), "PPP"));
+    } else {
+      setLastReadingDate(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastReadingsQueries[0]?.data]);
 
   // --- Data Submission ---
   const { mutate, isPending } = useMutation({
@@ -259,6 +296,11 @@ export const FormReadingWater = ({
                     />
                   </PopoverContent>
                 </Popover>
+                <FormDescription>
+                  {lastReadingDate
+                    ? `Data terakhir diinput: ${lastReadingDate}`
+                    : "Pilih tanggal pembacaan."}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -270,6 +312,7 @@ export const FormReadingWater = ({
         <div className="space-y-4">
           {fields.map((field, index) => {
             const lastReadingQuery = lastReadingsQueries[index];
+            const lastReadingValue = lastReadingQuery?.data?.data?.value;
             return (
               <div
                 key={field.id}
@@ -340,19 +383,17 @@ export const FormReadingWater = ({
                         </FormLabel>
                         <FormControl>
                           <Input
-                            min={lastReadingQuery?.data?.data?.value}
+                            min={lastReadingValue}
                             type="number"
                             placeholder="0.00"
                             {...field}
-                            disabled={!selectedMeterId}
+                            disabled={!detailsValues[index]?.reading_type_id}
                           />
                         </FormControl>
                         <FormDescription>
                           {lastReadingQuery?.isFetching
                             ? "Mencari..."
-                            : lastReadingQuery?.data?.data?.value
-                            ? `Angka terakhir: ${lastReadingQuery.data.data.value}`
-                            : "Belum ada data sebelumnya."}
+                            : `Angka terakhir: ${lastReadingValue || "-"}`}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
