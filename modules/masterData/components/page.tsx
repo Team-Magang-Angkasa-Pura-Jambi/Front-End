@@ -66,7 +66,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./dataTable";
 import { MeterManagement } from "./MeterManagement";
 import { TypeEnergyManagement } from "./TypeEnergyManagement";
 import { TariffGroupManagement } from "./TariffGroupManagement";

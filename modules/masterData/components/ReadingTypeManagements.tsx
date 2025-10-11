@@ -59,7 +59,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { masterData } from "@/services/masterData.service";
-import { DataTable } from "./DataTable";
+import { DataTable } from "./dataTable";
 import { EnergyType, getEnergyTypesApi } from "@/services/energyType.service";
 
 // --- Definisi Internal dari reading-type-config.tsx ---
