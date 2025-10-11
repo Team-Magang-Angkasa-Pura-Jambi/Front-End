@@ -14,9 +14,10 @@ import {
   Notebook,
   SquarePen,
   Users,
+  User2,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useMemo, useState } from "react"; // Import useMemo
+import React, { useMemo, useState } from "react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -35,50 +36,54 @@ const itemVariants = {
   },
 };
 
-// PENYEMPURNAAN: Gunakan string enum agar lebih jelas dan aman
 enum Role {
   Technician = "Technician",
   Admin = "Admin",
   SuperAdmin = "SuperAdmin",
 }
 
-// LANGKAH 1: Definisikan SEMUA kemungkinan link beserta role yang diizinkan
 const allLinks = [
   {
     label: "Dashboard",
     href: "/",
     icon: <LayoutDashboard className="h-5 w-5 shrink-0" />,
-    allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin], // Semua bisa lihat
+    allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
     label: "Enter Data",
     href: "/enter-data",
     icon: <SquarePen className="h-5 w-5 shrink-0" />,
-    allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin], // Semua bisa lihat
+    allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
     label: "Recap Data",
     href: "/recap-data",
     icon: <ClipboardList className="h-5 w-5 shrink-0" />,
-    allowedRoles: [Role.Admin, Role.SuperAdmin,Role.Technician], // Hanya Admin & SuperAdmin
+    allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
     label: "Recap Reading",
     href: "/recap-reading",
     icon: <Notebook className="h-5 w-5 shrink-0" />,
-    allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician], // Hanya Admin & SuperAdmin
+    allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
     label: "Data Master",
     href: "/data-master",
     icon: <Database className="h-5 w-5 shrink-0" />,
-    allowedRoles: [Role.SuperAdmin, Role.Admin], // Hanya SuperAdmin
+    allowedRoles: [Role.SuperAdmin, Role.Admin],
+  },
+  {
+    label: "Account",
+    href: "/profile",
+    icon: <User2 className="h-5 w-5 shrink-0" />,
+    allowedRoles: [Role.SuperAdmin, Role.Admin, Role.Technician],
   },
   {
     label: "User Management",
     href: "/user-management",
     icon: <Users className="h-5 w-5 shrink-0" />,
-    allowedRoles: [Role.SuperAdmin], // Hanya SuperAdmin
+    allowedRoles: [Role.SuperAdmin],
   },
 ];
 
@@ -88,11 +93,8 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // LANGKAH 2: Filter link berdasarkan role user yang sedang login
-  // useMemo digunakan agar proses filter tidak berjalan di setiap render,
-  // hanya ketika role user berubah.
   const visibleLinks = useMemo(() => {
-    if (!user?.role) return []; // Jika user belum ada, jangan tampilkan link
+    if (!user?.role) return [];
     return allLinks.filter((link) =>
       link.allowedRoles.includes(user.role as Role)
     );
@@ -103,9 +105,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
     router.push("/auth/login");
   };
 
-  // Jika user tidak ditemukan, bisa tampilkan loading atau null
   if (!user) {
-    // PERBAIKAN: Tampilan loading layar penuh yang lebih menarik
     return (
       <AnimatePresence>
         <motion.div

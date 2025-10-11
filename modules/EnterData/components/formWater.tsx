@@ -92,11 +92,11 @@ export const FormReadingWater = ({
     defaultValues: {
       meter_id: "",
       reading_date: new Date(),
-      details: [{ reading_type_id: "", value: undefined as any }],
+      details: [{ reading_type_id: "", value: "" as any }],
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: "details",
   });
@@ -129,12 +129,9 @@ export const FormReadingWater = ({
 
   useEffect(() => {
     if (selectedMeterId) {
-      form.setValue("details", [
-        { reading_type_id: "", value: undefined as any },
-      ]);
+      replace([{ reading_type_id: "", value: "" as any }]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedMeterId, form.setValue]);
+  }, [selectedMeterId, replace]);
 
   const selectedTypeIds = useMemo(
     () => detailsValues.map((d) => d.reading_type_id),
@@ -422,9 +419,7 @@ export const FormReadingWater = ({
           variant="outline"
           size="sm"
           className="mt-4"
-          onClick={() =>
-            append({ reading_type_id: "", value: undefined as any })
-          }
+          onClick={() => append({ reading_type_id: "", value: "" as any })}
           disabled={fields.length >= readingTypes.length}
         >
           <PlusCircleIcon className="mr-2 h-4 w-4" />

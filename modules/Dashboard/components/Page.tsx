@@ -1,16 +1,23 @@
 "use client";
 import { motion } from "framer-motion";
-import { NotificationCard } from "./NotificationCard";
 import { StatCard } from "./StatCard";
 import { AnalysisChart } from "./AnalysisChart";
 import { Header } from "./Header";
-import { Droplet, Fuel, Plane, Zap } from "lucide-react";
-import { ActivityLog } from "./ActivityLog";
-import { MachineLearningAnalysis } from "./MachineLearningAnalysis";
-import { useQuery } from "@tanstack/react-query";
+import {
+  Droplet,
+  Fuel,
+  Plane,
+  Zap,
+  Calendar as CalendarIcon,
+} from "lucide-react";
+import { DailyAnalysisLog } from "./DailyAnalysisLog"; // Pastikan path ini benar
+import { EnergyDistributionChart } from "./EnergyDistributionChart";
+import { ClassificationSummaryChart } from "./ClassificationSummaryChart";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { summaryApi } from "@/services/summary.service";
 import React, { useMemo, useState } from "react";
 import { StatCardSkeleton } from "./statCardSkeleton";
+import { useRealtimeNotification } from "@/hooks/useRealtimeNotification";
 
 // Konfigurasi terpusat untuk setiap tipe stat
 const statConfig = {
@@ -29,10 +36,17 @@ const statConfig = {
 };
 
 export const Page = () => {
-  const [thisMonth, setThisMonth] = useState(() => new Date());
+  // Panggil hook untuk mengaktifkan notifikasi toast di latar belakang
+  useRealtimeNotification();
 
-  const year = String(thisMonth.getFullYear());
-  const month = String(thisMonth.getMonth() + 1).padStart(2, "0");
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday;
+  });
+
+  const year = String(selectedDate.getFullYear());
+  const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["dashboardSummary", year, month],
@@ -40,6 +54,11 @@ export const Page = () => {
     retry: 1,
     staleTime: 1000 * 60 * 5,
   });
+
+  // Data untuk Pie Chart, diekstrak dari data summary yang sudah ada
+  const energyDistributionData = useMemo(() => {
+    return data?.data?.summary || [];
+  }, [data]);
 
   const processedStats = useMemo(() => {
     if (!data?.data) return [];
@@ -109,7 +128,7 @@ export const Page = () => {
         animate="visible"
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <NotificationCard />
+        {/* <NotificationCard /> */}
       </motion.div>
 
       <motion.div
@@ -132,6 +151,10 @@ export const Page = () => {
                 <StatCard {...stat} />
               </motion.div>
             ))}
+        <ClassificationSummaryChart />
+        {energyDistributionData.length > 0 && (
+          <EnergyDistributionChart data={energyDistributionData} />
+        )}
       </motion.div>
 
       {/* ================================================================== */}
@@ -154,19 +177,11 @@ export const Page = () => {
 
         {/* Item 2: Analisis ML */}
         <motion.div variants={itemVariants} className="flex flex-col gap-2">
-          <MachineLearningAnalysis />
-          <ActivityLog />
+          <DailyAnalysisLog />
+          {/* 2. Tampilkan Pie Chart jika data tersedia */}
+
+          {/* <ActivityLog /> */}
         </motion.div>
-
-        {/* Item 3: Grafik Air */}
-        {/* <motion.div variants={itemVariants} className="lg:col-span-2">
-          <AnalysisChart typeEnergy="Water" />
-        </motion.div> */}
-
-        {/* Item 4: Grafik BBM */}
-
-        {/* Item 5: Log Aktivitas */}
-        {/* <motion.div variants={itemVariants}></motion.div> */}
       </motion.div>
     </main>
   );

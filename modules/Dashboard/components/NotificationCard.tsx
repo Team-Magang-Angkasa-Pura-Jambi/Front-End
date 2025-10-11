@@ -11,7 +11,7 @@ import {
   IconCircleCheck,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { fetchAllNotifications } from "@/services/notification.service";
+import { fetchAllNotificationsApi } from "@/services/notification.service";
 
 // --- Helper untuk menentukan gaya notifikasi ---
 const getNotificationStyle = (title: string) => {
@@ -35,7 +35,7 @@ const getNotificationStyle = (title: string) => {
 export const NotificationCard = () => {
   const { data: notification, isLoading } = useQuery({
     queryKey: ["latestNotification"],
-    queryFn: fetchAllNotifications,
+    queryFn: fetchAllNotificationsApi,
   });
 
   if (isLoading) {

@@ -69,7 +69,7 @@ const formSchema = z.object({
     .array(
       z.object({
         reading_type_id: z.string().min(1, { message: "Jenis wajib dipilih." }),
-        value: z.coerce.number().positive({ message: "Nilai harus positif." }),
+        value: z.coerce.number({ invalid_type_error: "Nilai harus berupa angka." }).min(0, "Nilai tidak boleh negatif."),
       })
     )
     .min(1, "Minimal harus ada satu detail pembacaan."),
@@ -91,7 +91,7 @@ export const FormReadingElectric = ({
     defaultValues: {
       meter_id: "",
       reading_date: new Date(),
-      details: [{ reading_type_id: "", value: undefined as any }],
+      details: [],
     },
   });
 
@@ -144,15 +144,6 @@ export const FormReadingElectric = ({
       // retry: false, // Tidak perlu coba lagi jika 404 (data tidak ada)
     })),
   });
-
-  useEffect(() => {
-    if (selectedMeterId) {
-      form.setValue("details", [
-        { reading_type_id: "", value: undefined as any },
-      ]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedMeterId, form.setValue]);
 
   // Efek untuk menampilkan notifikasi jika data sebelumnya tidak ada
   useEffect(() => {
@@ -324,6 +315,8 @@ export const FormReadingElectric = ({
             const lastReadingQuery = lastReadingQueries[index];
             const lastReadingValue = lastReadingQuery?.data?.data?.value;
 
+            console.log(lastReadingValue);
+
             return (
               <div
                 key={field.id}
@@ -395,11 +388,17 @@ export const FormReadingElectric = ({
                         <div className="relative">
                           <FormControl>
                             <Input
-                              type="number"
+                              type="text"
+                              inputMode="decimal"
+                              step="any"
                               min={lastReadingValue} // ✅ Gunakan nilai dari query yang sesuai
                               placeholder="0.00"
                               className="pr-10"
                               {...field}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/,/g, ".");
+                                field.onChange(value);
+                              }}
                               disabled={!detailsValues[index]?.reading_type_id}
                             />
                           </FormControl>
@@ -412,7 +411,7 @@ export const FormReadingElectric = ({
                               onClick={() =>
                                 form.setValue(
                                   `details.${index}.value`,
-                                  lastReadingValue as any
+                                  lastReadingValue ?? ""
                                 )
                               }
                             >
@@ -453,9 +452,7 @@ export const FormReadingElectric = ({
           variant="outline"
           size="sm"
           className="mt-4"
-          onClick={() =>
-            append({ reading_type_id: "", value: undefined as any })
-          }
+          onClick={() => append({ reading_type_id: "", value: "" as any })}
           disabled={fields.length >= readingTypes.length}
         >
           <PlusCircleIcon className="mr-2 h-4 w-4" />

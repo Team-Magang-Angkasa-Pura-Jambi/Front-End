@@ -1,31 +1,56 @@
 import api from "@/lib/api";
 
-// Tipe untuk data harian yang diterima dari API
+// Tipe untuk data harian yang diterima dari API analisis
 export interface DailyRecord {
-  date: string; // Format direkomendasikan: "YYYY-MM-DD"
+  date: string;
   actual_consumption: number | null;
+  prediction: number | null;
+  classification: "HEMAT" | "NORMAL" | "BOROS" | null;
   efficiency_target: number | null;
-  actual_consumptio: number | null;
+  totalDaysWithClassification: number | null;
 }
 
-/**
- * Mewakili struktur respons API secara keseluruhan.
- * Properti 'data' adalah sebuah array dari DailyRecord.
- * Ini adalah cara yang benar dan fleksibel.
- */
-interface AnalysisApiResponse {
+// Tipe untuk data per meter
+export interface MeterAnalysisData {
+  meterId: number;
+  meterName: string;
   data: DailyRecord[];
 }
 
-// Fungsi untuk mengambil data analisis berdasarkan tipe (listrik, air, atau fuel)
+// Tipe untuk respons API analisis secara keseluruhan
+interface AnalysisApiResponse {
+  data: MeterAnalysisData[];
+}
+
+// Tipe untuk respons API ringkasan klasifikasi
+interface ClassificationSummaryResponse {
+  data: {
+    classification: "HEMAT" | "NORMAL" | "BOROS";
+    count: number;
+  }[];
+}
+
 export const analysisApi = async (
   type: "Electricity" | "Water" | "Fuel",
   mount: string,
-  meterId: number
+  meterId: number[]
 ): Promise<AnalysisApiResponse> => {
-  // Ganti '/analysis' dengan endpoint API Anda, sambil mengirimkan tipe sebagai query param
+  const meterIdParams = meterId.map((id) => `meterId=${id}`).join("&");
   const response = await api.get(
-    `/analysis?energyType=${type}&month=${mount}&meterId=${meterId}`
+    `/analysis?energyType=${type}&month=${mount}&${meterIdParams}`
+  );
+  return response.data;
+};
+
+export const getClassificationSummaryApi = async (
+  year: string,
+  month: string,
+  energyType: "Electricity" | "Water" | "Fuel",
+  meterId: number
+): Promise<ClassificationSummaryResponse> => {
+  const monthQuery = `${year}-${month}`;
+  const response = await api.get(
+    `/analysis/classification-summary?month=${monthQuery}&energyType=${energyType}&meterId=${meterId}`
   );
   return response.data;
 };

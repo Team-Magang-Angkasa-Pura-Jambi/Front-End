@@ -20,8 +20,15 @@ export const getUsersApi = async (): Promise<UserApiResponse> => {
   const response = await api.get("/users");
   return response.data;
 };
-export const getUserApi = async (id: number): Promise<UserApiResponse> => {
+export const getUserApi = async (
+  id: number
+): Promise<SingleUserApiResponse> => {
   const response = await api.get(`/users/${id}`);
+  return response.data;
+};
+
+export const getUserActivitiesApi = async (id: number) => {
+  const response = await api.get(`/users/${id}/activities`);
   return response.data;
 };
 

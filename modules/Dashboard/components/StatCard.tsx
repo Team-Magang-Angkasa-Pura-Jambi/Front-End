@@ -1,4 +1,4 @@
-import { BackgroundGradient } from "@/components/ui/background-gradient";
+"use client";
 import { ArrowDown, ArrowUp } from "lucide-react"; // Impor ikon panah
 
 export const StatCard = ({
@@ -39,9 +39,7 @@ export const StatCard = ({
   }
 
   return (
-    // Anda bisa mengaktifkan BackgroundGradient jika diinginkan
-    // <BackgroundGradient className="rounded-[22px] max-w-sm p-4 bg-white dark:bg-zinc-900">
-    <div className="bg-white p-5 rounded-2xl shadow-sm flex items-center justify-between">
+    <div className="bg-white p-5 rounded-2xl shadow-sm flex items-center justify-between h-full">
       <div>
         <p className="text-gray-500 text-sm">{label}</p>
         <p className="text-2xl font-bold text-gray-800">
@@ -63,6 +61,5 @@ export const StatCard = ({
         <IconComponent className="w-6 h-6 text-white" />
       </div>
     </div>
-    // </BackgroundGradient>
   );
 };

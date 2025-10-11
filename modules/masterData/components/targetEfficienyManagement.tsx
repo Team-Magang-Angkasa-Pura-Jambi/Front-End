@@ -77,6 +77,7 @@ export type EfficiencyTarget = {
   target_id: number;
   kpi_name: string;
   target_value: number;
+  target_cost: number; // BARU: Tambahkan properti target_cost
   period_start: string;
   period_end: string;
   meter: MeterType;
@@ -322,6 +323,16 @@ export const createTargetEfficiencyColumns = (
       const unit = row.original.meter?.energy_type?.unit_of_measurement || "%";
       return `${row.original.target_value} ${unit}`;
     },
+  },
+  {
+    accessorKey: "target_cost",
+    header: "Target Rupiah",
+    cell: ({ row }) =>
+      new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+      }).format(row.original.target_cost),
   },
   {
     accessorKey: "meter.meter_code",

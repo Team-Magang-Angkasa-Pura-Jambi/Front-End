@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { fetchAllNotifications } from "@/services/notification.service";
+import { fetchAllNotificationsApi } from "@/services/notification.service";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const NotificationPopover = () => {
@@ -22,7 +22,7 @@ export const NotificationPopover = () => {
     isError,
   } = useQuery({
     queryKey: ["allNotifications"],
-    queryFn: fetchAllNotifications,
+    queryFn: fetchAllNotificationsApi,
     staleTime: 1000 * 60, // 1 minute
   });
 
