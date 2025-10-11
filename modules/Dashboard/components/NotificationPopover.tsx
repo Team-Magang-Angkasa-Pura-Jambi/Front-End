@@ -27,7 +27,8 @@ export const NotificationPopover = () => {
     select: (data) => data.data, // Ambil array 'data' dari respons API
   });
 
-  const unreadCount = notifications?.filter((n) => !n.is_read).length || 0;
+  const unreadCount =
+    notifications?.data?.filter((n) => !n.is_read).length || 0;
 
   return (
     <Popover>
@@ -72,7 +73,7 @@ export const NotificationPopover = () => {
             )}
 
             {!isLoading &&
-              notifications?.map((notif) => (
+              notifications?.data?.map((notif) => (
                 <div
                   key={notif.id}
                   className={`p-3 rounded-lg hover:bg-accent ${

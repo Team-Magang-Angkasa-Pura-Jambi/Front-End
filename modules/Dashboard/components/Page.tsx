@@ -18,6 +18,7 @@ import { summaryApi } from "@/services/summary.service";
 import React, { useMemo, useState } from "react";
 import { StatCardSkeleton } from "./statCardSkeleton";
 import { useRealtimeNotification } from "@/hooks/useRealtimeNotification";
+import { NotificationCard } from "./NotificationCard";
 
 // Konfigurasi terpusat untuk setiap tipe stat
 const statConfig = {
@@ -128,7 +129,7 @@ export const Page = () => {
         animate="visible"
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        {/* <NotificationCard /> */}
+        <NotificationCard />
       </motion.div>
 
       <motion.div

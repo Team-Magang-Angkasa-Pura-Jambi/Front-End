@@ -25,10 +25,10 @@ export const cardData = [
     icon: <Users className="h-8 w-8 text-green-500" />,
     description: "Catat jumlah penumpang (PAX) keberangkatan & kedatangan.",
   },
-  {
-    type: "Log",
-    title: "Log Activity",
-    icon: <BookText className="h-8 w-8 text-slate-500" />,
-    description: "Catat kejadian atau aktivitas penting yang terjadi hari ini.",
-  },
+  // {
+  //   type: "Log",
+  //   title: "Log Activity",
+  //   icon: <BookText className="h-8 w-8 text-slate-500" />,
+  //   description: "Catat kejadian atau aktivitas penting yang terjadi hari ini.",
+  // },
 ];

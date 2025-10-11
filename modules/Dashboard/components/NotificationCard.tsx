@@ -11,7 +11,7 @@ import {
   IconCircleCheck,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { fetchAllNotificationsApi } from "@/services/notification.service";
+import { fetchLatestAlertApi } from "@/services/notification.service";
 
 // --- Helper untuk menentukan gaya notifikasi ---
 const getNotificationStyle = (title: string) => {
@@ -33,10 +33,11 @@ const getNotificationStyle = (title: string) => {
 };
 
 export const NotificationCard = () => {
-  const { data: notification, isLoading } = useQuery({
+  const { data: latestAlertResponse, isLoading } = useQuery({
     queryKey: ["latestNotification"],
-    queryFn: fetchAllNotificationsApi,
+    queryFn: () => fetchLatestAlertApi(),
   });
+  const notification = latestAlertResponse?.data;
 
   if (isLoading) {
     return (
@@ -47,7 +48,7 @@ export const NotificationCard = () => {
     );
   }
 
-  if (!notification || notification?.length === 0) {
+  if (!notification) {
     return (
       <div className="bg-white p-6 rounded-2xl flex items-center shadow-sm">
         <IconInfoCircle className="text-green-500" />
@@ -59,7 +60,7 @@ export const NotificationCard = () => {
   }
 
   // Tentukan ikon dan warna secara dinamis
-  const { Icon, color } = getNotificationStyle(notification[0].title);
+  const { Icon, color } = getNotificationStyle(notification.title);
   const colorClasses = {
     red: { bg: "bg-red-100", text: "text-red-600" },
     yellow: { bg: "bg-yellow-100", text: "text-yellow-600" },
@@ -74,15 +75,15 @@ export const NotificationCard = () => {
           <Icon className={`w-6 h-6 ${styles.text}`} />
         </div>
         <div>
-          <h2 className="font-bold text-gray-800">{notification[0]?.title}</h2>
-          <p className="text-gray-600">{notification[0]?.message}</p>
+          <h2 className="font-bold text-gray-800">{notification.title}</h2>
+          <p className="text-gray-600">{notification.message}</p>
         </div>
       </div>
-      {notification[0]?.link && (
+      {notification.link && (
         // PERBAIKAN: Komponen Link di Next.js modern tidak lagi memerlukan tag <a> di dalamnya.
         // ClassName dan props lainnya bisa langsung diterapkan pada Link.
         <Link
-          href={notification[0].link}
+          href={notification.link}
           className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition"
         >
           Lihat Detail

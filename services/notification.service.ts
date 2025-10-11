@@ -62,6 +62,48 @@ export const fetchAllNotificationsApi = async (): Promise<
 };
 
 /**
+ * Mengambil notifikasi yang hanya terkait dengan meter.
+ */
+export const fetchMeterAlertsApi = async (): Promise<
+  ApiResponse<AlertNotification[]>
+> => {
+  const response = await api.get("/alerts/meters");
+  return response.data;
+};
+
+/**
+ * Mengambil notifikasi yang hanya terkait dengan sistem (tidak ada meter_id).
+ */
+export const fetchSystemAlertsApi = async (): Promise<
+  ApiResponse<AlertNotification[]>
+> => {
+  const response = await api.get("/alerts/system");
+  return response.data;
+};
+
+/**
+ * Mengambil satu notifikasi alert terbaru dari gabungan meter dan sistem.
+ * Digunakan untuk NotificationCard di Dashboard.
+ */
+export const fetchLatestAlertApi = async (
+  scope?: "system" | "meters"
+): Promise<ApiResponse<AlertNotification | null>> => {
+  const response = await api.get<ApiResponse<AlertNotification[]>>(
+    "/alerts/latest",
+    {
+      params: { scope },
+    }
+  );
+  const latestAlerts = response.data.data;
+  // Jika ada data, kembalikan alert pertama (yang terbaru). Jika tidak, kembalikan null.
+  if (latestAlerts && latestAlerts.length > 0) {
+    return { ...response.data, data: latestAlerts[0] };
+  }
+  // Jika tidak ada alert, kembalikan null
+  return { ...response.data, data: null };
+};
+
+/**
  * Menandai satu notifikasi sebagai sudah dibaca.
  */
 export const markAsReadApi = async (
