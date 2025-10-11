@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DateRange } from "react-day-picker";
-import { subDays } from "date-fns";
+import { startOfMonth } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, ListFilter, AlertTriangle } from "lucide-react";
 
@@ -23,7 +23,7 @@ export const Page = () => {
     meterId: number | undefined;
   }>({
     type: "Electricity",
-    date: { from: subDays(new Date(), 30), to: new Date() },
+    date: { from: startOfMonth(new Date()), to: new Date() },
     sortBy: "date", // Memberikan nilai default
     meterId: undefined,
   });

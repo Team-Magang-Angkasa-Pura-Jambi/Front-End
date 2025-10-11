@@ -264,7 +264,7 @@ export const ProfilePage = () => {
               </CardTitle>
               <CardDescription className="flex items-center justify-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                {userProfileData.role.role_name}
+                {userProfileData?.role?.role_name}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 text-sm">

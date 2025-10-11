@@ -24,6 +24,7 @@ export const NotificationPopover = () => {
     queryKey: ["allNotifications"],
     queryFn: fetchAllNotificationsApi,
     staleTime: 1000 * 60, // 1 minute
+    select: (data) => data.data, // Ambil array 'data' dari respons API
   });
 
   const unreadCount = notifications?.filter((n) => !n.is_read).length || 0;
@@ -95,7 +96,7 @@ export const NotificationPopover = () => {
           </div>
         </ScrollArea>
         <div className="p-2 border-t text-center">
-          <Link href="/notifications" passHref>
+          <Link href="/notification-center" passHref>
             <Button variant="link" className="text-sm">
               Lihat Semua Notifikasi
             </Button>
