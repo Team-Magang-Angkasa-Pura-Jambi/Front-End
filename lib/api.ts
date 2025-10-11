@@ -1,10 +1,15 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore";
 
+// Pilih baseURL berdasarkan lingkungan (development atau production)
+const baseURL =
+  process.env.NODE_ENV === "development"
+    ? process.env.NEXT_PUBLIC_API_URL_DEVELOPMENT
+    : process.env.NEXT_PUBLIC_API_URL_PRODUCTION;
+
 // Buat instance Axios
 const api = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
-  // "https://patentable-steve-unsuburbed.ngrok-free.dev/api/v1" ||
+  baseURL: baseURL,
   headers: {
     "Content-Type": "application/json",
   },
