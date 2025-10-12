@@ -58,4 +58,3 @@ export const NotificationItem = React.forwardRef<
   </motion.li>
 ));
 NotificationItem.displayName = "NotificationItem";
-NotificationItem.displayName = "NotificationItem";
