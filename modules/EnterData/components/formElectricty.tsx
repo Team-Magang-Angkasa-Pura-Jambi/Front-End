@@ -69,7 +69,9 @@ const formSchema = z.object({
     .array(
       z.object({
         reading_type_id: z.string().min(1, { message: "Jenis wajib dipilih." }),
-        value: z.coerce.number({ invalid_type_error: "Nilai harus berupa angka." }).min(0, "Nilai tidak boleh negatif."),
+        value: z.coerce
+          .number({ invalid_type_error: "Nilai harus berupa angka." })
+          .min(0, "Nilai tidak boleh negatif."),
       })
     )
     .min(1, "Minimal harus ada satu detail pembacaan."),
@@ -320,9 +322,9 @@ export const FormReadingElectric = ({
             return (
               <div
                 key={field.id}
-                className="grid grid-cols-12 gap-4 items-start"
+                className="grid grid-cols-1 sm:grid-cols-12 gap-x-2 gap-y-4 items-start p-3 border rounded-md"
               >
-                <div className="col-span-6">
+                <div className="col-span-1 sm:col-span-6">
                   <FormField
                     control={form.control}
                     name={`details.${index}.reading_type_id`}
@@ -376,7 +378,7 @@ export const FormReadingElectric = ({
                     )}
                   />
                 </div>
-                <div className="col-span-5">
+                <div className="col-span-1 grid grid-cols-12 gap-x-2 items-start sm:col-span-5">
                   <FormField
                     control={form.control}
                     name={`details.${index}.value`}
@@ -385,7 +387,7 @@ export const FormReadingElectric = ({
                         <FormLabel className={index > 0 ? "sr-only" : ""}>
                           Nilai Pembacaan ({unit})
                         </FormLabel>
-                        <div className="relative">
+                        <div className="relative col-span-10">
                           <FormControl>
                             <Input
                               type="text"
@@ -430,7 +432,7 @@ export const FormReadingElectric = ({
                     )}
                   />
                 </div>
-                <div className="col-span-1 flex items-end h-[58px]">
+                <div className="col-span-1 flex items-center justify-end sm:h-[58px] sm:items-end">
                   {fields.length > 1 && (
                     <Button
                       variant="ghost"

@@ -127,11 +127,11 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       className={cn(
-        "flex h-screen w-full overflow-hidden rounded-md border md:flex-row"
+        "flex h-screen w-full flex-col overflow-hidden rounded-md border bg-background md:flex-row"
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10">
+        <SidebarBody className="justify-between gap-10 ">
           <div className="flex flex-1 flex-col overflow-y-auto overflow-hidden">
             <Logo />
             <motion.div

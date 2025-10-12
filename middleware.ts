@@ -45,6 +45,6 @@ export const config = {
      * - _next/image (file optimasi gambar)
      * - favicon.ico (file ikon)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|.*\\..*).*)",
   ],
 };

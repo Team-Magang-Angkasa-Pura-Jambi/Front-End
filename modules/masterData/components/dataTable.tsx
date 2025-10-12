@@ -15,7 +15,8 @@ export const DataTable = <TData, TValue>({
   data: TData[];
 }) => {
   return (
-    <div className="rounded-md border">
+    // PERBAIKAN: Menambahkan overflow-x-auto agar tabel dapat di-scroll secara horizontal di layar kecil
+    <div className="w-full overflow-x-auto rounded-md border">
       <table className="w-full text-sm">
         <thead className="border-b">
           <tr className="border-b">

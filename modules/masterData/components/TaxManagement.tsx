@@ -304,7 +304,7 @@ export const TaxManagement = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div>
             <CardTitle>Manajemen Pajak</CardTitle>
             <CardDescription>

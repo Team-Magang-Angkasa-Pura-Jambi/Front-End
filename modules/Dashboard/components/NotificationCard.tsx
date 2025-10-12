@@ -90,7 +90,7 @@ export const NotificationCard = () => {
   const styles = colorClasses[color as keyof typeof colorClasses];
 
   return (
-    <div className="bg-white p-6 rounded-2xl flex items-center justify-between shadow-sm overflow-hidden">
+    <div className="bg-white p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -98,7 +98,7 @@ export const NotificationCard = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center justify-between w-full"
+          className="flex items-center w-full"
         >
           <div className="flex items-center space-x-4">
             <div className={`${styles.bg} p-3 rounded-full`}>
@@ -113,7 +113,7 @@ export const NotificationCard = () => {
       </AnimatePresence>
       <Link
         href="/notification-center"
-        className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition ml-4 shrink-0"
+        className="bg-blue-600 text-white text-center px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition md:ml-4 shrink-0 w-full md:w-auto"
       >
         Lihat Semua
       </Link>
