@@ -6,7 +6,7 @@ export interface LogbookEntry {
   meter_id: number;
   consumption_change_percent: string | null;
   savings_value: string | null;
-  savings_cost: string | null;  
+  savings_cost: string | null;
   overage_value: string | null;
   overage_cost: string | null;
   summary_notes: string;

@@ -30,7 +30,7 @@ export const NotificationList = ({
   >
     {notifications?.map((notification) => (
       <NotificationItem
-        key={notification.notification_id}
+        key={notification.id}
         notification={notification}
         {...rest}
       />

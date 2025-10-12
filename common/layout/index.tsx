@@ -56,19 +56,19 @@ const allLinks = [
     allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
-    label: "Recap Data",
+    label: "Consumtion Data",
     href: "/recap-data",
     icon: <ClipboardList className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
-    label: "Recap Reading",
+    label: "Reading Data",
     href: "/recap-reading",
     icon: <Notebook className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
-    label: "Data Master",
+    label: "Master Data",
     href: "/data-master",
     icon: <Database className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin, Role.Admin],

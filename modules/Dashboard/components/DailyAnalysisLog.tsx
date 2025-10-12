@@ -11,10 +11,10 @@ import {
   Loader2,
   ServerCrash,
 } from "lucide-react"; // Pastikan ChevronDown diimpor
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UndefinedInitialDataOptions } from "@tanstack/react-query";
 import React, { useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getLogbooksApi } from "@/services/logbook.service";
+import { getLogbooksApi, LogbookEntry } from "@/services/logbook.service";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,22 +38,23 @@ const energyConfig = {
 export const DailyAnalysisLog = () => {
   const [dayOffset, setDayOffset] = useState(1); // Default: Kemarin
   const { startDate, endDate } = useMemo(() => {
+    // Buat tanggal target berdasarkan offset dari hari ini
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() - dayOffset);
     const start = new Date(targetDate.setHours(0, 0, 0, 0)).toISOString();
-    const end = new Date(targetDate.setHours(23, 59, 59, 999)).toISOString();
+    const end = new Date(targetDate.setHours(0, 0, 0, 0)).toISOString();
     return { startDate: start, endDate: end };
   }, [dayOffset]);
 
   const {
     data: logbookData,
     isLoading,
-    isError,
-  } = useQuery({
+    isError, // PERBAIKAN: Gunakan `isPending` untuk loading awal dan `isFetching` untuk background refresh
+  } = useQuery<LogbookEntry[], Error>({
     queryKey: ["logbooks", startDate, endDate],
     queryFn: () => getLogbooksApi(startDate, endDate),
-    select: (data) => data.data.data,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    select: (response: any) => response.data?.data || [], // PERBAIKAN: Akses data dengan aman
+    staleTime: 1000 * 60 * 5, // 5 menit
   });
 
   const selectedLabel =
@@ -99,7 +100,7 @@ export const DailyAnalysisLog = () => {
             <p className="text-sm">Gagal memuat data log.</p>
           </div>
         ) : logbookData && logbookData?.length > 0 ? (
-          logbookData.map((log) => {
+          logbookData.map((log: Logbook) => {
             const isSavings = log.savings_value !== null;
             const energy = energyConfig[log.meter.energy_type.type_name];
             const Icon = isSavings ? CheckCircle2 : AlertTriangle;

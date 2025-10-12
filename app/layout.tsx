@@ -40,7 +40,7 @@ export default function RootLayout({
           <QueryProvider>
             <SocketProvider />
             {children}
-            <Toaster />
+            <Toaster expand={true} position="top-right" />
           </QueryProvider>
         </ThemeProvider>
       </body>
