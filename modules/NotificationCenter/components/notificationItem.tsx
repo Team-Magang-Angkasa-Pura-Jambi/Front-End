@@ -1,5 +1,6 @@
 // src/app/notification-center/_components/notification-item.tsx
 import { formatDistanceToNow } from "date-fns";
+import React from "react";
 import { id } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { AlertNotification } from "@/services/notification.service";
@@ -18,13 +19,12 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 },
 };
 
-export const NotificationItem = ({
-  notification,
-  isSelected,
-  onSelect,
-  onClick,
-}: NotificationItemProps) => (
+export const NotificationItem = React.forwardRef<
+  HTMLLIElement,
+  NotificationItemProps
+>(({ notification, isSelected, onSelect, onClick }, ref) => (
   <motion.li
+    ref={ref}
     variants={itemVariants}
     onClick={() => onClick(notification)}
     className={cn(
@@ -43,15 +43,19 @@ export const NotificationItem = ({
     <div className="flex-1">
       <p className="font-semibold">{notification.title}</p>
       <p className="text-sm text-muted-foreground">{notification.message}</p>
-      <p className="text-xs text-muted-foreground/80 mt-1">
-        {formatDistanceToNow(new Date(notification.created_at), {
-          addSuffix: true,
-          locale: id,
-        })}
-      </p>
+      {notification.created_at && (
+        <p className="text-xs text-muted-foreground/80 mt-1">
+          {formatDistanceToNow(new Date(notification.created_at), {
+            addSuffix: true,
+            locale: id,
+          })}
+        </p>
+      )}
     </div>
     {!notification.is_read && (
       <div className="h-2.5 w-2.5 rounded-full bg-primary mt-1.5" />
     )}
   </motion.li>
-);
+));
+NotificationItem.displayName = "NotificationItem";
+NotificationItem.displayName = "NotificationItem";

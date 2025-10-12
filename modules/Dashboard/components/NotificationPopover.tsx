@@ -27,8 +27,7 @@ export const NotificationPopover = () => {
     select: (data) => data.data, // Ambil array 'data' dari respons API
   });
 
-  const unreadCount =
-    notifications?.data?.filter((n) => !n.is_read).length || 0;
+  const unreadCount = notifications?.filter((n) => !n.is_read).length || 0;
 
   return (
     <Popover>
@@ -60,7 +59,7 @@ export const NotificationPopover = () => {
               </div>
             )}
 
-            {!isLoading && (!notifications || notifications.length === 0) && (
+            {!isLoading && (!notifications || notifications?.length === 0) && (
               <div className="flex flex-col items-center justify-center p-8 text-center">
                 <Inbox className="h-10 w-10 text-muted-foreground" />
                 <p className="mt-2 text-sm font-semibold">
@@ -73,9 +72,9 @@ export const NotificationPopover = () => {
             )}
 
             {!isLoading &&
-              notifications?.data?.map((notif) => (
+              notifications?.map((notif) => (
                 <div
-                  key={notif.id}
+                  key={notif.notification_id}
                   className={`p-3 rounded-lg hover:bg-accent ${
                     !notif.is_read ? "bg-blue-50 dark:bg-blue-900/20" : ""
                   }`}
@@ -84,9 +83,9 @@ export const NotificationPopover = () => {
                   <p className="text-xs text-muted-foreground">
                     {notif.message}
                   </p>
-                  {notif.createdAt && (
+                  {notif.created_at && (
                     <p className="text-xs text-muted-foreground/70 mt-1">
-                      {formatDistanceToNow(new Date(notif.createdAt), {
+                      {formatDistanceToNow(new Date(notif.created_at), {
                         addSuffix: true,
                         locale: id,
                       })}
@@ -97,7 +96,7 @@ export const NotificationPopover = () => {
           </div>
         </ScrollArea>
         <div className="p-2 border-t text-center">
-          <Link href="/notification-center" passHref>
+          <Link href="/notification-center">
             <Button variant="link" className="text-sm">
               Lihat Semua Notifikasi
             </Button>

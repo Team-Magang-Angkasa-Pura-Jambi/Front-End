@@ -125,7 +125,7 @@ const NotificationCenterPage = () => {
   };
 
   const handleNotificationClick = (notification: AlertNotification) => {
-    if (!notification?.data?.is_read) {
+    if (!notification.is_read) {
       markAsRead(notification.notification_id);
     }
   };
