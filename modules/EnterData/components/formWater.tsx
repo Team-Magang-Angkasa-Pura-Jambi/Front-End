@@ -313,9 +313,9 @@ export const FormReadingWater = ({
             return (
               <div
                 key={field.id}
-                className="grid grid-cols-1 sm:grid-cols-12 gap-x-2 gap-y-4 items-start p-3 border rounded-md"
+                className="grid grid-cols-12 gap-4 items-start"
               >
-                <div className="col-span-1 sm:col-span-6">
+                <div className="col-span-6">
                   <FormField
                     control={form.control}
                     name={`details.${index}.reading_type_id`}
@@ -369,7 +369,7 @@ export const FormReadingWater = ({
                     )}
                   />
                 </div>
-                <div className="col-span-1 grid grid-cols-12 gap-x-2 items-start sm:col-span-5">
+                <div className="col-span-5">
                   <FormField
                     control={form.control}
                     name={`details.${index}.value`}
@@ -397,7 +397,7 @@ export const FormReadingWater = ({
                     )}
                   />
                 </div>
-                <div className="col-span-1 flex items-center justify-end sm:h-[58px] sm:items-end">
+                <div className="col-span-1 flex items-end h-[58px]">
                   {fields.length > 1 && (
                     <Button
                       variant="ghost"
