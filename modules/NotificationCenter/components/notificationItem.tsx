@@ -45,6 +45,10 @@ export const NotificationItem = React.forwardRef<
       <p className="text-sm text-muted-foreground">
         {notification.description}
       </p>
+
+      <p className="text-sm text-muted-foreground">
+        {notification.message}
+      </p>
       {notification.created_at && (
         <p className="text-xs text-muted-foreground/80 mt-1">
           {formatDistanceToNow(new Date(notification.created_at), {

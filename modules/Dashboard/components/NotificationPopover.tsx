@@ -65,8 +65,8 @@ export const NotificationPopover = () => {
         <div className="p-4 font-semibold border-b">
           Notifikasi ({unreadCount})
         </div>
-        <ScrollArea className="h-80">
-          <div className="p-2">
+        <ScrollArea className="h-80 ">
+          <div className="p-2 flex flex-col gap-2">
             {isLoading && (
               <div className="flex items-center justify-center p-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -79,17 +79,18 @@ export const NotificationPopover = () => {
               </div>
             )}
 
-            {!isLoading && (!notifications || notifications?.data?.length === 0) && (
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <Inbox className="h-10 w-10 text-muted-foreground" />
-                <p className="mt-2 text-sm font-semibold">
-                  Tidak ada notifikasi
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Semua notifikasi akan muncul di sini.
-                </p>
-              </div>
-            )}
+            {!isLoading &&
+              (!notifications || notifications?.data?.length === 0) && (
+                <div className="flex flex-col items-center justify-center p-8 text-center">
+                  <Inbox className="h-10 w-10 text-muted-foreground" />
+                  <p className="mt-2 text-sm font-semibold">
+                    Tidak ada notifikasi
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Semua notifikasi akan muncul di sini.
+                  </p>
+                </div>
+              )}
 
             {!isLoading &&
               notifications?.data?.map((notif: any) => (
@@ -103,6 +104,9 @@ export const NotificationPopover = () => {
                   <p className="text-sm font-semibold">{notif.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {notif.description}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {notif.message}
                   </p>
                   {notif.created_at && (
                     <p className="text-xs text-muted-foreground/70 mt-1">
