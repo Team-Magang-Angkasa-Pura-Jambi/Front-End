@@ -74,7 +74,9 @@ const formSchema = z.object({
     .array(
       z.object({
         reading_type_id: z.string().min(1, { message: "Jenis wajib dipilih." }),
-        value: z.coerce.number().positive({ message: "Nilai harus positif." }),
+        value: z.coerce
+          .number({ invalid_type_error: "Nilai harus berupa angka." })
+          .min(0, "Nilai tidak boleh negatif."),
       })
     )
     .min(1, "Minimal harus ada satu detail pembacaan."),
@@ -95,7 +97,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     defaultValues: {
       meter_id: "",
       reading_date: new Date(),
-      details: [{ reading_type_id: "", value: "" as any }],
+      details: [],
     },
   });
 
@@ -132,7 +134,13 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
 
   useEffect(() => {
     if (selectedMeterId) {
-      replace([{ reading_type_id: "", value: "" as any }]);
+      // Reset details and add one empty row when meter changes
+      replace([]);
+      if (fields.length === 0) {
+        append({ reading_type_id: "", value: "" as any });
+      }
+    } else {
+      replace([]);
     }
   }, [selectedMeterId, replace]);
 
@@ -165,10 +173,13 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
   // Efek untuk menampilkan notifikasi jika data sebelumnya tidak ada
   useEffect(() => {
     lastReadingsQueries.forEach((query) => {
+      var _a;
       // Cek jika query sudah selesai (bukan fetching) dan hasilnya error
       if (
         !query.isFetching &&
-        ((query.isSuccess && !query.data?.data) || query.isError)
+        ((query.isSuccess &&
+          !((_a = query.data) === null || _a === void 0 ? void 0 : _a.data)) ||
+          query.isError)
       ) {
         toast.error("Data hari sebelumnya belum diinput.", {
           description: "Silakan isi data untuk tanggal yang benar.",
@@ -179,7 +190,17 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
   }, [lastReadingsQueries.map((q) => q.status).join(",")]); // Bergantung pada status semua query
 
   useEffect(() => {
-    const lastDate = lastReadingsQueries[0]?.data?.data?.session?.reading_date;
+    var _a, _b, _c;
+    const lastDate =
+      (_c =
+        (_b =
+          (_a = lastReadingsQueries[0]) === null || _a === void 0
+            ? void 0
+            : _a.data) === null || _b === void 0
+          ? void 0
+          : _b.data) === null || _c === void 0
+        ? void 0
+        : _c.session?.reading_date;
     if (lastDate) {
       setLastReadingDate(format(new Date(lastDate), "PPP"));
     } else {
@@ -187,10 +208,6 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastReadingsQueries[0]?.data]);
-
-  if (!lastReadingsQueries) {
-    toast.error("error");
-  }
 
   // --- Data Submission ---
   const { mutate, isPending } = useMutation({
@@ -301,9 +318,18 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => {
+                        var _a, _b, _c;
                         const lastDate =
-                          lastReadingsQueries[0]?.data?.data?.session
-                            ?.reading_date;
+                          (_c =
+                            (_b =
+                              (_a = lastReadingsQueries[0]) === null ||
+                              _a === void 0
+                                ? void 0
+                                : _a.data) === null || _b === void 0
+                              ? void 0
+                              : _b.data) === null || _c === void 0
+                            ? void 0
+                            : _c.session?.reading_date;
                         return (
                           date > new Date() ||
                           (lastDate ? date <= new Date(lastDate) : false)

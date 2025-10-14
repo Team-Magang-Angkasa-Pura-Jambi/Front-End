@@ -180,8 +180,8 @@ export const AnalysisChart = ({
                 name="Prediksi Konsumsi"
                 stroke={COLORS.prediksi}
                 strokeWidth={2}
-                strokeDasharray="3 3"
-                dot={false}
+                // strokeDasharray="3 3"
+                dot={{ r: 3 }}
                 activeDot={{ r: 5 }}
                 connectNulls={false}
               />

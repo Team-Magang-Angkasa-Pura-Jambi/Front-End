@@ -11,7 +11,12 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, PlusCircleIcon, XCircleIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ClipboardPaste,
+  PlusCircleIcon,
+  XCircleIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 // Impor komponen shadcn/ui
@@ -68,7 +73,9 @@ const formSchema = z.object({
     .array(
       z.object({
         reading_type_id: z.string().min(1, { message: "Jenis wajib dipilih." }),
-        value: z.coerce.number().positive({ message: "Nilai harus positif." }),
+        value: z.coerce
+          .number({ invalid_type_error: "Nilai harus berupa angka." })
+          .min(0, "Nilai tidak boleh negatif."),
       })
     )
     .min(1, "Minimal harus ada satu detail pembacaan."),
@@ -92,7 +99,7 @@ export const FormReadingWater = ({
     defaultValues: {
       meter_id: "",
       reading_date: new Date(),
-      details: [{ reading_type_id: "", value: "" as any }],
+      details: [],
     },
   });
 
@@ -129,7 +136,13 @@ export const FormReadingWater = ({
 
   useEffect(() => {
     if (selectedMeterId) {
-      replace([{ reading_type_id: "", value: "" as any }]);
+      // Reset details and add one empty row when meter changes
+      replace([]);
+      if (fields.length === 0) {
+        append({ reading_type_id: "", value: "" as any });
+      }
+    } else {
+      replace([]);
     }
   }, [selectedMeterId, replace]);
 
@@ -162,8 +175,14 @@ export const FormReadingWater = ({
   // Efek untuk menampilkan notifikasi jika data sebelumnya tidak ada
   useEffect(() => {
     lastReadingsQueries.forEach((query) => {
+      var _a;
       // Cek jika query sudah selesai (bukan fetching) dan hasilnya error
-      if (!query.isFetching && query.isError) {
+      if (
+        !query.isFetching &&
+        ((query.isSuccess &&
+          !((_a = query.data) === null || _a === void 0 ? void 0 : _a.data)) ||
+          query.isError)
+      ) {
         toast.error("Data hari sebelumnya belum diinput.", {
           description: "Silakan isi data untuk tanggal yang benar.",
         });
@@ -173,7 +192,17 @@ export const FormReadingWater = ({
   }, [lastReadingsQueries.map((q) => q.status).join(",")]); // Bergantung pada status semua query
 
   useEffect(() => {
-    const lastDate = lastReadingsQueries[0]?.data?.data?.session?.reading_date;
+    var _a, _b, _c;
+    const lastDate =
+      (_c =
+        (_b =
+          (_a = lastReadingsQueries[0]) === null || _a === void 0
+            ? void 0
+            : _a.data) === null || _b === void 0
+          ? void 0
+          : _b.data) === null || _c === void 0
+        ? void 0
+        : _c.session?.reading_date;
     if (lastDate) {
       setLastReadingDate(format(new Date(lastDate), "PPP"));
     } else {
@@ -286,9 +315,24 @@ export const FormReadingWater = ({
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("2000-01-01")
-                      }
+                      disabled={(date) => {
+                        var _a, _b, _c;
+                        const lastDate =
+                          (_c =
+                            (_b =
+                              (_a = lastReadingsQueries[0]) === null ||
+                              _a === void 0
+                                ? void 0
+                                : _a.data) === null || _b === void 0
+                              ? void 0
+                              : _b.data) === null || _c === void 0
+                            ? void 0
+                            : _c.session;
+                        return (
+                          date > new Date() ||
+                          (lastDate ? date <= new Date(lastDate) : false)
+                        );
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -328,7 +372,7 @@ export const FormReadingWater = ({
                           onValueChange={field.onChange}
                           value={field.value}
                           disabled={isLoadingData || meters.length === 0}
-                        > 
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue
@@ -378,15 +422,43 @@ export const FormReadingWater = ({
                         <FormLabel className={index > 0 ? "sr-only" : ""}>
                           Nilai Pembacaan ({unit})
                         </FormLabel>
-                        <FormControl>
-                          <Input
-                            min={lastReadingValue}
-                            type="number"
-                            placeholder="0.00"
-                            {...field}
-                            disabled={!detailsValues[index]?.reading_type_id}
-                          />
-                        </FormControl>
+                        <div className="relative">
+                          <FormControl>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              step="any"
+                              min={lastReadingValue}
+                              placeholder="0.00"
+                              className="pr-10"
+                              {...field}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/,/g, ".");
+                                field.onChange(value);
+                              }}
+                              disabled={!detailsValues[index]?.reading_type_id}
+                            />
+                          </FormControl>
+                          {lastReadingValue && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-primary"
+                              onClick={() =>
+                                form.setValue(
+                                  `details.${index}.value`,
+                                  lastReadingValue !== null &&
+                                    lastReadingValue !== void 0
+                                    ? lastReadingValue
+                                    : ""
+                                )
+                              }
+                            >
+                              <ClipboardPaste className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                         <FormDescription>
                           {lastReadingQuery?.isFetching
                             ? "Mencari..."

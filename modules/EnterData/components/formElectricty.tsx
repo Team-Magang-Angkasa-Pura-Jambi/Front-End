@@ -125,32 +125,27 @@ export const FormReadingElectric = ({
   const detailsValues = form.watch("details");
   const readingDate = form.watch("reading_date");
 
-  // ✅ GANTI useQuery menjadi useQueries
-  // Ini akan membuat satu query untuk setiap baris di `detailsValues`
   const lastReadingQueries = useQueries({
     queries: detailsValues.map((detail) => ({
       queryKey: [
         "lastReading",
         selectedMeterId,
         detail.reading_type_id,
-        readingDate, // Tambahkan tanggal ke queryKey
+        readingDate,
       ],
       queryFn: () =>
         getLastReadingApi(
           parseInt(selectedMeterId),
-          parseInt(detail.reading_type_id), // Gunakan ID yang sesuai
+          parseInt(detail.reading_type_id),
           readingDate.toISOString()
         ),
-      // Aktifkan query hanya jika meter dan jenis pada baris ini sudah dipilih
+
       enabled: !!selectedMeterId && !!detail.reading_type_id && !!readingDate,
-      // retry: false, // Tidak perlu coba lagi jika 404 (data tidak ada)
     })),
   });
 
-  // Efek untuk menampilkan notifikasi jika data sebelumnya tidak ada
   useEffect(() => {
     lastReadingQueries.forEach((query) => {
-      // Cek jika query sudah selesai (bukan fetching) dan hasilnya error
       if (
         !query.isFetching &&
         ((query.isSuccess && !query.data?.data) || query.isError)
@@ -160,8 +155,7 @@ export const FormReadingElectric = ({
         });
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastReadingQueries.map((q) => q.status).join(",")]); // Bergantung pada status semua query
+  }, [lastReadingQueries.map((q) => q.status).join(",")]);
 
   useEffect(() => {
     const lastDate = lastReadingQueries[0]?.data?.data?.session?.reading_date;
@@ -170,7 +164,6 @@ export const FormReadingElectric = ({
     } else {
       setLastReadingDate(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastReadingQueries[0]?.data]);
 
   const selectedTypeIds = useMemo(
@@ -264,11 +257,6 @@ export const FormReadingElectric = ({
                         className={`w-full justify-start text-left font-normal ${
                           !field.value && "text-muted-foreground"
                         }`}
-                        // disabled={
-                        //   !canChangeDate ||
-                        //   !selectedMeterId ||
-                        //   !detailsValues[0]?.reading_type_id
-                        // }
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {field.value ? (
@@ -285,7 +273,6 @@ export const FormReadingElectric = ({
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => {
-                        // ✅ Gunakan hasil query pertama untuk validasi tanggal
                         const lastDate =
                           lastReadingQueries[0]?.data?.data?.session
                             ?.reading_date;
@@ -313,7 +300,6 @@ export const FormReadingElectric = ({
 
         <div className="space-y-4">
           {fields.map((field, index) => {
-            // ✅ Ambil hasil query yang sesuai untuk baris ini
             const lastReadingQuery = lastReadingQueries[index];
             const lastReadingValue = lastReadingQuery?.data?.data?.value;
 
@@ -393,7 +379,7 @@ export const FormReadingElectric = ({
                               type="text"
                               inputMode="decimal"
                               step="any"
-                              min={lastReadingValue} // ✅ Gunakan nilai dari query yang sesuai
+                              min={lastReadingValue}
                               placeholder="0.00"
                               className="pr-10"
                               {...field}
@@ -404,7 +390,7 @@ export const FormReadingElectric = ({
                               disabled={!detailsValues[index]?.reading_type_id}
                             />
                           </FormControl>
-                          {lastReadingValue && ( // ✅ Gunakan nilai dari query yang sesuai
+                          {lastReadingValue && (
                             <Button
                               type="button"
                               variant="ghost"

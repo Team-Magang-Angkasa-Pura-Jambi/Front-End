@@ -50,7 +50,13 @@ import { ReadingPayload } from "@/services/readings.service";
 // --- Skema Validasi Form ---
 const detailSchema = z.object({
   reading_type_id: z.number(), // ID akan berupa angka
-  value: z.coerce.number().min(0, "Nilai tidak boleh negatif."),
+  // PERBAIKAN: Izinkan nilai null, tetapi saat submit harus berupa angka.
+  // Ini penting agar form valid saat nilai awal null, tapi tetap divalidasi saat diubah.
+  value: z.coerce
+    .number({
+      error: "Nilai harus berupa angka.",
+    })
+    .nullable(),
 });
 
 const formSchema = z.object({
@@ -79,8 +85,9 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
   const isEditMode = !!initialData;
 
   // PERBAIKAN: Nilai default diatur oleh useEffect untuk keandalan yang lebih baik
-  const form = useForm<FormValues>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onChange", // Validasi saat input berubah agar tombol Simpan aktif/nonaktif
   });
 
   // Gunakan `replace` untuk mengganti seluruh array, lebih aman saat reset
@@ -96,10 +103,7 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
   );
 
   // --- Pengambilan Data untuk Dropdown (HANYA di mode Tambah Baru) ---
-  const { data: energyTypeDetails, isLoading: isLoadingMeters } = useQuery<
-    EnergyTypeDetails,
-    Error
-  >({
+  const { data: energyTypeDetails, isLoading: isLoadingMeters } = useQuery({
     queryKey: ["energyTypeDetailsForForm", energyType],
     queryFn: () => getEnergyTypesApi(energyType as any),
     enabled: !isEditMode, // Query ini hanya berjalan jika BUKAN mode edit
@@ -126,9 +130,10 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
       form.reset({
         meter_id: initialData.meter.meter_id,
         reading_date: new Date(initialData.reading_date),
+        // PERBAIKAN: Pastikan `value` di-map sebagai `null` jika tidak ada.
         details: initialData.details.map((d) => ({
-          reading_type_id: d.reading_type.reading_type_id,
-          value: d.value,
+          reading_type_id: d.reading_type_id,
+          value: d.value ?? null,
         })),
       });
     } else {
@@ -139,7 +144,8 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
         details: [],
       });
     }
-  }, [initialData, form.reset]);
+    // PERBAIKAN: Hapus `form.reset` dari dependency array untuk mencegah loop.
+  }, [initialData, form]);
 
   // Efek untuk mengisi detail secara dinamis saat meter dipilih (HANYA di mode Tambah Baru)
   useEffect(() => {
@@ -147,7 +153,7 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
 
     const newDetails = selectedMeter.allowed_reading_types.map((rt) => ({
       reading_type_id: rt.reading_type_id, // ID sudah number
-      value: undefined as any, // Dikosongkan untuk input pengguna
+      value: null, // Dikosongkan untuk input pengguna, gunakan `null`
     }));
     replace(newDetails); // `replace` lebih aman daripada `setValue` untuk field array
   }, [selectedMeter, isEditMode, replace]);
@@ -156,10 +162,9 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
   const { mutate, isPending } = useMutation({
     mutationFn: (readingData: ReadingPayload) => {
       if (isEditMode) {
-        return updateReadingSessionApi(
-          initialData!.reading_session_id,
-          readingData
-        );
+        console.log(initialData);
+
+        return updateReadingSessionApi(initialData.session_id, readingData);
       }
       return createReadingSessionApi(readingData);
     },
@@ -171,15 +176,29 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
       onSuccess?.();
     },
     onError: (error: any) => {
+      // PERBAIKAN: Tangkap pesan error dari backend dan tampilkan dengan lebih jelas.
       const message =
-        error.response?.data?.message || "Terjadi kesalahan tidak terduga.";
-      toast.error(message);
+        error.response?.data?.status?.message ||
+        "Terjadi kesalahan tidak terduga.";
+      toast.error("Gagal Memperbarui Data", {
+        description: message,
+      });
     },
   });
 
   const onSubmit = (values: FormValues) => {
     const payload: ReadingPayload = {
       ...values,
+      // Pastikan semua nilai detail adalah angka sebelum dikirim
+      details: values.details.map((detail) => ({
+        ...detail,
+        // Jika value null/undefined, kirim 0. Jika tidak, kirim nilainya.
+        // Sesuaikan ini jika API Anda mengharapkan perlakuan berbeda untuk nilai kosong.
+        value:
+          detail.value === null || detail.value === undefined
+            ? 0
+            : Number(detail.value),
+      })),
       reading_date: values.reading_date.toISOString(),
     };
     mutate(payload);
@@ -196,8 +215,14 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
               <FormItem>
                 <FormLabel>Meteran</FormLabel>
                 {isEditMode ? (
-                  // Tampilan di mode Edit (input statis)
-                  <Input value={initialData?.meter.meter_code} disabled />
+                  // PERBAIKAN: Bungkus dengan FormControl agar nilai tetap terdaftar di form state
+                  // meskipun inputnya dinonaktifkan. Ini penting untuk validasi.
+                  <FormControl>
+                    <Input
+                      value={initialData?.meter.meter_code || "Memuat..."}
+                      disabled
+                    />
+                  </FormControl>
                 ) : (
                   // Tampilan di mode Tambah (dropdown)
                   <Select
@@ -250,7 +275,8 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
                           "w-full justify-start text-left font-normal",
                           !field.value && "text-muted-foreground"
                         )}
-                        disabled={!canChangeDate}
+                        // PERBAIKAN: Nonaktifkan juga saat mode edit
+                        disabled={!canChangeDate || isEditMode}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {field.value ? (
@@ -281,35 +307,65 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
 
         <div className="space-y-4">
           {fields.length > 0 ? (
-            fields.map((field, index) => {
-              const readingType = isEditMode
-                ? initialData?.details.find(
-                    (d) =>
-                      d.reading_type.reading_type_id === field.reading_type_id
-                  )?.reading_type
-                : selectedMeter?.allowed_reading_types.find(
-                    (rt) => rt.reading_type_id === field.reading_type_id
-                  );
+            fields.map((field, index) => (
+              <div key={field.id} className="grid grid-cols-12 gap-4 items-end">
+                <div className="col-span-6">
+                  <FormField
+                    control={form.control}
+                    name={`details.${index}.reading_type_id`}
+                    render={({ field: typeField }) => {
+                      const readingType =
+                        initialData?.details.find(
+                          (d) => d.reading_type_id === typeField.value
+                        )?.reading_type ||
+                        selectedMeter?.allowed_reading_types.find(
+                          (rt) => rt.reading_type_id === typeField.value
+                        );
 
-              return (
-                <div key={field.id}>
+                      return (
+                        <FormItem>
+                          <FormLabel className={index > 0 ? "sr-only" : ""}>
+                            Jenis Pembacaan
+                          </FormLabel>
+                          {/* PERBAIKAN: Tampilkan sebagai Input disabled di mode Edit */}
+                          {isEditMode ? (
+                            <FormControl>
+                              <Input
+                                value={readingType?.type_name || "Memuat..."}
+                                disabled
+                              />
+                            </FormControl>
+                          ) : (
+                            <p>Mode Tambah belum diimplementasikan di sini.</p>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                </div>
+                <div className="col-span-6">
                   <FormField
                     control={form.control}
                     name={`details.${index}.value`}
                     render={({ field: valueField }) => (
                       <FormItem>
-                        <FormLabel>
-                          {readingType?.type_name || `Nilai Bacaan`} (
-                          {selectedMeter?.energy_type?.unit_of_measurement ||
-                            "..."}
-                          )
+                        <FormLabel className={index > 0 ? "sr-only" : ""}>
+                          Nilai Bacaan
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             step="0.01"
                             placeholder="0.00"
-                            {...valueField}
+                            value={valueField.value ?? ""}
+                            onChange={(e) =>
+                              valueField.onChange(
+                                e.target.value === ""
+                                  ? null
+                                  : parseFloat(e.target.value)
+                              )
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -317,8 +373,8 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
                     )}
                   />
                 </div>
-              );
-            })
+              </div>
+            ))
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
               {isEditMode
@@ -329,9 +385,19 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
         </div>
 
         <div className="flex justify-end pt-6">
-          <Button type="submit" disabled={isPending}>
+          {/* PERBAIKAN: Tombol dinonaktifkan jika form tidak valid atau sedang proses submit */}
+          <Button
+            type="submit"
+            disabled={
+              isPending || !form.formState.isValid || !form.formState.isDirty
+            }
+          >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isPending ? "Menyimpan..." : "Simpan"}
+            {isPending
+              ? "Menyimpan..."
+              : isEditMode
+              ? "Update Data"
+              : "Simpan Data"}
           </Button>
         </div>
       </form>

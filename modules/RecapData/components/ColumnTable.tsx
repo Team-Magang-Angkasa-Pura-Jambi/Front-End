@@ -5,7 +5,8 @@ import { ArrowUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { RecapDataRow } from "../type"; // Ganti 'RecapRecord' ke 'RecapDataRow' agar konsisten
-
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 /**
  * Memformat nilai menjadi format mata uang Rupiah.
  * @param amount Nilai yang akan diformat.
@@ -70,7 +71,7 @@ const ClassificationBadge = ({
   classification: RecapDataRow["classification"];
 }) => {
   if (!classification || classification === "UNKNOWN") {
-    return <span className="text-muted-foreground">-</span>;
+    return <span className="text-muted-foreground ">-</span>;
   }
 
   const variantMap: {
@@ -84,7 +85,7 @@ const ClassificationBadge = ({
     BOROS: "destructive",
   };
 
-  return <Badge variant={variantMap[classification]}>{classification}</Badge>;
+  return <Badge className="w-20" variant={variantMap[classification]}>{classification}</Badge>;
 };
 /**
  * Membuat definisi kolom untuk tabel rekap berdasarkan jenis data.
@@ -103,12 +104,12 @@ export const createColumns = (
       ),
       cell: ({ row }) => {
         const dateValue = row.getValue("date") as string | Date;
-        // Penanganan jika tanggal tidak valid
         if (!dateValue) return "-";
-        return new Date(dateValue).toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
+        // Ambil hanya bagian tanggal (YYYY-MM-DD) untuk menghindari masalah zona waktu
+        const dateOnlyString = new Date(dateValue).toISOString().split("T")[0];
+        // Buat objek Date baru dari string tanggal tersebut, ditambah 'T00:00:00' untuk memastikan diperlakukan sebagai awal hari di UTC
+        return format(new Date(`${dateOnlyString}T00:00:00`), "dd MMM yyyy", {
+          locale: id,
         });
       },
     },

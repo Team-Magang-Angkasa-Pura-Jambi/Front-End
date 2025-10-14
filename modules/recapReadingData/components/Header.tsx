@@ -153,8 +153,8 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
         );
       }
       return recalculateRecapApi({
-        startDate: filters.date.from.toISOString(),
-        endDate: filters.date.to.toISOString(),
+        startDate: format(filters.date.from, "yyyy-MM-dd"),
+        endDate: format(filters.date.to, "yyyy-MM-dd"),
         meterId: filters.meterId,
       });
     },
@@ -189,7 +189,6 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
         </CardHeader>
         <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
           <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full">
-            {/* Filter Jenis Energi */}
             <Tabs
               value={filters.type}
               onValueChange={(value) => handleFilterChange("type", value)}
@@ -200,9 +199,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 <TabsTrigger value="Fuel">BBM</TabsTrigger>
               </TabsList>
             </Tabs>
-
-            {/* Filter Meteran */}
-            <Select
+            <Select // Filter Meteran
               value={filters.meterId ? String(filters.meterId) : "all-meters"}
               onValueChange={(value) =>
                 handleFilterChange(
@@ -234,9 +231,9 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 )}
               </SelectContent>
             </Select>
-
-            {/* Filter Tanggal */}
             <Popover>
+              {" "}
+              {/* Filter Tanggal */}
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
@@ -271,38 +268,6 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 />
               </PopoverContent>
             </Popover>
-
-            {/* Filter Urutan */}
-            {/* <div className="flex gap-1">
-              <Select
-                value={filters.sortBy}
-                onValueChange={(value) => handleFilterChange("sortBy", value)}
-              >
-                <SelectTrigger className="w-full sm:w-auto">
-                  <SelectValue placeholder="Urutkan Berdasarkan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="reading_date">Tanggal</SelectItem>
-                  <SelectItem value="cost">Biaya</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  handleFilterChange(
-                    "sortOrder",
-                    filters.sortOrder === "asc" ? "desc" : "asc"
-                  )
-                }
-              >
-                {filters.sortOrder === "asc" ? (
-                  <ArrowUp className="h-4 w-4" />
-                ) : (
-                  <ArrowDown className="h-4 w-4" />
-                )}
-              </Button>
-            </div> */}
           </div>
         </CardContent>
       </Card>

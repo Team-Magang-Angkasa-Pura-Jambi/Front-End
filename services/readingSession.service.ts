@@ -111,7 +111,7 @@ export const updateReadingSessionApi = async (
   sessionId: number,
   data: UpdateReadingSessionBody
 ): Promise<ReadingSessionWithDetails> => {
-  const response = await api.put(`/readings/${sessionId}`, data);
+  const response = await api.patch(`/readings/${sessionId}`, data);
   return response.data;
 };
 

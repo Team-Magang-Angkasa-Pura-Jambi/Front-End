@@ -6,15 +6,15 @@ import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "./components/logo";
 import { Button } from "@/components/ui/button";
 import {
-  ClipboardList,
+  BarChart3,
+  BookText,
+  CircleUserRound,
   Database,
+  FilePenLine,
   Loader2,
   LayoutDashboard,
   LogOut,
-  Notebook,
-  SquarePen,
   Users,
-  User2,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useMemo, useState } from "react";
@@ -44,43 +44,43 @@ enum Role {
 
 const allLinks = [
   {
-    label: "Dashboard",
+    label: "Dasbor",
     href: "/",
     icon: <LayoutDashboard className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
-    label: "Enter Data",
+    label: "Input Data",
     href: "/enter-data",
-    icon: <SquarePen className="h-5 w-5 shrink-0" />,
+    icon: <FilePenLine className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
-    label: "Consumtion Data",
+    label: "Data Konsumsi",
     href: "/recap-data",
-    icon: <ClipboardList className="h-5 w-5 shrink-0" />,
+    icon: <BarChart3 className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
-    label: "Reading Data",
+    label: "Data Pembacaan",
     href: "/recap-reading",
-    icon: <Notebook className="h-5 w-5 shrink-0" />,
+    icon: <BookText className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
-    label: "Master Data",
+    label: "Data Master",
     href: "/data-master",
     icon: <Database className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin, Role.Admin],
   },
   {
-    label: "Account",
+    label: "Akun Saya",
     href: "/profile",
-    icon: <User2 className="h-5 w-5 shrink-0" />,
+    icon: <CircleUserRound className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin, Role.Admin, Role.Technician],
   },
   {
-    label: "User Management",
+    label: "Manajemen Pengguna",
     href: "/user-management",
     icon: <Users className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin],

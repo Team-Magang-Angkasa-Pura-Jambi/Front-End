@@ -166,7 +166,7 @@ export const Page = () => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Tabel Riwayat Pencatatan</CardTitle>
+              <CardTitle>Tabel Riwayat Pencatat an</CardTitle>
               <CardDescription>
                 Menampilkan semua data pencatatan meteran sesuai filter.
               </CardDescription>

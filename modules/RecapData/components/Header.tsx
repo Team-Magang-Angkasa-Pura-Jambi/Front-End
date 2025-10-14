@@ -81,7 +81,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   const { data: metersResponse, isLoading: isLoadingMeters } = useQuery({
-    // 1. queryKey dibuat dinamis, akan re-fetch jika `filters.type` berubah
+    // 1. queryKey dibuat dinamis, akan re-fetch jika `filters.type` berubah  
     queryKey: ["meters", filters.type],
     // 2. queryFn memanggil API dan langsung mengekstrak array-nya
     queryFn: () => getMetersApi(filters.type),
@@ -135,8 +135,8 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
         );
       }
       return recalculateRecapApi({
-        startDate: filters.date.from.toISOString(),
-        endDate: filters.date.to.toISOString(),
+        startDate: format(filters.date.from, "yyyy-MM-dd"),
+        endDate: format(filters.date.to, "yyyy-MM-dd"),
         meterId: filters.meterId,
       });
     },
