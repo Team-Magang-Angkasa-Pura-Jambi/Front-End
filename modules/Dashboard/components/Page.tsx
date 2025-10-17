@@ -10,17 +10,18 @@ import {
   Zap,
   Calendar as CalendarIcon,
 } from "lucide-react";
-import { DailyAnalysisLog } from "./DailyAnalysisLog"; // Pastikan path ini benar
+import { DailyAnalysisLog } from "./DailyAnalysisLog";
 import { EnergyDistributionChart } from "./EnergyDistributionChart";
 import { ClassificationSummaryChart } from "./ClassificationSummaryChart";
+import { FuelStockChart } from "./FuelStockChart";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { TemperatureStatCard } from "./TemperatureStatCard";
 import { summaryApi } from "@/services/summary.service";
 import React, { useMemo, useState } from "react";
 import { StatCardSkeleton } from "./statCardSkeleton";
 import { useRealtimeNotification } from "@/hooks/useRealtimeNotification";
 import { NotificationCard } from "./NotificationCard";
 
-// Konfigurasi terpusat untuk setiap tipe stat
 const statConfig = {
   Electricity: {
     icon: Zap,
@@ -37,7 +38,6 @@ const statConfig = {
 };
 
 export const Page = () => {
-  // Panggil hook untuk mengaktifkan notifikasi toast di latar belakang
   useRealtimeNotification();
 
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -56,7 +56,6 @@ export const Page = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Data untuk Pie Chart, diekstrak dari data summary yang sudah ada
   const energyDistributionData = useMemo(() => {
     return data?.data?.summary || [];
   }, [data]);
@@ -133,14 +132,14 @@ export const Page = () => {
       </motion.div>
 
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {isLoading
           ? Array.from({ length: 4 }).map((_, index) => (
-              <StatCardSkeleton key={index} />
+              <StatCardSkeleton key={`skeleton-${index}`} />
             ))
           : processedStats.map((stat) => (
               <motion.div
@@ -152,6 +151,17 @@ export const Page = () => {
                 <StatCard {...stat} />
               </motion.div>
             ))}
+        {/* Kartu Suhu Khusus */}
+        {!isLoading && data?.data && (
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <TemperatureStatCard data={data.data} />
+          </motion.div>
+        )}
+        {/* <FuelStockChart /> */}
         <ClassificationSummaryChart />
         {energyDistributionData.length > 0 && (
           <EnergyDistributionChart data={energyDistributionData} />
@@ -162,14 +172,14 @@ export const Page = () => {
       {/* PERUBAHAN UTAMA: DARI LAYOUT 2 KOLOM MENJADI "BENTO GRID"           */}
       {/* ================================================================== */}
       <motion.div
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6" // Menggunakan grid 3 kolom sebagai basis
+        className="grid grid-cols-1 lg:grid-cols-4 gap-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* Item 1: Grafik Utama, dibuat lebih besar */}
         <motion.div
-          className="lg:col-span-2 flex-col flex gap-2  "
+          className="lg:col-span-4 grid lg:grid-cols-2  gap-2  "
           variants={itemVariants}
         >
           <AnalysisChart typeEnergy="Electricity" />
@@ -177,7 +187,7 @@ export const Page = () => {
         </motion.div>
 
         {/* Item 2: Analisis ML */}
-        <motion.div variants={itemVariants} className="flex flex-col gap-2">
+        <motion.div variants={itemVariants} className="flex flex-col gap-1">
           <DailyAnalysisLog />
           {/* 2. Tampilkan Pie Chart jika data tersedia */}
 

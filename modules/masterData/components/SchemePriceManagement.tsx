@@ -118,7 +118,7 @@ const priceSchemeSchema = z.object({
           .number()
           .int()
           .positive("Jenis pembacaan wajib dipilih."),
-        value: z.coerce.number().positive("Nilai tarif harus positif."),
+        value: z.coerce.number(),
       })
     )
     .min(1, "Minimal harus ada satu tarif.")
@@ -467,16 +467,16 @@ export const createPriceSchemeColumns = (
       if (!taxes || taxes.length === 0) return "-";
       return (
         <div className="flex flex-col flex-wrap gap-1">
-          {taxes.map((item) => (
-            <Badge key={item.tax.tax_id} variant="outline">
-              {item.tax.tax_name} (
-              {new Intl.NumberFormat("id-ID", {
-                style: "percent",
-                minimumFractionDigits: 0,
-              }).format(parseFloat(item.tax.rate))}
-              )
-            </Badge>
-          ))}
+            {taxes.map((item) => (
+              <Badge key={item.tax.tax_id} variant="outline">
+                {item.tax.tax_name} (
+                {new Intl.NumberFormat("id-ID", {
+                  style: "percent",
+                  minimumFractionDigits: 0,
+                }).format(parseFloat(item.tax.rate))}
+                )
+              </Badge>
+            ))}
         </div>
       );
     },

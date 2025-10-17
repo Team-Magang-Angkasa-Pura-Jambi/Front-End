@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   LogOut,
   Users,
+  Wallet,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useMemo, useState } from "react";
@@ -84,6 +85,12 @@ const allLinks = [
     href: "/user-management",
     icon: <Users className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin],
+  },
+  {
+    label: "Anggaran",
+    href: "/budget",
+    icon: <Wallet className="h-5 w-5 shrink-0" />,
+    allowedRoles: [Role.SuperAdmin, Role.Admin],
   },
 ];
 

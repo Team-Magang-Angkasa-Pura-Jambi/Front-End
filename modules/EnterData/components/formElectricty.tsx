@@ -272,15 +272,15 @@ export const FormReadingElectric = ({
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) => {
-                        const lastDate =
-                          lastReadingQueries[0]?.data?.data?.session
-                            ?.reading_date;
-                        return (
-                          date > new Date() ||
-                          (lastDate ? date <= new Date(lastDate) : false)
-                        );
-                      }}
+                      // disabled={(date) => {
+                      //   const lastDate =
+                      //     lastReadingQueries[0]?.data?.data?.session
+                      //       ?.reading_date;
+                      //   return (
+                      //     date > new Date() ||
+                      //     (lastDate ? date <= new Date(lastDate) : false)
+                      //   );
+                      // }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -303,7 +303,6 @@ export const FormReadingElectric = ({
             const lastReadingQuery = lastReadingQueries[index];
             const lastReadingValue = lastReadingQuery?.data?.data?.value;
 
-            console.log(lastReadingValue);
 
             return (
               <div

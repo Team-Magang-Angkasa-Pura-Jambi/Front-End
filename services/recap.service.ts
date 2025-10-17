@@ -22,6 +22,10 @@ export interface RecapRecord {
   target: number | null;
   pax: number | null;
   cost: number | null;
+  max_temp: number | null;
+  avg_temp: number | null;
+  is_workday: boolean | null;
+  classification: "HEMAT" | "NORMAL" | "BOROS" | null;
 }
 /**
  * Mengambil data rekap historis dari API backend.

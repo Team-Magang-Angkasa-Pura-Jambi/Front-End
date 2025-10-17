@@ -30,6 +30,39 @@ interface ClassificationSummaryResponse {
   }[];
 }
 
+interface FuelStockRecord {
+  meter_id: number;
+  meter_code: string;
+  tank_volume_liters: number;
+  latest_stock_liters: number;
+  latest_stock_date: string;
+  percentage: number;
+}
+
+interface FuelStockAnalysisResponse {
+  success: boolean;
+  message: string;
+  data: FuelStockRecord[];
+  meta: {
+    year: number;
+    month: number;
+  };
+}
+export type BudgetSummaryByEnergy = {
+  energyTypeId: number;
+  energyTypeName: string;
+  budgetThisYear: number;
+  currentPeriod: {
+    budgetId: number;
+    periodStart: string; // ISO Date String
+    periodEnd: string; // ISO Date String
+    totalBudget: number;
+    totalRealization: number;
+    remainingBudget: number;
+    realizationPercentage: number | null;
+  } | null;
+};
+
 export const analysisApi = async (
   type: "Electricity" | "Water" | "Fuel",
   mount: string,
@@ -53,4 +86,33 @@ export const getClassificationSummaryApi = async (
     `/analysis/classification-summary?month=${monthQuery}&energyType=${energyType}&meterId=${meterId}`
   );
   return response.data;
+};
+
+export const getFuelStockAnalysisApi = async (
+  year: string,
+  month: string
+): Promise<FuelStockAnalysisResponse> => {
+  const monthQuery = `${year}-${month}`;
+  const response = await api.get(`/analysis/fuel-stock?month=${monthQuery}`);
+  return response.data;
+};
+
+export const getBudgetSummaryApi = async (): Promise<
+  BudgetSummaryByEnergy[]
+> => {
+  const response = await api.get("/analysis/budget-summary");
+  return response.data.data;
+};
+
+export type prepareNextPeriodBudget = {
+  parentBudgetId: number;
+  parentTotalBudget: number;
+  totalAllocatedToChildren: number;
+  availableBudgetForNextPeriod: number;
+};
+export const getprepareNextPeriodBudgetApi = async (
+  parentBudgetId: number
+): Promise<prepareNextPeriodBudget> => {
+  const response = await api.get(`/analysis/prepare-budget/${parentBudgetId}`);
+  return response.data.data;
 };

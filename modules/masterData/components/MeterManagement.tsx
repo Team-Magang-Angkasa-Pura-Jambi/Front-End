@@ -1,5 +1,6 @@
 import { Loader2, MoreHorizontal, PlusCircle } from "lucide-react";
 import React, { useState } from "react";
+import { Switch } from "@/components/ui/switch";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,6 +45,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -84,6 +86,10 @@ export type MeterType = {
     faktor_kali: number;
   };
   energy_type: EnergyType;
+  tank_height_cm?: number | null;
+  tank_volume_liters?: number | null;
+  rollover_limit?: number | null;
+  has_rollover?: boolean;
 };
 
 // Skema validasi Zod untuk form meter
@@ -93,7 +99,39 @@ const meterSchema = z.object({
   category_id: z.coerce.number().min(1, "Kategori wajib dipilih."),
   tariff_group_id: z.coerce.number().min(1, "Golongan tarif wajib dipilih."),
   energy_type_id: z.coerce.number().min(1, "Jenis energi wajib dipilih."),
+  tank_height_cm: z.coerce.number().nullable().optional(),
+  tank_volume_liters: z.coerce.number().nullable().optional(),
+  has_rollover: z.boolean().default(false),
+  rollover_limit: z.coerce
+    .number()
+    .positive("Batas Rollover harus angka positif.")
+    .nullable()
+    .optional(),
 });
+
+const refinedMeterSchema = (energyTypes: EnergyType[]) => {
+  return meterSchema
+    .refine(
+      (data) => {
+        const fuelEnergyType = energyTypes.find(
+          (et) => et.type_name.toLowerCase() === "fuel"
+        );
+        if (data.energy_type_id === fuelEnergyType?.energy_type_id) {
+          return data.tank_height_cm != null && data.tank_volume_liters != null;
+        }
+        return true;
+      },
+      {
+        message:
+          "Tinggi dan Volume Tangki wajib diisi untuk jenis energi Fuel.",
+        path: ["tank_height_cm"],
+      }
+    )
+    .refine((data) => !data.has_rollover || data.rollover_limit != null, {
+      message: "Batas Rollover wajib diisi jika diaktifkan.",
+      path: ["rollover_limit"],
+    });
+};
 
 export const MeterForm = ({
   initialData,
@@ -104,8 +142,17 @@ export const MeterForm = ({
   onSubmit: (values: z.infer<typeof meterSchema>) => void;
   isLoading?: boolean;
 }) => {
+  const { data: energyTypesResponse, isLoading: isLoadingEnergyTypes } =
+    useQuery({
+      queryKey: ["energyTypes"],
+      queryFn: () => getEnergyTypesApi(),
+    });
+
+  const energyTypes = energyTypesResponse?.data || [];
+  const currentSchema = refinedMeterSchema(energyTypes);
+
   const form = useForm<z.infer<typeof meterSchema>>({
-    resolver: zodResolver(meterSchema),
+    resolver: zodResolver(currentSchema),
     defaultValues: initialData
       ? {
           meter_code: initialData.meter_code,
@@ -113,20 +160,20 @@ export const MeterForm = ({
           category_id: initialData.category_id,
           tariff_group_id: initialData.tariff_group_id,
           energy_type_id: initialData.energy_type_id,
+          tank_height_cm: initialData.tank_height_cm,
+          tank_volume_liters: initialData.tank_volume_liters,
+          has_rollover: !!initialData.rollover_limit,
+          rollover_limit: initialData.rollover_limit,
         }
       : {
           meter_code: "",
           status: "Active",
           category_id: undefined,
           tariff_group_id: undefined,
+          has_rollover: false,
         },
   });
 
-  const { data: energyTypesResponse, isLoading: isLoadingEnergyTypes } =
-    useQuery({
-      queryKey: ["energyTypes"],
-      queryFn: () => getEnergyTypesApi(),
-    });
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
     {
       queryKey: ["meterCategories"],
@@ -138,6 +185,21 @@ export const MeterForm = ({
       queryKey: ["tariffGroups"],
       queryFn: getTariffGroupsApi,
     });
+
+  const watchedEnergyTypeId = form.watch("energy_type_id");
+  const selectedEnergyType = energyTypes.find(
+    (et: EnergyType) => et.energy_type_id === watchedEnergyTypeId
+  );
+  const isFuelType = selectedEnergyType?.type_name.toLowerCase() === "fuel";
+  const isRolloverType =
+    selectedEnergyType?.type_name.toLowerCase() === "electricity" ||
+    selectedEnergyType?.type_name.toLowerCase() === "water";
+
+  const hasRollover = form.watch("has_rollover");
+
+  React.useEffect(() => {
+    if (!hasRollover) form.setValue("rollover_limit", null);
+  }, [hasRollover, form]);
 
   return (
     <Form {...form}>
@@ -291,6 +353,91 @@ export const MeterForm = ({
               </FormItem>
             )}
           />
+          {isFuelType && (
+            <>
+              <FormField
+                control={form.control}
+                name="tank_height_cm"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tinggi Tangki (cm)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Tinggi tangki dalam cm"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tank_volume_liters"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Volume Tangki (L)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Volume tangki dalam liter"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+          {isRolloverType && (
+            <div className="md:col-span-2 space-y-4">
+              <FormField
+                control={form.control}
+                name="has_rollover"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel>Aktifkan Batas Rollover</FormLabel>
+                      <FormDescription>
+                        Aktifkan jika meteran ini memiliki batas angka dan akan
+                        kembali ke 0.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              {hasRollover && (
+                <FormField
+                  control={form.control}
+                  name="rollover_limit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Batas Angka Rollover</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="Contoh: 999999"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+          )}
         </div>
 
         <DialogFooter>
@@ -310,8 +457,37 @@ export const createMeterColumns = (
   { accessorKey: "meter_code", header: "Kode Meter" },
   { accessorKey: "category.name", header: "Lokasi" },
   { accessorKey: "energy_type.type_name", header: "Energi" },
-  { accessorKey: "tariff_group.group_code", header: "Golongan" },
-  { accessorKey: "tariff_group.faktor_kali", header: "Faktor Kali" },
+  {
+    header: "Keterangan",
+    cell: ({ row }) => {
+      const { tariff_group } = row.original;
+      const { tank_height_cm } = row.original;
+      const { tank_volume_liters } = row.original;
+      const { rollover_limit } = row.original;
+      const isFuel =
+        row.original.energy_type.type_name.toLowerCase() === "fuel";
+      if (!tariff_group) return "-";
+      return (
+        <div className="flex flex-col items-start gap-1">
+          <Badge variant="outline">Gol: {tariff_group.group_code}</Badge>
+          <Badge variant="secondary">
+            Faktor Kali: x{tariff_group.faktor_kali}
+          </Badge>
+          {isFuel && tank_height_cm && tank_volume_liters ? (
+            <>
+              <Badge variant="secondary">Tinggi: {tank_height_cm} cm,</Badge>
+              <Badge variant="secondary">Volume: {tank_volume_liters} L</Badge>
+            </>
+          ) : null}
+          {rollover_limit && (
+            <Badge variant="info" className="bg-sky-100 text-sky-800">
+              Rollover: {new Intl.NumberFormat("id-ID").format(rollover_limit)}
+            </Badge>
+          )}
+        </div>
+      );
+    },
+  },
   {
     accessorKey: "status",
     header: "Status",

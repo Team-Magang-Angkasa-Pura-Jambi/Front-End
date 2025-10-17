@@ -1,7 +1,23 @@
 "use client";
 
 import { Column, ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import {
+  ArrowUpDown,
+  Briefcase,
+  Calendar,
+  DollarSign,
+  Droplets,
+  Flame,
+  Fuel,
+  Home,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Thermometer,
+  Users,
+  Zap,
+} from "lucide-react";
+import { Minus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { RecapDataRow } from "../type"; // Ganti 'RecapRecord' ke 'RecapDataRow' agar konsisten
@@ -18,12 +34,14 @@ const formatCurrency = (amount: unknown): string => {
   if (amount === null || amount === undefined || isNaN(num)) {
     return "-";
   }
-  return new Intl.NumberFormat("id-ID", {
+  const formatted = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(num);
+  // Menghilangkan spasi antara 'Rp' dan angka
+  return formatted.replace(/\s/g, "");
 };
 
 /**
@@ -62,9 +80,6 @@ const SortableHeader = ({
   </Button>
 );
 
-/**
- * Komponen untuk menampilkan badge klasifikasi pemakaian.
- */
 const ClassificationBadge = ({
   classification,
 }: {
@@ -85,7 +100,11 @@ const ClassificationBadge = ({
     BOROS: "destructive",
   };
 
-  return <Badge className="w-20" variant={variantMap[classification]}>{classification}</Badge>;
+  return (
+    <Badge className="w-20" variant={variantMap[classification]}>
+      {classification}
+    </Badge>
+  );
 };
 /**
  * Membuat definisi kolom untuk tabel rekap berdasarkan jenis data.
@@ -108,9 +127,16 @@ export const createColumns = (
         // Ambil hanya bagian tanggal (YYYY-MM-DD) untuk menghindari masalah zona waktu
         const dateOnlyString = new Date(dateValue).toISOString().split("T")[0];
         // Buat objek Date baru dari string tanggal tersebut, ditambah 'T00:00:00' untuk memastikan diperlakukan sebagai awal hari di UTC
-        return format(new Date(`${dateOnlyString}T00:00:00`), "dd MMM yyyy", {
-          locale: id,
-        });
+        return (
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span>
+              {format(new Date(`${dateOnlyString}T00:00:00`), "dd MMM yyyy", {
+                locale: id,
+              })}
+            </span>
+          </div>
+        );
       },
     },
   ];
@@ -125,21 +151,36 @@ export const createColumns = (
           header: ({ column }) => (
             <SortableHeader column={column} title="Target (kWh)" />
           ),
-          cell: ({ row }) => formatNumber(row.getValue("target")),
+          cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-muted-foreground" />
+              <span>{formatNumber(row.getValue("target"))}</span>
+            </div>
+          ),
         },
         {
           accessorKey: "wbp",
           header: ({ column }) => (
             <SortableHeader column={column} title="WBP (kWh)" />
           ),
-          cell: ({ row }) => formatNumber(row.getValue("wbp")),
+          cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-muted-foreground" />
+              <span>{formatNumber(row.getValue("wbp"))}</span>
+            </div>
+          ),
         },
         {
           accessorKey: "lwbp",
           header: ({ column }) => (
             <SortableHeader column={column} title="LWBP (kWh)" />
           ),
-          cell: ({ row }) => formatNumber(row.getValue("lwbp")),
+          cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-muted-foreground" />
+              <span>{formatNumber(row.getValue("lwbp"))}</span>
+            </div>
+          ),
         },
         {
           // **FIX**: Menggunakan 'consumption' yang sudah dihitung di service
@@ -155,7 +196,111 @@ export const createColumns = (
           header: ({ column }) => (
             <SortableHeader column={column} title="Pax" />
           ),
-          cell: ({ row }) => formatNumber(row.getValue("pax")),
+          cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span>{formatNumber(row.getValue("pax"))}</span>
+            </div>
+          ),
+        },
+        {
+          accessorKey: "avg_temp",
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Suhu (°C)" />
+          ),
+          cell: ({ row }) => {
+            const avgTemp = row.getValue("avg_temp") as number;
+            const maxTemp = row.original.max_temp; // <-- PERBAIKAN: Gunakan row.original
+            const isHotMaxTemp = maxTemp > 30;
+            const isHotAvgTemp = avgTemp > 30;
+
+            return (
+              <div className="flex flex-col gap-2 ">
+                <Badge variant={isHotAvgTemp ? "destructive" : "secondary"}>
+                  <div className="flex items-center gap-1.5">
+                    {isHotAvgTemp ? (
+                      <Flame className="h-4 w-4" />
+                    ) : (
+                      <Thermometer className="h-4 w-4" />
+                    )}
+                    <span>{formatNumber(avgTemp)}</span>
+                  </div>
+                </Badge>
+                <Badge variant={isHotMaxTemp ? "destructive" : "secondary"}>
+                  <div className="flex items-center gap-1.5">
+                    {isHotMaxTemp ? (
+                      <Flame className="h-4 w-4" />
+                    ) : (
+                      <Thermometer className="h-4 w-4" />
+                    )}
+                    <span>{formatNumber(maxTemp)}</span>
+                  </div>
+                </Badge>
+              </div>
+            );
+          },
+        },
+        {
+          accessorKey: "is_workday",
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Hari Kerja" />
+          ),
+          cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+              {row.getValue("is_workday") ? (
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <Home className="h-4 w-4 text-muted-foreground" />
+              )}
+              <span>{row.getValue("is_workday") ? "Hari Kerja" : "Libur"}</span>
+            </div>
+          ),
+        },
+        {
+          accessorKey: "classification",
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Nilai Deviasi" />
+          ),
+          cell: ({ row }) => {
+            const classification = row.original.classification;
+            const score = row.original.confidence_score;
+
+            if (
+              !classification ||
+              classification === "UNKNOWN" ||
+              score == null
+            ) {
+              return (
+                <span className="text-muted-foreground text-center">-</span>
+              );
+            }
+
+            const styleMap = {
+              HEMAT: "text-green-600 dark:text-green-500",
+              NORMAL: "text-slate-600 dark:text-slate-400",
+              BOROS: "text-red-600 dark:text-red-500",
+            } as const;
+
+            const iconMap = {
+              HEMAT: <TrendingDown className="h-3.5 w-3.5" />,
+              NORMAL: <Minus className="h-3.5 w-3.5" />,
+              BOROS: <TrendingUp className="h-3.5 w-3.5" />,
+            };
+
+            return (
+              <div className="flex flex-col items-center justify-center gap-1.5 text-center">
+                <ClassificationBadge classification={classification} />
+                <div
+                  className={`flex items-center gap-1 text-xs font-mono ${styleMap[classification]}`}
+                >
+                  {iconMap[classification]}
+                  <span className="font-semibold">{`${score.toFixed(
+                    1
+                  )}%`}</span>
+                </div>
+              </div>
+            );
+          },
         },
       ];
       break;
@@ -170,9 +315,15 @@ export const createColumns = (
           ),
           cell: ({ row }) => {
             const amount = row.getValue("target");
-            if (amount === null || amount === undefined) return "-";
             const unit = dataType === "Water" ? "m³" : "L";
-            return `${formatNumber(amount)} ${unit}`;
+            return (
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-muted-foreground" />
+                <span>
+                  {formatNumber(amount)} {unit}
+                </span>
+              </div>
+            );
           },
         },
         {
@@ -182,9 +333,16 @@ export const createColumns = (
           ),
           cell: ({ row }) => {
             const amount = row.getValue("consumption");
-            if (amount === null || amount === undefined) return "-";
             const unit = dataType === "Water" ? "m³" : "L";
-            return `${formatNumber(amount)} ${unit}`;
+            const Icon = dataType === "Water" ? Droplets : Fuel;
+            return (
+              <div className="flex items-center gap-2">
+                <Icon className="h-4 w-4 text-muted-foreground" />
+                <span>
+                  {formatNumber(amount)} {unit}
+                </span>
+              </div>
+            );
           },
         },
         // **BARU**: Menambahkan kolom Target dan Pax untuk Air & BBM
@@ -195,18 +353,14 @@ export const createColumns = (
   // Kolom yang selalu ada di akhir
   const commonEndColumns: ColumnDef<RecapDataRow>[] = [
     {
-      accessorKey: "classification",
-      header: ({ column }) => (
-        <SortableHeader column={column} title="Klasifikasi" />
-      ),
-      cell: ({ row }) => (
-        <ClassificationBadge classification={row.getValue("classification")} />
-      ),
-    },
-    {
       accessorKey: "cost",
       header: ({ column }) => <SortableHeader column={column} title="Biaya" />,
-      cell: ({ row }) => formatCurrency(row.getValue("cost")),
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2 font-medium">
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <span>{formatCurrency(row.getValue("cost"))}</span>
+        </div>
+      ),
     },
   ];
 

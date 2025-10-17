@@ -297,11 +297,11 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                         className={`w-full justify-start text-left font-normal ${
                           !field.value && "text-muted-foreground"
                         }`}
-                        disabled={
-                          !canChangeDate ||
-                          !selectedMeterId ||
-                          !detailsValues[0]?.reading_type_id
-                        }
+                        // disabled={
+                        //   !canChangeDate ||
+                        //   !selectedMeterId ||
+                        //   !detailsValues[0]?.reading_type_id
+                        // }
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {field.value ? (
@@ -317,24 +317,24 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) => {
-                        var _a, _b, _c;
-                        const lastDate =
-                          (_c =
-                            (_b =
-                              (_a = lastReadingsQueries[0]) === null ||
-                              _a === void 0
-                                ? void 0
-                                : _a.data) === null || _b === void 0
-                              ? void 0
-                              : _b.data) === null || _c === void 0
-                            ? void 0
-                            : _c.session?.reading_date;
-                        return (
-                          date > new Date() ||
-                          (lastDate ? date <= new Date(lastDate) : false)
-                        );
-                      }}
+                      // disabled={(date) => {
+                      //   var _a, _b, _c;
+                      //   const lastDate =
+                      //     (_c =
+                      //       (_b =
+                      //         (_a = lastReadingsQueries[0]) === null ||
+                      //         _a === void 0
+                      //           ? void 0
+                      //           : _a.data) === null || _b === void 0
+                      //         ? void 0
+                      //         : _b.data) === null || _c === void 0
+                      //       ? void 0
+                      //       : _c.session?.reading_date;
+                      //   return (
+                      //     date > new Date() ||
+                      //     (lastDate ? date <= new Date(lastDate) : false)
+                      //   );
+                      // }}
                       initialFocus
                     />
                   </PopoverContent>

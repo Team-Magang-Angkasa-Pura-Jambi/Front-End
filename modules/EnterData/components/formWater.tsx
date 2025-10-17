@@ -158,7 +158,7 @@ export const FormReadingWater = ({
         queryKey: [
           "lastReading",
           selectedMeterId,
-          detail.reading_type_id,
+          detail.reading_type_id,  
           readingDate,
         ],
         queryFn: () =>

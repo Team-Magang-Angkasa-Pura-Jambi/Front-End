@@ -88,7 +88,11 @@ export const Page = () => {
       setItemToDelete(null); // Menutup dialog konfirmasi
     },
     onError: (error: any) => {
-      toast.error(`Gagal menghapus: ${error.message || "Terjadi kesalahan"}`);
+      toast.error(
+        `Gagal menghapus: ${
+          error.response?.data?.status?.message || "Terjadi kesalahan"
+        }`
+      );
     },
   });
 
@@ -166,7 +170,7 @@ export const Page = () => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Tabel Riwayat Pencatat an</CardTitle>
+              <CardTitle>Tabel Riwayat Pencatatan</CardTitle>
               <CardDescription>
                 Menampilkan semua data pencatatan meteran sesuai filter.
               </CardDescription>

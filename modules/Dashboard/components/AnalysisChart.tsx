@@ -117,7 +117,7 @@ export const AnalysisChart = ({
     "";
 
   return (
-    <Card className="col-span-2">
+    <Card className="col-span-1">
       <CardHeader>
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <CardTitle>
