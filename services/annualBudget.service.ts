@@ -25,7 +25,7 @@ export const annualBudgetApi = {
     id: string,
     data: AnnualBudgetFormValues
   ): Promise<ApiResponse<AnnualBudget>> => {
-    const response = await api.put(`/annual-budgets/${id}`, data);
+    const response = await api.patch(`/annual-budgets/${id}`, data);
     return response.data;
   },
 
