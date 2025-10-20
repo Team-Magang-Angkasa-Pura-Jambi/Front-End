@@ -116,3 +116,73 @@ export const getprepareNextPeriodBudgetApi = async (
   const response = await api.get(`/analysis/prepare-budget/${parentBudgetId}`);
   return response.data.data;
 };
+
+export const runSinglePredictionApi = async (payload: {
+  date: string;
+  meterId: number;
+}) => {
+  const response = await api.post("/analysis/run-single-prediction", payload);
+  return response.data;
+};
+export const runSingleClassificationApi = async (payload: {
+  date: string;
+  meterId: number;
+}) => {
+  const response = await api.post(
+    "/analysis/run-single-classification",
+    payload
+  );
+  return response.data;
+};
+
+export interface EfficiencyTargetPreviewPayload {
+  meter_id: number;
+  target_value: number; // Sesuai dengan form
+  period_start: string; // Format YYYY-MM-DD
+  period_end: string; // Format YYYY-MM-DD
+}
+
+export interface EfficiencyTargetPreviewResponse {
+  input: any;
+  budget: {
+    budgetId: number;
+    budgetPeriodStart: string;
+    budgetPeriodEnd: string;
+    meterAllocationWeight: number;
+    allocatedBudgetForMeter: number;
+    realizationToDate: number;
+    remainingBudget: number;
+  } | null;
+  calculation: {
+    avgPricePerUnit: number;
+    totalDays: number;
+    unitOfMeasurement: string;
+  };
+  preview: {
+    totalTargetConsumption: number;
+    dailyTargetConsumption: number;
+    estimatedTotalCost: number;
+  };
+  suggestion: {
+    standard: {
+      message: string;
+      suggestedDailyKwh: number;
+      suggestedTotalKwh: number;
+    } | null;
+    efficiency: {
+      message: string;
+      suggestedDailyKwh: number;
+      suggestedTotalKwh: number;
+    } | null;
+  } | null;
+}
+
+export const getEfficiencyTargetPreviewApi = async (
+  payload: EfficiencyTargetPreviewPayload
+): Promise<EfficiencyTargetPreviewResponse> => {
+  const response = await api.post(
+    "/analysis/efficiency-target-preview",
+    payload
+  );
+  return response.data.data;
+};

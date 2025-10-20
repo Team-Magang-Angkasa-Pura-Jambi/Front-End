@@ -1,7 +1,7 @@
 "use client";
 
 import { Column, ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Users } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -110,6 +110,7 @@ export const createColumns = (
         );
       },
     },
+    // Kolom Pax dihapus dari sini
     {
       id: "actions",
       header: "",

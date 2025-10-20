@@ -64,6 +64,11 @@ const formSchema = z.object({
     .number({ error: "Meteran wajib dipilih." })
     .min(1, "Meteran wajib dipilih."),
   reading_date: z.date({ error: "Tanggal pembacaan wajib diisi." }),
+  // BARU: Menambahkan validasi untuk pax, opsional dan bisa null
+  pax: z.coerce
+    .number({ error: "Pax harus berupa angka." })
+    .nullable()
+    .optional(),
   details: z
     .array(detailSchema)
     .min(1, "Minimal harus ada satu detail pembacaan."),
@@ -130,6 +135,7 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
       form.reset({
         meter_id: initialData.meter.meter_id,
         reading_date: new Date(initialData.reading_date),
+        pax: initialData.pax ?? null, // Mengisi data pax jika ada
         // PERBAIKAN: Pastikan `value` di-map sebagai `null` jika tidak ada.
         details: initialData.details.map((d) => ({
           reading_type_id: d.reading_type_id,
@@ -141,6 +147,7 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
       form.reset({
         meter_id: undefined,
         reading_date: new Date(),
+        pax: null, // Atur pax ke null untuk form baru
         details: [],
       });
     }

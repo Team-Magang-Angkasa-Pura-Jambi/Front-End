@@ -39,8 +39,8 @@ const StatItem = ({
 
   return (
     <div>
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className="font-bold text-gray-800">
+      <p className="text-xs">{label}</p>
+      <p className="font-bold ">
         {value}
         <span className="text-sm font-normal text-gray-600">{unit}</span>
       </p>
@@ -79,9 +79,9 @@ export const TemperatureStatCard = ({ data }) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-2xl shadow-sm flex flex-col h-full">
+    <div className="bg-card p-5 rounded-2xl shadow-sm flex flex-col h-full">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-gray-800">Suhu & Cuaca</p>
+        <p className="text-sm font-semibold ">Suhu & Cuaca</p>
         <div className="p-3 rounded-full bg-red-500">
           <Thermometer className="w-6 h-6 text-white" />
         </div>

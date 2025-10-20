@@ -21,6 +21,7 @@ export type ProcessBudgetPayload = {
 };
 
 export type BudgetPreviewPayload = {
+  parent_budget_id?: number | null;
   total_budget: number;
   period_start: string;
   period_end: string;
@@ -41,6 +42,14 @@ export type BudgetPreviewResponse = {
     "realizationCost" | "remainingBudget" | "realizationPercentage"
   >[];
   meterAllocationPreview: MeterAllocationPreview[];
+  calculationDetails: {
+    parentTotalBudget: number;
+    efficiencyBudget: number;
+    realizationToDate: number;
+    remainingBudgetForPeriod: number;
+    budgetPerMonth: number;
+    suggestedBudgetForPeriod: number;
+  } | null;
 };
 
 export const budgetApi = {

@@ -166,6 +166,7 @@ export const Page = () => {
         {energyDistributionData.length > 0 && (
           <EnergyDistributionChart data={energyDistributionData} />
         )}
+        <DailyAnalysisLog />
       </motion.div>
 
       {/* ================================================================== */}
@@ -187,12 +188,10 @@ export const Page = () => {
         </motion.div>
 
         {/* Item 2: Analisis ML */}
-        <motion.div variants={itemVariants} className="flex flex-col gap-1">
-          <DailyAnalysisLog />
-          {/* 2. Tampilkan Pie Chart jika data tersedia */}
-
-          {/* <ActivityLog /> */}
-        </motion.div>
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col gap-1"
+        ></motion.div>
       </motion.div>
     </main>
   );

@@ -39,10 +39,10 @@ export const StatCard = ({
   }
 
   return (
-    <div className="bg-white p-5 rounded-2xl shadow-sm flex items-center justify-between h-full">
+    <div className="bg-card text-card-foreground p-5 rounded-2xl shadow-sm flex items-center justify-between h-full">
       <div>
-        <p className="text-gray-500 text-sm">{label}</p>
-        <p className="text-2xl font-bold text-gray-800">
+        <p className="text-muted-foreground text-sm">{label}</p>
+        <p className="text-2xl font-bold text-foreground">
           {value} {unit}
         </p>
         {/* Tambahkan bagian untuk menampilkan persentase perubahan */}

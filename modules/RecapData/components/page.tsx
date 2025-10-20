@@ -43,16 +43,34 @@ export const Page = () => {
       getRecapDataApi({
         type,
         // Non-null assertion (!) aman di sini karena ada `enabled`
-        startDate: date!.from!.toISOString(),
-        endDate: date!.to!.toISOString(),
+        startDate: date?.from
+          ? new Date(
+              Date.UTC(
+                date.from.getFullYear(),
+                date.from.getMonth(),
+                date.from.getDate()
+              )
+            ).toISOString()
+          : new Date().toISOString(),
+        endDate: date?.from
+          ? new Date(
+              Date.UTC(
+                date.to.getFullYear(),
+                date.to.getMonth(),
+                date.to.getDate()
+              )
+            ).toISOString()
+          : new Date().toISOString(),
         sortBy,
         meterId,
       }),
     // Query hanya akan berjalan jika tanggal sudah terisi
     enabled: !!date?.from && !!date?.to,
+    // Mencegah query berjalan otomatis saat window/tab kembali fokus
+    refetchOnWindowFocus: false,
   });
 
-  const columns = useMemo(() => createColumns(type), [type]);
+  const columns = useMemo(() => createColumns(type, meterId), [meterId, type]);
 
   const renderContent = () => {
     if (isLoading) {

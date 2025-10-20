@@ -1,31 +1,100 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect } from "react";
+import {
+  motion,
+  useAnimationFrame,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+import { useMouse } from "@uidotdev/usehooks";
 
-// Komponen untuk ilustrasi di sisi kanan (TIDAK BERUBAH)
+const springConfig = {
+  damping: 40,
+  stiffness: 200,
+  mass: 2,
+};
 
-// Komponen gelembung (bubble)
 export const Bubble = ({ size, style, delay }) => {
-  // Menghasilkan nilai random untuk gerakan horizontal
-  const randomX = (Math.random() - 0.5) * 60; // Gerakan horizontal antara -30px dan +30px
+  // 1. Ubah `useMouse` untuk melacak seluruh viewport (hapus 'ref')
+  // Ini penting agar logika paralaks [0, window.innerWidth] berfungsi
+  const [mouse] = useMouse();
+
+  // 2. Buat MotionValues untuk menjembatani 'mouse' (state React) 
+  //    dengan 'framer-motion'
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // 3. Gunakan 'useEffect' HANYA untuk memperbarui MotionValues
+  //    Ini adalah cara yang benar untuk menyinkronkan state non-motion
+  useEffect(() => {
+    // Tangani nilai 'null' jika mouse berada di luar jendela
+    mouseX.set(mouse.x ?? 0);
+    mouseY.set(mouse.y ?? 0);
+    // Kita hanya perlu menjalankan ini ketika 'mouse.x' atau 'mouse.y' berubah
+  }, [mouse.x, mouse.y, mouseX, mouseY]);
+
+  // 4. Definisikan SEMUA hook di top-level
+  
+  // --- Efek Mengambang (Floating) ---
+  const time = useMotionValue(delay * 1000);
+  useAnimationFrame((t) => {
+    time.set(t + delay * 1000);
+  });
+
+  const floatingX = useTransform(
+    time,
+    (t) => Math.sin(t / 2000) * (size / 4)
+  );
+  const floatingY = useTransform(
+    time,
+    (t) => Math.cos(t / 1500) * (size / 4)
+  );
+
+  // --- Efek Paralaks (Parallax) ---
+  const parallaxX = useTransform(
+    mouseX, // Gunakan MotionValue, bukan 'mouse.x'
+    [0, typeof window !== "undefined" ? window.innerWidth : 1000],
+    [-size / 8, size / 8]
+  );
+  const parallaxY = useTransform(
+    mouseY, // Gunakan MotionValue, bukan 'mouse.y'
+    [0, typeof window !== "undefined" ? window.innerHeight : 1000],
+    [-size / 8, size / 8]
+  );
+
+  // --- Kombinasi ---
+  // Gabungkan kedua transformasi secara deklaratif
+  const combinedX = useTransform(
+    [floatingX, parallaxX],
+    ([latestFloating, latestParallax]) => latestFloating + latestParallax
+  );
+  const combinedY = useTransform(
+    [floatingY, parallaxY],
+    ([latestFloating, latestParallax]) => latestFloating + latestParallax
+  );
+
+  // 5. Buat 'useSpring' melacak MotionValue gabungan
+  //    Ini akan secara otomatis menerapkan fisika spring setiap kali
+  //    'combinedX' atau 'combinedY' berubah.
+  const x = useSpring(combinedX, springConfig);
+  const y = useSpring(combinedY, springConfig);
 
   return (
     <motion.div
-      className="absolute rounded-full bg-white/10 border border-white/20 backdrop-blur-sm"
-      style={{ width: size, height: size, ...style }}
-      initial={{ opacity: 0, scale: 0.5, y: 20 }}
-      animate={{
-        opacity: [0, 1, 1, 0],
-        scale: 1,
-        y: -120, // Bergerak lebih jauh ke atas
-        x: [0, randomX / 2, randomX], // Menambahkan gerakan menyamping yang random
+      // 6. Hapus 'ref' karena sudah tidak digunakan oleh useMouse
+      className="absolute rounded-full bg-white/10 border border-white/20 backdrop-blur-sm transition-transform duration-300 ease-out"
+      style={{
+        width: size,
+        height: size,
+        ...style,
+        x, // Terapkan spring
+        y, // Terapkan spring
+        willChange: "transform",
       }}
-      transition={{
-        duration: 5 + Math.random() * 6, // Durasi lebih bervariasi
-        delay: delay,
-        ease: "easeOut",
-        repeat: Infinity,
-        repeatDelay: Math.random() * 4,
-      }}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.2 }}
+      transition={{ duration: 0.5, delay, type: "spring" }}
     />
   );
 };

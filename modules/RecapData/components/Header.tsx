@@ -85,6 +85,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
     queryKey: ["meters", filters.type],
     // 2. queryFn memanggil API dan langsung mengekstrak array-nya
     queryFn: () => getMetersApi(filters.type),
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

@@ -61,9 +61,11 @@ export const DailyAnalysisLog = () => {
     dayOptions.find((opt) => opt.offset === dayOffset)?.label || "Pilih Hari";
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm col-span-1">
+    <div className="bg-card p-6 rounded-2xl shadow-sm col-span-1">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-lg text-gray-800">Log Analisis Harian</h3>
+        <h3 className="font-bold text-lg text-foreground">
+          Log Analisis Harian
+        </h3>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="text-sm text-gray-500">
@@ -113,16 +115,18 @@ export const DailyAnalysisLog = () => {
                   <Icon className={`w-5 h-5 ${iconColor}`} />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-800 text-sm">
+                  <p className="font-semibold text-foreground text-sm">
                     {energy.label}: {isSavings ? "Penghematan" : "Pemborosan"}
                   </p>
-                  <p className="text-gray-600 text-sm">{log.summary_notes}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {log.summary_notes}
+                  </p>
                 </div>
               </div>
             );
           })
         ) : (
-          <p className="text-center text-gray-500 py-4 text-sm">
+          <p className="text-center text-muted-foreground py-4 text-sm">
             Tidak ada analisis untuk tanggal yang dipilih.
           </p>
         )}

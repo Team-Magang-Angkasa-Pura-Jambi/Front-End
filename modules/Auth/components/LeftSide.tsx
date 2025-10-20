@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useLogin } from "@/hooks/useLogin";
+import { Logo } from "@/common/layout/components/logo";
+import { LogoIcon } from "@/common/layout/components/LogoIcon";
+import Image from "next/image";
 
 // Animation variants for the container and its children
 const containerVariants = {
@@ -41,22 +44,77 @@ export const LeftSide = () => {
     performLogin({ username, password });
   };
 
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  };
+
+  // Varian untuk teks individual (jika ingin animasi per baris)
+  const textVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
   return (
     <motion.div
-      className="w-full md:w-[40%] p-8 sm:p-12 py-0 flex flex-col justify-center z-10"
+      className="w-full md:w-[40%] p- sm:p-12  py-0 flex flex-col  z-10"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       <motion.div
-        className="mb-5 text-center md:text-left"
-        variants={itemVariants}
+        className=" text-center md:text-left z-20" // Z-index agar di atas ilustrasi
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.1, // Setiap anak akan muncul dengan jeda 0.1 detik
+              delayChildren: 0.2, // Anak pertama akan mulai setelah 0.2 detik
+            },
+          },
+        }}
       >
-        <h1 className="text-2xl font-bold text-gray-800">Welcome To</h1>
-        <h2 className="text-4xl font-extrabold text-blue-600">SENTINEL</h2>
-        <p className="text-muted-foreground mt-2">
+        {/* Logo */}
+        <motion.div variants={textVariants} >
+          <Image
+            src={"/image/logo.png"}
+            alt="Company Logo"
+            width={150}
+            height={150}
+          />
+        </motion.div>
+
+        {/* Welcome To */}
+        <motion.h1
+          className="text-3xl font-bold text-gray-200" // Warna teks lebih terang untuk dark mode, ukuran lebih besar
+          variants={textVariants}
+        >
+          Welcome To
+        </motion.h1>
+
+        {/* SENTINEL */}
+        <motion.h2
+          className="text-5xl font-extrabold text-blue-400 mt-1 drop-shadow-lg" // Warna lebih terang, ukuran lebih besar, bayangan
+          variants={textVariants}
+        >
+          SENTINEL
+        </motion.h2>
+
+        {/* Deskripsi */}
+        <motion.p
+          className="text-blue-200  max-w-sm" // Warna teks lebih terang, margin top sedikit lebih banyak
+          variants={textVariants}
+        >
           Please log in to access your dashboard.
-        </p>
+        </motion.p>
       </motion.div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
@@ -75,7 +133,7 @@ export const LeftSide = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
-              className="pl-10 pr-4 py-2 w-full border-none bg-transparent h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="pl-10 pr-4 py-2 w-full text-black border-none bg-transparent h-auto focus-visible:ring-0 focus-visible:ring-offset-0 bg"
             />
           </div>
         </motion.fieldset>
@@ -95,7 +153,7 @@ export const LeftSide = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="pl-10 pr-4 py-2 w-full border-none bg-transparent h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="pl-10 pr-4 py-2 w-full border-none text-black bg-transparent h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
         </motion.fieldset>

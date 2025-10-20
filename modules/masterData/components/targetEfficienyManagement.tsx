@@ -1,7 +1,14 @@
-import { Loader2, MoreHorizontal, PlusCircle } from "lucide-react";
-import React, { useState } from "react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Copy,
+  Loader2,
+  MoreHorizontal,
+  PlusCircle,
+} from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -70,8 +77,13 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format } from "date-fns-tz";
 import { cn } from "@/lib/utils";
+import {
+  getEfficiencyTargetPreviewApi,
+  EfficiencyTargetPreviewPayload,
+} from "@/services/analysis.service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export type EfficiencyTarget = {
   target_id: number;
@@ -84,6 +96,26 @@ export type EfficiencyTarget = {
   energy_type: EnergyType;
 };
 
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(
+    value
+  );
 const targetEfficiencySchema = z
   .object({
     kpi_name: z.string().min(3, "Nama KPI minimal 3 karakter."),
@@ -105,6 +137,194 @@ interface TargetEfficiencyFormProps {
   onSubmit: (values: z.infer<typeof targetEfficiencySchema>) => void;
   isLoading?: boolean;
 }
+
+const TargetEfficiencyPreview = () => {
+  const {
+    control,
+    setValue,
+    formState: { errors },
+  } = useFormContext<z.infer<typeof targetEfficiencySchema>>();
+
+  const watchedFields = useWatch({
+    control,
+    name: ["meter_id", "target_value", "period_start", "period_end"],
+  });
+
+  const debouncedFields = useDebounce(watchedFields, 500);
+  const [meter_id, target_value, period_start, period_end] = debouncedFields;
+
+  const hasErrors =
+    errors.meter_id ||
+    errors.target_value ||
+    errors.period_start ||
+    errors.period_end;
+
+  const canFetchPreview =
+    !hasErrors &&
+    meter_id &&
+    target_value > 0 &&
+    period_start instanceof Date &&
+    period_end instanceof Date;
+
+  const {
+    data: previewData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: [
+      "efficiencyTargetPreview",
+      meter_id,
+      target_value,
+      period_start,
+      period_end,
+    ],
+    queryFn: () =>
+      getEfficiencyTargetPreviewApi({
+        meter_id: Number(meter_id), // Menggunakan snake_case
+        target_value: Number(target_value), // Menggunakan snake_case
+        period_start: period_start
+          ? format(period_start, "yyyy-MM-dd", { timeZone: "UTC" })
+          : "",
+        period_end: period_end
+          ? format(period_end, "yyyy-MM-dd", { timeZone: "UTC" })
+          : "",
+      }),
+    enabled: canFetchPreview,
+  });
+
+  const isExceedingBudget =
+    previewData?.budget &&
+    previewData.preview.estimatedTotalCost > previewData.budget.remainingBudget;
+
+  return (
+    <Card className="mt-4 col-span-2 bg-muted/50 border-dashed transition-all">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Pratinjau Target</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {!canFetchPreview && !isLoading && (
+          <p className="text-sm text-muted-foreground">
+            Isi semua field untuk melihat pratinjau.
+          </p>
+        )}
+        {isLoading && (
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+          </div>
+        )}
+        {isError && (
+          <p className="text-sm text-destructive">
+            Gagal memuat pratinjau. {(error as any)?.response?.data?.message}
+          </p>
+        )}
+        {previewData && !isLoading && !isError && (
+          <>
+            <div className="flex items-start gap-3">
+              {isExceedingBudget ? (
+                <AlertTriangle className="h-8 w-8 text-destructive mt-1 shrink-0" />
+              ) : (
+                <CheckCircle2 className="h-8 w-8 text-green-600 mt-1 shrink-0" />
+              )}
+              <div>
+                <p
+                  className={cn(
+                    "text-2xl font-bold",
+                    isExceedingBudget ? "text-destructive" : "text-primary"
+                  )}
+                >
+                  {formatCurrency(previewData.preview.estimatedTotalCost || 0)}
+                </p>
+                {previewData.budget && (
+                  <p className="text-xs text-muted-foreground">
+                    Sisa Anggaran Periode Ini:{" "}
+                    <strong>
+                      {formatCurrency(previewData.budget.remainingBudget)}
+                    </strong>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground mt-2">
+              Estimasi total biaya berdasarkan target{" "}
+              <strong>
+                {previewData?.preview?.totalTargetConsumption?.toLocaleString(
+                  "id-ID"
+                )}{" "}
+                {previewData?.calculation?.unitOfMeasurement}
+              </strong>{" "}
+              selama {previewData?.calculation?.totalDays} hari.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Target harian:{" "}
+              {previewData?.preview?.dailyTargetConsumption?.toLocaleString(
+                "id-ID"
+              )}{" "}
+              {previewData?.calculation?.unitOfMeasurement}.
+            </p>
+            {isExceedingBudget && (
+              <p className="text-xs text-destructive font-medium mt-1">
+                Peringatan: Target yang Anda masukkan melebihi sisa anggaran.
+              </p>
+            )}
+            {previewData.suggestion?.standard && (
+              <div className="mt-2 text-xs p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-md">
+                <p className="text-blue-800 dark:text-blue-300">
+                  {previewData.suggestion.standard.message}
+                </p>
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="p-0 h-auto text-blue-600 hover:text-blue-700"
+                  onClick={() =>
+                    setValue(
+                      "target_value",
+                      Number(
+                        previewData.suggestion.standard.suggestedDailyKwh.toFixed(
+                          2
+                        )
+                      )
+                    )
+                  }
+                >
+                  <Copy className="mr-1 h-3 w-3" /> Gunakan nilai ini
+                </Button>
+              </div>
+            )}
+            {previewData.suggestion?.efficiency && (
+              <div className="mt-2 text-xs p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 rounded-md">
+                <p className="text-green-800 dark:text-green-300">
+                  {previewData.suggestion.efficiency.message}
+                </p>
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="p-0 h-auto text-green-600 hover:text-green-700"
+                  onClick={() =>
+                    setValue(
+                      "target_value",
+                      Number(
+                        previewData.suggestion.efficiency.suggestedDailyKwh.toFixed(
+                          2
+                        )
+                      )
+                    )
+                  }
+                >
+                  <Copy className="mr-1 h-3 w-3" /> Gunakan nilai ini
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 export function TargetEfficiencyForm({
   initialData,
@@ -297,6 +517,7 @@ export function TargetEfficiencyForm({
             </div>
           </>
         )}
+        <TargetEfficiencyPreview />
       </form>
       <DialogFooter className="pt-4">
         <Button
@@ -406,7 +627,20 @@ export const TargetEfficiencyManagement = () => {
   });
 
   const { mutate: createOrUpdateTarget, isPending: isMutating } = useMutation({
-    mutationFn: (targetData: z.infer<typeof targetEfficiencySchema>) => {
+    mutationFn: (
+      originalTargetData: z.infer<typeof targetEfficiencySchema>
+    ) => {
+      // Format tanggal sebelum mengirim ke API untuk menghindari masalah timezone
+      const targetData = {
+        ...originalTargetData,
+        period_start: format(originalTargetData.period_start, "yyyy-MM-dd", {
+          timeZone: "UTC",
+        }),
+        period_end: format(originalTargetData.period_end, "yyyy-MM-dd", {
+          timeZone: "UTC",
+        }),
+      };
+
       const id = editingTarget ? editingTarget.target_id : undefined;
       return id
         ? masterData.efficiencyTarget.update(id, targetData)

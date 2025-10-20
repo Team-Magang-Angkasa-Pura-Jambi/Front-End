@@ -60,13 +60,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import {
-  getTariffGroupsApi,
-  TariffGroup,
-} from "@/services/tariffGroup.service";
+import { getTariffGroupsApi } from "@/services/tariffGroup.service";
 import { getEnergyTypesApi, EnergyType } from "@/services/energyType.service";
 import { masterData } from "@/services/masterData.service";
-import { getCategoryApi } from "@/services/category.service";
 import { DataTable } from "@/modules/UserManagement/components/DataTable";
 
 export type MeterType = {

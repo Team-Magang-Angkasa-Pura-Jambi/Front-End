@@ -108,10 +108,35 @@ export const createReadingSessionApi = async (
  * @param data - Body request berisi data yang akan diubah.
  */
 export const updateReadingSessionApi = async (
-  sessionId: number,
+  sessionId: number, // Tetap ada untuk kompatibilitas
   data: UpdateReadingSessionBody
 ): Promise<ReadingSessionWithDetails> => {
   const response = await api.patch(`/readings/${sessionId}`, data);
+  return response.data;
+};
+
+/**
+ * BARU: Memperbarui nilai Pax untuk tanggal tertentu.
+ * @param payload - Body request berisi tanggal dan nilai pax baru.
+ */
+export const updatePaxApi = async (
+  paxId: number,
+  payload: {
+    total_pax: number;
+  }
+): Promise<{ message: string }> => {
+  const response = await api.patch(`/pax/${paxId}`, payload);
+  return response.data;
+};
+
+/**
+ * BARU: Menghapus data Pax berdasarkan ID-nya.
+ * @param paxId - ID dari data Pax yang akan dihapus.
+ */
+export const deletePaxApi = async (
+  paxId: number
+): Promise<{ message: string }> => {
+  const response = await api.delete(`/pax/${paxId}`);
   return response.data;
 };
 
@@ -122,8 +147,7 @@ export const updateReadingSessionApi = async (
 export const deleteReadingSessionApi = async (
   sessionId: number
 ): Promise<{ message: string }> => {
-  console.log(sessionId);
-
+  // PERBAIKAN: Menggunakan endpoint dan parameter yang benar untuk menghapus sesi pembacaan.
   const response = await api.delete(`/readings/${sessionId}`);
   return response.data;
 };

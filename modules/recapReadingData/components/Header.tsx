@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { DateRange } from "react-day-picker";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import {
   CalendarIcon,
@@ -12,6 +12,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
+import { formatInTimeZone } from "date-fns-tz";
 import { ColumnDef } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
 
@@ -59,9 +60,9 @@ import { toast } from "sonner";
 import { exportToExcel, exportToPdf } from "@/lib/exportUtils";
 import { companyLogoBase64 } from "@/lib/logo";
 import { getMetersApi } from "@/services/meter.service";
-import type { RecapMeta, Meter } from "../type"; // Impor tipe yang relevan
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { recalculateRecapApi } from "@/services/recap.service";
+import { RecapMeta } from "@/modules/RecapData/type";
 
 // --- Tipe Props ---
 interface RecapHeaderProps {
@@ -121,12 +122,15 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
   // --- Logika untuk Opsi Ekspor PDF ---
   const generateSubtitle = () => {
     const { from, to } = filters.date || {};
+
     if (from && to) {
-      return `Periode: ${format(from, "d MMM yyyy", { locale: id })} - ${format(
-        to,
-        "d MMM yyyy",
-        { locale: id }
-      )}`;
+      // Perbaikan: Gunakan formatInTimeZone untuk memastikan tanggal diformat di zona waktu yang benar (Asia/Jakarta)
+      // untuk mencegah tanggal mundur karena perbedaan UTC dan waktu lokal.
+      return `Periode: ${formatInTimeZone(from, "Asia/Jakarta", "d MMM yyyy", {
+        locale: id,
+      })} - ${formatInTimeZone(to, "Asia/Jakarta", "d MMM yyyy", {
+        locale: id,
+      })}`;
     }
     return "Semua Periode";
   };
@@ -246,11 +250,27 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                   {filters.date?.from ? (
                     filters.date.to ? (
                       <>
-                        {format(filters.date.from, "d LLL, y", { locale: id })}{" "}
-                        - {format(filters.date.to, "d LLL, y", { locale: id })}
+                        {formatInTimeZone(
+                          filters.date.from,
+                          "Asia/Jakarta",
+                          "d LLL, y",
+                          { locale: id }
+                        )}{" "}
+                        -{" "}
+                        {formatInTimeZone(
+                          filters.date.to,
+                          "Asia/Jakarta",
+                          "d LLL, y",
+                          { locale: id }
+                        )}
                       </>
                     ) : (
-                      format(filters.date.from, "d LLL, y", { locale: id })
+                      formatInTimeZone(
+                        filters.date.from,
+                        "Asia/Jakarta",
+                        "d LLL, y",
+                        { locale: id }
+                      )
                     )
                   ) : (
                     <span>Pilih periode</span>

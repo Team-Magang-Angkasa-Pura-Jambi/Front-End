@@ -40,21 +40,24 @@ const positiveInt = (fieldName: string) =>
 // Skema Zod untuk validasi form
 export const annualBudgetFormSchema = z
   .object({
+    budgetType: z.enum(["parent", "child"], {
+      error: "Tipe anggaran tidak valid.",
+    }),
     period_start: z.coerce.date({
       message: "Tanggal mulai periode tidak valid.",
     }),
     period_end: z.coerce.date({
       message: "Tanggal akhir periode tidak valid.",
     }),
-    total_budget: positiveNumber("Total Budget"),
-    efficiency_tag: positiveNumber("Efficiency Tag").min(0).max(1).optional(),
-    energy_type_id: positiveInt("Tipe Energi"),
+    total_budget: z.coerce.number().nullable(),
+    efficiency_tag: z.coerce.number().min(0).max(1).optional().nullable(),
+    energy_type_id: positiveInt("Tipe Energi").optional().nullable(),
     parent_budget_id: positiveInt("Parent Budget ID").optional().nullable(),
     allocations: z
       .array(
         z.object({
-          meter_id: positiveInt("Meter ID dalam alokasi"),
-          weight: positiveNumber("Bobot alokasi").min(0).max(1),
+          meter_id: positiveInt("Meter ID"),
+          weight: positiveNumber("Bobot"),
         })
       )
       .optional(),
@@ -64,9 +67,7 @@ export const annualBudgetFormSchema = z
     path: ["period_end"],
   })
   .superRefine((data, ctx) => {
-    // Jika ini adalah anggaran anak (memiliki parent_budget_id)
-    if (data.parent_budget_id) {
-      // Pastikan parent_budget_id benar-benar ada dan bukan null/undefined
+    if (data.budgetType === "child") {
       if (!data.parent_budget_id) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -74,12 +75,13 @@ export const annualBudgetFormSchema = z
           path: ["parent_budget_id"],
         });
       }
+
       if (!data.allocations || data.allocations.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
             "Anggaran periode (anak) wajib memiliki minimal satu alokasi meter.",
-          path: ["allocations"],
+          path: ["allocations"], // Path ke tombol "Tambah Alokasi"
         });
       }
 
@@ -91,19 +93,37 @@ export const annualBudgetFormSchema = z
         if (Math.abs(totalWeight - 1) > 0.001) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message:
-              "Total bobot (weight) dari semua alokasi harus sama dengan 100%.",
+            message: "Total bobot dari semua alokasi harus tepat 100%.",
             path: ["allocations"],
           });
         }
       }
-    } else {
-      // Jika ini adalah anggaran induk (tidak memiliki parent_budget_id)
-      if (data.efficiency_tag === undefined || data.efficiency_tag === null) {
+    } else if (data.budgetType === "parent") {
+      // Validasi untuk Anggaran Induk (Tahunan)
+      if (
+        data.efficiency_tag === undefined ||
+        data.efficiency_tag === null ||
+        data.efficiency_tag <= 0
+      ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Efficiency Tag wajib diisi untuk anggaran induk.",
+          message: "Efficiency Tag harus lebih dari 0.",
           path: ["efficiency_tag"],
+        });
+      }
+      if (!data.energy_type_id) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Tipe Energi wajib diisi untuk anggaran induk.",
+          path: ["energy_type_id"],
+        });
+      }
+
+      if (!data.total_budget || data.total_budget <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Total Budget harus lebih dari 0.",
+          path: ["total_budget"],
         });
       }
     }
@@ -122,3 +142,8 @@ export const processBudgetFormSchema = z.object({
 });
 
 export type ProcessBudgetFormValues = z.infer<typeof processBudgetFormSchema>;
+
+// --- Skema untuk Parameter URL/Route ---
+export const annualBudgetParamsSchema = z.object({
+  budgetId: positiveInt("Budget ID"),
+});

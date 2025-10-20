@@ -62,18 +62,18 @@ export const NotificationCard = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-2xl flex items-center shadow-sm">
+      <div className="bg-card p-6 rounded-2xl flex items-center shadow-sm">
         <IconLoader className="animate-spin text-gray-400" />
-        <p className="ml-4 text-gray-500">Memuat notifikasi...</p>
+        <p className="ml-4 text-muted-foreground">Memuat notifikasi...</p>
       </div>
     );
   }
 
   if (!notification) {
     return (
-      <div className="bg-white p-6 rounded-2xl flex items-center shadow-sm">
+      <div className="bg-card p-6 rounded-2xl flex items-center shadow-sm">
         <IconInfoCircle className="text-green-500" />
-        <p className="ml-4 text-gray-600">
+        <p className="ml-4 text-muted-foreground">
           Tidak ada notifikasi baru saat ini. Kerja bagus!
         </p>
       </div>
@@ -90,7 +90,7 @@ export const NotificationCard = () => {
   const styles = colorClasses[color as keyof typeof colorClasses];
 
   return (
-    <div className="bg-white p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm overflow-hidden">
+    <div className="bg-card p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -105,8 +105,12 @@ export const NotificationCard = () => {
               <Icon className={`w-6 h-6 ${styles.text}`} />
             </div>
             <div>
-              <h2 className="font-bold text-gray-800">{notification.title}</h2>
-              <p className="text-gray-600">{notification.description}</p>
+              <h2 className="font-bold text-foreground">
+                {notification.title}
+              </h2>
+              <p className="text-muted-foreground">
+                {notification.description}
+              </p>
             </div>
           </div>
         </motion.div>

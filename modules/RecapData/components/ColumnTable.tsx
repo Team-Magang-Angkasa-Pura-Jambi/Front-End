@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Column, ColumnDef } from "@tanstack/react-table";
 import {
   ArrowUpDown,
@@ -15,12 +16,21 @@ import {
   TrendingUp,
   Thermometer,
   Users,
+  BrainCircuit,
+  Tags,
   Zap,
+  Loader2,
 } from "lucide-react";
 import { Minus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { RecapDataRow } from "../type"; // Ganti 'RecapRecord' ke 'RecapDataRow' agar konsisten
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  runSinglePredictionApi,
+  runSingleClassificationApi,
+} from "@/services/analysis.service";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 /**
@@ -107,12 +117,124 @@ const ClassificationBadge = ({
   );
 };
 /**
+ * Komponen sel khusus untuk tombol prediksi.
+ * Menggunakan hook `useMutation` untuk memanggil API.
+ */
+const PredictionCell = ({
+  row,
+  meterId,
+}: {
+  row: any;
+  meterId: number | null;
+}) => {
+  const queryClient = useQueryClient(); // 1. Dapatkan instance query client
+  const { mutate, isPending } = useMutation({
+    mutationFn: runSinglePredictionApi,
+    onSuccess: () => {
+      // 2. Invalidate query 'recapData' untuk memicu refetch
+      queryClient.invalidateQueries({ queryKey: ["recapData"] });
+      toast.success("Prediksi berhasil dijalankan.", {
+        description: "Data mungkin memerlukan beberapa saat untuk diperbarui.",
+      });
+    },
+    onError: (error: any) => {
+      toast.error("Gagal menjalankan prediksi.", {
+        description: error.response?.data?.message || error.message,
+      });
+    },
+  });
+
+  const handlePredict = () => {
+    if (!meterId) {
+      toast.warning(
+        "Pilih satu meter terlebih dahulu untuk melakukan prediksi."
+      );
+      return;
+    }
+    const date = new Date(row.original.date).toISOString().split("T")[0];
+    mutate({ date, meterId });
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handlePredict}
+      disabled={isPending || !meterId}
+      className="w-full"
+    >
+      {isPending ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <BrainCircuit className="mr-2 h-4 w-4" />
+      )}
+      Prediksi
+    </Button>
+  );
+};
+
+/**
+ * Komponen sel khusus untuk tombol klasifikasi.
+ */
+const ClassificationActionCell = ({
+  row,
+  meterId,
+}: {
+  row: any;
+  meterId: number | null;
+}) => {
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useMutation({
+    mutationFn: runSingleClassificationApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recapData"] });
+      toast.success("Klasifikasi berhasil dijalankan.", {
+        description: "Data mungkin memerlukan beberapa saat untuk diperbarui.",
+      });
+    },
+    onError: (error: any) => {
+      toast.error("Gagal menjalankan klasifikasi.", {
+        description: error.response?.data?.message || error.message,
+      });
+    },
+  });
+
+  const handleClassify = () => {
+    if (!meterId) {
+      toast.warning(
+        "Pilih satu meter terlebih dahulu untuk melakukan klasifikasi."
+      );
+      return;
+    }
+    const date = new Date(row.original.date).toISOString().split("T")[0];
+    mutate({ date, meterId });
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleClassify}
+      disabled={isPending || !meterId}
+      className="w-full"
+    >
+      {isPending ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Tags className="mr-2 h-4 w-4" />
+      )}
+      Klasifikasi
+    </Button>
+  );
+};
+/**
  * Membuat definisi kolom untuk tabel rekap berdasarkan jenis data.
  * @param dataType Jenis energi ('Electricity', 'Water', atau 'Fuel').
  * @returns Array dari ColumnDef.
  */
 export const createColumns = (
-  dataType: "Electricity" | "Water" | "Fuel"
+  dataType: "Electricity" | "Water" | "Fuel",
+  meterId: number | null
 ): ColumnDef<RecapDataRow>[] => {
   // Kolom dasar yang selalu ada di awal
   const baseColumns: ColumnDef<RecapDataRow>[] = [
@@ -265,14 +387,9 @@ export const createColumns = (
             const classification = row.original.classification;
             const score = row.original.confidence_score;
 
-            if (
-              !classification ||
-              classification === "UNKNOWN" ||
-              score == null
-            ) {
-              return (
-                <span className="text-muted-foreground text-center">-</span>
-              );
+            // Jika klasifikasi tidak ada atau UNKNOWN, tampilkan tombol.
+            if (!classification || classification === "UNKNOWN") {
+              return <ClassificationActionCell row={row} meterId={meterId} />;
             }
 
             const styleMap = {
@@ -299,6 +416,25 @@ export const createColumns = (
                   )}%`}</span>
                 </div>
               </div>
+            );
+          },
+        },
+        {
+          accessorKey: "predict",
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Prediksi" />
+          ),
+          cell: ({ row }) => {
+            // PERBAIKAN: Cek properti 'prediction' pada data baris, bukan seluruh objek.
+            const predictionValue = row.original.prediction;
+            return predictionValue != null ? (
+              // Jika ada nilai prediksi, format dan tampilkan.
+              <div className="text-center font-mono">
+                {formatNumber(predictionValue)}
+              </div>
+            ) : (
+              // Jika tidak ada, tampilkan tombol untuk melakukan prediksi.
+              <PredictionCell row={row} meterId={meterId} />
             );
           },
         },

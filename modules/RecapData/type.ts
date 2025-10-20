@@ -7,6 +7,9 @@ export interface RecapDataRow {
   pax: number | null;
   cost: number | null;
   classification: "HEMAT" | "NORMAL" | "BOROS" | "UNKNOWN" | null;
+  prediction: number | null;
+  avg_temp: number | null;
+  max_temp: number | null;
 }
 
 export interface RecapMeta {

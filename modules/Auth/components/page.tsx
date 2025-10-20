@@ -9,7 +9,7 @@ import { RightSide } from "./RightSide";
 
 export const Page = () => {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#d6d3d1]  flex items-center justify-center p-4">
       <div
         className="w-full relatve max-w-6xl flex flex-col md:flex-row rounded-2xl shadow-2xl overflow-hidden bg-white relative"
         style={{ minHeight: "650px" }}

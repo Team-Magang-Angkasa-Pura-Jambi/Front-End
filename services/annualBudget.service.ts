@@ -1,6 +1,5 @@
 import api from "@/lib/api";
 import { AnnualBudget, AnnualBudgetFormValues } from "@/modules/budget/types"; // Path sudah benar
-import { promises } from "dns";
 
 // Tipe respons umum dari API Anda
 interface ApiResponse<T> {
@@ -22,18 +21,18 @@ export const annualBudgetApi = {
   },
 
   update: async (
-    id: string,
+    id: number,
     data: AnnualBudgetFormValues
   ): Promise<ApiResponse<AnnualBudget>> => {
     const response = await api.patch(`/annual-budgets/${id}`, data);
     return response.data;
   },
 
-  delete: async (id: string): Promise<void> => {
-    await api.delete(`/annual-budgets/${id}`);
+  delete: async (budgetId: number): Promise<void> => {
+    await api.delete(`/annual-budgets/${budgetId}`);
   },
 
-  getParents: async (): Promise<void> => {
+  getParents: async (): Promise<ApiResponse<AnnualBudget[]>> => {
     const response = await api.get("/annual-budgets/parents");
     return response.data;
   },
