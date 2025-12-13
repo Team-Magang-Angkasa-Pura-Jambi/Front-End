@@ -75,10 +75,6 @@ fe-sentinel-temp/
 └── ...
 ```
 
-## 🤝 Kontribusi
 
-Silakan buat _Pull Request_ atau laporkan _Issue_ jika Anda menemukan bug atau ingin menambahkan fitur baru.
-
----
 
 Dibuat dengan ❤️ oleh Tim Sentinel.
