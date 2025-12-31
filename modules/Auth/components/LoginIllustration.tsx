@@ -33,6 +33,7 @@ export const LoginIllustration = () => {
     duration: number;
     delay: number;
   }
+  
 
   const [particles, setParticles] = React.useState<Particle[]>([]);
   useEffect(() => {
