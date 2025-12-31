@@ -24,6 +24,15 @@ export interface ReadingPayload {
   details: ReadingDetail[];
 }
 
+export interface LastReading {
+  meter_id: string;
+  last_reading_date: string;
+  value: number;
+  is_data_missing: boolean;
+  missing_date?: string;
+  message: string;
+}
+
 /**
  * Mengambil jenis-jenis pembacaan (misal: LWBP, WBP) dari API.
  * @param energyTypeId - ID dari jenis energi (misal: 1 untuk Listrik).
@@ -58,7 +67,7 @@ export const getLastReadingApi = async (
   meterId: number,
   readingTypeId: number,
   date: string
-): Promise<{ data: { value: number } | null }> => {
+): Promise<{ data: LastReading }> => {
   const response = await api.get(
     `/readings/last?meterId=${meterId}&readingTypeId=${readingTypeId}&readingDate=${date}`
   );

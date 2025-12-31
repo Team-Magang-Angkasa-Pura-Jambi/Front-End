@@ -52,6 +52,7 @@ import {
 } from "@/services/energyType.service";
 import {
   getLastReadingApi,
+  LastReading,
   ReadingPayload,
   submitReadingApi,
 } from "@/services/readings.service";
@@ -147,25 +148,32 @@ export const FormReadingElectric = ({
 
   useEffect(() => {
     lastReadingQueries.forEach((query) => {
+      let _a: LastReading;
       if (
         !query.isFetching &&
-        ((query.isSuccess && !query.data?.data) || query.isError)
+        ((query.isSuccess &&
+          !((_a = query.data.data).is_data_missing || _a === void 0
+            ? void 0
+            : _a)) ||
+          query.isError)
       ) {
         toast.error("Data hari sebelumnya belum diinput.", {
-          description: "Silakan isi data untuk tanggal yang benar.",
+          description: `${_a.message}`,
         });
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastReadingQueries.map((q) => q.status).join(",")]);
-
+  // Bergantung pada status semua query
+  console.log(lastReadingQueries[0]?.data?.data?.missing_date);
   useEffect(() => {
-    const lastDate = lastReadingQueries[0]?.data?.data?.session?.reading_date;
+    const lastDate = lastReadingQueries[0]?.data?.data?.missing_date;
     if (lastDate) {
       setLastReadingDate(format(new Date(lastDate), "PPP"));
     } else {
       setLastReadingDate(null);
     }
-  }, [lastReadingQueries[0]?.data]);
+  }, [lastReadingQueries]);
 
   const selectedTypeIds = useMemo(
     () => detailsValues.map((d) => d.reading_type_id),
@@ -290,7 +298,7 @@ export const FormReadingElectric = ({
                     </PopoverContent>
                   </Popover>
                   <FormDescription>
-                    {lastReadingDate
+                    {!lastReadingQueries[0]?.data?.data?.is_data_missing
                       ? `Data terakhir diinput: ${lastReadingDate}`
                       : "Pilih tanggal pembacaan."}
                   </FormDescription>

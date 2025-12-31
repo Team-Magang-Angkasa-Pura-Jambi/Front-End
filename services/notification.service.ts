@@ -67,7 +67,7 @@ interface ApiResponse<T> {
  */
 export const fetchTodaySummaryApi =
   async (): Promise<TodaySummaryApiResponse> => {
-    const response = await api.get("/analysis/today-summary");
+    const response = await api.get("/analytics/today-summary");
     return response.data;
   };
 

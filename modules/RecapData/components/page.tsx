@@ -30,6 +30,7 @@ export const Page = () => {
 
   // DIUBAH: 'meterId' sekarang di-destructure agar bisa digunakan
   const { type, date, sortBy, meterId } = filters;
+  console.log(filters);
 
   const {
     data: queryData,

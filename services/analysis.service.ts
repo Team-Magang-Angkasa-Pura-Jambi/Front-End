@@ -70,7 +70,7 @@ export const analysisApi = async (
 ): Promise<AnalysisApiResponse> => {
   const meterIdParams = meterId.map((id) => `meterId=${id}`).join("&");
   const response = await api.get(
-    `/analysis?energyType=${type}&month=${mount}&${meterIdParams}`
+    `/analytics?energyType=${type}&month=${mount}&${meterIdParams}`
   );
   return response.data;
 };
@@ -83,7 +83,7 @@ export const getClassificationSummaryApi = async (
 ): Promise<ClassificationSummaryResponse> => {
   const monthQuery = `${year}-${month}`;
   const response = await api.get(
-    `/analysis/classification-summary?month=${monthQuery}&energyType=${energyType}&meterId=${meterId}`
+    `/analytics/classification-summary?month=${monthQuery}&energyType=${energyType}&meterId=${meterId}`
   );
   return response.data;
 };
@@ -93,14 +93,14 @@ export const getFuelStockAnalysisApi = async (
   month: string
 ): Promise<FuelStockAnalysisResponse> => {
   const monthQuery = `${year}-${month}`;
-  const response = await api.get(`/analysis/fuel-stock?month=${monthQuery}`);
+  const response = await api.get(`/analytics/fuel-stock?month=${monthQuery}`);
   return response.data;
 };
 
 export const getBudgetSummaryApi = async (): Promise<
   BudgetSummaryByEnergy[]
 > => {
-  const response = await api.get("/analysis/budget-summary");
+  const response = await api.get("/analytics/budget-summary");
   return response.data.data;
 };
 
@@ -113,7 +113,7 @@ export type prepareNextPeriodBudget = {
 export const getprepareNextPeriodBudgetApi = async (
   parentBudgetId: number
 ): Promise<prepareNextPeriodBudget> => {
-  const response = await api.get(`/analysis/prepare-budget/${parentBudgetId}`);
+  const response = await api.get(`/analytics/prepare-budget/${parentBudgetId}`);
   return response.data.data;
 };
 
@@ -121,7 +121,7 @@ export const runSinglePredictionApi = async (payload: {
   date: string;
   meterId: number;
 }) => {
-  const response = await api.post("/analysis/run-single-prediction", payload);
+  const response = await api.post("/analytics/run-single-prediction", payload);
   return response.data;
 };
 export const runSingleClassificationApi = async (payload: {
@@ -129,7 +129,7 @@ export const runSingleClassificationApi = async (payload: {
   meterId: number;
 }) => {
   const response = await api.post(
-    "/analysis/run-single-classification",
+    "/analytics/run-single-classification",
     payload
   );
   return response.data;
@@ -181,7 +181,7 @@ export const getEfficiencyTargetPreviewApi = async (
   payload: EfficiencyTargetPreviewPayload
 ): Promise<EfficiencyTargetPreviewResponse> => {
   const response = await api.post(
-    "/analysis/efficiency-target-preview",
+    "/analytics/efficiency-target-preview",
     payload
   );
   return response.data.data;

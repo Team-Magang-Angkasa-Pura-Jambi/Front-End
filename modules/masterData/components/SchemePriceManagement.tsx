@@ -468,12 +468,12 @@ export const createPriceSchemeColumns = (
       return (
         <div className="flex flex-col flex-wrap gap-1">
             {taxes.map((item) => (
-              <Badge key={item.tax.tax_id} variant="outline">
-                {item.tax.tax_name} (
+              <Badge key={item?.tax?.tax_id} variant="outline">
+                {item?.tax?.tax_name} (
                 {new Intl.NumberFormat("id-ID", {
                   style: "percent",
                   minimumFractionDigits: 0,
-                }).format(parseFloat(item.tax.rate))}
+                }).format(parseFloat(item?.tax?.rate))}
                 )
               </Badge>
             ))}

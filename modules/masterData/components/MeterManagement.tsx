@@ -64,6 +64,7 @@ import { getTariffGroupsApi } from "@/services/tariffGroup.service";
 import { getEnergyTypesApi, EnergyType } from "@/services/energyType.service";
 import { masterData } from "@/services/masterData.service";
 import { DataTable } from "@/modules/UserManagement/components/DataTable";
+import { categoryApi } from "@/services/category.service";
 
 export type MeterType = {
   meter_id: number;
@@ -173,7 +174,7 @@ export const MeterForm = ({
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
     {
       queryKey: ["meterCategories"],
-      queryFn: getCategoryApi,
+      queryFn: categoryApi.getAll,
     }
   );
   const { data: tariffGroupsResponse, isLoading: isLoadingTariffGroups } =
