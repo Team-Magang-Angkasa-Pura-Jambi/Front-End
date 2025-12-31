@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect } from "react";
 import {
   motion,
@@ -19,7 +19,6 @@ const springConfig = {
 export const Bubble = ({ size, style, delay }) => {
   const [mouse] = useMouse();
 
-  // Dapatkan lebar/tinggi window yang reaktif
   const { width, height } = useWindowSize();
 
   const mouseX = useMotionValue(0);
@@ -28,7 +27,6 @@ export const Bubble = ({ size, style, delay }) => {
   useEffect(() => {
     mouseX.set(mouse.x ?? 0);
     mouseY.set(mouse.y ?? 0);
-    // Perbaiki dependency array: hapus mouseX dan mouseY
   }, [mouse.x, mouse.y]);
 
   const time = useMotionValue(delay * 1000);
@@ -41,24 +39,24 @@ export const Bubble = ({ size, style, delay }) => {
 
   const parallaxX = useTransform(
     mouseX,
-    // Gunakan 'width' dari hook useWindowSize
     [0, width ?? 1000],
     [-size / 8, size / 8]
   );
   const parallaxY = useTransform(
     mouseY,
-    // Gunakan 'height' dari hook useWindowSize
     [0, height ?? 1000],
     [-size / 8, size / 8]
   );
 
   const combinedX = useTransform(
     [floatingX, parallaxX],
-    ([latestFloating, latestParallax]) => latestFloating + latestParallax
+    ([latestFloating, latestParallax]) =>
+      Number(latestFloating) + Number(latestParallax)
   );
   const combinedY = useTransform(
     [floatingY, parallaxY],
-    ([latestFloating, latestParallax]) => latestFloating + latestParallax
+    ([latestFloating, latestParallax]) =>
+      Number(latestFloating) + Number(latestParallax)
   );
 
   const x = useSpring(combinedX, springConfig);
