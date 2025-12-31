@@ -11,10 +11,10 @@ import {
   Loader2,
   ServerCrash,
 } from "lucide-react"; // Pastikan ChevronDown diimpor
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UndefinedInitialDataOptions } from "@tanstack/react-query";
 import React, { useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getLogbooksApi } from "@/services/logbook.service";
+import { getLogbooksApi, LogbookEntry } from "@/services/logbook.service";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,31 +38,34 @@ const energyConfig = {
 export const DailyAnalysisLog = () => {
   const [dayOffset, setDayOffset] = useState(1); // Default: Kemarin
   const { startDate, endDate } = useMemo(() => {
+    // Buat tanggal target berdasarkan offset dari hari ini
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() - dayOffset);
     const start = new Date(targetDate.setHours(0, 0, 0, 0)).toISOString();
-    const end = new Date(targetDate.setHours(23, 59, 59, 999)).toISOString();
+    const end = new Date(targetDate.setHours(0, 0, 0, 0)).toISOString();
     return { startDate: start, endDate: end };
   }, [dayOffset]);
 
   const {
     data: logbookData,
     isLoading,
-    isError,
-  } = useQuery({
+    isError, // PERBAIKAN: Gunakan `isPending` untuk loading awal dan `isFetching` untuk background refresh
+  } = useQuery<LogbookEntry[], Error>({
     queryKey: ["logbooks", startDate, endDate],
     queryFn: () => getLogbooksApi(startDate, endDate),
-    select: (data) => data.data.data,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    select: (response: any) => response.data?.data || [], // PERBAIKAN: Akses data dengan aman
+    staleTime: 1000 * 60 * 5, // 5 menit
   });
 
   const selectedLabel =
     dayOptions.find((opt) => opt.offset === dayOffset)?.label || "Pilih Hari";
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm col-span-1">
+    <div className="bg-card p-6 rounded-2xl shadow-sm col-span-1">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-lg text-gray-800">Log Analisis Harian</h3>
+        <h3 className="font-bold text-lg text-foreground">
+          Log Analisis Harian
+        </h3>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="text-sm text-gray-500">
@@ -99,7 +102,7 @@ export const DailyAnalysisLog = () => {
             <p className="text-sm">Gagal memuat data log.</p>
           </div>
         ) : logbookData && logbookData?.length > 0 ? (
-          logbookData.map((log) => {
+          logbookData.map((log: Logbook) => {
             const isSavings = log.savings_value !== null;
             const energy = energyConfig[log.meter.energy_type.type_name];
             const Icon = isSavings ? CheckCircle2 : AlertTriangle;
@@ -112,16 +115,18 @@ export const DailyAnalysisLog = () => {
                   <Icon className={`w-5 h-5 ${iconColor}`} />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-800 text-sm">
+                  <p className="font-semibold text-foreground text-sm">
                     {energy.label}: {isSavings ? "Penghematan" : "Pemborosan"}
                   </p>
-                  <p className="text-gray-600 text-sm">{log.summary_notes}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {log.summary_notes}
+                  </p>
                 </div>
               </div>
             );
           })
         ) : (
-          <p className="text-center text-gray-500 py-4 text-sm">
+          <p className="text-center text-muted-foreground py-4 text-sm">
             Tidak ada analisis untuk tanggal yang dipilih.
           </p>
         )}

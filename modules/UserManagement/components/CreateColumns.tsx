@@ -57,6 +57,8 @@ export const createColumns = (
     cell: ({ row }) =>
       new Date(row.getValue("created_at")).toLocaleDateString("id-ID"),
   },
+
+  
   {
     id: "actions",
     cell: ({ row }) => {

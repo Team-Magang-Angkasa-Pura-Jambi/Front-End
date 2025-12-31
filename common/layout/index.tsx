@@ -6,15 +6,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "./components/logo";
 import { Button } from "@/components/ui/button";
 import {
-  ClipboardList,
+  BarChart3,
+  BookText,
+  CircleUserRound,
   Database,
+  FilePenLine,
   Loader2,
   LayoutDashboard,
   LogOut,
-  Notebook,
-  SquarePen,
   Users,
-  User2,
+  Wallet,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useMemo, useState } from "react";
@@ -44,46 +45,52 @@ enum Role {
 
 const allLinks = [
   {
-    label: "Dashboard",
+    label: "Dasbor",
     href: "/",
-    icon: <LayoutDashboard className="h-5 w-5 shrink-0" />,
+    icon: <LayoutDashboard className="h-5 w-5 shrink-0 text-sky-500" />,
     allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
-    label: "Enter Data",
+    label: "Input Data",
     href: "/enter-data",
-    icon: <SquarePen className="h-5 w-5 shrink-0" />,
+    icon: <FilePenLine className="h-5 w-5 shrink-0 text-green-500" />,
     allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
-    label: "Recap Data",
+    label: "Data Konsumsi",
     href: "/recap-data",
-    icon: <ClipboardList className="h-5 w-5 shrink-0" />,
+    icon: <BarChart3 className="h-5 w-5 shrink-0 text-violet-500" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
-    label: "Recap Reading",
+    label: "Data Pembacaan",
     href: "/recap-reading",
-    icon: <Notebook className="h-5 w-5 shrink-0" />,
+    icon: <BookText className="h-5 w-5 shrink-0 text-orange-500" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
     label: "Data Master",
     href: "/data-master",
-    icon: <Database className="h-5 w-5 shrink-0" />,
+    icon: <Database className="h-5 w-5 shrink-0 text-rose-500" />,
     allowedRoles: [Role.SuperAdmin, Role.Admin],
   },
   {
-    label: "Account",
+    label: "Akun Saya",
     href: "/profile",
-    icon: <User2 className="h-5 w-5 shrink-0" />,
+    icon: <CircleUserRound className="h-5 w-5 shrink-0 text-blue-500" />,
     allowedRoles: [Role.SuperAdmin, Role.Admin, Role.Technician],
   },
   {
-    label: "User Management",
+    label: "Manajemen Pengguna",
     href: "/user-management",
-    icon: <Users className="h-5 w-5 shrink-0" />,
+    icon: <Users className="h-5 w-5 shrink-0 text-teal-500" />,
     allowedRoles: [Role.SuperAdmin],
+  },
+  {
+    label: "Anggaran",
+    href: "/budget",
+    icon: <Wallet className="h-5 w-5 shrink-0 text-emerald-500" />,
+    allowedRoles: [Role.SuperAdmin, Role.Admin],
   },
 ];
 
@@ -127,11 +134,11 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       className={cn(
-        "flex h-screen w-full overflow-hidden rounded-md border md:flex-row"
+        "flex h-screen w-full flex-col overflow-hidden rounded-md border bg-background md:flex-row"
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10">
+        <SidebarBody className="justify-between gap-10 ">
           <div className="flex flex-1 flex-col overflow-y-auto overflow-hidden">
             <Logo />
             <motion.div

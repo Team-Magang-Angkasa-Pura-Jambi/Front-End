@@ -1,11 +1,11 @@
 // lib/exportUtils.ts
 
 import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
-import type { RecapSummary } from "@/types/recap.types"; // Pastikan path ini benar
+import { saveAs } from "file-saver";
+import type { RecapSummary } from "@/modules/RecapData/type";
 
 // --- Definisi Tipe Data ---
 interface PdfOptions {
@@ -130,10 +130,11 @@ export const exportToExcel = async (
 
   // --- Baris Ringkasan (Total) ---
   if (summary) {
-    worksheet.addRow([]); // Spasi
-    const summaryHeader = worksheet.addRow(["RINGKASAN LAPORAN"]);
+    const startSummaryRow = worksheet.rowCount + 2;
+    const summaryHeader = worksheet.getRow(startSummaryRow);
+    summaryHeader.values = ["RINGKASAN LAPORAN"];
     summaryHeader.font = { name: "Calibri", size: 12, bold: true };
-    worksheet.mergeCells(summaryHeader.number, 1, summaryHeader.number, 3);
+    worksheet.mergeCells(startSummaryRow, 1, startSummaryRow, 2);
 
     // Definisikan ringkasan
     const summaryItems = [
@@ -150,12 +151,23 @@ export const exportToExcel = async (
     ];
 
     summaryItems.forEach((item) => {
-      if (item.value > 0) {
+      if (item.value !== null && item.value !== undefined && item.value > 0) {
         // Hanya tampilkan jika relevan
         const row = worksheet.addRow([item.label, item.value]);
-        row.getCell(1).font = { bold: true };
-        row.getCell(2).numFmt = item.format;
-        row.getCell(2).alignment = { horizontal: "right" };
+        const labelCell = row.getCell(1);
+        const valueCell = row.getCell(2);
+
+        labelCell.font = { bold: true };
+        labelCell.alignment = { horizontal: "left" };
+        valueCell.numFmt = item.format;
+        valueCell.alignment = { horizontal: "right" };
+
+        labelCell.border = {
+          bottom: { style: "dotted", color: { argb: "FFD0D0D0" } },
+        };
+        valueCell.border = {
+          bottom: { style: "dotted", color: { argb: "FFD0D0D0" } },
+        };
       }
     });
   }
@@ -167,7 +179,7 @@ export const exportToExcel = async (
       const len = cell.value?.toString().length ?? 10;
       if (len > maxLen) maxLen = len;
     });
-    column.width = maxLen < 15 ? 15 : maxLen + 4;
+    column.width = Math.max(15, Math.min(50, maxLen + 4)); // Batasi lebar kolom
   });
 
   // --- Simpan File ---
@@ -196,49 +208,24 @@ export const exportToPdf = (
 
   const headerColor = options.headerColor || "#0D47A1";
 
-  // --- Menambahkan Baris Ringkasan ke Data Tabel ---
-  const body = [...tableData];
-  if (summary) {
-    const summaryRow: any[] = [];
-    columns.forEach((col, index) => {
-      let content = "";
-      if (index === 0) {
-        content = "TOTAL";
-      } else if (
-        summary.hasOwnProperty(
-          `total${col.dataKey.charAt(0).toUpperCase() + col.dataKey.slice(1)}`
-        )
-      ) {
-        content = formatDisplayValue(
-          (summary as any)[`total${col.dataKey}`],
-          col.dataKey
-        );
-      } else if (
-        summary.hasOwnProperty(
-          `total${col.dataKey.charAt(0).toUpperCase() + col.dataKey.slice(1)}`
-        )
-      ) {
-        content = formatDisplayValue(
-          (summary as any)[`total${col.dataKey}`],
-          col.dataKey
-        );
-      } else if (col.dataKey.toLowerCase().includes("consumption")) {
-        content = formatDisplayValue(summary.totalConsumption, "consumption");
-      }
-
-      summaryRow.push({
-        content,
-        styles: { fontStyle: "bold", halign: index === 0 ? "left" : "right" },
-      });
-    });
-    body.push(summaryRow);
-  }
-
   autoTable(doc, {
     head: [tableHeaders],
-    body: body,
+    body: tableData,
     startY: 100,
     theme: "striped",
+    tableWidth: "auto",
+    columnStyles: {
+      // Atur perataan kolom angka ke kanan
+      consumption: { halign: "right" },
+      wbp: { halign: "right" },
+      lwbp: { halign: "right" },
+      target: { halign: "right" },
+      pax: { halign: "right" },
+      avg_temp: { halign: "right" },
+      cost: { halign: "right" },
+      predict: { halign: "right" },
+      confidence_score: { halign: "center" },
+    },
     headStyles: {
       fillColor: headerColor,
       textColor: "#FFFFFF",
@@ -246,16 +233,17 @@ export const exportToPdf = (
       halign: "center",
     },
     styles: { fontSize: 8, cellPadding: 5 },
-    didDrawPage: (data) => {
+    didDrawPage: (hookData) => {
+      const { pageNumber, pageCount } = doc.internal.pages;
       // --- Header Halaman ---
       if (logoBase64) {
         const logoWidth = 105;
         const logoHeight = 45;
-        const pageWidth = doc.internal.pageSize.width;
+        const pageWidth = doc.internal.pageSize.getWidth();
         doc.addImage(
           logoBase64,
           "PNG",
-          pageWidth - data.settings.margin.right - logoWidth,
+          pageWidth - hookData.settings.margin.right - logoWidth,
           30,
           logoWidth,
           logoHeight
@@ -264,25 +252,81 @@ export const exportToPdf = (
       doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(headerColor);
-      doc.text(options.title, data.settings.margin.left, 50);
+      doc.text(options.title, hookData.settings.margin.left, 50);
 
       doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
       doc.setTextColor("#333333");
-      doc.text(options.subtitle, data.settings.margin.left, 65);
+      doc.text(options.subtitle, hookData.settings.margin.left, 65);
 
       // --- Footer Halaman ---
-      const pageStr = `Halaman ${data.pageNumber}`;
+      const pageStr = `Halaman ${pageNumber} dari ${pageCount}`;
+      const footerY = doc.internal.pageSize.getHeight() - 30;
+      doc.line(
+        hookData.settings.margin.left,
+        footerY - 10,
+        doc.internal.pageSize.getWidth() - hookData.settings.margin.right,
+        footerY - 10
+      );
       doc.setFontSize(9);
       doc.setTextColor("#777777");
-      doc.text(
-        pageStr,
-        doc.internal.pageSize.width / 2,
-        doc.internal.pageSize.height - 20,
-        { align: "center" }
-      );
+      doc.text(pageStr, doc.internal.pageSize.width / 2, footerY, {
+        align: "center",
+      });
+    },
+    // Tambahkan ringkasan setelah tabel selesai digambar
+    didParseCell: (data) => {
+      // Ubah perataan untuk kolom 'classification'
+      if (data.column.dataKey === "classification") {
+        data.cell.styles.halign = "center";
+      }
     },
   });
+
+  // --- Bagian Ringkasan Terpisah ---
+  if (summary) {
+    const finalY = (doc as any).lastAutoTable.finalY;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Ringkasan Laporan", 40, finalY + 40);
+
+    const summaryItems = [
+      {
+        label: "Total Konsumsi:",
+        value: formatDisplayValue(summary.totalConsumption, "consumption"),
+      },
+      {
+        label: "Total WBP:",
+        value: formatDisplayValue(summary.totalWbp, "wbp"),
+      },
+      {
+        label: "Total LWBP:",
+        value: formatDisplayValue(summary.totalLwbp, "lwbp"),
+      },
+      {
+        label: "Total Target:",
+        value: formatDisplayValue(summary.totalTarget, "target"),
+      },
+      {
+        label: "Total Pax:",
+        value: formatDisplayValue(summary.totalPax, "pax"),
+      },
+      {
+        label: "Total Biaya:",
+        value: formatDisplayValue(summary.totalCost, "cost"),
+      },
+    ];
+
+    autoTable(doc, {
+      startY: finalY + 50,
+      body: summaryItems.filter(
+        (item) => parseFloat(item.value.replace(/[^0-9,-]/g, "")) > 0
+      ),
+      theme: "plain",
+      styles: { fontSize: 9, cellPadding: 3 },
+      columnStyles: { 0: { fontStyle: "bold" } },
+    });
+  }
 
   doc.save(`${fileName}.pdf`);
 };

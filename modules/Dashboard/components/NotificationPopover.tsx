@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, Loader2, Inbox } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -12,10 +12,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { fetchAllNotificationsApi } from "@/services/notification.service";
+import {
+  fetchAllNotificationsApi,
+  markAsReadApi,
+} from "@/services/notification.service";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const NotificationPopover = () => {
+  const queryClient = useQueryClient();
   const {
     data: notifications,
     isLoading,
@@ -27,8 +31,23 @@ export const NotificationPopover = () => {
     select: (data) => data.data, // Ambil array 'data' dari respons API
   });
 
+  const { mutate: markAsRead } = useMutation({
+    mutationFn: markAsReadApi,
+    onSuccess: () => {
+      // Invalidate query untuk memuat ulang data notifikasi di popover dan di tempat lain
+      queryClient.invalidateQueries({ queryKey: ["allNotifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const handleNotificationClick = (notification: any) => {
+    if (!notification.is_read) {
+      markAsRead(notification.notification_id);
+    }
+  };
+
   const unreadCount =
-    notifications?.data?.filter((n) => !n.is_read).length || 0;
+    notifications?.data?.filter((n: any) => !n.is_read).length || 0;
 
   return (
     <Popover>
@@ -46,8 +65,8 @@ export const NotificationPopover = () => {
         <div className="p-4 font-semibold border-b">
           Notifikasi ({unreadCount})
         </div>
-        <ScrollArea className="h-80">
-          <div className="p-2">
+        <ScrollArea className="h-80 ">
+          <div className="p-2 flex flex-col gap-2">
             {isLoading && (
               <div className="flex items-center justify-center p-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -60,33 +79,38 @@ export const NotificationPopover = () => {
               </div>
             )}
 
-            {!isLoading && (!notifications || notifications.length === 0) && (
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <Inbox className="h-10 w-10 text-muted-foreground" />
-                <p className="mt-2 text-sm font-semibold">
-                  Tidak ada notifikasi
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Semua notifikasi akan muncul di sini.
-                </p>
-              </div>
-            )}
+            {!isLoading &&
+              (!notifications || notifications?.data?.length === 0) && (
+                <div className="flex flex-col items-center justify-center p-8 text-center">
+                  <Inbox className="h-10 w-10 text-muted-foreground" />
+                  <p className="mt-2 text-sm font-semibold">
+                    Tidak ada notifikasi
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Semua notifikasi akan muncul di sini.
+                  </p>
+                </div>
+              )}
 
             {!isLoading &&
-              notifications?.data?.map((notif) => (
+              notifications?.data?.map((notif: any) => (
                 <div
-                  key={notif.id}
+                  key={notif.notification_id}
+                  onClick={() => handleNotificationClick(notif)}
                   className={`p-3 rounded-lg hover:bg-accent ${
                     !notif.is_read ? "bg-blue-50 dark:bg-blue-900/20" : ""
-                  }`}
+                  } cursor-pointer`}
                 >
                   <p className="text-sm font-semibold">{notif.title}</p>
                   <p className="text-xs text-muted-foreground">
+                    {notif.description}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
                     {notif.message}
                   </p>
-                  {notif.createdAt && (
+                  {notif.created_at && (
                     <p className="text-xs text-muted-foreground/70 mt-1">
-                      {formatDistanceToNow(new Date(notif.createdAt), {
+                      {formatDistanceToNow(new Date(notif.created_at), {
                         addSuffix: true,
                         locale: id,
                       })}
@@ -97,7 +121,7 @@ export const NotificationPopover = () => {
           </div>
         </ScrollArea>
         <div className="p-2 border-t text-center">
-          <Link href="/notification-center" passHref>
+          <Link href="/notification-center">
             <Button variant="link" className="text-sm">
               Lihat Semua Notifikasi
             </Button>

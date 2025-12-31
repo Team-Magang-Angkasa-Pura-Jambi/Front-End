@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/stores/authStore";
 import Image from "next/image";
 import { NotificationPopover } from "./NotificationPopover";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export const Header = () => {
   const { user } = useAuthStore();
@@ -16,12 +17,13 @@ export const Header = () => {
           className="w-10 h-10 rounded-full"
         />
         <div>
-          <h1 className="text-xl font-bold text-gray-800">{user?.username}</h1>
-          <p className="text-sm text-gray-500">Sunday, June 25, 2024</p>
+          <h1 className="text-xl font-bold">{user?.username}</h1>
+          <p className="text-sm ">Sunday, June 25, 2024</p>
         </div>
       </div>
       <div className="flex items-center space-x-6">
         <NotificationPopover />
+        <ThemeToggle />
       </div>
     </header>
   );

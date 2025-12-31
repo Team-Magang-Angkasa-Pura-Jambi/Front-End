@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { BellPlus } from "lucide-react";
+import { BellPlus, Plane } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchTodaySummaryApi, // Menggunakan API yang benar
@@ -27,12 +27,19 @@ export const useRealtimeNotification = () => {
   });
 
   useEffect(() => {
-    const notifications = todaySummaryResponse?.data;
-    if (notifications && notifications.length > 0) {
-      notifications.forEach((notif) => {
+    // Akses data utama dari respons API
+    const responseData = todaySummaryResponse?.data;
+    if (!responseData) return;
+
+    const { meta, data: energyNotifications } = responseData;
+
+    // 1. Proses notifikasi untuk data energi
+    if (energyNotifications && energyNotifications.length > 0) {
+      energyNotifications.forEach((notif) => {
         const consumption = parseFloat(notif.total_consumption);
         // Buat ID unik untuk setiap notifikasi agar tidak duplikat
         const notificationId = `${notif.meter.meter_code}-${notif.summary_id}`;
+
         if (!shownNotifications.current.has(notificationId)) {
           toast(`+${consumption.toLocaleString("id-ID")} Data Baru`, {
             description: `Meteran ${notif.meter.meter_code} baru saja diperbarui.`,
@@ -41,6 +48,20 @@ export const useRealtimeNotification = () => {
           shownNotifications.current.add(notificationId);
         }
       });
+    }
+
+    // 2. Proses notifikasi untuk data Pax
+    if (meta && meta.pax) {
+      // Buat ID unik berdasarkan tanggal untuk notifikasi pax
+      const paxNotificationId = `pax-${meta.date}`;
+
+      if (!shownNotifications.current.has(paxNotificationId)) {
+        toast(`+${meta.pax.toLocaleString("id-ID")} Penumpang Hari Ini`, {
+          description: `Data penumpang untuk hari ini telah diperbarui.`,
+          icon: <Plane className="h-5 w-5" />,
+        });
+        shownNotifications.current.add(paxNotificationId);
+      }
     }
   }, [todaySummaryResponse]);
 };

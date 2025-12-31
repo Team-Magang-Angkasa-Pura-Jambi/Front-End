@@ -1,7 +1,7 @@
 "use client";
 
 import { Column, ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Users } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -110,11 +110,17 @@ export const createColumns = (
         );
       },
     },
+    // Kolom Pax dihapus dari sini
     {
       id: "actions",
       header: "",
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
         const item = row.original;
+        // PERBAIKAN: Logika untuk menonaktifkan tombol Edit.
+        // Asumsi data sudah diurutkan dari yang terbaru (descending).
+        // Hanya item pertama (index 0) yang bisa diedit.
+        const isLatest = row.index === 0;
+
         return (
           <div className="text-center">
             <DropdownMenu>
@@ -127,8 +133,9 @@ export const createColumns = (
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                 <DropdownMenuItem
-                  onClick={() => onEdit(item)}
+                  onClick={() => isLatest && onEdit(item)}
                   className="cursor-pointer"
+                  disabled={!isLatest}
                 >
                   Edit
                 </DropdownMenuItem>

@@ -117,7 +117,7 @@ export const AnalysisChart = ({
     "";
 
   return (
-    <Card className="col-span-2">
+    <Card className="col-span-1">
       <CardHeader>
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <CardTitle>
@@ -129,7 +129,7 @@ export const AnalysisChart = ({
             value={selectedMeterId ?? ""}
             onValueChange={(value) => setSelectedMeterId(value)}
           >
-            <SelectTrigger className="w-[280px]">
+            <SelectTrigger className="w-full sm:w-[280px]">
               <SelectValue placeholder="Pilih Meter..." />
             </SelectTrigger>
             <SelectContent>
@@ -143,11 +143,11 @@ export const AnalysisChart = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div style={{ width: "100%", height: 350 }}>
+        <div className="h-[300px] w-full sm:h-[350px]">
           <ResponsiveContainer>
             <LineChart
               data={chartData}
-              margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+              margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -180,8 +180,8 @@ export const AnalysisChart = ({
                 name="Prediksi Konsumsi"
                 stroke={COLORS.prediksi}
                 strokeWidth={2}
-                strokeDasharray="3 3"
-                dot={false}
+                // strokeDasharray="3 3"
+                dot={{ r: 3 }}
                 activeDot={{ r: 5 }}
                 connectNulls={false}
               />

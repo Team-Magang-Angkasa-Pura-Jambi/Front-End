@@ -18,36 +18,29 @@ import Image from "next/image";
 export default function NotFoundEnergyPage() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
-      <div className="pointer-events-none absolute bottom-0 right-0 z-10 hidden w-1/3 max-w-xs animate-fade-in-left md:block lg:right-10">
+      {/* <div className="pointer-events-none absolute bottom-0 right-0 z-10 hidden w-1/3 max-w-xs animate-fade-in-left md:block lg:right-10">
         <Image
-          src="/img/sir_miles_axelrod.png" // <-- Ganti nama file jika berbeda
+          src="/image/sir-miles-axelrod.png" // <-- Ganti nama file jika berbeda
           alt="Sir Miles Axlerod Tersesat"
           width={400}
           height={400}
           className="h-auto w-full object-contain opacity-60 mix-blend-luminosity filter transition-all duration-500 hover:opacity-80 hover:drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]"
         />
-      </div>
+      </div> */}
       {/* Fillmore - penduduk hutan */}
-      <div className="pointer-events-none absolute bottom-0 left-0 z-10 hidden w-1/4 max-w-[280px] animate-fade-in-right lg:left-10 lg:block">
-        <Image
-          src="/img/fillmore.png" // <-- Ganti nama file jika berbeda
-          alt="Fillmore di Hutan Digital"
-          width={400}
-          height={400}
-          className="h-auto w-full object-contain opacity-50 mix-blend-luminosity filter transition-all duration-500 hover:opacity-70 hover:drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]"
-        />
-      </div>
+
       <Card className="w-full max-w-md transform-gpu animate-fade-in-down">
         <CardHeader className="items-center text-center">
           {/* Visualisasi Tema: Ikon yang menceritakan kisah */}
           <div className="mb-4 flex items-center justify-center space-x-4 text-primary">
             <TreePine size={48} strokeWidth={1.5} />
             <div className="flex flex-col items-center">
-              <ZapOff size={64} strokeWidth={1.5} />
-              <Map
-                size={32}
-                strokeWidth={1.5}
-                className="-mt-2 text-muted-foreground"
+              <Image
+                src="/image/sir-miles-axelrod.png" // <-- Ganti nama file jika berbeda
+                alt="Sir Miles Axlerod Tersesat"
+                width={90}
+                height={90}
+                className="h-auto w-full object-contain opacity-60 mix-blend-luminosity filter transition-all duration-500 hover:opacity-80 hover:drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]"
               />
             </div>
             <TreePine size={48} strokeWidth={1.5} />

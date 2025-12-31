@@ -67,33 +67,33 @@ const createRoleColumns = (
     accessorKey: "role_name",
     header: "Nama Peran",
   },
-  {
-    id: "actions",
-    header: "Aksi",
-    cell: ({ row }) => {
-      const role = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(role)}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(role)}
-              className="text-red-600"
-            >
-              Hapus
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
+  // {
+  //   id: "actions",
+  //   header: "Aksi",
+  //   cell: ({ row }) => {
+  //     const role = row.original;
+  //     return (
+  //       <DropdownMenu>
+  //         <DropdownMenuTrigger asChild>
+  //           <Button variant="ghost" className="h-8 w-8 p-0">
+  //             <MoreHorizontal className="h-4 w-4" />
+  //           </Button>
+  //         </DropdownMenuTrigger>
+  //         <DropdownMenuContent align="end">
+  //           <DropdownMenuItem onClick={() => onEdit(role)}>
+  //             Edit
+  //           </DropdownMenuItem>
+  //           <DropdownMenuItem
+  //             onClick={() => onDelete(role)}
+  //             className="text-red-600"
+  //           >
+  //             Hapus
+  //           </DropdownMenuItem>
+  //         </DropdownMenuContent>
+  //       </DropdownMenu>
+  //     );
+  //   },
+  // },
 ];
 
 export default function RolesPage() {

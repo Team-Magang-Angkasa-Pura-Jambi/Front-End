@@ -7,12 +7,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import {
-  AlertNotification,
+  NotificationOrAlert,
   fetchAllNotificationsApi,
   markAsReadApi,
   markAllAsReadApi,
   bulkDeleteNotificationsApi,
-  deleteAllNotificationsApi,
+  bulkDeleteAlertsApi,
+  deleteAllApi,
+  markAlertAsReadApi,
   fetchMeterAlertsApi,
   fetchSystemAlertsApi,
 } from "@/services/notification.service";
@@ -44,19 +46,34 @@ const NotificationCenterPage = () => {
     data: notifications,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<any, Error, NotificationOrAlert[]>({
     queryKey: ["notifications", activeTab],
     queryFn: queryFnMap[activeTab],
-    select: (data) => data.data,
+    select: (response) => {
+      // PERBAIKAN: Akses data dengan aman, karena struktur respons API bisa berbeda.
+      const data = response.data.data || [];
+
+      if (activeTab === "all") {
+        return data.map((item: any) => ({
+          ...item,
+          id: item.notification_id,
+          type: "notification",
+        }));
+      }
+      return data.map((item: any) => ({
+        ...item,
+        id: item.alert_id,
+        type: "alert",
+      }));
+    },
   });
 
   useEffect(() => {
     setSelectedIds(new Set());
   }, [activeTab]);
-  console.log(notifications?.data?.data);
 
   const unreadCount = useMemo(
-    () => (notifications?.data || [])?.filter((n) => !n.is_read).length,
+    () => (notifications || [])?.filter((n) => !n.is_read).length,
     [notifications]
   );
 
@@ -72,8 +89,13 @@ const NotificationCenterPage = () => {
     toast.error(message);
   };
 
-  const { mutate: markAsRead } = useMutation({
-    mutationFn: markAsReadApi,
+  const { mutate: markAsRead } = useMutation<
+    any,
+    Error,
+    { id: string; type: "notification" | "alert" }
+  >({
+    mutationFn: ({ id, type }) =>
+      type === "notification" ? markAsReadApi(id) : markAlertAsReadApi(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications", activeTab] });
     },
@@ -81,14 +103,25 @@ const NotificationCenterPage = () => {
   });
 
   const { mutate: markAllAsRead, isPending: isMarkingAll } = useMutation({
-    mutationFn: markAllAsReadApi,
+    mutationFn: (scope: TabType) => markAllAsReadApi(scope),
     onSuccess: () => handleSuccess("Semua notifikasi ditandai telah dibaca."),
     onError: (err) => handleError(err, "Gagal menandai semua notifikasi."),
   });
 
   const { mutate: markSelectedAsRead, isPending: isMarkingSelected } =
     useMutation({
-      mutationFn: async (ids: string[]) => Promise.all(ids.map(markAsReadApi)),
+      // PERBAIKAN: Logika untuk memanggil API yang benar berdasarkan tipe item.
+      mutationFn: async (ids: string[]) => {
+        const itemsToMark = (notifications || []).filter((n) =>
+          ids.includes(n.id)
+        );
+        const promises = itemsToMark.map((item) =>
+          item.type === "notification"
+            ? markAsReadApi(item.id)
+            : markAlertAsReadApi(item.id)
+        );
+        return Promise.all(promises);
+      },
       onSuccess: () =>
         handleSuccess("Notifikasi terpilih ditandai telah dibaca."),
       onError: (err) => handleError(err, "Gagal menandai notifikasi."),
@@ -96,14 +129,24 @@ const NotificationCenterPage = () => {
 
   const { mutate: deleteSelected, isPending: isDeletingSelected } = useMutation(
     {
-      mutationFn: (ids: string[]) => bulkDeleteNotificationsApi(ids),
+      // PERBAIKAN: Logika untuk memanggil endpoint delete yang benar.
+      mutationFn: (params: { ids: string[]; scope: TabType }) => {
+        if (params.scope === "all") {
+          // Gunakan API notifikasi umum untuk tab "Semua"
+          return bulkDeleteNotificationsApi(params.ids);
+        }
+        // Untuk scope 'meter' atau 'system'
+        return bulkDeleteAlertsApi({
+          alertIds: params.ids,
+        });
+      },
       onSuccess: () => handleSuccess("Notifikasi terpilih berhasil dihapus."),
       onError: (err) => handleError(err, "Gagal menghapus notifikasi."),
     }
   );
 
   const { mutate: deleteAll, isPending: isDeletingAll } = useMutation({
-    mutationFn: deleteAllNotificationsApi,
+    mutationFn: (scope: TabType) => deleteAllApi(scope),
     onSuccess: () => handleSuccess("Semua notifikasi berhasil dihapus."),
     onError: (err) => handleError(err, "Gagal menghapus semua notifikasi."),
   });
@@ -116,31 +159,33 @@ const NotificationCenterPage = () => {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(
-        new Set((notifications?.data || []).map((n) => n.notification_id))
-      );
+      // PERBAIKAN: Pastikan `notifications` adalah array sebelum di-map.
+      setSelectedIds(new Set((notifications || []).map((n) => n.id)));
     } else {
       setSelectedIds(new Set());
     }
   };
 
-  const handleNotificationClick = (notification: AlertNotification) => {
-    if (!notification?.data?.is_read) {
-      markAsRead(notification.notification_id);
+  const handleNotificationClick = (notification: NotificationOrAlert) => {
+    if (!notification.is_read) {
+      markAsRead({ id: notification.id, type: notification.type });
     }
   };
 
   const handleConfirmDelete = () => {
     if (dialogAction === "delete-all") {
-      deleteAll();
+      deleteAll(activeTab);
     } else if (dialogAction === "delete-selected") {
-      deleteSelected(Array.from(selectedIds));
+      deleteSelected({
+        ids: Array.from(selectedIds),
+        scope: activeTab,
+      });
     }
   };
 
   const isAllSelected =
-    (notifications?.data?.length ?? 0) > 0 &&
-    selectedIds.size === notifications?.data?.length;
+    (notifications?.length ?? 0) > 0 &&
+    selectedIds.size === notifications?.length;
 
   return (
     <div className="container mx-auto max-w-4xl py-8">
@@ -155,7 +200,7 @@ const NotificationCenterPage = () => {
             <NotificationTabs />
           </CardHeader>
           <CardContent>
-            {(notifications?.data?.length ?? 0) > 0 && (
+            {(notifications?.length ?? 0) > 0 && (
               <NotificationActions
                 isAllSelected={isAllSelected}
                 onSelectAll={handleSelectAll}
@@ -166,7 +211,7 @@ const NotificationCenterPage = () => {
                 }
                 unreadCount={unreadCount}
                 isMarkingAll={isMarkingAll}
-                onMarkAllRead={() => markAllAsRead()}
+                onMarkAllRead={() => markAllAsRead(activeTab)}
                 isDeletingSelected={isDeletingSelected}
                 onDeleteSelected={() => setDialogAction("delete-selected")}
                 onDeleteAll={() => setDialogAction("delete-all")}
@@ -175,7 +220,7 @@ const NotificationCenterPage = () => {
             <NotificationContent
               isLoading={isLoading}
               isError={isError}
-              notifications={notifications?.data}
+              notifications={notifications}
               selectedIds={selectedIds}
               onSelect={handleSelect}
               onItemClick={handleNotificationClick}

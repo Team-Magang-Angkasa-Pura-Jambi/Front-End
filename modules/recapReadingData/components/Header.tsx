@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { DateRange } from "react-day-picker";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import {
   CalendarIcon,
@@ -12,6 +12,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
+import { formatInTimeZone } from "date-fns-tz";
 import { ColumnDef } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
 
@@ -59,9 +60,9 @@ import { toast } from "sonner";
 import { exportToExcel, exportToPdf } from "@/lib/exportUtils";
 import { companyLogoBase64 } from "@/lib/logo";
 import { getMetersApi } from "@/services/meter.service";
-import type { RecapMeta, Meter } from "../type"; // Impor tipe yang relevan
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { recalculateRecapApi } from "@/services/recap.service";
+import { RecapMeta } from "@/modules/RecapData/type";
 
 // --- Tipe Props ---
 interface RecapHeaderProps {
@@ -121,12 +122,15 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
   // --- Logika untuk Opsi Ekspor PDF ---
   const generateSubtitle = () => {
     const { from, to } = filters.date || {};
+
     if (from && to) {
-      return `Periode: ${format(from, "d MMM yyyy", { locale: id })} - ${format(
-        to,
-        "d MMM yyyy",
-        { locale: id }
-      )}`;
+      // Perbaikan: Gunakan formatInTimeZone untuk memastikan tanggal diformat di zona waktu yang benar (Asia/Jakarta)
+      // untuk mencegah tanggal mundur karena perbedaan UTC dan waktu lokal.
+      return `Periode: ${formatInTimeZone(from, "Asia/Jakarta", "d MMM yyyy", {
+        locale: id,
+      })} - ${formatInTimeZone(to, "Asia/Jakarta", "d MMM yyyy", {
+        locale: id,
+      })}`;
     }
     return "Semua Periode";
   };
@@ -153,8 +157,8 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
         );
       }
       return recalculateRecapApi({
-        startDate: filters.date.from.toISOString(),
-        endDate: filters.date.to.toISOString(),
+        startDate: format(filters.date.from, "yyyy-MM-dd"),
+        endDate: format(filters.date.to, "yyyy-MM-dd"),
         meterId: filters.meterId,
       });
     },
@@ -189,7 +193,6 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
         </CardHeader>
         <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
           <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full">
-            {/* Filter Jenis Energi */}
             <Tabs
               value={filters.type}
               onValueChange={(value) => handleFilterChange("type", value)}
@@ -200,9 +203,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 <TabsTrigger value="Fuel">BBM</TabsTrigger>
               </TabsList>
             </Tabs>
-
-            {/* Filter Meteran */}
-            <Select
+            <Select // Filter Meteran
               value={filters.meterId ? String(filters.meterId) : "all-meters"}
               onValueChange={(value) =>
                 handleFilterChange(
@@ -234,9 +235,9 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 )}
               </SelectContent>
             </Select>
-
-            {/* Filter Tanggal */}
             <Popover>
+              {" "}
+              {/* Filter Tanggal */}
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
@@ -249,11 +250,27 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                   {filters.date?.from ? (
                     filters.date.to ? (
                       <>
-                        {format(filters.date.from, "d LLL, y", { locale: id })}{" "}
-                        - {format(filters.date.to, "d LLL, y", { locale: id })}
+                        {formatInTimeZone(
+                          filters.date.from,
+                          "Asia/Jakarta",
+                          "d LLL, y",
+                          { locale: id }
+                        )}{" "}
+                        -{" "}
+                        {formatInTimeZone(
+                          filters.date.to,
+                          "Asia/Jakarta",
+                          "d LLL, y",
+                          { locale: id }
+                        )}
                       </>
                     ) : (
-                      format(filters.date.from, "d LLL, y", { locale: id })
+                      formatInTimeZone(
+                        filters.date.from,
+                        "Asia/Jakarta",
+                        "d LLL, y",
+                        { locale: id }
+                      )
                     )
                   ) : (
                     <span>Pilih periode</span>
@@ -271,38 +288,6 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 />
               </PopoverContent>
             </Popover>
-
-            {/* Filter Urutan */}
-            {/* <div className="flex gap-1">
-              <Select
-                value={filters.sortBy}
-                onValueChange={(value) => handleFilterChange("sortBy", value)}
-              >
-                <SelectTrigger className="w-full sm:w-auto">
-                  <SelectValue placeholder="Urutkan Berdasarkan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="reading_date">Tanggal</SelectItem>
-                  <SelectItem value="cost">Biaya</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  handleFilterChange(
-                    "sortOrder",
-                    filters.sortOrder === "asc" ? "desc" : "asc"
-                  )
-                }
-              >
-                {filters.sortOrder === "asc" ? (
-                  <ArrowUp className="h-4 w-4" />
-                ) : (
-                  <ArrowDown className="h-4 w-4" />
-                )}
-              </Button>
-            </div> */}
           </div>
         </CardContent>
       </Card>

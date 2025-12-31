@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Landmark,
   Percent,
+  Tags,
   MoreHorizontal,
   PlusCircle,
   DollarSignIcon,
@@ -74,6 +75,7 @@ import { TargetEfficiencyManagement } from "./targetEfficienyManagement";
 import { ReadingTypeManagement } from "./ReadingTypeManagements";
 import { TaxManagement } from "./TaxManagement";
 import { SchemePriceManagement } from "./SchemePriceManagement";
+import { CategoryManagement } from "./CategoryManagement";
 
 function PlaceholderManagementComponent({ title }: { title: string }) {
   return (
@@ -120,6 +122,12 @@ const masterDataGroups = [
         title: "Jenis Pembacaan",
         icon: Ruler,
         component: <ReadingTypeManagement />,
+      },
+      {
+        key: "category",
+        title: "Kategori",
+        icon: Tags,
+        component: <CategoryManagement />,
       },
     ],
   },

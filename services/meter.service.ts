@@ -1,24 +1,22 @@
 import api from "@/lib/api";
 import { EnergyType } from "./energyType.service";
 
-// ... (definisi tipe MeterStatus dan MeterType Anda tetap sama)
 export const MeterStatus = {
   Active: "Active",
   UnderMaintenance: "UnderMaintenance",
   Inactive: "Inactive",
   DELETED: "DELETED",
-} as const; // 'as const' membuat nilai-nilainya menjadi literal type
+} as const;
 
 export type MeterStatus = keyof typeof MeterStatus;
 
-// Tipe untuk satu objek Meter
 export interface MeterType {
-  meter_id: number; // Tambahkan ID untuk identifikasi
+  meter_id: number;
   meter_code: string;
   energy_type_id: number;
-  location: string | null; // Location bisa jadi null
+  location: string | null;
   status: MeterStatus;
-  energy_type?: EnergyType; // Tambahkan relasi ke EnergyType
+  energy_type?: EnergyType;
 }
 interface MeterApiResponse {
   data: MeterType[];
@@ -31,9 +29,9 @@ interface MeterApiResponse {
 export const getMetersApi = async (
   type_name?: string
 ): Promise<MeterApiResponse> => {
+  
   let url = "/meters";
 
-  // Jika energy_type_id diberikan, tambahkan sebagai query parameter
   if (type_name) {
     url += `?typeName=${type_name}`;
   }
@@ -47,7 +45,6 @@ export const getMetersbyIdApi = async (
 ): Promise<MeterApiResponse> => {
   let url = "/meters";
 
-  // Jika energy_type_id diberikan, tambahkan sebagai query parameter
   if (meterId) {
     url += `/${meterId}`;
   }

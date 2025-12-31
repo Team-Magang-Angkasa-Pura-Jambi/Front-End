@@ -1,12 +1,11 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-// import { InputData } from "./InputData";
 import { DialogType } from "../types";
 import { FormReadingElectric } from "./formElectricty";
-import { FormReadingWater } from "./formWater";
-import { FormReadingFuel } from "./formFuel";
-import { FormReadingPax } from "./formPax";
+import { FormReadingWater } from "./formWater"; // PERBAIKAN: Impor form baru
+import { FormReadingFuel } from "./formFuel"; // PERBAIKAN: Impor form baru
+import { FormReadingPax } from "./formPax"; // PERBAIKAN: Impor form baru
 
 export const getDialogDetails = (openDialog: DialogType) => {
   switch (openDialog) {
@@ -19,14 +18,14 @@ export const getDialogDetails = (openDialog: DialogType) => {
     case "Water":
       return {
         title: "Input Data Pemakaian Air",
-        description: "Masukkan total pemakaian air (m³) untuk hari ini.",
-        form: <FormReadingWater type_name="water" />,
+        description: "Pilih meteran dan masukkan angka pembacaan meter air.",
+        form: <FormReadingWater type_name="Water" />, // PERBAIKAN: Gunakan komponen baru
       };
     case "Fuel":
       return {
-        title: "Input Data Pemakaian BBM Solar  ",
-        description: "Masukkan total pemakaian dalam liter.",
-        form: <FormReadingFuel type_name="Fuel" />,
+        title: "Input Data Pemakaian BBM",
+        description: "Pilih meteran dan masukkan angka pembacaan meter BBM.",
+        form: <FormReadingFuel type_name="Fuel" />, // PERBAIKAN: Gunakan komponen baru
       };
     case "Pax":
       return {

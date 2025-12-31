@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  frontend:
+    # Build image menggunakan Dockerfile.dev dari direktori saat ini (.)
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Beri nama container agar mudah diidentifikasi
+    container_name: sentinel-frontend-dev
+    # Petakan port 3000 di host ke port 3000 di container
+    ports:
+      - "3000:3000"
+    # Atur volumes untuk hot reloading
+    volumes:
+      # Sinkronkan direktori saat ini (kode sumber) di host
+      # ke direktori /app di dalam container.
+      - .:/app
+      # Gunakan volume anonim untuk node_modules.
+      # Ini mencegah folder node_modules dari host (jika ada)
+      # menimpa folder node_modules yang diinstal di dalam container.
+      # Ini adalah praktik terbaik yang penting.
+      - /app/node_modules
+    # Jaga agar container tetap berjalan
+    stdin_open: true
+    tty: true

@@ -85,6 +85,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
     queryKey: ["meters", filters.type],
     // 2. queryFn memanggil API dan langsung mengekstrak array-nya
     queryFn: () => getMetersApi(filters.type),
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -135,9 +136,10 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
         );
       }
       return recalculateRecapApi({
-        startDate: filters.date.from.toISOString(),
-        endDate: filters.date.to.toISOString(),
+        startDate: format(filters.date.from, "yyyy-MM-dd"),
+        endDate: format(filters.date.to, "yyyy-MM-dd"),
         meterId: filters.meterId,
+        // NOTE: API v1.2 mungkin tidak lagi memerlukan parameter lain. Sesuaikan jika perlu.
       });
     },
     onSuccess: () => {
