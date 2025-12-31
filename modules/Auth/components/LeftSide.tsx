@@ -1,23 +1,19 @@
-// Di dalam komponen, misalnya: src/app/login/page.tsx
 "use client";
 
 import { Lock, User } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useLogin } from "@/hooks/useLogin";
-import { Logo } from "@/common/layout/components/logo";
-import { LogoIcon } from "@/common/layout/components/LogoIcon";
 import Image from "next/image";
 
-// Animation variants for the container and its children
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15, // Delay between each child animation
+      staggerChildren: 0.15,
     },
   },
 };
@@ -44,7 +40,7 @@ export const LeftSide = () => {
     performLogin({ username, password });
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -53,8 +49,7 @@ export const LeftSide = () => {
     },
   };
 
-  // Varian untuk teks individual (jika ingin animasi per baris)
-  const textVariants = {
+  const textVariants: Variants = {
     hidden: { opacity: 0, y: 10 },
     visible: {
       opacity: 1,
@@ -70,20 +65,21 @@ export const LeftSide = () => {
       animate="visible"
     >
       <motion.div
-        className=" text-center md:text-left z-20" // Z-index agar di atas ilustrasi
+        className=" text-center md:text-left z-20"
         initial="hidden"
         animate="visible"
         variants={{
           visible: {
             transition: {
-              staggerChildren: 0.1, // Setiap anak akan muncul dengan jeda 0.1 detik
-              delayChildren: 0.2, // Anak pertama akan mulai setelah 0.2 detik
+              staggerChildren: 0.1,
+
+              delayChildren: 0.2,
             },
           },
         }}
       >
         {/* Logo */}
-        <motion.div variants={textVariants} >
+        <motion.div variants={textVariants}>
           <Image
             src={"/image/logo.png"}
             alt="Company Logo"
@@ -94,7 +90,7 @@ export const LeftSide = () => {
 
         {/* Welcome To */}
         <motion.h1
-          className="text-3xl font-bold text-gray-200" // Warna teks lebih terang untuk dark mode, ukuran lebih besar
+          className="text-3xl font-bold text-gray-200"
           variants={textVariants}
         >
           Welcome To
@@ -102,17 +98,14 @@ export const LeftSide = () => {
 
         {/* SENTINEL */}
         <motion.h2
-          className="text-5xl font-extrabold text-blue-400 mt-1 drop-shadow-lg" // Warna lebih terang, ukuran lebih besar, bayangan
+          className="text-5xl font-extrabold text-blue-400 mt-1 drop-shadow-lg"
           variants={textVariants}
         >
           SENTINEL
         </motion.h2>
 
         {/* Deskripsi */}
-        <motion.p
-          className="text-blue-200  max-w-sm" // Warna teks lebih terang, margin top sedikit lebih banyak
-          variants={textVariants}
-        >
+        <motion.p className="text-blue-200  max-w-sm" variants={textVariants}>
           Please log in to access your dashboard.
         </motion.p>
       </motion.div>
