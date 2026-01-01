@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { User, Lock } from "lucide-react";
 import { Bubble } from "./Bubble";
 import { LoginIllustration } from "./LoginIllustration";
 import { LeftSide } from "./LeftSide";

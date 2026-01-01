@@ -7,7 +7,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-// Impor 'useWindowSize'
+
 import { useMouse, useWindowSize } from "@uidotdev/usehooks";
 
 const springConfig = {
@@ -27,7 +27,7 @@ export const Bubble = ({ size, style, delay }) => {
   useEffect(() => {
     mouseX.set(mouse.x ?? 0);
     mouseY.set(mouse.y ?? 0);
-  }, [mouse.x, mouse.y]);
+  }, [mouse.x, mouse.y, mouseX, mouseY]);
 
   const time = useMotionValue(delay * 1000);
   useAnimationFrame((t) => {

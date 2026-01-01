@@ -5,7 +5,7 @@ import { motion, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useLogin } from "@/hooks/useLogin";
+import { useLogin } from "@/modules/Auth/hooks/useLogin";
 import Image from "next/image";
 
 const containerVariants: Variants = {
