@@ -33,7 +33,7 @@ const itemVariants = {
 export const LeftSide = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { mutate: performLogin, isPending, isError } = useLogin();
+  const { mutate: performLogin, isPending, isError, error } = useLogin();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,7 +156,7 @@ export const LeftSide = () => {
             variants={itemVariants}
             className="text-sm font-medium text-red-500"
           >
-            Username atau password yang Anda masukkan salah.
+            {error.response?.data?.status?.message || "Internal Server Error"}
           </motion.p>
         )}
 
