@@ -7,10 +7,7 @@ export interface ReadingType {
   reading_type_id: number;
   type_name: string;
 }
-export interface ReadingDetail {
-  reading_type_id: number | "";
-  value: number | "";
-}
+
 // Pastikan tipe ReadingType ada
 export interface ReadingType {
   reading_type_id: number;
@@ -18,19 +15,7 @@ export interface ReadingType {
   energy_type_id: number;
 }
 
-export interface ReadingPayload {
-  reading_date: Date;
-  meter_id: number;
-  details: ReadingDetail[];
-}
 
-export interface LastReading {
-  value: number;
-  reading_type_id: number;
-  session: {
-    reading_date: Date;
-  };
-}
 /**
  * Mengambil jenis-jenis pembacaan (misal: LWBP, WBP) dari API.
  * @param energyTypeId - ID dari jenis energi (misal: 1 untuk Listrik).
@@ -55,19 +40,6 @@ export const getReadingTypesApibyMeterId = async (
  * Mengirim data pembacaan baru ke API.
  * @param payload - Data pembacaan yang akan dikirim.
  */
-export const submitReadingApi = async (payload: ReadingPayload) => {
-  const response = await api.post("/readings", payload);
-  return response.data;
-};
+
 
 // Tambahkan fungsi ini
-export const getLastReadingApi = async (
-  meterId: number,
-  readingTypeId: number,
-  date: string
-): Promise<{ data: LastReading }> => {
-  const response = await api.get(
-    `/readings/last?meterId=${meterId}&readingTypeId=${readingTypeId}&readingDate=${date}`
-  );
-  return response.data;
-};

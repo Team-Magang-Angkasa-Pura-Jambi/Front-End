@@ -25,10 +25,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { submitPaxApi, PaxPayload } from "@/services/pax.service";
 import { useAuthStore } from "@/stores/authStore";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
+import { PaxPayload, submitPaxApi } from "./services/pax.service";
 
 interface FormPaxProps {
   onSuccess?: () => void;

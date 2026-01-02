@@ -53,15 +53,16 @@ import {
   getEnergyTypesApi,
   EnergyTypesApiResponse,
 } from "@/services/energyType.service";
-import {
-  getLastReadingApi,
-  ReadingPayload,
-  submitReadingApi,
-} from "@/services/readings.service";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formSchema, FormValues } from "./schemas/reading.schema";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
+import {
+  getLastReadingApi,
+  ReadingPayload,
+  submitReadingApi,
+} from "./services/reading.service";
 
 interface FormReadingProps {
   onSuccess?: () => void;
@@ -131,8 +132,6 @@ export const FormReadingElectric = ({
       refetchOnWindowFocus: false,
     })),
   });
-
- 
 
   const { mutate, isPending } = useMutation<
     unknown,
@@ -299,7 +298,6 @@ export const FormReadingElectric = ({
                               <SelectGroup>
                                 {readingTypes
                                   .filter((type) => {
-                            
                                     const isUsedInOtherRows =
                                       detailsValues.some(
                                         (d, idx) =>
