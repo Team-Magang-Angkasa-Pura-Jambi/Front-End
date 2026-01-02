@@ -8,7 +8,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Resolver } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// Impor komponen shadcn/ui
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -47,28 +46,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Impor service dan tipe
 import {
   getEnergyTypesApi,
   EnergyTypesApiResponse,
-  ReadingType,
 } from "@/services/energyType.service";
 import {
   getLastReadingApi,
-  LastReading,
   ReadingPayload,
   submitReadingApi,
 } from "@/services/readings.service";
 import { useAuthStore } from "@/stores/authStore";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/common/types/api";
 
-// --- Tipe Data ---
 interface FormReadingProps {
   onSuccess?: () => void;
   type_name: "Electricity" | "Water" | "Fuel";
 }
 
-// --- Skema Validasi Zod ---
 const formSchema = z.object({
   meter_id: z.string().min(1, { message: "Meteran wajib dipilih." }),
   reading_date: z.date({ error: "Tanggal pembacaan wajib diisi." }),
@@ -86,16 +82,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// --- Komponen Utama ---
 export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
-  // --- Hooks ---
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const [lastReadingDate, setLastReadingDate] = useState<string | null>(null);
-  const canChangeDate = user?.role === "Admin" || user?.role === "SuperAdmin";
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       meter_id: "",
       reading_date: new Date(),
@@ -108,14 +101,12 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     name: "details",
   });
 
-  // --- Data Fetching Utama ---
   const { data: energyTypeData, isLoading: isLoadingData } =
     useQuery<EnergyTypesApiResponse>({
       queryKey: ["energyData", type_name],
       queryFn: () => getEnergyTypesApi(type_name),
     });
 
-  // --- Data Turunan ---
   const meters = useMemo(
     () => energyTypeData?.data[0]?.meters || [],
     [energyTypeData]
@@ -129,17 +120,15 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     [energyTypeData]
   );
 
-  // --- Form State & Effects ---
   const selectedMeterId = form.watch("meter_id");
   const detailsValues = form.watch("details");
   const readingDate = form.watch("reading_date");
 
   useEffect(() => {
     if (selectedMeterId) {
-      // Reset details and add one empty row when meter changes
       replace([]);
       if (fields.length === 0) {
-        append({ reading_type_id: "", value: "" as any });
+        append({ reading_type_id: "", value: "" as unknown as number });
       }
     } else {
       replace([]);
@@ -151,7 +140,6 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     [detailsValues]
   );
 
-  // --- Data Fetching Dependen (Last Reading) ---
   const lastReadingsQueries = useQueries({
     queries: detailsValues.map((detail) => {
       return {
@@ -172,31 +160,23 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     }),
   });
 
-  // Efek untuk menampilkan notifikasi jika data sebelumnya tidak ada
-
   useEffect(() => {
-    var _a, _b, _c: number;
-    const lastDate =
-      (_c =
-        (_b =
-          (_a = lastReadingsQueries[0]) === null || _a === void 0
-            ? void 0
-            : _a.data) === null || _b === void 0
-          ? void 0
-          : _b.data) === null || _c === void 0
-        ? void 0
-        : _c.session?.reading_date;
+    const lastReadingData = lastReadingsQueries[0]?.data?.data;
+    const lastDate = lastReadingData?.session?.reading_date;
+
     if (lastDate) {
       setLastReadingDate(format(new Date(lastDate), "PPP"));
     } else {
       setLastReadingDate(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastReadingsQueries[0]?.data]);
+  }, [lastReadingsQueries]);
 
-  // --- Data Submission ---
-  const { mutate, isPending } = useMutation({
-    mutationFn: (readingData: ReadingPayload) => submitReadingApi(readingData),
+  const { mutate, isPending } = useMutation<
+    unknown,
+    AxiosError<ApiErrorResponse>,
+    ReadingPayload
+  >({
+    mutationFn: (readingData) => submitReadingApi(readingData),
     onSuccess: () => {
       toast.success("Data berhasil dikirim!");
       form.reset();
@@ -205,7 +185,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
       });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error) => {
       const message =
         error.response?.data?.status?.message ||
         "Terjadi kesalahan tidak terduga.";
@@ -216,7 +196,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
   const onSubmit = (values: FormValues) => {
     const payload: ReadingPayload = {
       meter_id: parseInt(values.meter_id),
-      reading_date: values.reading_date.toISOString(),
+      reading_date: values.reading_date,
       details: values.details.map((d) => ({
         reading_type_id: parseInt(d.reading_type_id),
         value: d.value,
@@ -225,7 +205,6 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     mutate(payload);
   };
 
-  // --- JSX ---
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -285,11 +264,6 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                           className={`w-full justify-start text-left font-normal ${
                             !field.value && "text-muted-foreground"
                           }`}
-                          // disabled={
-                          //   !canChangeDate ||
-                          //   !selectedMeterId ||
-                          //   !detailsValues[0]?.reading_type_id
-                          // }
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {field.value ? (
@@ -305,24 +279,6 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        // disabled={(date) => {
-                        //   var _a, _b, _c;
-                        //   const lastDate =
-                        //     (_c =
-                        //       (_b =
-                        //         (_a = lastReadingsQueries[0]) === null ||
-                        //         _a === void 0
-                        //           ? void 0
-                        //           : _a.data) === null || _b === void 0
-                        //         ? void 0
-                        //         : _b.data) === null || _c === void 0
-                        //       ? void 0
-                        //       : _c.session?.reading_date;
-                        //   return (
-                        //     date > new Date() ||
-                        //     (lastDate ? date <= new Date(lastDate) : false)
-                        //   );
-                        // }}
                         initialFocus
                       />
                     </PopoverContent>
@@ -443,7 +399,8 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                                 onClick={() =>
                                   form.setValue(
                                     `details.${index}.value`,
-                                    lastReadingValue ?? ""
+                                    lastReadingValue ??
+                                      ("" as unknown as number)
                                   )
                                 }
                               >
@@ -483,7 +440,9 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
             variant="outline"
             size="sm"
             className="mt-4"
-            onClick={() => append({ reading_type_id: "", value: "" as any })}
+            onClick={() =>
+              append({ reading_type_id: "", value: "" as unknown as number })
+            }
             disabled={fields.length >= readingTypes.length}
           >
             <PlusCircleIcon className="mr-2 h-4 w-4" />
