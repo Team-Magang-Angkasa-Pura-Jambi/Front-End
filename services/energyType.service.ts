@@ -9,7 +9,7 @@ export interface EnergyType {
   unit_of_measurement: string;
   is_active: boolean;
   reading_types: readingTypes[];
-  meters: meters;
+  meters: meters[];
 }
 
 interface readingTypes {
@@ -19,6 +19,7 @@ interface readingTypes {
 }
 
 interface meters {
+  meter_id: number;
   meter_code: string;
   location: string;
   status: Status;

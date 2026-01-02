@@ -19,20 +19,18 @@ export interface ReadingType {
 }
 
 export interface ReadingPayload {
-  reading_date: string;
+  reading_date: Date;
   meter_id: number;
   details: ReadingDetail[];
 }
 
 export interface LastReading {
-  meter_id: string;
-  last_reading_date: string;
   value: number;
-  is_data_missing: boolean;
-  missing_date?: string;
-  message: string;
+  reading_type_id: number;
+  session: {
+    reading_date: Date;
+  };
 }
-
 /**
  * Mengambil jenis-jenis pembacaan (misal: LWBP, WBP) dari API.
  * @param energyTypeId - ID dari jenis energi (misal: 1 untuk Listrik).

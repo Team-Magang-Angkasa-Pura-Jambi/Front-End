@@ -173,27 +173,9 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
   });
 
   // Efek untuk menampilkan notifikasi jika data sebelumnya tidak ada
-  useEffect(() => {
-    lastReadingsQueries.forEach((query) => {
-      let _a: LastReading;
-      if (
-        !query.isFetching &&
-        ((query.isSuccess &&
-          !(!(_a = query.data.data).is_data_missing || _a === void 0
-            ? void 0
-            : _a)) ||
-          query.isError)
-      ) {
-        toast.error("Data hari sebelumnya", {
-          description: `${_a.message}`,
-        });
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastReadingsQueries.map((q) => q.status).join(",")]); // Bergantung pada status semua query
 
   useEffect(() => {
-    var _a, _b, _c: any;
+    var _a, _b, _c: number;
     const lastDate =
       (_c =
         (_b =
@@ -428,7 +410,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className={index > 0 ? "sr-only" : ""}>
-                            Nilai Pembacaan ({unit})
+                            Nilai (cm)
                           </FormLabel>
                           <div className="relative">
                             <FormControl>

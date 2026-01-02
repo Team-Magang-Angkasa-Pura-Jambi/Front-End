@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
 import { authService } from "../services";
-import { LoginPayload, LoginResponseDTO } from "../types/auth.dto";
+import { LoginCredentials, LoginResponseDTO } from "../types/auth.dto";
 import { ApiErrorResponse } from "@/common/types/api";
 import { AxiosError } from "axios";
 
