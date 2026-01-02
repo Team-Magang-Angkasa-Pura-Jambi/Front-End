@@ -110,19 +110,7 @@ export const FormReadingWater = ({
   const detailsValues = form.watch("details");
   const readingDate = form.watch("reading_date");
 
-  useEffect(() => {
-    if (selectedMeterId) {
-      replace([]);
-      if (fields.length === 0) {
-        append({
-          reading_type_id: "" as unknown as number,
-          value: "" as unknown as number,
-        });
-      }
-    } else {
-      replace([]);
-    }
-  }, [selectedMeterId, replace, fields.length, append]);
+  
 
   const lastReadingsQueries = useQueries({
     queries: detailsValues.map((detail) => {
@@ -201,7 +189,7 @@ export const FormReadingWater = ({
                 <FormLabel>Pilih Meteran</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value.toString()}
+                  value={field.value ? String(field.value) : ""}
                   disabled={isLoadingData}
                 >
                   <FormControl>
@@ -236,7 +224,7 @@ export const FormReadingWater = ({
             name="reading_date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Tanggal Pembacaan</FormLabel>
+                <FormLabel>Tanggal</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -312,7 +300,7 @@ export const FormReadingWater = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className={index > 0 ? "sr-only" : ""}>
-                          Jenis Pemakaian
+                          Jenis
                         </FormLabel>
                         <Select
                           onValueChange={field.onChange}

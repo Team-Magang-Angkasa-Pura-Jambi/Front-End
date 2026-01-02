@@ -102,20 +102,6 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
   const detailsValues = form.watch("details");
   const readingDate = form.watch("reading_date");
 
-  useEffect(() => {
-    if (selectedMeterId) {
-      replace([]);
-      if (fields.length === 0) {
-        append({
-          reading_type_id: "" as unknown as number,
-          value: "" as unknown as number,
-        });
-      }
-    } else {
-      replace([]);
-    }
-  }, [selectedMeterId, replace, fields.length, append]);
-
   const lastReadingsQueries = useQueries({
     queries: detailsValues.map((detail) => {
       return {
@@ -300,7 +286,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                                 <SelectValue
                                   placeholder={
                                     !selectedMeterId
-                                      ? "Pilih meteran"
+                                      ? "Pilih Jenis"
                                       : isLoadingData
                                       ? "Memuat..."
                                       : "Pilih Jenis"
