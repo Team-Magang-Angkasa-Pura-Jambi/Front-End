@@ -1,6 +1,5 @@
 "use client";
 
-import { addDays, subDays } from "date-fns";
 import { useMemo, useEffect, useState } from "react";
 import {
   useMutation,
@@ -9,7 +8,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useForm, useFieldArray, Resolver } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import {
@@ -59,38 +57,21 @@ import { useAuthStore } from "@/stores/authStore";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
+import { formSchema, FormValues } from "./schemas/reading.schema";
 
 interface FormReadingProps {
   onSuccess?: () => void;
   type_name: "Electricity" | "Water" | "Fuel";
 }
 
-const formSchema = z.object({
-  meter_id: z.string().min(1, { message: "Meteran wajib dipilih." }),
-  reading_date: z.date({ error: "Tanggal pembacaan wajib diisi." }),
-  details: z
-    .array(
-      z.object({
-        reading_type_id: z.string().min(1, { message: "Jenis wajib dipilih." }),
-        value: z.coerce
-          .number({ error: "Nilai harus berupa angka." })
-          .min(0, "Nilai tidak boleh negatif."),
-      })
-    )
-    .min(1, "Minimal harus ada satu detail pembacaan."),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
 export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
   const [lastReadingDate, setLastReadingDate] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
-      meter_id: "",
+      meter_id: "" as unknown as number,
       reading_date: new Date(),
       details: [],
     },
@@ -115,10 +96,6 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     () => energyTypeData?.data[0]?.reading_types || [],
     [energyTypeData]
   );
-  const unit = useMemo(
-    () => energyTypeData?.data[0]?.unit_of_measurement || "...",
-    [energyTypeData]
-  );
 
   const selectedMeterId = form.watch("meter_id");
   const detailsValues = form.watch("details");
@@ -128,17 +105,15 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     if (selectedMeterId) {
       replace([]);
       if (fields.length === 0) {
-        append({ reading_type_id: "", value: "" as unknown as number });
+        append({
+          reading_type_id: "" as unknown as number,
+          value: "" as unknown as number,
+        });
       }
     } else {
       replace([]);
     }
-  }, [selectedMeterId, replace]);
-
-  const selectedTypeIds = useMemo(
-    () => detailsValues.map((d) => d.reading_type_id),
-    [detailsValues]
-  );
+  }, [selectedMeterId, replace, fields.length, append]);
 
   const lastReadingsQueries = useQueries({
     queries: detailsValues.map((detail) => {
@@ -151,8 +126,8 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
         ],
         queryFn: () =>
           getLastReadingApi(
-            parseInt(selectedMeterId),
-            parseInt(detail.reading_type_id),
+            selectedMeterId,
+            detail.reading_type_id,
             readingDate.toISOString()
           ),
         enabled: !!selectedMeterId && !!detail.reading_type_id && !!readingDate,
@@ -195,10 +170,10 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
 
   const onSubmit = (values: FormValues) => {
     const payload: ReadingPayload = {
-      meter_id: parseInt(values.meter_id),
+      meter_id: values.meter_id,
       reading_date: values.reading_date,
       details: values.details.map((d) => ({
-        reading_type_id: parseInt(d.reading_type_id),
+        reading_type_id: d.reading_type_id,
         value: d.value,
       })),
     };
@@ -218,7 +193,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                   <FormLabel>Pilih Meteran</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    value={field.value}
+                    value={field.value.toString()}
                     disabled={isLoadingData}
                   >
                     <FormControl>
@@ -316,7 +291,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            value={field.value}
+                            value={field.value.toString()}
                             disabled={isLoadingData || meters.length === 0}
                           >
                             <FormControl>
@@ -335,18 +310,23 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                             <SelectContent>
                               <SelectGroup>
                                 {readingTypes
-                                  .filter(
-                                    (type) =>
-                                      !selectedTypeIds.includes(
-                                        type.reading_type_id.toString()
-                                      ) ||
-                                      field.value ===
-                                        type.reading_type_id.toString()
-                                  )
+                                  .filter((type) => {
+                                    const isUsedInOtherRows =
+                                      detailsValues.some(
+                                        (d, idx) =>
+                                          idx !== index &&
+                                          Number(d.reading_type_id) ===
+                                            type.reading_type_id
+                                      );
+
+                                    return !isUsedInOtherRows;
+                                  })
                                   .map((type) => (
                                     <SelectItem
                                       key={type.reading_type_id}
-                                      value={type.reading_type_id.toString()}
+                                      value={
+                                        type.reading_type_id?.toString() || ""
+                                      }
                                     >
                                       {type.type_name}
                                     </SelectItem>
@@ -441,7 +421,10 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
             size="sm"
             className="mt-4"
             onClick={() =>
-              append({ reading_type_id: "", value: "" as unknown as number })
+              append({
+                reading_type_id: "" as unknown as number,
+                value: "" as unknown as number,
+              })
             }
             disabled={fields.length >= readingTypes.length}
           >

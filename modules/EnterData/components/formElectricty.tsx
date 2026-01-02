@@ -59,7 +59,7 @@ import {
   submitReadingApi,
 } from "@/services/readings.service";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formSchema, FormValues } from "./schemas/login.schema";
+import { formSchema, FormValues } from "./schemas/reading.schema";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
 
