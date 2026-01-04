@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { format } from "date-fns";
-import { id } from "date-fns/locale"; // BARU: Impor ikon Trash2
+import { id } from "date-fns/locale";
 import { Users, Edit, CalendarDays, Trash2 } from "lucide-react";
 
 import {
@@ -14,7 +14,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ReadingSessionWithDetails } from "../types";
 import {
   Card,
   CardContent,
@@ -22,17 +21,18 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { ReadingHistory } from "../services/reading.service";
 
 export interface DailyPaxData {
   date: string;
   pax: number;
-  paxId: number; // ID dari data Pax itu sendiri
+  paxId: number;
 }
 
 interface PaxDailyTableProps {
-  data: ReadingSessionWithDetails[];
+  data: ReadingHistory[];
   onEdit: (paxData: DailyPaxData) => void;
-  onDelete: (paxData: DailyPaxData) => void; // BARU: Prop untuk handler hapus
+  onDelete: (paxData: DailyPaxData) => void;
 }
 
 export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
@@ -41,12 +41,11 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
   onDelete,
 }) => {
   const dailyPaxData = useMemo<DailyPaxData[]>(() => {
-    // PERBAIKAN: Logika untuk mengelompokkan data Pax per hari
     const paxByDate: {
       [key: string]: {
         totalPax: number;
         firstSessionId: number;
-        paxId: number | null; // paxId bisa null jika tidak ada data pax
+        paxId: number | null;
       };
     } = {};
 
@@ -56,29 +55,30 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
         paxByDate[dateStr] = {
           totalPax: 0,
           firstSessionId: session.session_id,
-          paxId: null, // Inisialisasi dengan null
+          paxId: null,
         };
       }
-      // Hanya proses jika ada data pax di sesi ini
-      if (session.pax !== null && session.pax_id !== null) {
-        paxByDate[dateStr].totalPax = session.pax; // Ambil nilai pax dari sesi (asumsi 1 data pax per hari)
-        paxByDate[dateStr].paxId = session.pax_id; // Simpan paxId
+
+      if (session.paxData.pax !== null && session.paxData.pax_id !== null) {
+        paxByDate[dateStr].totalPax = session.paxData.pax;
+        paxByDate[dateStr].paxId = session.paxData.pax_id;
       }
     });
 
-    // PERBAIKAN: Filter data yang tidak memiliki paxId (null) agar tidak ditampilkan
     return Object.entries(paxByDate)
       .map(([date, { totalPax, firstSessionId, paxId }]) => ({
         date,
         pax: totalPax,
-        session_id: firstSessionId, // session_id tetap ada untuk referensi
+        session_id: firstSessionId,
         paxId: paxId,
       }))
       .filter((item) => item.paxId !== null);
   }, [data]);
 
+  console.log(dailyPaxData);
+
   if (dailyPaxData.length === 0) {
-    return null; // Jangan tampilkan apapun jika tidak ada data Pax
+    return null;
   }
 
   return (
@@ -88,8 +88,8 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
           <Users className="h-5 w-5" /> Ringkasan Pax Harian
         </CardTitle>
         <CardDescription>
-          Tabel ini menampilkan total penumpang (Pax) per hari. Klik 'Edit'
-          untuk memperbarui jumlah Pax pada hari tersebut.
+          Tabel ini menampilkan total penumpang (Pax) per hari. Klik
+          &apos;Edit&apos; untuk memperbarui jumlah Pax pada hari tersebut.
         </CardDescription>
       </CardHeader>
       <CardContent>

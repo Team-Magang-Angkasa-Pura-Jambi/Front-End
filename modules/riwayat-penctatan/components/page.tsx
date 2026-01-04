@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DateRange } from "react-day-picker";
-import { subDays, format } from "date-fns";
-import { da, id } from "date-fns/locale";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 import {
   Card,
   CardContent,
@@ -12,7 +11,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Loader2, AlertTriangle, PlusCircle, BookLock } from "lucide-react";
+import { Loader2, AlertTriangle, BookLock } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,49 +25,60 @@ import {
 import { toast } from "sonner";
 
 import { createColumns } from "./ColumnTable";
-import { RecapHeader } from "./Header"; // Pastikan path ini benar
-import { ReadingSessionWithDetails, HistoryFilters } from "../types";
-import { ReadingForm } from "./readingForm"; // Pastikan path ini benar
+import { RecapHeader } from "./Header";
+import { HistoryFilters } from "../types";
+import { ReadingForm } from "./readingForm";
 import {
   deleteReadingSessionApi,
   getReadingSessionsApi,
-  deletePaxApi, // BARU: Impor service deletePaxApi
-} from "@/services/readingSession.service";
-import { ManagementDialog } from "./ManagementDialog";
+  ReadingHistory,
+} from "../services/reading.service";
+import { deletePaxApi } from "../services/pax.service";
+
 import { DataTable } from "./Table";
 import { PaxDailyTable, DailyPaxData } from "./PaxDailyTable";
 import { PaxEditForm } from "./PaxEditForm";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/common/types/api";
+import { ManagementDialog } from "./ManagementDialog";
+import { ENERGY_TYPES, EnergyTypeName } from "@/common/types/energy";
 
 export const Page = () => {
   const queryClient = useQueryClient();
+  const now = new Date();
 
-  // --- State untuk Filter dan Data ---
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const firstDayOfNextMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    1
+  );
+
   const [filters, setFilters] = useState<HistoryFilters>({
-    type: "Electricity",
-    date: { from: subDays(new Date(), 7), to: new Date() },
+    type: "Electricity" as unknown as EnergyTypeName,
+    date: {
+      from: firstDayOfMonth,
+      to: firstDayOfNextMonth,
+    },
     sortBy: "reading_date",
     sortOrder: "desc",
     meterId: undefined,
   });
-
-  // --- State untuk mengelola dialog/modal ---
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] =
-    useState<ReadingSessionWithDetails | null>(null);
-  const [itemToDelete, setItemToDelete] =
-    useState<ReadingSessionWithDetails | null>(null);
-  // BARU: State untuk dialog edit Pax
+  const [editingItem, setEditingItem] = useState<ReadingHistory | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<ReadingHistory | null>(null);
+
   const [isPaxModalOpen, setIsPaxModalOpen] = useState(false);
   const [editingPaxData, setEditingPaxData] = useState<DailyPaxData | null>(
     null
   );
-  // BARU: State untuk dialog hapus Pax
+
   const [paxToDelete, setPaxToDelete] = useState<DailyPaxData | null>(null);
 
   const { type, date, sortBy, sortOrder, meterId } = filters;
   console.log(date!.from!.toISOString());
 
-  // --- Pengambilan Data (Data Fetching) ---
   const {
     data: queryData,
     isLoading,
@@ -78,9 +88,8 @@ export const Page = () => {
     queryKey: ["readingHistory", type, date, meterId, sortBy, sortOrder],
     queryFn: () =>
       getReadingSessionsApi({
-        energyTypeName: type,
-        // PERBAIKAN: Buat tanggal UTC secara manual dari komponen tanggal lokal
-        // untuk menghindari pergeseran hari akibat konversi zona waktu.
+        energyTypeName: type as unknown as EnergyTypeName,
+
         startDate: date?.from
           ? new Date(
               Date.UTC(
@@ -104,20 +113,26 @@ export const Page = () => {
         sortOrder,
       }),
     enabled: !!date?.from && !!date?.to,
+    refetchOnWindowFocus: false,
   });
 
-  const historyData = queryData?.data || [];
+  const historyData = useMemo<ReadingHistory[]>(() => {
+    const data = queryData?.data;
+    return Array.isArray(data) ? data : [];
+  }, [queryData?.data]);
 
-  const { mutate: deleteSession, isPending: isDeleting } = useMutation({
-    // PERBAIKAN: Mengirim session_id, bukan paxId, untuk menghapus sesi pembacaan.
-    mutationFn: (item: ReadingSessionWithDetails) =>
-      deleteReadingSessionApi(item.session_id),
+  const { mutate: deleteSession, isPending: isDeleting } = useMutation<
+    unknown,
+    AxiosError<ApiErrorResponse>,
+    number
+  >({
+    mutationFn: (item) => deleteReadingSessionApi(item),
     onSuccess: () => {
       toast.success("Data pencatatan berhasil dihapus!");
       queryClient.invalidateQueries({ queryKey: ["readingHistory"] });
-      setItemToDelete(null); // Menutup dialog konfirmasi
+      setItemToDelete(null);
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(
         `Gagal menghapus: ${
           error.response?.data?.status?.message || "Terjadi kesalahan"
@@ -126,15 +141,18 @@ export const Page = () => {
     },
   });
 
-  // BARU: Mutasi untuk menghapus data Pax
-  const { mutate: deletePax, isPending: isDeletingPax } = useMutation({
+  const { mutate: deletePax, isPending: isDeletingPax } = useMutation<
+    unknown,
+    AxiosError<ApiErrorResponse>,
+    DailyPaxData
+  >({
     mutationFn: (item: DailyPaxData) => deletePaxApi(item.paxId),
     onSuccess: () => {
       toast.success("Data Pax berhasil dihapus!");
       queryClient.invalidateQueries({ queryKey: ["readingHistory"] });
-      setPaxToDelete(null); // Menutup dialog konfirmasi
+      setPaxToDelete(null);
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(
         `Gagal menghapus Pax: ${
           error.response?.data?.status?.message || "Terjadi kesalahan"
@@ -142,36 +160,28 @@ export const Page = () => {
       );
     },
   });
-  // --- Handlers untuk Aksi Dialog ---
-  const handleOpenCreate = () => {
-    setEditingItem(null); // Pastikan tidak ada item yang diedit
-    setIsModalOpen(true);
-  };
 
-  const handleOpenEdit = useCallback((item: ReadingSessionWithDetails) => {
+  const handleOpenEdit = useCallback((item: ReadingHistory) => {
     setEditingItem(item);
-    setIsModalOpen(true); // Buka dialog yang sama untuk edit
+    setIsModalOpen(true);
   }, []);
 
-  const handleDelete = useCallback((item: ReadingSessionWithDetails) => {
-    setItemToDelete(item); // Ini akan membuka AlertDialog
+  const handleDelete = useCallback((item: ReadingHistory) => {
+    setItemToDelete(item);
   }, []);
 
-  // BARU: Handler untuk membuka dialog edit Pax
   const handleOpenPaxEdit = useCallback((paxData: DailyPaxData) => {
     setEditingPaxData(paxData);
     setIsPaxModalOpen(true);
   }, []);
 
-  // BARU: Handler untuk membuka dialog hapus Pax
   const handleDeletePax = useCallback((paxData: DailyPaxData) => {
-    setPaxToDelete(paxData); // Hanya tampilkan dialog, jangan langsung hapus
+    setPaxToDelete(paxData);
   }, []);
 
-  // --- Definisi Kolom sekarang menerima handler ---
   const columns = useMemo(
-    () => createColumns(handleOpenEdit, handleDelete, filters.type),
-    [handleOpenEdit, handleDelete, filters.type]
+    () => createColumns(handleOpenEdit, handleDelete),
+    [handleOpenEdit, handleDelete]
   );
 
   const renderContent = () => {
@@ -205,7 +215,7 @@ export const Page = () => {
       );
     }
 
-    if (historyData.length === 0) {
+    if (historyData?.length === 0) {
       return (
         <Card className="flex flex-col items-center justify-center text-center h-96">
           <CardContent className="p-6">
@@ -224,7 +234,7 @@ export const Page = () => {
 
     return (
       <div className="space-y-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filters.type === "Electricity" && (
+        {filters.type === ENERGY_TYPES.ELECTRICITY && (
           <PaxDailyTable
             data={historyData}
             onEdit={handleOpenPaxEdit}
@@ -256,32 +266,22 @@ export const Page = () => {
 
   return (
     <div className="space-y-6">
-      <RecapHeader
-        columns={columns}
-        filters={filters}
-        setFilters={setFilters}
-        isFetching={isFetching}
-      />
+      <RecapHeader filters={filters} setFilters={setFilters} />
       {renderContent()}
 
-      {/* Dialog untuk Tambah/Edit Data. Sekarang diaktifkan. */}
       <ManagementDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={
-          editingItem
-            ? "Edit Catatan Pembacaan"
-            : `Tambah Catatan ${filters.type}`
+          editingItem ? "Edit Input Data" : `Tambah Catatan ${filters.type}`
         }
       >
         <ReadingForm
           initialData={editingItem}
-          onSuccess={() => setIsModalOpen(false)} // Tutup dialog saat berhasil
-          energyType={filters.type}
+          onSuccess={() => setIsModalOpen(false)}
         />
       </ManagementDialog>
 
-      {/* BARU: Dialog khusus untuk Edit Pax */}
       {editingPaxData && (
         <ManagementDialog
           isOpen={isPaxModalOpen}
@@ -295,7 +295,6 @@ export const Page = () => {
         </ManagementDialog>
       )}
 
-      {/* Dialog Konfirmasi untuk Hapus Data */}
       <AlertDialog
         open={!!itemToDelete}
         onOpenChange={() => setItemToDelete(null)}
@@ -323,7 +322,7 @@ export const Page = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteSession(itemToDelete!)}
+              onClick={() => deleteSession(itemToDelete.session_id)}
               disabled={isDeleting}
             >
               {isDeleting ? "Menghapus..." : "Ya, Hapus"}
@@ -332,7 +331,6 @@ export const Page = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* BARU: Dialog Konfirmasi untuk Hapus Data Pax */}
       <AlertDialog
         open={!!paxToDelete}
         onOpenChange={() => setPaxToDelete(null)}

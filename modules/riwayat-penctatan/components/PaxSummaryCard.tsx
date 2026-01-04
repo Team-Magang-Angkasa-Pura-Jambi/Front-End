@@ -3,10 +3,10 @@
 import React, { useMemo } from "react";
 import { Users, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ReadingSessionWithDetails } from "../types";
+import { ReadingHistory } from "../services/reading.service";
 
 interface PaxSummaryCardProps {
-  data: ReadingSessionWithDetails[];
+  data: ReadingHistory[];
   isLoading: boolean;
 }
 
@@ -19,7 +19,7 @@ export const PaxSummaryCard: React.FC<PaxSummaryCardProps> = ({
   isLoading,
 }) => {
   const totalPax = useMemo(() => {
-    return data.reduce((sum, session) => sum + (session.pax || 0), 0);
+    return data.reduce((sum, session) => sum + (session.paxData.pax || 0), 0);
   }, [data]);
 
   return (

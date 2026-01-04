@@ -1,12 +1,11 @@
 "use client";
 
 import { Column, ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal, Users } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
-import { ReadingSessionWithDetails } from "../types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,13 +13,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// DIUBAH: Impor tipe data yang benar untuk riwayat
+import { ReadingHistory } from "../services/reading.service";
 
-/**
- * Memformat nilai menjadi format angka lokal Indonesia dengan 2 desimal.
- * @param value Nilai yang akan diformat.
- * @returns String angka atau "-" jika tidak valid.
- */
 const formatNumber = (value: unknown): string => {
   const num = Number(value);
   if (value === null || value === undefined || isNaN(num)) {
@@ -32,14 +26,11 @@ const formatNumber = (value: unknown): string => {
   }).format(num);
 };
 
-/**
- * Komponen helper untuk membuat header kolom yang bisa di-sort.
- */
 const SortableHeader = ({
   column,
   title,
 }: {
-  column: Column<ReadingSessionWithDetails, unknown>;
+  column: Column<ReadingHistory, unknown>;
   title: string;
 }) => (
   <Button
@@ -52,18 +43,11 @@ const SortableHeader = ({
   </Button>
 );
 
-/**
- * DIUBAH TOTAL: Membuat definisi kolom untuk tabel RIWAYAT PENCATATAN.
- * Fungsi ini sekarang lebih sederhana karena struktur data riwayat konsisten.
- * @param dataType - Jenis energi (saat ini tidak digunakan karena kolomnya generik, tapi bisa dipakai untuk kustomisasi di masa depan).
- * @returns Array dari ColumnDef.
- */
 export const createColumns = (
-  onEdit: (item: ReadingSessionWithDetails) => void,
-  onDelete: (item: ReadingSessionWithDetails) => void,
-  dataType: "Electricity" | "Water" | "Fuel"
-): ColumnDef<ReadingSessionWithDetails>[] => {
-  const columns: ColumnDef<ReadingSessionWithDetails>[] = [
+  onEdit: (item: ReadingHistory) => void,
+  onDelete: (item: ReadingHistory) => void
+): ColumnDef<ReadingHistory>[] => {
+  const columns: ColumnDef<ReadingHistory>[] = [
     {
       accessorKey: "reading_date",
       header: ({ column }) => (
@@ -72,22 +56,19 @@ export const createColumns = (
       cell: ({ row }) => {
         const dateValue = row.getValue("reading_date") as string | Date;
         if (!dateValue) return "-";
-        // Menggunakan date-fns untuk format yang lebih konsisten
+
         return format(new Date(dateValue), "dd MMM yyyy", { locale: id });
       },
     },
     {
-      // BARU: Mengakses data relasi dengan dot notation
       accessorKey: "meter.meter_code",
       header: "Kode Meter",
     },
     {
-      // BARU: Mengakses data relasi dengan dot notation
       accessorKey: "user.username",
       header: "Petugas Pencatat",
     },
     {
-      // BARU: Kolom ini secara cerdas menampilkan semua detail bacaan dari array
       accessorKey: "details",
       header: "Detail Pembacaan",
       cell: ({ row }) => {
@@ -110,15 +91,13 @@ export const createColumns = (
         );
       },
     },
-    // Kolom Pax dihapus dari sini
+
     {
       id: "actions",
       header: "",
       cell: ({ row, table }) => {
         const item = row.original;
-        // PERBAIKAN: Logika untuk menonaktifkan tombol Edit.
-        // Asumsi data sudah diurutkan dari yang terbaru (descending).
-        // Hanya item pertama (index 0) yang bisa diedit.
+
         const isLatest = row.index === 0;
 
         return (

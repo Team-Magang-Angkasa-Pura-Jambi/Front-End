@@ -58,7 +58,7 @@ import {
   getLastReadingApi,
   ReadingPayload,
   submitReadingApi,
-} from "./services/reading.service";
+} from "./services";
 
 interface FormReadingProps {
   onSuccess?: () => void;

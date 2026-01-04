@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import React from "react";
+import { Resolver, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,11 +20,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { updatePaxApi } from "@/services/readingSession.service"; // DIUBAH: Impor service baru
 import { DailyPaxData } from "./PaxDailyTable";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/common/types/api";
+import { updatePaxApi } from "../services/pax.service";
 
 const formSchema = z.object({
-  // PERBAIKAN: Sesuaikan dengan skema backend, gunakan 'total_pax'
   total_pax: z.coerce
     .number({ error: "Pax harus berupa angka." })
     .int("Jumlah pax harus bilangan bulat.")
@@ -44,15 +45,17 @@ export const PaxEditForm: React.FC<PaxEditFormProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
-      // PERBAIKAN: Gunakan 'total_pax' dan ambil nilai dari initialData.pax
       total_pax: initialData.pax,
     },
   });
 
-  const { mutate, isPending } = useMutation({
-    // PERBAIKAN: Gunakan service updatePaxApi dan kirim payload yang benar
+  const { mutate, isPending } = useMutation<
+    unknown,
+    AxiosError<ApiErrorResponse>,
+    FormValues
+  >({
     mutationFn: (payload: FormValues) =>
       updatePaxApi(initialData.paxId, payload),
     onSuccess: () => {
@@ -60,7 +63,7 @@ export const PaxEditForm: React.FC<PaxEditFormProps> = ({
       queryClient.invalidateQueries({ queryKey: ["readingHistory"] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error("Gagal memperbarui Pax", {
         description:
           error.response?.data?.status?.message || "Terjadi kesalahan.",
@@ -85,7 +88,7 @@ export const PaxEditForm: React.FC<PaxEditFormProps> = ({
         </div>
         <FormField
           control={form.control}
-          name="total_pax" // PERBAIKAN: Hubungkan ke field 'total_pax'
+          name="total_pax"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Jumlah Pax</FormLabel>

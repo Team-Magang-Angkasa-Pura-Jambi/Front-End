@@ -57,7 +57,7 @@ import {
   getLastReadingApi,
   ReadingPayload,
   submitReadingApi,
-} from "./services/reading.service";
+} from "./services";
 
 interface FormReadingProps {
   onSuccess?: () => void;
@@ -109,8 +109,6 @@ export const FormReadingWater = ({
   const selectedMeterId = form.watch("meter_id");
   const detailsValues = form.watch("details");
   const readingDate = form.watch("reading_date");
-
-  
 
   const lastReadingsQueries = useQueries({
     queries: detailsValues.map((detail) => {
