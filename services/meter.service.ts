@@ -1,5 +1,5 @@
+import { EnergyType, EnergyTypeName } from "@/common/types/energy";
 import api from "@/lib/api";
-import { EnergyType } from "./energyType.service";
 
 export const MeterStatus = {
   Active: "Active",
@@ -27,9 +27,8 @@ interface MeterApiResponse {
  * @param energy_type_id - ID dari tipe energi (opsional).
  */
 export const getMetersApi = async (
-  type_name?: string
+  type_name?: EnergyTypeName
 ): Promise<MeterApiResponse> => {
-  
   let url = "/meters";
 
   if (type_name) {

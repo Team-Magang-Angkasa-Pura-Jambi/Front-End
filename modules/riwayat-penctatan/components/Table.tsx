@@ -19,14 +19,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// --- DIUBAH: Tipe Props disederhanakan untuk tabel data generik ---
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading: boolean;
 }
 
-// --- DIUBAH: Komponen diganti nama menjadi DataTable yang lebih generik ---
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -39,24 +37,17 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  // --- Komponen Skeleton (Placeholder saat Loading) ---
   const TableSkeleton = () =>
-    Array.from({ length: 10 }).map(
-      (
-        _,
-        i // Ditambah menjadi 10 baris untuk visual yang lebih baik
-      ) => (
-        <TableRow key={i}>
-          {columns.map((col, j) => (
-            <TableCell key={j}>
-              <Skeleton className="h-6 w-full" />
-            </TableCell>
-          ))}
-        </TableRow>
-      )
-    );
+    Array.from({ length: 10 }).map((_, i) => (
+      <TableRow key={i}>
+        {columns.map((col, j) => (
+          <TableCell key={j}>
+            <Skeleton className="h-6 w-full" />
+          </TableCell>
+        ))}
+      </TableRow>
+    ));
 
-  // --- JSX ---
   return (
     <div>
       <div className="rounded-md border">
@@ -108,8 +99,6 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
-
-          {/* DIHAPUS: TableFooter tidak lagi relevan untuk tabel riwayat */}
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
