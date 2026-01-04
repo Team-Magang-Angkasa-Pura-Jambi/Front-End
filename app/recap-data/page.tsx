@@ -1,5 +1,5 @@
 import { AuthLayouts } from "@/common/layout";
-import RecapPage from "@/modules/RecapData";
+import RecapPage from "@/modules/UsageSummary";
 
 export default function RecapPages() {
   return (
