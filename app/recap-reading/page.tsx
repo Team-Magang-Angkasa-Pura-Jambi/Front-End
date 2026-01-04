@@ -1,5 +1,5 @@
 import { AuthLayouts } from "@/common/layout";
-import RecapReading from "@/modules/riwayat-penctatan";
+import RecapReading from "@/modules/LoggingActivity";
 
 export default function RecapReadingPage() {
   return (

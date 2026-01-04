@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Column, ColumnDef } from "@tanstack/react-table";
+import { Column, ColumnDef, Row } from "@tanstack/react-table";
 import {
   ArrowUpDown,
   Briefcase,
@@ -24,23 +24,19 @@ import {
 import { Minus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { RecapDataRow } from "../type"; // Ganti 'RecapRecord' ke 'RecapDataRow' agar konsisten
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  runSinglePredictionApi,
-  runSingleClassificationApi,
-} from "@/services/analysis.service";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-/**
- * Memformat nilai menjadi format mata uang Rupiah.
- * @param amount Nilai yang akan diformat.
- * @returns String mata uang atau "-" jika tidak valid.
- */
+import { cn } from "@/lib/utils";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/common/types/api";
+import { RecapDataRow } from "../types/recap.type";
+import { runSingleClassificationApi, runSinglePredictionApi } from "../services/recap.service";
+
 const formatCurrency = (amount: unknown): string => {
   const num = Number(amount);
-  // Cek jika amount null, undefined, atau bukan angka yang valid
+
   if (amount === null || amount === undefined || isNaN(num)) {
     return "-";
   }
@@ -50,15 +46,10 @@ const formatCurrency = (amount: unknown): string => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(num);
-  // Menghilangkan spasi antara 'Rp' dan angka
+
   return formatted.replace(/\s/g, "");
 };
 
-/**
- * Memformat nilai menjadi format angka lokal Indonesia.
- * @param value Nilai yang akan diformat.
- * @returns String angka atau "-" jika tidak valid.
- */
 const formatNumber = (value: unknown): string => {
   const num = Number(value);
   if (value === null || value === undefined || isNaN(num)) {
@@ -70,9 +61,6 @@ const formatNumber = (value: unknown): string => {
   }).format(num);
 };
 
-/**
- * Komponen helper untuk membuat header kolom yang bisa di-sort.
- */
 const SortableHeader = ({
   column,
   title,
@@ -96,50 +84,57 @@ const ClassificationBadge = ({
   classification: RecapDataRow["classification"];
 }) => {
   if (!classification || classification === "UNKNOWN") {
-    return <span className="text-muted-foreground ">-</span>;
+    return <span className="text-muted-foreground">-</span>;
   }
 
-  const variantMap: {
-    [key in "HEMAT" | "NORMAL" | "BOROS"]:
-      | "success"
-      | "default"
-      | "destructive";
-  } = {
-    HEMAT: "success",
+  const colorMap: Record<"HEMAT" | "NORMAL" | "BOROS", string> = {
+    HEMAT: "bg-emerald-500 hover:bg-emerald-600 text-white border-transparent",
+    NORMAL: "",
+    BOROS: "",
+  };
+
+  const variantMap: Record<
+    "HEMAT" | "NORMAL" | "BOROS",
+    "default" | "destructive"
+  > = {
+    HEMAT: "default",
     NORMAL: "default",
     BOROS: "destructive",
   };
 
   return (
-    <Badge className="w-20" variant={variantMap[classification]}>
+    <Badge
+      className={cn("w-20 justify-center", colorMap[classification])}
+      variant={variantMap[classification]}
+    >
       {classification}
     </Badge>
   );
 };
-/**
- * Komponen sel khusus untuk tombol prediksi.
- * Menggunakan hook `useMutation` untuk memanggil API.
- */
+
 const PredictionCell = ({
   row,
   meterId,
 }: {
-  row: any;
+  row: Row<RecapDataRow>;
   meterId: number | null;
 }) => {
-  const queryClient = useQueryClient(); // 1. Dapatkan instance query client
-  const { mutate, isPending } = useMutation({
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useMutation<
+    unknown,
+    AxiosError<ApiErrorResponse>,
+    { date: string; meterId: number }
+  >({
     mutationFn: runSinglePredictionApi,
     onSuccess: () => {
-      // 2. Invalidate query 'recapData' untuk memicu refetch
       queryClient.invalidateQueries({ queryKey: ["recapData"] });
       toast.success("Prediksi berhasil dijalankan.", {
         description: "Data mungkin memerlukan beberapa saat untuk diperbarui.",
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error("Gagal menjalankan prediksi.", {
-        description: error.response?.data?.message || error.message,
+        description: error.response?.data?.status?.message || error.message,
       });
     },
   });
@@ -173,18 +168,19 @@ const PredictionCell = ({
   );
 };
 
-/**
- * Komponen sel khusus untuk tombol klasifikasi.
- */
 const ClassificationActionCell = ({
   row,
   meterId,
 }: {
-  row: any;
+  row: Row<RecapDataRow>;
   meterId: number | null;
 }) => {
   const queryClient = useQueryClient();
-  const { mutate, isPending } = useMutation({
+  const { mutate, isPending } = useMutation<
+    unknown,
+    AxiosError<ApiErrorResponse>,
+    { date: string; meterId: number }
+  >({
     mutationFn: runSingleClassificationApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recapData"] });
@@ -192,9 +188,9 @@ const ClassificationActionCell = ({
         description: "Data mungkin memerlukan beberapa saat untuk diperbarui.",
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error("Gagal menjalankan klasifikasi.", {
-        description: error.response?.data?.message || error.message,
+        description: error.response?.data?.status?.message || error.message,
       });
     },
   });
@@ -227,16 +223,10 @@ const ClassificationActionCell = ({
     </Button>
   );
 };
-/**
- * Membuat definisi kolom untuk tabel rekap berdasarkan jenis data.
- * @param dataType Jenis energi ('Electricity', 'Water', atau 'Fuel').
- * @returns Array dari ColumnDef.
- */
 export const createColumns = (
   dataType: "Electricity" | "Water" | "Fuel",
   meterId: number | null
 ): ColumnDef<RecapDataRow>[] => {
-  // Kolom dasar yang selalu ada di awal
   const baseColumns: ColumnDef<RecapDataRow>[] = [
     {
       accessorKey: "date",
@@ -246,9 +236,9 @@ export const createColumns = (
       cell: ({ row }) => {
         const dateValue = row.getValue("date") as string | Date;
         if (!dateValue) return "-";
-        // Ambil hanya bagian tanggal (YYYY-MM-DD) untuk menghindari masalah zona waktu
+
         const dateOnlyString = new Date(dateValue).toISOString().split("T")[0];
-        // Buat objek Date baru dari string tanggal tersebut, ditambah 'T00:00:00' untuk memastikan diperlakukan sebagai awal hari di UTC
+
         return (
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -305,7 +295,6 @@ export const createColumns = (
           ),
         },
         {
-          // **FIX**: Menggunakan 'consumption' yang sudah dihitung di service
           accessorKey: "consumption",
           header: ({ column }) => (
             <SortableHeader column={column} title="Total Konsumsi (kWh)" />
@@ -332,7 +321,7 @@ export const createColumns = (
           ),
           cell: ({ row }) => {
             const avgTemp = row.getValue("avg_temp") as number;
-            const maxTemp = row.original.max_temp; // <-- PERBAIKAN: Gunakan row.original
+            const maxTemp = row.original.max_temp;
             const isHotMaxTemp = maxTemp > 30;
             const isHotAvgTemp = avgTemp > 30;
 
@@ -387,7 +376,6 @@ export const createColumns = (
             const classification = row.original.classification;
             const score = row.original.confidence_score;
 
-            // Jika klasifikasi tidak ada atau UNKNOWN, tampilkan tombol.
             if (!classification || classification === "UNKNOWN") {
               return <ClassificationActionCell row={row} meterId={meterId} />;
             }
@@ -425,15 +413,12 @@ export const createColumns = (
             <SortableHeader column={column} title="Prediksi" />
           ),
           cell: ({ row }) => {
-            // PERBAIKAN: Cek properti 'prediction' pada data baris, bukan seluruh objek.
             const predictionValue = row.original.prediction;
             return predictionValue != null ? (
-              // Jika ada nilai prediksi, format dan tampilkan.
               <div className="text-center font-mono">
                 {formatNumber(predictionValue)}
               </div>
             ) : (
-              // Jika tidak ada, tampilkan tombol untuk melakukan prediksi.
               <PredictionCell row={row} meterId={meterId} />
             );
           },
@@ -481,12 +466,10 @@ export const createColumns = (
             );
           },
         },
-        // **BARU**: Menambahkan kolom Target dan Pax untuk Air & BBM
       ];
       break;
   }
 
-  // Kolom yang selalu ada di akhir
   const commonEndColumns: ColumnDef<RecapDataRow>[] = [
     {
       accessorKey: "cost",

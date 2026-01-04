@@ -117,23 +117,7 @@ export const getprepareNextPeriodBudgetApi = async (
   return response.data.data;
 };
 
-export const runSinglePredictionApi = async (payload: {
-  date: string;
-  meterId: number;
-}) => {
-  const response = await api.post("/analytics/run-single-prediction", payload);
-  return response.data;
-};
-export const runSingleClassificationApi = async (payload: {
-  date: string;
-  meterId: number;
-}) => {
-  const response = await api.post(
-    "/analytics/run-single-classification",
-    payload
-  );
-  return response.data;
-};
+
 
 export interface EfficiencyTargetPreviewPayload {
   meter_id: number;
