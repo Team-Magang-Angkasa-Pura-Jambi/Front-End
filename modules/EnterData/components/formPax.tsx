@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { Resolver, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -25,8 +25,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { submitPaxApi, PaxPayload } from "@/services/pax.service";
 import { useAuthStore } from "@/stores/authStore";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/common/types/api";
+import { PaxPayload, submitPaxApi } from "./services/pax.service";
 
 interface FormPaxProps {
   onSuccess?: () => void;
@@ -48,22 +50,26 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
   const canChangeDate = user?.role === "Admin" || user?.role === "SuperAdmin";
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       data_date: new Date(),
-      total_pax: "" as any,
+      total_pax: 0,
     },
   });
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: (paxData: PaxPayload) => submitPaxApi(paxData),
+  const { mutate, isPending } = useMutation<
+    unknown,
+    AxiosError<ApiErrorResponse>,
+    PaxPayload
+  >({
+    mutationFn: (paxData) => submitPaxApi(paxData),
     onSuccess: () => {
       toast.success("Data Pax berhasil dikirim!");
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["paxData"] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error) => {
       const message =
         error.response?.data?.status?.message ||
         "Terjadi kesalahan tidak terduga.";
@@ -72,9 +78,8 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
   });
 
   const onSubmit = (values: FormValues) => {
-    // Ambil tanggal dari form
     const date = values.data_date;
-    // Buat tanggal baru dengan mengabaikan zona waktu lokal untuk menghindari pergeseran hari
+
     const dateInUTC = new Date(
       Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
     );
