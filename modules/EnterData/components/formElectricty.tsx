@@ -55,14 +55,14 @@ import {
 } from "@/services/energyType.service";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formSchema, FormValues } from "./schemas/reading.schema";
+import { formSchema, FormValues } from "../schemas/reading.schema";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
 import {
   getLastReadingApi,
   ReadingPayload,
   submitReadingApi,
-} from "./services";
+} from "../services";
 
 interface FormReadingProps {
   onSuccess?: () => void;

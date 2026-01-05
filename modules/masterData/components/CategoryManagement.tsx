@@ -30,7 +30,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -59,10 +58,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./dataTable";
-
-const categorySchema = z.object({
-  name: z.string().min(3, "Nama kategori minimal 3 karakter."),
-});
+import {
+  categorySchema,
+  categoryType,
+} from "../schemas/categoryManagement.schema";
 
 const createCategoryColumns = (
   onEdit: (item: CategoryType) => void,
@@ -107,7 +106,7 @@ export const CategoryManagement = () => {
     null
   );
 
-  const form = useForm<z.infer<typeof categorySchema>>({
+  const form = useForm<categoryType>({
     resolver: zodResolver(categorySchema),
     defaultValues: { name: "" },
   });
@@ -188,16 +187,9 @@ export const CategoryManagement = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <DataTable
-          columns={columns}
-          data={data || []}
-          isLoading={isLoading}
-          filterColumnId="name"
-          filterPlaceholder="Cari nama kategori..."
-        />
+        <DataTable columns={columns} data={data || []} />
       </CardContent>
 
-      {/* Dialog untuk Tambah/Edit */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -233,7 +225,6 @@ export const CategoryManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog Konfirmasi Hapus */}
       <AlertDialog
         open={!!categoryToDelete}
         onOpenChange={() => setCategoryToDelete(null)}
