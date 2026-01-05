@@ -1,12 +1,10 @@
-import { Loader2, MoreHorizontal, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import React, { useState } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-// Asumsi Anda menggunakan shadcn/ui untuk komponen ini
+
 import {
   Card,
   CardContent,
@@ -15,20 +13,13 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
@@ -41,148 +32,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+
 import { masterData } from "@/services/masterData.service";
 import { DataTable } from "./dataTable";
-import { EnergyType, getEnergyTypesApi } from "@/services/energyType.service";
-
-// --- Definisi Internal dari reading-type-config.tsx ---
-
-export type ReadingType = {
-  reading_type_id: number;
-  type_name: string;
-  reading_unit: string;
-  energy_type: EnergyType; // Tambahkan relasi
-};
-
-const readingTypeSchema = z.object({
-  type_name: z.string().min(1, "Nama tipe tidak boleh kosong."),
-  reading_unit: z.string().min(1, "Satuan tidak boleh kosong."),
-  energy_type_id: z.coerce.number().min(1, "Jenis energi wajib dipilih."),
-});
-
-interface ReadingTypeFormProps {
-  initialData?: ReadingType | null;
-  onSubmit: (values: z.infer<typeof readingTypeSchema>) => void;
-  isLoading?: boolean;
-}
-
-export function ReadingTypeForm({
-  initialData,
-  onSubmit,
-  isLoading,
-}: ReadingTypeFormProps) {
-  const form = useForm<z.infer<typeof readingTypeSchema>>({
-    resolver: zodResolver(readingTypeSchema),
-    defaultValues: initialData
-      ? {
-          type_name: initialData.type_name,
-          reading_unit: initialData.reading_unit,
-          energy_type_id: initialData.energy_type.energy_type_id,
-        }
-      : { type_name: "", reading_unit: "", energy_type_id: undefined },
-  });
-
-  const { data: energyTypesResponse, isLoading: isLoadingEnergyTypes } =
-    useQuery({
-      queryKey: ["energyTypes"],
-      queryFn: () => getEnergyTypesApi(),
-    });
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="type_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nama Tipe Pembacaan</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Contoh: WBP, LWBP, Stand Meter"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="reading_unit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Satuan</FormLabel>
-              <FormControl>
-                <Input placeholder="Contoh: kWh, m³, L" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="energy_type_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Jenis Energi</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value ? String(field.value) : ""}
-                disabled={isLoadingEnergyTypes}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={
-                        isLoadingEnergyTypes
-                          ? "Memuat..."
-                          : "Pilih Jenis Energi"
-                      }
-                    />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {energyTypesResponse?.data?.map((et) => (
-                    <SelectItem
-                      key={et.energy_type_id}
-                      value={String(et.energy_type_id)}
-                    >
-                      {et.type_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <DialogFooter>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Menyimpan..." : "Simpan"}
-          </Button>
-        </DialogFooter>
-      </form>
-    </Form>
-  );
-}
+import { EnergyType } from "../types";
+import { readingTypeFormValues } from "../schemas/readingType.schema";
+import { DataTableRowActions } from "./dataTableRowActions";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/common/types/api";
+import { getReadingTypesApi } from "../services/readingsType.service";
+import { ReadingType } from "@/common/types/readingTypes";
+import { ReadingTypeForm } from "./forms/readingType.form";
+import { SubmitHandler } from "react-hook-form";
 
 export const createReadingTypeColumns = (
   onEdit: (item: ReadingType) => void,
@@ -193,34 +54,15 @@ export const createReadingTypeColumns = (
   { accessorKey: "energy_type.type_name", header: "Jenis Energi" },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const item = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => onEdit(item)}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(item)}
-              className="text-red-600"
-            >
-              Hapus
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => (
+      <DataTableRowActions
+        row={row.original}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
+    ),
   },
 ];
-
-// --- Akhir Definisi Internal ---
 
 export const ReadingTypeManagement = () => {
   const queryClient = useQueryClient();
@@ -236,12 +78,12 @@ export const ReadingTypeManagement = () => {
     isError,
   } = useQuery({
     queryKey: ["readingTypes"],
-    queryFn: masterData.readingType.getAll,
+    queryFn: () => getReadingTypesApi(),
   });
 
   const { mutate: createOrUpdateReadingType, isPending: isMutating } =
-    useMutation({
-      mutationFn: (readingTypeData: z.infer<typeof readingTypeSchema>) => {
+    useMutation<unknown, AxiosError<ApiErrorResponse>, readingTypeFormValues>({
+      mutationFn: (readingTypeData) => {
         const id = editingReadingType
           ? editingReadingType.reading_type_id
           : undefined;
@@ -259,23 +101,28 @@ export const ReadingTypeManagement = () => {
         setIsFormOpen(false);
         setEditingReadingType(null);
       },
-      onError: (error: any) => {
+      onError: (error) => {
         const message =
           error.response?.data?.status?.message || "Terjadi kesalahan";
         toast.error(`Gagal: ${message}`);
       },
     });
 
-  const { mutate: deleteReadingType, isPending: isDeleting } = useMutation({
-    mutationFn: (readingType: ReadingType) =>
-      masterData.readingType.delete(readingType.reading_type_id),
+  const { mutate: deleteReadingType, isPending: isDeleting } = useMutation<
+    unknown,
+    AxiosError<ApiErrorResponse>,
+    number
+  >({
+    mutationFn: (id) => masterData.readingType.delete(id),
     onSuccess: () => {
       toast.success("Tipe pembacaan berhasil dihapus!");
       queryClient.invalidateQueries({ queryKey: ["readingTypes"] });
       setReadingTypeToDelete(null);
     },
-    onError: (error: any) => {
-      toast.error(`Gagal menghapus: ${error.message}`);
+    onError: (error) => {
+      const message =
+        error.response?.data?.status?.message || "Terjadi kesalahan";
+      toast.error(`Gagal: ${message}`);
     },
   });
 
@@ -290,11 +137,12 @@ export const ReadingTypeManagement = () => {
 
   const columns = createReadingTypeColumns(handleEdit, handleDeleteRequest);
 
-  // Menangani kasus di mana data mungkin tidak terstruktur seperti yang diharapkan
   const readingTypes = Array.isArray(readingTypesResponse?.data)
     ? readingTypesResponse.data
     : [];
-
+  const handleFormSubmit: SubmitHandler<readingTypeFormValues> = (data) => {
+    createOrUpdateReadingType(data);
+  };
   return (
     <Card>
       <CardHeader>
@@ -330,7 +178,7 @@ export const ReadingTypeManagement = () => {
               </DialogHeader>
               <ReadingTypeForm
                 initialData={editingReadingType}
-                onSubmit={createOrUpdateReadingType}
+                onSubmit={handleFormSubmit}
                 isLoading={isMutating}
               />
             </DialogContent>
@@ -341,9 +189,7 @@ export const ReadingTypeManagement = () => {
         <DataTable
           columns={columns}
           data={readingTypes}
-          isLoading={isLoading}
-          filterColumnId="type_name"
-          filterPlaceholder="Cari nama tipe..."
+          // isLoading={isLoading}
         />
       </CardContent>
       <AlertDialog
@@ -364,7 +210,9 @@ export const ReadingTypeManagement = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteReadingType(readingTypeToDelete!)}
+              onClick={() =>
+                deleteReadingType(readingTypeToDelete.reading_type_id)
+              }
               disabled={isDeleting}
             >
               {isDeleting ? "Menghapus..." : "Ya, Hapus"}

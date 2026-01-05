@@ -28,9 +28,10 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { getTariffGroupsApi } from "@/services/tariffGroup.service";
 import { getEnergyTypesApi } from "@/services/energyType.service";
 import { categoryApi } from "@/services/category.service";
-import { MeterType, STATUS_METER } from "../../types/meter.type";
+import {  STATUS_METER } from "../../types/meter.type";
 import { MeterFormValues, meterSchema } from "../../schemas/meter.schema";
 import { ENERGY_TYPES } from "@/common/types/energy";
+import { MeterType } from "@/common/types/meters";
 
 interface MeterFormProps {
   initialData?: MeterType | null;

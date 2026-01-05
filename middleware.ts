@@ -3,59 +3,48 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const authCookie = request.cookies.get("auth-storage")?.value;
-  const { pathname } = request.nextUrl;
 
-  let token: string | null = null;
-  let role: string | null = null;
+  let hasToken = false;
 
   if (authCookie) {
     try {
       const authState = JSON.parse(authCookie);
-      token = authState?.state?.token ?? null;
-      role = authState?.state?.user?.role ?? null;
-    } catch {
-      token = null;
-      role = null;
+
+      const token = authState?.state?.token || authState?.token;
+
+      if (token) {
+        hasToken = true;
+      }
+    } catch (e) {
+      hasToken = false;
     }
   }
+
+  const { pathname } = request.nextUrl;
 
   const publicPaths = ["/auth/login"];
   const isPublicPath = publicPaths.includes(pathname);
 
-  // 🔴 Belum login
-  if (!token && !isPublicPath) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
-
-  // 🔁 Sudah login tapi ke login
-  if (token && isPublicPath) {
+  if (hasToken && isPublicPath) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 🛡️ ROLE CHECK (INI KUNCI)
-  if (token && role) {
-    const roleRouteMap: Record<string, string[]> = {
-      SuperAdmin: ["/"],
-      Admin: ["/", "/data-master", "/budget"],
-      Technician: [
-        "/",
-        "/enter-data",
-        "/recap-data",
-        "/recap-reading",
-        "/profile",
-      ],
-    };
-
-    const allowedRoutes = roleRouteMap[role] ?? [];
-
-    const isAllowed =
-      allowedRoutes.includes("/") ||
-      allowedRoutes.some((route) => pathname.startsWith(route));
-
-    if (!isAllowed) {
-      return NextResponse.redirect(new URL("/403", request.url));
-    }
+  if (!hasToken && !isPublicPath) {
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: [
+    /*
+     * Cocokkan semua path, KECUALI yang dimulai dengan:
+     * - api (rute API)
+     * - _next/static (file statis)
+     * - _next/image (file optimasi gambar)
+     * - favicon.ico (file ikon)
+     */
+    "/((?!api|_next/static|_next/image|.*\\..*).*)",
+  ],
+};

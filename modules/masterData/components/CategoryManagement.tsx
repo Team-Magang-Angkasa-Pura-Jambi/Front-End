@@ -58,10 +58,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "./dataTable";
-import {
-  categorySchema,
-  categoryType,
-} from "../schemas/categoryManagement.schema";
+import { categorySchema, categoryType } from "../schemas/category.schema";
+import { DataTableRowActions } from "./dataTableRowActions";
 
 const createCategoryColumns = (
   onEdit: (item: CategoryType) => void,
@@ -71,27 +69,11 @@ const createCategoryColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <div className="text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => onEdit(row.original)}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(row.original)}
-              className="text-red-600"
-            >
-              Hapus
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <DataTableRowActions
+        row={row.original}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
     ),
   },
 ];

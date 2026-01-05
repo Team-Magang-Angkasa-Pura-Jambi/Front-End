@@ -1,5 +1,5 @@
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -12,13 +12,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Dialog,
   DialogContent,
@@ -41,12 +35,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { masterData } from "@/services/masterData.service";
 import { DataTable } from "@/modules/UserManagement/components/DataTable";
-import { MeterType } from "../types/meter.type";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
-import { MeterForm } from "./forms/meterForm";
+import { MeterForm } from "./forms/meter.form";
 import { MeterFormValues } from "../schemas/meter.schema";
 import { SubmitHandler } from "react-hook-form";
+import { DataTableRowActions } from "./dataTableRowActions";
+import { getMetersApi } from "@/services/meter.service";
+import { MeterType } from "@/common/types/meters";
 
 export const createMeterColumns = (
   onEdit: (meter: MeterType) => void,
@@ -104,25 +100,11 @@ export const createMeterColumns = (
     id: "actions",
     cell: ({ row }) => {
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => onEdit(row.original)}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(row.original)}
-              className="text-red-600"
-            >
-              Hapus
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <DataTableRowActions
+          row={row.original}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       );
     },
   },
@@ -137,11 +119,17 @@ export const MeterManagement = () => {
   const {
     data: metersResponse,
     isLoading,
-    isError,
-  } = useQuery<MeterType[]>({
+    isError,  
+  } = useQuery({
     queryKey: ["meters"],
-    queryFn: masterData.meter.getAll,
+    queryFn: () => getMetersApi(),
+    refetchOnWindowFocus: false,
   });
+
+  const metersData = useMemo(
+    () => metersResponse?.data || [],
+    [metersResponse?.data]
+  );
 
   const { mutate: createOrUpdateMeter, isPending: isMutating } = useMutation<
     unknown,
@@ -246,7 +234,7 @@ export const MeterManagement = () => {
       <CardContent>
         <DataTable<MeterType, unknown>
           columns={columns}
-          data={metersResponse ?? []}
+          data={metersData ?? []}
           isLoading={isLoading}
           filterColumnId="meter_code"
           filterPlaceholder="Cari kode meter..."

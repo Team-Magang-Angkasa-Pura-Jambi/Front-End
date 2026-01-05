@@ -1,10 +1,11 @@
+import { MeterType } from "@/common/types/meters";
 import api from "@/lib/api";
-import { MeterType } from "@/modules/masterData/types/meter.type";
 
 const createApiMethods = <T>(endpoint: string) => {
   return {
     getAll: async (): Promise<T[]> => {
       const response = await api.get<T[]>(`/${endpoint}`);
+
       return response.data;
     },
 

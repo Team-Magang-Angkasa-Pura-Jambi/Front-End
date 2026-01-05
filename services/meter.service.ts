@@ -1,4 +1,5 @@
 import { EnergyType, EnergyTypeName } from "@/common/types/energy";
+import { MeterType } from "@/common/types/meters";
 import api from "@/lib/api";
 
 export const MeterStatus = {
@@ -10,14 +11,14 @@ export const MeterStatus = {
 
 export type MeterStatus = keyof typeof MeterStatus;
 
-export interface MeterType {
-  meter_id: number;
-  meter_code: string;
-  energy_type_id: number;
-  location: string | null;
-  status: MeterStatus;
-  energy_type?: EnergyType;
-}
+// export interface MeterType {
+//   meter_id: number;
+//   meter_code: string;
+//   energy_type_id: number;
+//   location: string | null;
+//   status: MeterStatus;
+//   energy_type?: EnergyType;
+// }
 interface MeterApiResponse {
   data: MeterType[];
 }
