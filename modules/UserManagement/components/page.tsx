@@ -32,7 +32,7 @@ import {
 import { toast } from "sonner";
 import { UserForm } from "./UserForm";
 import { DeleteUserDialog } from "./DeleteUserDialog";
-import { DataTable } from "../../../components/DataTable";
+import { DataTable } from "../../../components/table/dataTable";
 import RolesPage from "./role";
 
 // PERBAIKAN: Definisikan skema Zod untuk create dan update

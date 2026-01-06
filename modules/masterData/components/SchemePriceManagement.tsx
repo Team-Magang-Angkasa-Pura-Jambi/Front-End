@@ -33,10 +33,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/DataTable";
+import { DataTable } from "@/components/table/dataTable";
 
 import { PriceSchemeForm } from "./forms/priceSchema.form";
-import { DataTableRowActions } from "./dataTableRowActions";
 
 import { ReadingType } from "@/common/types/readingTypes";
 import { ApiErrorResponse } from "@/common/types/api";
@@ -50,6 +49,7 @@ import {
 import { getReadingTypesApi } from "../services/readingsType.service";
 import { getTaxesApi } from "../services/tax.service";
 import { schemaFormValues } from "../schemas/schemaPrice.schema";
+import { DataTableRowActions } from "@/components/table/dataTableRowActions";
 
 const RatesCell = ({
   row,
@@ -158,7 +158,7 @@ export const createPriceSchemeColumns = (
     id: "actions",
     cell: ({ row }) => (
       <DataTableRowActions
-        row={row.original}
+        row={row}
         onEdit={onEdit}
         onDelete={onDelete}
       />

@@ -32,9 +32,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/DataTable";
+import { DataTable } from "@/components/table/dataTable";
 
-import { DataTableRowActions } from "./dataTableRowActions";
 
 import { ApiErrorResponse } from "@/common/types/api";
 import { TariffGroup } from "@/common/types/tariffGroup";
@@ -46,6 +45,7 @@ import {
 } from "../services/tariffGroup.service";
 import { tarifFormValues } from "../schemas/tariffGroup.schema";
 import { TariffGroupForm } from "./forms/tarffGroup.forms";
+import { DataTableRowActions } from "@/components/table/dataTableRowActions";
 
 export const createTariffGroupColumns = (
   onEdit: (item: TariffGroup) => void,
@@ -82,7 +82,7 @@ export const createTariffGroupColumns = (
     id: "actions",
     cell: ({ row }) => (
       <DataTableRowActions
-        row={row.original}
+        row={row}
         onEdit={onEdit}
         onDelete={onDelete}
       />

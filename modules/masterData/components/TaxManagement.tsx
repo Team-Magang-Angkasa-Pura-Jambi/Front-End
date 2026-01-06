@@ -31,9 +31,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { DataTable } from "@/components/DataTable";
+import { DataTable } from "@/components/table/dataTable";
 
-import { DataTableRowActions } from "./dataTableRowActions";
 
 import { ApiErrorResponse } from "@/common/types/api";
 
@@ -46,6 +45,7 @@ import {
 import { Taxes } from "@/common/types/taxes";
 import { taxFormValue } from "../schemas/taxes.schema";
 import { TaxForm } from "./forms/taxes.form";
+import { DataTableRowActions } from "@/components/table/dataTableRowActions";
 
 const RateCell = ({ value }: { value: number }) => {
   const rate = Number(value);
@@ -72,7 +72,7 @@ export const createTaxColumns = (
     id: "actions",
     cell: ({ row }) => (
       <DataTableRowActions
-        row={row.original}
+        row={row}
         onEdit={onEdit}
         onDelete={onDelete}
       />

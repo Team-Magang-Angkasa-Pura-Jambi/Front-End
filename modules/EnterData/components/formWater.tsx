@@ -44,10 +44,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import {
-  getEnergyTypesApi,
-  EnergyTypesApiResponse,
-} from "@/services/energyType.service";
 
 import { useAuthStore } from "@/stores/authStore";
 import { AxiosError } from "axios";
@@ -58,6 +54,7 @@ import {
   ReadingPayload,
   submitReadingApi,
 } from "../services";
+import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 
 interface FormReadingProps {
   onSuccess?: () => void;
@@ -88,7 +85,7 @@ export const FormReadingWater = ({
   });
 
   const { data: energyTypeData, isLoading: isLoadingData } =
-    useQuery<EnergyTypesApiResponse>({
+    useQuery({
       queryKey: ["energyData", type_name],
       queryFn: () => getEnergyTypesApi(type_name),
     });

@@ -21,10 +21,10 @@ import {
 } from "../../schemas/readingType.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { getEnergyTypesApi } from "@/services/energyType.service";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ReadingType } from "@/common/types/readingTypes";
+import { getEnergyTypesApi } from "../../services/energyType.service";
 
 interface ReadingTypeFormProps {
   initialData?: ReadingType | null;

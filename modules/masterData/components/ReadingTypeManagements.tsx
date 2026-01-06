@@ -32,9 +32,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { DataTable } from "@/components/DataTable";
+import { DataTable } from "@/components/table/dataTable";
 
-import { DataTableRowActions } from "./dataTableRowActions";
 import { ReadingTypeForm } from "./forms/readingType.form";
 
 import { ReadingType } from "@/common/types/readingTypes";
@@ -47,6 +46,7 @@ import {
   updateReadingTypeApi,
   deleteReadingTypeApi,
 } from "../services/readingsType.service";
+import { DataTableRowActions } from "@/components/table/dataTableRowActions";
 
 export const createReadingTypeColumns = (
   onEdit: (item: ReadingType) => void,
@@ -59,7 +59,7 @@ export const createReadingTypeColumns = (
     id: "actions",
     cell: ({ row }) => (
       <DataTableRowActions
-        row={row.original}
+        row={row}
         onEdit={onEdit}
         onDelete={onDelete}
       />
