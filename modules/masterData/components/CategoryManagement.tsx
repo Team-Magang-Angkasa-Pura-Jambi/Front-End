@@ -175,7 +175,7 @@ export const CategoryManagement = () => {
           columns={columns}
           data={data || []}
           isLoading={isLoading}
-          filterColumnId="category_name"
+          filterColumnId="name"
           filterPlaceholder="Cari Kategori"
         />
       </CardContent>
