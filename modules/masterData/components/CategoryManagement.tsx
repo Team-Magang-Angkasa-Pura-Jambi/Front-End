@@ -57,9 +57,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { DataTable } from "./dataTable";
 import { categorySchema, categoryType } from "../schemas/category.schema";
 import { DataTableRowActions } from "./dataTableRowActions";
+import { DataTable } from "@/components/DataTable";
 
 const createCategoryColumns = (
   onEdit: (item: CategoryType) => void,
@@ -99,6 +99,8 @@ export const CategoryManagement = () => {
       const res = await categoryApi.getAll();
       return res.data;
     },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const mutation = useMutation({
@@ -169,7 +171,13 @@ export const CategoryManagement = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={data || []} />
+        <DataTable<CategoryType, unknown>
+          columns={columns}
+          data={data || []}
+          isLoading={isLoading}
+          filterColumnId="category_name"
+          filterPlaceholder="Cari Kategori"
+        />
       </CardContent>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -52,6 +52,8 @@ export function ReadingTypeForm({
     useQuery({
       queryKey: ["energyTypes"],
       queryFn: () => getEnergyTypesApi(),
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false,
     });
 
   return (

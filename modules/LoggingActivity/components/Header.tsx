@@ -29,10 +29,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getMetersApi } from "@/services/meter.service";
+import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { CalendarIcon } from "lucide-react";
 import { HistoryFilters } from "../types";
-import {  EnergyTypeName } from "@/common/types/energy";
+import { EnergyTypeName } from "@/common/types/energy";
 
 interface RecapHeaderProps {
   filters: HistoryFilters;

@@ -47,7 +47,7 @@ import { toast } from "sonner";
 import { exportToExcel, exportToPdf } from "@/lib/exportUtils";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getMetersApi } from "@/services/meter.service";
+import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
 import { EnergyTypeName } from "@/common/types/energy";

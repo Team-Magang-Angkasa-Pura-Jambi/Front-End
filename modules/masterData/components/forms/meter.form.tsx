@@ -25,13 +25,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { DialogFooter } from "@/components/ui/dialog";
-import { getTariffGroupsApi } from "@/services/tariffGroup.service";
 import { getEnergyTypesApi } from "@/services/energyType.service";
 import { categoryApi } from "@/services/category.service";
-import {  STATUS_METER } from "../../types/meter.type";
+import { STATUS_METER } from "../../types/meter.type";
 import { MeterFormValues, meterSchema } from "../../schemas/meter.schema";
 import { ENERGY_TYPES } from "@/common/types/energy";
 import { MeterType } from "@/common/types/meters";
+import { getTariffGroupsApi } from "../../services/tariffGroup.service";
 
 interface MeterFormProps {
   initialData?: MeterType | null;
@@ -47,16 +47,22 @@ export const MeterForm = ({
   const { data: energyTypeRes, isLoading: isLoadingEnergy } = useQuery({
     queryKey: ["energyTypes"],
     queryFn: () => getEnergyTypesApi(),
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const { data: categoryRes, isLoading: isLoadingCategory } = useQuery({
     queryKey: ["categories"],
     queryFn: categoryApi.getAll,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const { data: tariffGroupRes, isLoading: isLoadingTariff } = useQuery({
     queryKey: ["tariffGroups"],
     queryFn: getTariffGroupsApi,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const energyTypes = useMemo(() => energyTypeRes?.data || [], [energyTypeRes]);
