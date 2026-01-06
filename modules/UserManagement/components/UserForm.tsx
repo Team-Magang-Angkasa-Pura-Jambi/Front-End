@@ -1,8 +1,7 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useQuery } from "@tanstack/react-query";
 import { getRolesApi } from "@/services/role.service";
 import { Button } from "@/components/ui/button";
@@ -22,9 +21,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formSchema, UserFormProps } from "../types";
-import { Skeleton } from "@/components/ui/skeleton";
+import { User } from "@/common/types/user";
+import { userFormSchema, userFormValues } from "../schemas/user.schema";
+import { useMemo } from "react";
 
+export interface UserFormProps {
+  onSubmit: (values: userFormValues) => void;
+  isPending: boolean;
+  defaultValues?: User;
+}
 export const UserForm: React.FC<UserFormProps> = ({
   onSubmit,
   isPending,
@@ -37,19 +42,19 @@ export const UserForm: React.FC<UserFormProps> = ({
   } = useQuery({
     queryKey: ["roles"],
     queryFn: getRolesApi,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<userFormValues>({
+    resolver: zodResolver(userFormSchema) as Resolver<userFormValues>,
     defaultValues: {
       username: defaultValues?.username || "",
       role_id: defaultValues?.role?.role_id || undefined,
     },
   });
 
-  // Mengambil data peran dari API
-
-  const roles = rolesData?.data || [];
+  const roles = useMemo(() => rolesData?.data || [], [rolesData?.data]);
 
   return (
     <Form {...form}>
