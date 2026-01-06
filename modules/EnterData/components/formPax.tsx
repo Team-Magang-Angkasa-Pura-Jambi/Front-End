@@ -28,7 +28,7 @@ import {
 import { useAuthStore } from "@/stores/authStore";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
-import { PaxPayload, submitPaxApi } from "./services/pax.service";
+import { PaxPayload, submitPaxApi } from "../services/pax.service";
 
 interface FormPaxProps {
   onSuccess?: () => void;

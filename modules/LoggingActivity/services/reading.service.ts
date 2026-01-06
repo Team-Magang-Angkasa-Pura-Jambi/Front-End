@@ -1,6 +1,6 @@
 import { EnergyTypeName } from "@/common/types/energy";
 import api from "@/lib/api";
-import { ReadingPayload } from "@/modules/EnterData/components/services";
+import { ReadingPayload } from "@/modules/EnterData/services";
 
 export interface ReadingHistoryResponse {
   data: ReadingHistory[];
@@ -36,7 +36,6 @@ export interface PaxData {
   pax_id: number;
 }
 export type UpdateReadingSessionBody = Partial<ReadingPayload>;
-
 
 export interface GetReadingSessionsQuery {
   energyTypeName?: EnergyTypeName;

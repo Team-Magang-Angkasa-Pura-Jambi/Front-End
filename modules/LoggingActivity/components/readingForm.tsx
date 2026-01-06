@@ -30,9 +30,9 @@ import {
 import {
   formSchema,
   FormValues,
-} from "@/modules/EnterData/components/schemas/reading.schema";
+} from "@/modules/EnterData/schemas/reading.schema";
 import { ApiErrorResponse } from "@/common/types/api";
-import { ReadingPayload } from "@/modules/EnterData/components/services";
+import { ReadingPayload } from "@/modules/EnterData/services";
 import {
   ReadingHistory,
   updateReadingSessionApi,

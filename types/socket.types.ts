@@ -1,11 +1,11 @@
 // src/socket-types.ts
 
 // Tipe untuk membedakan meteran
-export type MeterType = "LISTRIK" | "AIR";
+export type Energies = "LISTRIK" | "AIR";
 
 // "Isi amplop" atau data notifikasi yang akan dikirim
 export interface MissingDataPayload {
-  meterType: MeterType;
+  meterType: Energies;
   message: string;
   missingDate: string;
 }

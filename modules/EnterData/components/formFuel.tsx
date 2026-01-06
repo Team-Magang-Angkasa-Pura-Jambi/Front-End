@@ -53,16 +53,17 @@ import { useAuthStore } from "@/stores/authStore";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
-import { formSchema, FormValues } from "./schemas/reading.schema";
+import { formSchema, FormValues } from "../schemas/reading.schema";
 import {
   getLastReadingApi,
   ReadingPayload,
   submitReadingApi,
-} from "./services";
+} from "../services";
+import { EnergyTypeName } from "@/common/types/energy";
 
 interface FormReadingProps {
   onSuccess?: () => void;
-  type_name: "Electricity" | "Water" | "Fuel";
+  type_name: EnergyTypeName;
 }
 
 export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {

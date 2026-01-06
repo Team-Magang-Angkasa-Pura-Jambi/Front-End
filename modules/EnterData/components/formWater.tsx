@@ -52,12 +52,12 @@ import {
 import { useAuthStore } from "@/stores/authStore";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
-import { formSchema, FormValues } from "./schemas/reading.schema";
+import { formSchema, FormValues } from "../schemas/reading.schema";
 import {
   getLastReadingApi,
   ReadingPayload,
   submitReadingApi,
-} from "./services";
+} from "../services";
 
 interface FormReadingProps {
   onSuccess?: () => void;

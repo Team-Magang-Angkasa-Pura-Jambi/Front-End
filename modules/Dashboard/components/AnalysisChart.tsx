@@ -13,7 +13,7 @@ import {
 } from "recharts";
 
 import { analysisApi } from "@/services/analysis.service";
-import { getMetersApi } from "@/services/meter.service";
+import { getMetersApi } from "@/modules/masterData/services/meter.service";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,7 +22,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; 
+} from "@/components/ui/select";
 import { AnalysisChartSkeleton } from "./analystChartSkeleton";
 
 type MeterInfo = {
@@ -30,11 +30,10 @@ type MeterInfo = {
   meter_code: string;
 };
 
-
 const COLORS = {
-  pemakaian: "#3b82f6", 
-  prediksi: "#22c55e", 
-  target: "#a1a1aa", 
+  pemakaian: "#3b82f6",
+  prediksi: "#22c55e",
+  target: "#a1a1aa",
 };
 
 export const AnalysisChart = ({
@@ -44,49 +43,41 @@ export const AnalysisChart = ({
 }) => {
   const [thisMonth, setThisMonth] = useState(() => new Date());
 
-  
   const [selectedMeterId, setSelectedMeterId] = useState<string | null>(null);
 
   const year = thisMonth.getFullYear();
   const month = String(thisMonth.getMonth() + 1).padStart(2, "0");
   const formattedMonth = `${year}-${month}`;
 
-  
   const { data: metersData, isLoading: isMetersLoading } = useQuery({
     queryKey: ["meters", typeEnergy],
     queryFn: () => getMetersApi(typeEnergy),
     enabled: !!typeEnergy,
   });
 
-  
   const {
     data: analysisData,
     isLoading: isAnalysisLoading,
     isError,
   } = useQuery({
     queryKey: ["analysisData", typeEnergy, formattedMonth, selectedMeterId],
-    
+
     queryFn: () =>
       analysisApi(typeEnergy, formattedMonth, [Number(selectedMeterId!)]),
-    enabled: !!selectedMeterId, 
+    enabled: !!selectedMeterId,
   });
 
-  
   useEffect(() => {
     const meters = metersData?.data;
-    
-    
+
     if (meters && meters.length > 0 && !selectedMeterId) {
-      
       setSelectedMeterId(String(meters[0].meter_id));
     }
-  }, [metersData, selectedMeterId]); 
+  }, [metersData, selectedMeterId]);
 
-  
   const chartData = useMemo(() => {
     if (!analysisData?.data || analysisData.data.length === 0) return [];
 
-    
     const meterTimeSeries = analysisData.data[0].data;
 
     return meterTimeSeries.map((record) => ({
@@ -110,7 +101,6 @@ export const AnalysisChart = ({
       </Card>
     );
 
-  
   const allMeters: MeterInfo[] = metersData?.data || [];
   const selectedMeterName =
     allMeters.find((m) => m.meter_id === Number(selectedMeterId))?.meter_code ||
@@ -180,7 +170,6 @@ export const AnalysisChart = ({
                 name="Prediksi Konsumsi"
                 stroke={COLORS.prediksi}
                 strokeWidth={2}
-                
                 dot={{ r: 3 }}
                 activeDot={{ r: 5 }}
                 connectNulls={false}

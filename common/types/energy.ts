@@ -14,6 +14,6 @@ export interface EnergyType {
   type_name: EnergyTypeName;
   unit_of_measurement: string;
   is_active: boolean;
-  reading_types: readingTypes[];
-  meters: meters[];
+  reading_types?: readingTypes[];
+  meters? : meters[];
 }
