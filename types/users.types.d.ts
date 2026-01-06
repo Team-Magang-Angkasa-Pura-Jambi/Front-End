@@ -1,15 +1,5 @@
 // Tipe data untuk objek Pengguna tunggal, sesuai dengan API Anda
-export interface User {
-  user_id: number;
-  username: string;
-  role: {
-    role_id: number;
-    role_name: string;
-  };
-  photo_profile_url?: stirng;
-  is_active: boolean;
-  created_at: string; // ISO string date
-}
+
 
 // Tipe untuk payload saat membuat pengguna baru
 export interface CreateUserPayload {

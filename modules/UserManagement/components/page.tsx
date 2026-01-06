@@ -10,7 +10,7 @@ import {
   createUserApi,
   updateUserApi,
   deleteUserApi,
-} from "@/services/users.service";
+} from "@/modules/profile/services/users.service";
 import {
   User,
   CreateUserPayload,
