@@ -7,14 +7,6 @@ export interface EnergyType {
   is_active: boolean;
 }
 
-export interface ReadingType {
-  reading_type_id: number;
-  type_name: string;
-  energy_type: {
-    type_name: string;
-  };
-}
-
 export interface Meter {
   meter_id: number;
   meter_code: string;

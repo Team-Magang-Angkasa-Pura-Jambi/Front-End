@@ -104,7 +104,10 @@ import {
 import { budgetApi } from "@/services/budget.service";
 import { annualBudgetApi } from "@/services/annualBudget.service";
 import { getEnergyTypesApi, EnergyType } from "@/services/energyType.service";
-import { getMetersApi, MeterType } from "@/services/meter.service";
+import {
+  getMetersApi,
+  MeterType,
+} from "@/modules/masterData/services/meter.service";
 import { getprepareNextPeriodBudgetApi } from "@/services/analysis.service";
 import {
   Select,

@@ -1,19 +1,14 @@
 "use client";
 
 import React from "react";
-import { User, Lock } from "lucide-react";
 import { Bubble } from "./Bubble";
-import { LoginIllustration } from "./LoginIllustration";
 import { LeftSide } from "./LeftSide";
 import { RightSide } from "./RightSide";
 
 export const Page = () => {
   return (
-    <div className="min-h-screen bg-[#d6d3d1]  flex items-center justify-center p-4">
-      <div
-        className="w-full relatve max-w-6xl flex flex-col md:flex-row rounded-2xl shadow-2xl overflow-hidden bg-white relative"
-        style={{ minHeight: "650px" }}
-      >
+    <div className="min-h-screen bg-[#d6d3d1] flex items-center justify-center p-4">
+      <div className="w-full p-3 md:min-h-[650px] md:h-full relatve max-w-6xl flex flex-col md:flex-row rounded-2xl shadow-2xl overflow-hidden bg-white relative">  
         <svg
           className="absolute  rotate-[125deg] z-10 top-[280px] -left-[410px] "
           xmlns="http://www.w3.org/2000/svg"
@@ -37,7 +32,6 @@ export const Page = () => {
           <Bubble size={60} delay={2} style={{ top: "65%", left: "52%" }} />
           <Bubble size={30} delay={3} style={{ bottom: "15%", left: "77%" }} />
           <Bubble size={50} delay={3.5} style={{ bottom: "5%", left: "55%" }} />
-          {/* Tambahan bubbles untuk efek lebih ramai */}
           <Bubble size={20} delay={0.5} style={{ top: "5%", left: "51%" }} />
           <Bubble size={35} delay={2.5} style={{ top: "80%", left: "49%" }} />
           <Bubble size={45} delay={1.2} style={{ top: "90%", left: "83%" }} />

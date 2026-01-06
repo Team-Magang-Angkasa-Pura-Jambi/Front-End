@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { ZapOff, Droplets, Flame, CheckCircle2 } from "lucide-react";
 import { LogItem } from "./LogItem";
 

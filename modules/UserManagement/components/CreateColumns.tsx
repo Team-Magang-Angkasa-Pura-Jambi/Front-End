@@ -11,9 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { User } from "@/types/users.types";
+import { User } from "@/common/types/user";
 
-// Mendefinisikan tipe untuk properti tambahan pada kolom
 type UserColumnDef = ColumnDef<User> & {
   onEdit?: (user: User) => void;
   onDelete?: (user: User) => void;
@@ -58,7 +57,6 @@ export const createColumns = (
       new Date(row.getValue("created_at")).toLocaleDateString("id-ID"),
   },
 
-  
   {
     id: "actions",
     cell: ({ row }) => {

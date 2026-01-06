@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { MeterType } from "@/services/meter.service";
+import { MeterType } from "@/modules/masterData/services/meter.service";
 import { EnergyType } from "@/services/energyType.service";
 /**
  * Tipe data AnnualBudget yang merepresentasikan data dari API.

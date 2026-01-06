@@ -30,15 +30,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,11 +51,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { DataTable } from "./dataTable";
-
-const categorySchema = z.object({
-  name: z.string().min(3, "Nama kategori minimal 3 karakter."),
-});
+import { categorySchema, categoryType } from "../schemas/category.schema";
+import { DataTableRowActions } from "./dataTableRowActions";
+import { DataTable } from "@/components/DataTable";
 
 const createCategoryColumns = (
   onEdit: (item: CategoryType) => void,
@@ -72,27 +63,11 @@ const createCategoryColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <div className="text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => onEdit(row.original)}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onDelete(row.original)}
-              className="text-red-600"
-            >
-              Hapus
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <DataTableRowActions
+        row={row.original}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
     ),
   },
 ];
@@ -107,7 +82,7 @@ export const CategoryManagement = () => {
     null
   );
 
-  const form = useForm<z.infer<typeof categorySchema>>({
+  const form = useForm<categoryType>({
     resolver: zodResolver(categorySchema),
     defaultValues: { name: "" },
   });
@@ -118,6 +93,8 @@ export const CategoryManagement = () => {
       const res = await categoryApi.getAll();
       return res.data;
     },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   const mutation = useMutation({
@@ -188,16 +165,15 @@ export const CategoryManagement = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <DataTable
+        <DataTable<CategoryType, unknown>
           columns={columns}
           data={data || []}
           isLoading={isLoading}
           filterColumnId="name"
-          filterPlaceholder="Cari nama kategori..."
+          filterPlaceholder="Cari Kategori"
         />
       </CardContent>
 
-      {/* Dialog untuk Tambah/Edit */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -233,7 +209,6 @@ export const CategoryManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog Konfirmasi Hapus */}
       <AlertDialog
         open={!!categoryToDelete}
         onOpenChange={() => setCategoryToDelete(null)}

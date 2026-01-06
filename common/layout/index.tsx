@@ -17,10 +17,10 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, Variants } from "framer-motion";
 import React, { useMemo, useState } from "react";
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -28,7 +28,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: {
     opacity: 1,
@@ -57,13 +57,13 @@ const allLinks = [
     allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
-    label: "Data Konsumsi",
+    label: "Riwayat Konsumsi",
     href: "/recap-data",
     icon: <BarChart3 className="h-5 w-5 shrink-0 text-violet-500" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
-    label: "Data Pembacaan",
+    label: "Riwayat Pencatatan",
     href: "/recap-reading",
     icon: <BookText className="h-5 w-5 shrink-0 text-orange-500" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],

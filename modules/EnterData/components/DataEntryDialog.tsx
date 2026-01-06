@@ -1,9 +1,7 @@
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -28,7 +26,6 @@ export const DataEntryDialog = ({
   isOpen,
   onClose,
   details,
-  isSubmitting,
 }: EntryDataProps) => {
   if (!details) return null;
 

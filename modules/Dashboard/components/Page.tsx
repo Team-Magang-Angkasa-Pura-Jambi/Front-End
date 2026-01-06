@@ -8,13 +8,12 @@ import {
   Fuel,
   Plane,
   Zap,
-  Calendar as CalendarIcon,
+  Calendar,
 } from "lucide-react";
 import { DailyAnalysisLog } from "./DailyAnalysisLog";
 import { EnergyDistributionChart } from "./EnergyDistributionChart";
 import { ClassificationSummaryChart } from "./ClassificationSummaryChart";
-import { FuelStockChart } from "./FuelStockChart";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { TemperatureStatCard } from "./TemperatureStatCard";
 import { summaryApi } from "@/services/summary.service";
 import React, { useMemo, useState } from "react";

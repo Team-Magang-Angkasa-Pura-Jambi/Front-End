@@ -2,22 +2,16 @@
 
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod"; // Impor Zod
+import { z } from "zod";
 
-// --- Service dan Tipe ---
 import {
   getUsersApi,
   createUserApi,
   updateUserApi,
   deleteUserApi,
-} from "@/services/users.service";
-import {
-  User,
-  CreateUserPayload,
-  UpdateUserPayload,
-} from "@/types/users.types";
+} from "@/modules/profile/services/users.service";
+import { CreateUserPayload, UpdateUserPayload } from "@/types/users.types";
 
-// --- Komponen UI ---
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createColumns } from "./CreateColumns";
 import { Button } from "@/components/ui/button";
@@ -32,10 +26,10 @@ import {
 import { toast } from "sonner";
 import { UserForm } from "./UserForm";
 import { DeleteUserDialog } from "./DeleteUserDialog";
-import { DataTable } from "./DataTable";
+import { DataTable } from "../../../components/DataTable";
 import RolesPage from "./role";
+import { User } from "@/common/types/user";
 
-// PERBAIKAN: Definisikan skema Zod untuk create dan update
 const createUserSchema = z.object({
   username: z.string().min(3, "Username minimal 3 karakter."),
   password: z.string().min(6, "Password minimal 6 karakter."),
@@ -49,7 +43,7 @@ const updateUserSchema = z.object({
     .string()
     .min(6, "Password minimal 6 karakter.")
     .optional()
-    .or(z.literal("")), // Opsional saat update
+    .or(z.literal("")),
   role_id: z.number(),
   is_active: z.boolean(),
 });
@@ -60,18 +54,13 @@ export const Page = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // --- Fetching Data ---
-  const {
-    data: usersResponse, // Ganti nama agar lebih jelas
-    isLoading,
-  } = useQuery({
+  const { data: usersResponse, isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: getUsersApi,
   });
-  // PERBAIKAN: Akses data yang benar
+
   const users = usersResponse?.data || [];
 
-  // --- Mutations (tidak ada perubahan signifikan) ---
   const { mutate: createUser, isPending: isCreating } = useMutation({
     mutationFn: (userData: CreateUserPayload) => createUserApi(userData),
     onSuccess: () => {
@@ -106,7 +95,6 @@ export const Page = () => {
       toast.error(`Gagal menghapus pengguna: ${error.message}`),
   });
 
-  // --- Handlers ---
   const handleOpenForm = (user: User | null = null) => {
     setSelectedUser(user);
     setIsFormOpen(true);
@@ -117,7 +105,6 @@ export const Page = () => {
     setIsDeleteOpen(true);
   };
 
-  // PERBAIKAN: Logika submit disederhanakan
   const handleFormSubmit = (values: CreateUserPayload | UpdateUserPayload) => {
     if (selectedUser) {
       updateUser({ userId: selectedUser.user_id, data: values });
@@ -126,7 +113,6 @@ export const Page = () => {
     }
   };
 
-  // --- Columns (tidak ada perubahan) ---
   const columns = useMemo(
     () => createColumns(handleOpenForm, handleOpenDelete),
     []
@@ -181,8 +167,6 @@ export const Page = () => {
             onSubmit={handleFormSubmit}
             isPending={isCreating || isUpdating}
             defaultValues={selectedUser}
-            // PERBAIKAN: Kirim skema yang sesuai ke komponen Form
-            schema={selectedUser ? updateUserSchema : createUserSchema}
           />
         </DialogContent>
       </Dialog>
@@ -193,7 +177,6 @@ export const Page = () => {
           onClose={() => setIsDeleteOpen(false)}
           onConfirm={() => deleteUser(selectedUser.user_id)}
           username={selectedUser.username}
-          isPending={isDeleting}
         />
       )}
     </div>

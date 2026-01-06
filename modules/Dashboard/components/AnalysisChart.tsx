@@ -13,7 +13,7 @@ import {
 } from "recharts";
 
 import { analysisApi } from "@/services/analysis.service";
-import { getMetersApi } from "@/services/meter.service";
+import { getMetersApi } from "@/modules/masterData/services/meter.service";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,7 +22,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // Impor komponen Select
+} from "@/components/ui/select";
 import { AnalysisChartSkeleton } from "./analystChartSkeleton";
 
 type MeterInfo = {
@@ -30,11 +30,10 @@ type MeterInfo = {
   meter_code: string;
 };
 
-// Palet warna sekarang bisa lebih sederhana karena hanya ada beberapa garis statis
 const COLORS = {
-  pemakaian: "#3b82f6", // blue-500
-  prediksi: "#22c55e", // green-500
-  target: "#a1a1aa", // zinc-400
+  pemakaian: "#3b82f6",
+  prediksi: "#22c55e",
+  target: "#a1a1aa",
 };
 
 export const AnalysisChart = ({
@@ -44,49 +43,41 @@ export const AnalysisChart = ({
 }) => {
   const [thisMonth, setThisMonth] = useState(() => new Date());
 
-  // PERBAIKAN: Gunakan string untuk state ID agar sesuai dengan komponen Select
   const [selectedMeterId, setSelectedMeterId] = useState<string | null>(null);
 
   const year = thisMonth.getFullYear();
   const month = String(thisMonth.getMonth() + 1).padStart(2, "0");
   const formattedMonth = `${year}-${month}`;
 
-  // 1. Ambil daftar meter untuk mengisi dropdown
   const { data: metersData, isLoading: isMetersLoading } = useQuery({
     queryKey: ["meters", typeEnergy],
     queryFn: () => getMetersApi(typeEnergy),
     enabled: !!typeEnergy,
   });
 
-  // 2. Ambil data analisis HANYA untuk meter yang dipilih
   const {
     data: analysisData,
     isLoading: isAnalysisLoading,
     isError,
   } = useQuery({
     queryKey: ["analysisData", typeEnergy, formattedMonth, selectedMeterId],
-    // API tetap menerima array, jadi kita konversi string ID ke number
+
     queryFn: () =>
       analysisApi(typeEnergy, formattedMonth, [Number(selectedMeterId!)]),
-    enabled: !!selectedMeterId, // Hanya aktif jika ada meter yang dipilih
+    enabled: !!selectedMeterId,
   });
 
-  // Efek untuk mengisi daftar meter dan memilih meter pertama sebagai default
   useEffect(() => {
     const meters = metersData?.data;
-    // PERBAIKAN: Logika disederhanakan. Jika meteran ada dan belum ada yang dipilih,
-    // set meteran pertama sebagai default.
+
     if (meters && meters.length > 0 && !selectedMeterId) {
-      // Konversi ke string saat menyimpan ke state
       setSelectedMeterId(String(meters[0].meter_id));
     }
-  }, [metersData, selectedMeterId]); // Hapus selectedMeterId dari dependency untuk mencegah loop
+  }, [metersData, selectedMeterId]);
 
-  // Logika untuk mengubah data API (yang sekarang hanya berisi 1 meter) menjadi format grafik
   const chartData = useMemo(() => {
     if (!analysisData?.data || analysisData.data.length === 0) return [];
 
-    // Karena API hanya mengembalikan data untuk 1 meter, kita ambil elemen pertama
     const meterTimeSeries = analysisData.data[0].data;
 
     return meterTimeSeries.map((record) => ({
@@ -110,7 +101,6 @@ export const AnalysisChart = ({
       </Card>
     );
 
-  // Ambil data meter langsung dari hasil query, tidak perlu state terpisah
   const allMeters: MeterInfo[] = metersData?.data || [];
   const selectedMeterName =
     allMeters.find((m) => m.meter_id === Number(selectedMeterId))?.meter_code ||
@@ -180,7 +170,6 @@ export const AnalysisChart = ({
                 name="Prediksi Konsumsi"
                 stroke={COLORS.prediksi}
                 strokeWidth={2}
-                // strokeDasharray="3 3"
                 dot={{ r: 3 }}
                 activeDot={{ r: 5 }}
                 connectNulls={false}
