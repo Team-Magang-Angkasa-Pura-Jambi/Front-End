@@ -417,7 +417,8 @@ export function BudgetForm({
                                     (meter) =>
                                       !selectedMeterIds.includes(
                                         meter.meter_id.toString()
-                                      ) || field.value === meter.meter_id.toString()
+                                      ) ||
+                                      field.value === meter.meter_id.toString()
                                   )
                                   .map((meter) => (
                                     <SelectItem

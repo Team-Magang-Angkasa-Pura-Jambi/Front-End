@@ -1,5 +1,6 @@
+import { AnnualBudget } from "@/common/types/budget";
 import api from "@/lib/api";
-import { AnnualBudget, AnnualBudgetFormValues } from "@/modules/budget/types"; // Path sudah benar
+import { AnnualBudgetFormValues } from "@/modules/budget/schemas/annualBudget.schema";
 
 // Tipe respons umum dari API Anda
 interface ApiResponse<T> {

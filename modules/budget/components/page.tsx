@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { PlusCircle } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
-import { motion, Variants } from "framer-motion"; // 1. Import Framer Motion
+import { motion, Variants } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,19 +40,16 @@ declare module "@tanstack/react-table" {
   }
 }
 
-// 2. Definisi Varian Animasi
-const containerVariants:Variants = {
+// Variants Animasi
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.15, // Delay antar elemen anak
-      when: "beforeChildren",
-    },
+    transition: { staggerChildren: 0.15, when: "beforeChildren" },
   },
 };
 
-const itemVariants:Variants = {
+const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -62,20 +59,31 @@ const itemVariants:Variants = {
 };
 
 export default function AnnualBudgetPage() {
+  // 1. Ambil semua logic & data dari Hook
   const {
     childBudgets,
     parentBudgets,
     isLoading,
+    isLoadingSummary,
+    summaryData,
     selectedYear,
     setSelectedYear,
+    availableYears,
+    selectedEnergyType,
+    setSelectedEnergyType,
+    energyTypes,
     createOrUpdateMutation,
     deleteMutation,
   } = useAnnualBudgetLogic();
 
+  // 2. Local State untuk Modal/Dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<AnnualBudget | null>(null);
-  const [budgetToDelete, setBudgetToDelete] = useState<AnnualBudget | null>(null);
+  const [budgetToDelete, setBudgetToDelete] = useState<AnnualBudget | null>(
+    null
+  );
 
+  // 3. Handlers
   const handleOpenDialog = (budget: AnnualBudget | null = null) => {
     setEditingBudget(budget);
     setIsDialogOpen(true);
@@ -103,56 +111,81 @@ export default function AnnualBudgetPage() {
   );
 
   return (
-    // 3. Wrap Container Utama dengan motion.div
-    <motion.div 
+    <motion.div
       className="container mx-auto py-10"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* --- Bagian Summary --- */}
+      {/* --- Bagian Summary & Filter --- */}
       <motion.div className="mb-8" variants={itemVariants}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Ringkasan & Analisis Budget</h2>
+
           <div className="flex items-center gap-2">
+            {/* Filter Tahun */}
             <Select
-              value={selectedYear.toString()}
+              value={selectedYear ? selectedYear.toString() : ""}
               onValueChange={(value) => setSelectedYear(Number(value))}
             >
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Pilih Tahun" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from(
-                  { length: 10 },
-                  (_, i) => new Date().getFullYear() - 5 + i
-                ).map((year) => (
+                {availableYears?.map((year) => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Filter Energy Type (FIXED: State sendiri) */}
+            <Select
+              value={selectedEnergyType}
+              onValueChange={(value) => setSelectedEnergyType(value)}
+            >
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Tipe Energi" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Energi</SelectItem>
+                {energyTypes?.map((e: any) => (
+                  <SelectItem key={e.energy_type_id} value={e.type_name}>
+                    {e.type_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-        <BudgetSummaryCarousel />
+
+        {/* Carousel Summary (FIXED: Pass Props) */}
+        <BudgetSummaryCarousel
+          data={summaryData}
+          isLoading={isLoadingSummary}
+          selectedEnergyType={selectedEnergyType}
+        />
       </motion.div>
 
-      {/* --- Bagian Header Tabel --- */}
-      <motion.div 
-        className="flex justify-between items-center mb-4" 
+      {/* --- Header Tabel --- */}
+      <motion.div
+        className="flex justify-between items-center mb-4"
         variants={itemVariants}
       >
         <h1 className="text-2xl font-bold">Manajemen Budget Tahunan</h1>
-        <Button onClick={() => handleOpenDialog(null)} className="transition-transform active:scale-95">
+        <Button
+          onClick={() => handleOpenDialog(null)}
+          className="transition-transform active:scale-95"
+        >
           <PlusCircle className="mr-2 h-4 w-4" /> Tambah Budget
         </Button>
       </motion.div>
 
-      {/* --- Bagian Tabel --- */}
+      {/* --- Tabel --- */}
       <motion.div variants={itemVariants}>
         <div className="rounded-md border bg-card shadow-sm">
-           <BudgetTable
+          <BudgetTable
             columns={columns}
             data={childBudgets}
             isLoading={isLoading}
@@ -164,7 +197,7 @@ export default function AnnualBudgetPage() {
         </div>
       </motion.div>
 
-      {/* --- Dialogs (Tidak perlu di-animate via parent, Shadcn sudah handle) --- */}
+      {/* --- Dialogs --- */}
       <AnnualBudgetDialog
         open={isDialogOpen}
         onOpenChange={handleCloseDialog}
@@ -185,7 +218,9 @@ export default function AnnualBudgetPage() {
               Aksi ini akan menghapus budget periode{" "}
               <span className="font-bold">
                 {budgetToDelete &&
-                  new Date(budgetToDelete.period_start).toLocaleDateString("id-ID")}
+                  new Date(budgetToDelete.period_start).toLocaleDateString(
+                    "id-ID"
+                  )}
               </span>
               . Data yang terhapus tidak dapat dikembalikan.
             </AlertDialogDescription>

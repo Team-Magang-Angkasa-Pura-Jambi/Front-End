@@ -11,7 +11,7 @@ export type MonthlyBudgetAllocation = {
 
 export type ProcessBudgetPayload = {
   pjj_rate: number;
-  process_date?: string; 
+  process_date?: string;
 };
 
 export type BudgetPreviewPayload = {
@@ -46,15 +46,12 @@ export type BudgetPreviewResponse = {
   } | null;
 };
 
-
-
-
 export const budgetApi = {
   getAllocation: async (year: number): Promise<MonthlyBudgetAllocation[]> => {
     const response = await api.get("/analytics/budget-allocation", {
       params: { year },
     });
-    
+
     return response.data.data;
   },
 

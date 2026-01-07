@@ -96,15 +96,14 @@ export const getFuelStockAnalysisApi = async (
   const response = await api.get(`/analytics/fuel-stock?month=${monthQuery}`);
   return response.data;
 };
+export const getBudgetSummaryApi = async (
+  selectedYear: number
+): Promise<BudgetSummaryByEnergy[]> => {
+  const response = await api.get("/analytics/budget-summary", {
+    params: {
+      year: selectedYear, // 🔥 Ini akan otomatis diubah jadi URL: .../budget-summary?year=2026
+    },
+  });
 
-export const getBudgetSummaryApi = async (): Promise<
-  BudgetSummaryByEnergy[]
-> => {
-  const response = await api.get("/analytics/budget-summary");
   return response.data.data;
 };
-
-
-
-
-
