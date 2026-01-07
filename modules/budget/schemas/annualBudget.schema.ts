@@ -1,5 +1,3 @@
-import { EnergyType } from "@/common/types/energy";
-import { MeterType } from "@/common/types/meters";
 import { z } from "zod";
 
 const requiredPositiveNumber = (label: string) =>
@@ -46,11 +44,9 @@ const allocationSchema = z.object({
 const childBudgetSchema = baseBudgetSchema.extend({
   budgetType: z.literal("child"),
   parent_budget_id: requiredPositiveInt("Anggaran Induk"),
-  allocations: z
-    .array(allocationSchema)
-    .min(1, {
-      message: "Anggaran periode wajib memiliki minimal satu alokasi meter.",
-    }),
+  allocations: z.array(allocationSchema).min(1, {
+    message: "Anggaran periode wajib memiliki minimal satu alokasi meter.",
+  }),
 
   total_budget: z.any().nullable().optional(),
   efficiency_tag: z.any().nullable().optional(),

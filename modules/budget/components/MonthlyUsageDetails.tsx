@@ -18,7 +18,7 @@ export const MonthlyUsageDetails = ({
 }) => {
   const year = new Date(annualBudget.period_start).getFullYear();
   const monthlyData = annualBudget.monthlyAllocation || [];
-  const isLoading = false; // Data is now passed directly
+  const isLoading = false;
   const isError = !monthlyData;
 
   if (isLoading) {

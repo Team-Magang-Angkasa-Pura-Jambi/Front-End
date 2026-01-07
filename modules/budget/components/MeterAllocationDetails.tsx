@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { cn } from "@/lib/utils";
-import { AnnualBudget } from "@/common/types/budget"; // Pastikan type dasar ada
+import { AnnualBudget } from "@/common/types/budget";
 
-// Definisikan tipe tambahan karena properti ini hasil kalkulasi service (bukan raw DB)
 interface ExtendedAllocation {
   allocation_id: number;
   allocatedBudget: number;

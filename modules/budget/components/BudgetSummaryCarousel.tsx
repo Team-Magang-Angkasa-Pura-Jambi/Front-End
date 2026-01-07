@@ -6,7 +6,6 @@ import { BudgetSummaryCard } from "./BudgetSummaryCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-// Definisikan tipe props agar Type Safe
 interface BudgetSummaryItem {
   energyTypeName: string;
   currentPeriod: {
@@ -19,9 +18,9 @@ interface BudgetSummaryItem {
 }
 
 interface BudgetSummaryCarouselProps {
-  data: BudgetSummaryItem[]; // Data dikirim dari Parent
+  data: BudgetSummaryItem[];
   isLoading: boolean;
-  selectedEnergyType: string; // "all" atau nama energi (misal "Electricity")
+  selectedEnergyType: string;
 }
 
 export const BudgetSummaryCarousel = ({
@@ -31,35 +30,29 @@ export const BudgetSummaryCarousel = ({
 }: BudgetSummaryCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // 1. Filter Data berdasarkan Pilihan Dropdown
   const filteredData = useMemo(() => {
     if (!data) return [];
     if (selectedEnergyType === "all") return data;
 
-    // Cari data yang sesuai nama energinya
     return data.filter((item) => item.energyTypeName === selectedEnergyType);
   }, [data, selectedEnergyType]);
 
-  // 2. Reset index ke 0 jika filter berubah
   useEffect(() => {
     setCurrentIndex(0);
   }, [selectedEnergyType]);
 
-  // 3. Logic Carousel (Auto Slide)
   const handleNext = useCallback(() => {
     if (!filteredData || filteredData.length <= 1) return;
     setCurrentIndex((prev) => (prev + 1) % filteredData.length);
   }, [filteredData]);
 
   useEffect(() => {
-    // Hanya jalan auto slide jika "all" dipilih DAN data lebih dari 1
     if (filteredData.length <= 1) return;
 
-    const interval = setInterval(handleNext, 5000); // Slide tiap 5 detik
+    const interval = setInterval(handleNext, 5000);
     return () => clearInterval(interval);
   }, [filteredData, handleNext]);
 
-  // --- Loading State ---
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -70,7 +63,6 @@ export const BudgetSummaryCarousel = ({
     );
   }
 
-  // --- Empty State ---
   if (!filteredData || filteredData.length === 0) {
     return (
       <div className="flex h-[126px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
@@ -79,24 +71,22 @@ export const BudgetSummaryCarousel = ({
     );
   }
 
-  // Ambil item yang sedang aktif
   const currentItem = filteredData[currentIndex];
   const budget = currentItem?.currentPeriod;
 
-  // Animasi Framer Motion
   const cardVariants = {
     enter: { opacity: 0, x: 20 },
     center: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -20 },
   };
 
-  if (!budget) return null; // Safety check
+  if (!budget) return null;
 
   return (
     <div className="overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentItem.energyTypeName} // Key penting agar animasi jalan saat ganti energi
+          key={currentItem.energyTypeName}
           variants={cardVariants}
           initial="enter"
           animate="center"

@@ -1,4 +1,4 @@
-import { MonthlyBudgetAllocation } from "@/modules/budget/services/budget.service";
+import { MonthlyBudgetAllocation } from "@/modules/budget/services/analytics.service";
 import { EnergyType } from "./energy";
 import { MeterType } from "./meters";
 
@@ -26,6 +26,9 @@ export interface AnnualBudget {
   energy_type: EnergyType | null;
   parent_budget_id?: number | null;
   allocations: AnnualBudgetAllocation[];
+  totalRealization: number;
+  remainingBudget: number;
+  realizationPercentage: number;
   monthlyAllocation: MonthlyBudgetAllocation[];
   createdAt: string;
   updatedAt: string;

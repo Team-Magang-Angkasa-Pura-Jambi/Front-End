@@ -103,7 +103,7 @@ export const updateEfficiencyTargetApi = async (
   id: number,
   data: EfficiencyTargetPayload
 ): Promise<EfficiencyTargetDetailApiResponse> => {
-  const response = await api.put<EfficiencyTargetDetailApiResponse>(
+  const response = await api.patch<EfficiencyTargetDetailApiResponse>(
     `${BASE_URL}/${id}`,
     data
   );

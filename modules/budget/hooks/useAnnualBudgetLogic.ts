@@ -2,14 +2,18 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns-tz";
+import { AxiosError } from "axios";
 
 import { getBudgetSummaryApi } from "@/services/analysis.service";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
 import { AnnualBudget } from "@/common/types/budget";
-import { yearOptionsApi } from "../services/annualBudget.service";
-import { annualBudgetApi } from "@/services/annualBudget.service";
+import {
+  annualBudgetApi,
+  getAnnualBudgetApi,
+  yearOptionsApi,
+} from "@/modules/budget/services/annualBudget.service";
 
 export const useAnnualBudgetLogic = () => {
   const queryClient = useQueryClient();
@@ -19,72 +23,60 @@ export const useAnnualBudgetLogic = () => {
   );
   const [selectedEnergyType, setSelectedEnergyType] = useState<string>("all");
 
-  const { data: yearsResponse, isLoading: isLoadingYears } = useQuery({
+  const handleApiError = (err: unknown, defaultMsg: string) => {
+    const error = err as AxiosError<{ message: string }>;
+    const message = error.response?.data?.message || defaultMsg;
+    toast.error(message);
+  };
+
+  const { data: yearsRes, isLoading: isLoadingYears } = useQuery({
     queryKey: ["meta", "fiscal-years"],
     queryFn: yearOptionsApi,
     staleTime: Infinity,
   });
 
-  const { data: energyTypesResponse, isLoading: isLoadingEnergyTypes } =
-    useQuery({
-      queryKey: ["master", "energy-types"],
-      queryFn: () => getEnergyTypesApi(),
-      staleTime: Infinity,
-    });
+  const { data: energyRes, isLoading: isLoadingEnergyTypes } = useQuery({
+    queryKey: ["master", "energy-types"],
+    queryFn: () => getEnergyTypesApi(),
+    staleTime: Infinity,
+  });
 
-  const { data: childBudgetsResponse, isLoading: isLoadingChildren } = useQuery(
-    {
-      queryKey: ["childAnnualBudgets", selectedYear],
-      queryFn: () => annualBudgetApi.getAll(selectedYear),
-      staleTime: 1000 * 60 * 1,
-      placeholderData: (prev) => prev,
-    }
-  );
+  const { data: childBudgetsRes, isLoading: isLoadingChildren } = useQuery({
+    queryKey: ["childAnnualBudgets", selectedYear],
+    queryFn: () => getAnnualBudgetApi(selectedYear),
+    staleTime: 1000 * 60,
+  });
 
-  const { data: summaryData, isLoading: isLoadingSummary } = useQuery({
+  const { data: parentsRes, isLoading: isLoadingParents } = useQuery({
+    queryKey: ["parentAnnualBudgets", selectedYear],
+    queryFn: () => annualBudgetApi.getParents(),
+    enabled: !!selectedYear,
+  });
+
+  const { data: summaryRes, isLoading: isLoadingSummary } = useQuery({
     queryKey: ["budgetSummary", selectedYear],
     queryFn: () => getBudgetSummaryApi(selectedYear),
     enabled: !!selectedYear,
-    placeholderData: (prev) => prev,
   });
-
-  const { data: parentsResponse, isLoading: isLoadingParents } = useQuery({
-    queryKey: ["parentAnnualBudgets", selectedYear],
-    queryFn: () => annualBudgetApi.getParents(), // Memanggil endpoint dengan parent_budget_id = null
-    enabled: !!selectedYear,
-  });
-
-  const parentBudgets = useMemo(() => {
-    return parentsResponse?.data || [];
-  }, [parentsResponse]);
 
   const availableYears = useMemo(
-    () => yearsResponse?.data?.availableYears || [],
-    [yearsResponse]
+    () => yearsRes?.data?.availableYears || [],
+    [yearsRes]
   );
-
-  const energyTypes = useMemo(
-    () => energyTypesResponse?.data || [],
-    [energyTypesResponse]
-  );
+  const energyTypes = useMemo(() => energyRes?.data || [], [energyRes]);
+  const parentBudgets = useMemo(() => parentsRes?.data || [], [parentsRes]);
+  const summaryData = useMemo(() => summaryRes || [], [summaryRes]);
 
   const childBudgets = useMemo(() => {
-    const rawData = childBudgetsResponse?.data || [];
-
-    if (selectedEnergyType === "all") {
-      return rawData;
-    }
-
-    return rawData.filter(
-      (budget: AnnualBudget) =>
-        budget.energy_type.type_name === selectedEnergyType
+    const data = childBudgetsRes?.data || [];
+    if (selectedEnergyType === "all") return data;
+    return data.filter(
+      (b: AnnualBudget) => b.energy_type.type_name === selectedEnergyType
     );
-  }, [childBudgetsResponse, selectedEnergyType]);
-
-  const summary = useMemo(() => summaryData || [], [summaryData]);
+  }, [childBudgetsRes, selectedEnergyType]);
 
   const createOrUpdateMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       values,
       isEditing,
       id,
@@ -103,23 +95,21 @@ export const useAnnualBudgetLogic = () => {
         ),
       };
 
-      if ("budgetType" in payload) delete (payload as any).budgetType;
+      if ("budgetType" in payload) delete payload.budgetType;
 
       return isEditing && id
         ? annualBudgetApi.update(id, payload)
         : annualBudgetApi.create(payload);
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (_, vars) => {
       toast.success(
-        `Budget berhasil ${variables.isEditing ? "diperbarui" : "dibuat"}.`
+        `Budget berhasil ${vars.isEditing ? "diperbarui" : "dibuat"}.`
       );
-
       queryClient.invalidateQueries({ queryKey: ["childAnnualBudgets"] });
+      queryClient.invalidateQueries({ queryKey: ["parentAnnualBudgets"] });
       queryClient.invalidateQueries({ queryKey: ["budgetSummary"] });
     },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Terjadi kesalahan.");
-    },
+    onError: (err) => handleApiError(err, "Gagal menyimpan budget."),
   });
 
   const deleteMutation = useMutation({
@@ -129,9 +119,7 @@ export const useAnnualBudgetLogic = () => {
       queryClient.invalidateQueries({ queryKey: ["childAnnualBudgets"] });
       queryClient.invalidateQueries({ queryKey: ["budgetSummary"] });
     },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Gagal menghapus budget.");
-    },
+    onError: (err) => handleApiError(err, "Gagal menghapus budget."),
   });
 
   return {
@@ -143,10 +131,14 @@ export const useAnnualBudgetLogic = () => {
     availableYears,
     energyTypes,
     childBudgets,
-    summaryData: summary,
-    parentBudgets: parentBudgets,
+    parentBudgets,
+    summaryData,
 
-    isLoading: isLoadingChildren || isLoadingYears || isLoadingEnergyTypes,
+    isLoading:
+      isLoadingChildren ||
+      isLoadingYears ||
+      isLoadingEnergyTypes ||
+      isLoadingParents,
     isLoadingSummary,
 
     createOrUpdateMutation,

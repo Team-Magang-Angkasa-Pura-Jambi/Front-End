@@ -53,13 +53,21 @@ export const getColumns = (
     id: "expander",
     header: () => null,
     cell: ({ row }) => {
-      return row.getCanExpand() ? (
+      const hasAllocations =
+        row.original.allocations && row.original.allocations.length > 0;
+
+      return hasAllocations ? (
         <Button
           variant="ghost"
           size="icon"
           onClick={row.getToggleExpandedHandler()}
+          className="h-8 w-8"
         >
-          {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
+          {row.getIsExpanded() ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
         </Button>
       ) : null;
     },
@@ -68,15 +76,11 @@ export const getColumns = (
     accessorKey: "period_start",
     header: "Periode",
     cell: ({ row }) => {
-      const isChild = !!row.original.parent_budget_id;
       const startDate = format(new Date(row.original.period_start), "d LLL y");
       const endDate = format(new Date(row.original.period_end), "d LLL y");
 
       return (
-        <div className={cn("flex items", isChild && "pl-4")}>
-          {isChild && (
-            <CornerDownRight className="h-4 w-4 mr-2 text-muted-foreground" />
-          )}
+        <div className="flex items-center font-medium">
           <span>{`${startDate} - ${endDate}`}</span>
         </div>
       );
@@ -86,15 +90,35 @@ export const getColumns = (
     accessorKey: "total_budget",
     header: "Total Budget",
     cell: ({ row }) => (
-      <div>{formatCurrency(parseFloat(row.getValue("total_budget")))}</div>
+      <div className="font-semibold text-primary">
+        {formatCurrency(Number(row.getValue("total_budget")))}
+      </div>
     ),
   },
   {
-    accessorKey: "efficiency_tag",
-    header: "Efficiency Tag",
+    accessorKey: "totalRealization",
+    header: "Realisasi",
+    cell: ({ row }) => (
+      <div className="text-muted-foreground">
+        {formatCurrency(row.original.totalRealization || 0)}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "realizationPercentage",
+    header: "Usage (%)",
     cell: ({ row }) => {
-      const value = row.getValue("efficiency_tag") as number;
-      return value ? `${(value * 100).toFixed(0)}%` : "-";
+      const percent = row.original.realizationPercentage || 0;
+      return (
+        <div
+          className={cn(
+            "font-bold",
+            percent > 100 ? "text-destructive" : "text-green-600"
+          )}
+        >
+          {percent.toFixed(2)}%
+        </div>
+      );
     },
   },
   {
@@ -103,7 +127,6 @@ export const getColumns = (
     cell: ({ row }) => {
       const energyType = row.original.energy_type;
       if (!energyType) return "-";
-
       return <EnergyTypeCell typeName={energyType.type_name} />;
     },
   },
