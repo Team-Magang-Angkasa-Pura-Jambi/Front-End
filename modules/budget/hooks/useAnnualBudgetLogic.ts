@@ -3,36 +3,28 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns-tz";
 
-// Services
-
 import { getBudgetSummaryApi } from "@/services/analysis.service";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 
-// Schemas & Types
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
-import { AnnualBudget } from "@/common/types/budget"; // Pastikan import type ini ada
+import { AnnualBudget } from "@/common/types/budget";
 import { yearOptionsApi } from "../services/annualBudget.service";
 import { annualBudgetApi } from "@/services/annualBudget.service";
 
 export const useAnnualBudgetLogic = () => {
   const queryClient = useQueryClient();
 
-  // --- 1. State ---
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
   const [selectedEnergyType, setSelectedEnergyType] = useState<string>("all");
 
-  // --- 2. Queries (Read Data) ---
-
-  // A. List Tahun (Untuk Dropdown)
   const { data: yearsResponse, isLoading: isLoadingYears } = useQuery({
     queryKey: ["meta", "fiscal-years"],
     queryFn: yearOptionsApi,
-    staleTime: Infinity, // Data tahun jarang berubah
+    staleTime: Infinity,
   });
 
-  // B. List Tipe Energi (Untuk Dropdown)
   const { data: energyTypesResponse, isLoading: isLoadingEnergyTypes } =
     useQuery({
       queryKey: ["master", "energy-types"],
@@ -40,18 +32,15 @@ export const useAnnualBudgetLogic = () => {
       staleTime: Infinity,
     });
 
-  // C. Main Table Data (List Budget)
-  // Strategi: Ambil SEMUA data 1 tahun, filter di frontend.
   const { data: childBudgetsResponse, isLoading: isLoadingChildren } = useQuery(
     {
-      queryKey: ["childAnnualBudgets", selectedYear], // Key hanya TAHUN
-      queryFn: () => annualBudgetApi.getAll(selectedYear), // Fetch semua tipe energi
-      staleTime: 1000 * 60 * 1, // Cache 1 menit
-      placeholderData: (prev) => prev, // Keep data lama saat ganti tahun biar smooth
+      queryKey: ["childAnnualBudgets", selectedYear],
+      queryFn: () => annualBudgetApi.getAll(selectedYear),
+      staleTime: 1000 * 60 * 1,
+      placeholderData: (prev) => prev,
     }
   );
 
-  // D. Summary Data (Carousel)
   const { data: summaryData, isLoading: isLoadingSummary } = useQuery({
     queryKey: ["budgetSummary", selectedYear],
     queryFn: () => getBudgetSummaryApi(selectedYear),
@@ -59,7 +48,15 @@ export const useAnnualBudgetLogic = () => {
     placeholderData: (prev) => prev,
   });
 
-  // --- 3. Derived State (Memoization & Filtering) ---
+  const { data: parentsResponse, isLoading: isLoadingParents } = useQuery({
+    queryKey: ["parentAnnualBudgets", selectedYear],
+    queryFn: () => annualBudgetApi.getParents(), // Memanggil endpoint dengan parent_budget_id = null
+    enabled: !!selectedYear,
+  });
+
+  const parentBudgets = useMemo(() => {
+    return parentsResponse?.data || [];
+  }, [parentsResponse]);
 
   const availableYears = useMemo(
     () => yearsResponse?.data?.availableYears || [],
@@ -71,8 +68,6 @@ export const useAnnualBudgetLogic = () => {
     [energyTypesResponse]
   );
 
-  // 🔥 FILTERING LOGIC (Client-Side)
-  // User ganti dropdown -> useMemo jalan -> UI update (Tanpa loading server)
   const childBudgets = useMemo(() => {
     const rawData = childBudgetsResponse?.data || [];
 
@@ -88,8 +83,6 @@ export const useAnnualBudgetLogic = () => {
 
   const summary = useMemo(() => summaryData || [], [summaryData]);
 
-  // --- 4. Mutations (Write Data) ---
-
   const createOrUpdateMutation = useMutation({
     mutationFn: ({
       values,
@@ -100,7 +93,6 @@ export const useAnnualBudgetLogic = () => {
       isEditing: boolean;
       id?: number;
     }) => {
-      // Normalisasi Tanggal ke UTC agar konsisten di DB
       const payload = {
         ...values,
         period_start: new Date(
@@ -111,7 +103,6 @@ export const useAnnualBudgetLogic = () => {
         ),
       };
 
-      // Hapus properti dummy jika ada
       if ("budgetType" in payload) delete (payload as any).budgetType;
 
       return isEditing && id
@@ -122,7 +113,7 @@ export const useAnnualBudgetLogic = () => {
       toast.success(
         `Budget berhasil ${variables.isEditing ? "diperbarui" : "dibuat"}.`
       );
-      // Refresh data tabel & summary
+
       queryClient.invalidateQueries({ queryKey: ["childAnnualBudgets"] });
       queryClient.invalidateQueries({ queryKey: ["budgetSummary"] });
     },
@@ -143,26 +134,21 @@ export const useAnnualBudgetLogic = () => {
     },
   });
 
-  // --- 5. Return Value ---
   return {
-    // State Controls
     selectedYear,
     setSelectedYear,
     selectedEnergyType,
     setSelectedEnergyType,
 
-    // Data Sources
     availableYears,
     energyTypes,
-    childBudgets, // Sudah terfilter
+    childBudgets,
     summaryData: summary,
-    parentBudgets: [], // Placeholder jika nanti butuh
+    parentBudgets: parentBudgets,
 
-    // Loading States
     isLoading: isLoadingChildren || isLoadingYears || isLoadingEnergyTypes,
     isLoadingSummary,
 
-    // Actions
     createOrUpdateMutation,
     deleteMutation,
   };

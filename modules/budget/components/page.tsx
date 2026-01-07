@@ -150,7 +150,7 @@ export default function AnnualBudgetPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Energi</SelectItem>
-                {energyTypes?.map((e: any) => (
+                {energyTypes?.map((e) => (
                   <SelectItem key={e.energy_type_id} value={e.type_name}>
                     {e.type_name}
                   </SelectItem>
