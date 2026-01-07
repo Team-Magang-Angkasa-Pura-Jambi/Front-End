@@ -44,10 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import {
-  getEnergyTypesApi,
-  EnergyTypesApiResponse,
-} from "@/services/energyType.service";
+
 
 import { useAuthStore } from "@/stores/authStore";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -60,6 +57,7 @@ import {
   submitReadingApi,
 } from "../services";
 import { EnergyTypeName } from "@/common/types/energy";
+import { EnergyTypesApiResponse, getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 
 interface FormReadingProps {
   onSuccess?: () => void;

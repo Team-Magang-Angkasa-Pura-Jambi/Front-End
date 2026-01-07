@@ -49,10 +49,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import {
-  getEnergyTypesApi,
-  EnergyTypesApiResponse,
-} from "@/services/energyType.service";
+
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formSchema, FormValues } from "../schemas/reading.schema";
@@ -63,6 +60,7 @@ import {
   ReadingPayload,
   submitReadingApi,
 } from "../services";
+import {  getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 
 interface FormReadingProps {
   onSuccess?: () => void;
@@ -90,7 +88,7 @@ export const FormReadingElectric = ({
   });
 
   const { data: energyTypeData, isLoading: isLoadingData } =
-    useQuery<EnergyTypesApiResponse>({
+    useQuery({
       queryKey: ["energyData", type_name],
       queryFn: () => getEnergyTypesApi(type_name),
       refetchOnWindowFocus: false,

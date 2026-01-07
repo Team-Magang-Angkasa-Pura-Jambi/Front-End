@@ -1,5 +1,4 @@
 import { Loader2 } from "lucide-react";
-import { AnnualBudget } from "../types";
 import { MeterAllocationDetails } from "./MeterAllocationDetails";
 import {
   Table,
@@ -10,7 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { annualBudgetApi } from "@/services/annualBudget.service";
+import { AnnualBudget } from "@/common/types/budget";
+
+
 
 export const MonthlyUsageDetails = ({
   annualBudget,

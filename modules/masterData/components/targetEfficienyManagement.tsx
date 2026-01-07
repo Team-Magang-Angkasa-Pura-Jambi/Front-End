@@ -32,10 +32,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { DataTable } from "@/components/DataTable";
+import { DataTable } from "@/components/table/dataTable";
 
 import { TargetEfficiencyForm } from "./forms/targetEfficiency.form";
-import { DataTableRowActions } from "./dataTableRowActions";
 
 import { ApiErrorResponse } from "@/common/types/api";
 import { MeterType } from "@/common/types/meters";
@@ -48,6 +47,7 @@ import {
   updateEfficiencyTargetApi,
 } from "../services/targetEfficiency.service";
 import { EfficiencyTarget } from "@/common/types/efficiencyTarget";
+import { DataTableRowActions } from "@/components/table/dataTableRowActions";
 
 const TargetValueCell = ({ row }: { row: Row<EfficiencyTarget> }) => {
   const unit = row.original.meter?.energy_type?.unit_of_measurement || "%";
@@ -113,7 +113,7 @@ export const createTargetEfficiencyColumns = (
     id: "actions",
     cell: ({ row }) => (
       <DataTableRowActions
-        row={row.original}
+        row={row}
         onEdit={onEdit}
         onDelete={onDelete}
       />

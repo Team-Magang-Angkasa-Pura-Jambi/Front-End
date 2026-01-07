@@ -33,10 +33,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/DataTable";
 
 import { MeterForm } from "./forms/meter.form";
-import { DataTableRowActions } from "./dataTableRowActions";
 
 import { MeterType } from "@/common/types/meters";
 import { ApiErrorResponse } from "@/common/types/api";
@@ -47,6 +45,8 @@ import {
   getMetersApi,
   updateMeterApi,
 } from "../services/meter.service";
+import { DataTableRowActions } from "@/components/table/dataTableRowActions";
+import { DataTable } from "@/components/table/dataTable";
 
 const MeterDescriptionCell = ({ row }: { row: Row<MeterType> }) => {
   const {
@@ -125,7 +125,7 @@ export const createMeterColumns = (
     id: "actions",
     cell: ({ row }) => (
       <DataTableRowActions
-        row={row.original}
+        row={row}
         onEdit={onEdit}
         onDelete={onDelete}
       />

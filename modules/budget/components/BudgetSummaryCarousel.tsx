@@ -11,7 +11,8 @@ export const BudgetSummaryCarousel = () => {
   const { data: summaryData, isLoading } = useQuery({
     queryKey: ["budgetSummary"],
     queryFn: getBudgetSummaryApi,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5, 
+    refetchOnWindowFocus: false,
   });
 
   const [currentIndex, setCurrentIndex] = useState(0);

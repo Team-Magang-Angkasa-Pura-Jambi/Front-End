@@ -32,10 +32,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/DataTable";
+import { DataTable } from "@/components/table/dataTable";
 
 import { EnergyTypeForm } from "./forms/energyType.form";
-import { DataTableRowActions } from "./dataTableRowActions";
 
 import { ApiErrorResponse } from "@/common/types/api";
 import {
@@ -46,6 +45,7 @@ import {
 } from "../services/energyType.service";
 import { EnergyTypeFormValues } from "../schemas/energyType.schema";
 import { EnergyType } from "@/common/types/energy";
+import { DataTableRowActions } from "@/components/table/dataTableRowActions";
 
 export const createEnergyTypeColumns = (
   onEdit: (item: EnergyType) => void,
@@ -69,7 +69,7 @@ export const createEnergyTypeColumns = (
     id: "actions",
     cell: ({ row }) => (
       <DataTableRowActions
-        row={row.original}
+        row={row}
         onEdit={onEdit}
         onDelete={onDelete}
       />

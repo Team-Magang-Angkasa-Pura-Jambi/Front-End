@@ -25,13 +25,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { DialogFooter } from "@/components/ui/dialog";
-import { getEnergyTypesApi } from "@/services/energyType.service";
 import { categoryApi } from "@/services/category.service";
 import { STATUS_METER } from "../../types/meter.type";
 import { MeterFormValues, meterSchema } from "../../schemas/meter.schema";
 import { ENERGY_TYPES } from "@/common/types/energy";
 import { MeterType } from "@/common/types/meters";
 import { getTariffGroupsApi } from "../../services/tariffGroup.service";
+import { getEnergyTypesApi } from "../../services/energyType.service";
 
 interface MeterFormProps {
   initialData?: MeterType | null;

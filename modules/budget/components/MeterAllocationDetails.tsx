@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AnnualBudget } from "../types";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { cn } from "@/lib/utils";
+import { AnnualBudget } from "@/common/types/budget";
 
 export const MeterAllocationDetails = ({
   annualBudget,

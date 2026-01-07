@@ -31,7 +31,7 @@ import {
   updateRoleApi,
   UpdateRolePayload,
 } from "@/services/role.service";
-import { DataTable } from "@/components/DataTable";
+import { DataTable } from "@/components/table/dataTable";
 import {
   AlertDialog,
   AlertDialogAction,

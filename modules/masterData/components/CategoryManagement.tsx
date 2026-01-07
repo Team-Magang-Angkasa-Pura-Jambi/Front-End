@@ -58,8 +58,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { categorySchema, categoryType } from "../schemas/category.schema";
-import { DataTableRowActions } from "./dataTableRowActions";
-import { DataTable } from "@/components/DataTable";
+import { DataTable } from "@/components/table/dataTable";
+import { DataTableRowActions } from "@/components/table/dataTableRowActions";
 
 const createCategoryColumns = (
   onEdit: (item: CategoryType) => void,
@@ -70,7 +70,7 @@ const createCategoryColumns = (
     id: "actions",
     cell: ({ row }) => (
       <DataTableRowActions
-        row={row.original}
+        row={row}
         onEdit={onEdit}
         onDelete={onDelete}
       />

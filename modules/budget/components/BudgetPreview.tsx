@@ -1,13 +1,13 @@
 import { useFormContext, useWatch } from "react-hook-form";
-import { useDebounce } from "./useDebounce";
 import { useQuery } from "@tanstack/react-query";
-import { budgetApi } from "@/services/budget.service";
 import { format } from "date-fns-tz";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
-import { AnnualBudgetFormValues } from "../types";
+import { Copy, Loader2 } from "lucide-react";
+import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
+import { useDebounce } from "@uidotdev/usehooks";
+import { budgetApi } from "../services/budget.service";
 
 export const BudgetPreview = () => {
   const {
@@ -16,7 +16,7 @@ export const BudgetPreview = () => {
     setValue,
   } = useFormContext<AnnualBudgetFormValues>();
 
-  // 1. Awasi field untuk mendapatkan nilai secara instan
+  
   const watchedFields = useWatch({
     control,
     name: [
@@ -28,7 +28,7 @@ export const BudgetPreview = () => {
     ],
   });
 
-  // 2. Terapkan debounce pada nilai yang diawasi (delay 500ms)
+  
   const debouncedFields = useDebounce(watchedFields, 500);
   const [
     total_budget,
@@ -38,7 +38,7 @@ export const BudgetPreview = () => {
     parent_budget_id,
   ] = debouncedFields;
 
-  // Cek apakah ada error pada field yang relevan
+  
   const hasErrors =
     errors.total_budget || errors.period_start || errors.period_end;
 
@@ -47,7 +47,7 @@ export const BudgetPreview = () => {
     (total_budget > 0 || parent_budget_id) &&
     period_start instanceof Date && period_end instanceof Date;
 
-  // 3. Gunakan nilai yang sudah di-debounce untuk query
+  
   const {
     data: previewData,
     isLoading,
@@ -69,9 +69,11 @@ export const BudgetPreview = () => {
         allocations: allocations?.map((alloc) => ({
           meter_id: alloc.meter_id,
           weight: alloc.weight,
-        })), // Format ke YYYY-MM-DD
+        })), 
       }),
     enabled: !!canFetchPreview,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   return (
@@ -87,9 +89,12 @@ export const BudgetPreview = () => {
           </p>
         )}
         {isLoading && (
-          <p className="text-sm text-muted-foreground">
-            Menghitung pratinjau...
-          </p>
+       <div className="flex items-center gap-2 py-2">
+    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+    <span className="text-sm text-muted-foreground">
+      Menghitung pratinjau...
+    </span>
+  </div>
         )}
         {isError && (
           <p className="text-sm text-destructive">Gagal memuat pratinjau.</p>
