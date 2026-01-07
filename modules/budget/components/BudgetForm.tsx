@@ -40,7 +40,7 @@ import { AnnualBudget } from "@/common/types/budget";
 import { EnergyType } from "@/common/types/energy";
 import { MeterType } from "@/common/types/meters";
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
-import { prepareNextPeriodBudget } from "../services/analytics.service";
+import { PrepareNextPeriodBudget } from "../services/analytics.service";
 
 interface BudgetFormProps {
   budgetType: "parent" | "child";
@@ -52,7 +52,7 @@ interface BudgetFormProps {
   meters: MeterType[];
   isLoadingMeters: boolean;
   isLoadingEnergyTypes: boolean;
-  prepareNextPeriodBudget: prepareNextPeriodBudget;
+  prepareNextPeriodBudget: PrepareNextPeriodBudget;
   selectedEnergyTypeName?: string;
 }
 
@@ -77,62 +77,45 @@ export function BudgetForm({
     name: "allocations",
   });
 
-  const allocationValues = useWatch({
-    control,
-    name: "allocations",
-  });
-
-  const selectedMeterIds = (allocationValues || []).map(
-    (alloc) => alloc?.meter_id
-  );
-
-  const currentBudgetType = useWatch({
-    control,
-    name: "budgetType",
-  });
-
-  const selectedEnergyTypeId = useWatch({
-    control,
-    name: "energy_type_id",
-  });
+  const allocationValues = useWatch({ control, name: "allocations" }) || [];
+  const selectedMeterIds = allocationValues.map((alloc) => alloc?.meter_id);
+  const selectedEnergyTypeId = useWatch({ control, name: "energy_type_id" });
 
   return (
     <>
-      <ScrollArea className="max-h-[70vh] overflow-y-auto p-4 -m-4">
-        <div className="space-y-6 p-4">
-          <div className="col-span-2 space-y-2">
-            <FormLabel>Tipe Anggaran</FormLabel>
+      <ScrollArea className="max-h-[80vh] overflow-y-auto px-6 py-2">
+        <div className="space-y-6 pb-6">
+          <div className="space-y-3">
+            <FormLabel className="text-base font-bold text-primary">
+              Tipe Anggaran
+            </FormLabel>
             <RadioGroup
               onValueChange={(value: "parent" | "child") => {
                 setBudgetType(value);
-                setValue("budgetType", value, {
-                  shouldValidate: true,
-                });
+                setValue("budgetType", value, { shouldValidate: true });
+
+                if (value === "parent") setValue("allocations", []);
               }}
               value={budgetType}
-              className="flex items-center space-x-4"
+              className="flex items-center space-x-6 p-2 border rounded-lg bg-muted/20"
               disabled={!!editingBudget}
             >
-              <FormItem className="flex items-center space-x-2 space-y-0">
-                <FormControl>
-                  <RadioGroupItem value="parent" />
-                </FormControl>
-                <FormLabel className="font-normal">
-                  Anggaran Induk (Tahunan)
-                </FormLabel>
-              </FormItem>
-              <FormItem className="flex items-center space-x-2 space-y-0">
-                <FormControl>
-                  <RadioGroupItem value="child" />
-                </FormControl>
-                <FormLabel className="font-normal">
-                  Anggaran Periode (Anak)
-                </FormLabel>
-              </FormItem>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="parent" id="parent" />
+                <Label htmlFor="parent" className="font-medium cursor-pointer">
+                  Induk (Tahunan)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="child" id="child" />
+                <Label htmlFor="child" className="font-medium cursor-pointer">
+                  Periode (Anak)
+                </Label>
+              </div>
             </RadioGroup>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={control}
               name="period_start"
@@ -143,9 +126,9 @@ export function BudgetForm({
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={"outline"}
+                          variant="outline"
                           className={cn(
-                            "pl-3 text-left font-normal",
+                            "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -163,7 +146,8 @@ export function BudgetForm({
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        initialFocus
+                        numberOfMonths={2}
+                        className="rounded-md border shadow"
                       />
                     </PopoverContent>
                   </Popover>
@@ -171,6 +155,7 @@ export function BudgetForm({
                 </FormItem>
               )}
             />
+
             <FormField
               control={control}
               name="period_end"
@@ -181,9 +166,9 @@ export function BudgetForm({
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={"outline"}
+                          variant="outline"
                           className={cn(
-                            "pl-3 text-left font-normal",
+                            "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -204,7 +189,8 @@ export function BudgetForm({
                         disabled={(date) =>
                           date < (getValues("period_start") || new Date(0))
                         }
-                        initialFocus
+                        numberOfMonths={2}
+                        className="rounded-md border shadow"
                       />
                     </PopoverContent>
                   </Popover>
@@ -213,13 +199,14 @@ export function BudgetForm({
               )}
             />
           </div>
+
           {budgetType === "child" && (
             <FormField
               control={control}
               name="parent_budget_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Anggaran Induk</FormLabel>
+                  <FormLabel>Anggaran Induk (Annual)</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value ? String(field.value) : ""}
@@ -248,6 +235,7 @@ export function BudgetForm({
               )}
             />
           )}
+
           <FormField
             control={control}
             name="total_budget"
@@ -258,22 +246,22 @@ export function BudgetForm({
                   <div className="relative">
                     <Input
                       type="number"
-                      placeholder="e.g., 50000000"
+                      placeholder="Input nominal budget"
                       {...field}
                       max={
-                        budgetType === "child" &&
-                        prepareNextPeriodBudget?.availableBudgetForNextPeriod
+                        prepareNextPeriodBudget?.availableBudgetForNextPeriod ||
+                        undefined
                       }
-                      className="pr-28"
+                      className="pr-24 h-11 text-lg font-medium"
                     />
                     {budgetType === "child" &&
-                      prepareNextPeriodBudget?.availableBudgetForNextPeriod >
-                        0 && (
+                      (prepareNextPeriodBudget?.availableBudgetForNextPeriod ??
+                        0) > 0 && (
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="secondary"
                           size="sm"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-7"
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 text-xs"
                           onClick={() =>
                             setValue(
                               "total_budget",
@@ -282,223 +270,215 @@ export function BudgetForm({
                           }
                         >
                           <Copy className="h-3 w-3 mr-1" />
-                          Gunakan
+                          Gunakan Sisa
                         </Button>
                       )}
                   </div>
                 </FormControl>
                 {budgetType === "child" && prepareNextPeriodBudget && (
-                  <FormDescription>
-                    Sisa budget dari induk yang dapat dialokasikan:{" "}
-                    {formatCurrency(
-                      prepareNextPeriodBudget.availableBudgetForNextPeriod || 0
-                    )}
+                  <FormDescription className="bg-blue-50 p-2 rounded border border-blue-100 text-blue-700">
+                    Maksimum alokasi tersedia:{" "}
+                    <span className="font-bold">
+                      {formatCurrency(
+                        prepareNextPeriodBudget.availableBudgetForNextPeriod ||
+                          0
+                      )}
+                    </span>
                   </FormDescription>
                 )}
                 <FormMessage />
               </FormItem>
             )}
           />
+
           {budgetType === "parent" && (
             <FormField
               control={control}
               name="efficiency_tag"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Efficiency Tag (0-1)</FormLabel>
+                  <FormLabel>Target Efisiensi (Saving %)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      step="0.01"
-                      placeholder="e.g., 0.85"
+                      step="0.001"
+                      placeholder="Contoh: 0.005 untuk 0.5%"
                       {...field}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Nilai 0.005 berarti target penghematan 0.5% dari budget
+                    dasar.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
           )}
 
-          {currentBudgetType === "parent" && (
-            <FormField
-              control={control}
-              name="energy_type_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipe Energi</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(Number(value));
-                      setValue("allocations", []);
-                    }}
-                    value={field.value ? String(field.value) : ""}
-                    disabled={isLoadingEnergyTypes || !!editingBudget}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={
-                            isLoadingEnergyTypes
-                              ? "Memuat..."
-                              : "Pilih Tipe Energi"
-                          }
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {energyTypes.map((type) => (
-                        <SelectItem
-                          key={type.energy_type_id}
-                          value={String(type.energy_type_id)}
-                        >
-                          {type.type_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {budgetType === "child" && selectedEnergyTypeName && (
-            <div className="space-y-2">
-              <Label>Tipe Energi</Label>
-              <Input
-                value={selectedEnergyTypeName}
-                disabled
-                className="font-semibold"
+          <div className="p-4 bg-muted/30 rounded-lg border border-dashed">
+            {budgetType === "parent" ? (
+              <FormField
+                control={control}
+                name="energy_type_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pilih Tipe Energi</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(Number(value));
+                        setValue("allocations", []);
+                      }}
+                      value={field.value ? String(field.value) : ""}
+                      disabled={isLoadingEnergyTypes || !!editingBudget}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Tipe Energi" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {energyTypes.map((type) => (
+                          <SelectItem
+                            key={type.energy_type_id}
+                            value={String(type.energy_type_id)}
+                          >
+                            {type.type_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
               />
-              <p className="text-sm text-muted-foreground">
-                Tipe energi diwarisi dari anggaran induk yang dipilih.
-              </p>
-            </div>
-          )}
+            ) : (
+              <div className="space-y-1">
+                <Label className="text-muted-foreground text-xs uppercase tracking-wider">
+                  Tipe Energi Terpilih
+                </Label>
+                <div className="text-lg font-bold text-primary">
+                  {selectedEnergyTypeName || "Belum dipilih"}
+                </div>
+                <p className="text-[10px] text-muted-foreground italic">
+                  Diwarisi otomatis dari anggaran induk.
+                </p>
+              </div>
+            )}
+          </div>
 
-          {/* --- Bagian Alokasi Meter --- */}
-          {(budgetType === "child" ||
-            (editingBudget && editingBudget.allocations?.length > 0)) && (
-            <div className="col-span-2">
-              <FormLabel>Alokasi Meter</FormLabel>
-              <div className="space-y-3 mt-2">
+          {budgetType === "child" && (
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <FormLabel className="text-base">Alokasi per Meter</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    append({
+                      meter_id: undefined,
+                      weight: undefined,
+                    })
+                  }
+                  disabled={
+                    !selectedEnergyTypeId ||
+                    fields.length >= (meters.length || 0)
+                  }
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Tambah Meter
+                </Button>
+              </div>
+
+              <div className="grid gap-3">
                 {fields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="grid grid-cols-12 gap-x-2 gap-y-2 items-start p-3 border rounded-md"
+                    className="flex gap-2 items-start bg-background p-3 border rounded-xl shadow-sm"
                   >
-                    <div className="col-span-12 sm:col-span-6">
+                    <div className="flex-1">
                       <FormField
                         control={control}
                         name={`allocations.${index}.meter_id`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="sr-only">Meter</FormLabel>
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={(val) =>
+                                field.onChange(Number(val))
+                              }
                               value={field.value ? String(field.value) : ""}
-                              disabled={isLoadingMeters || isLoadingEnergyTypes}
                             >
                               <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue
-                                    placeholder={
-                                      isLoadingMeters
-                                        ? "Memuat..."
-                                        : "Pilih Meter"
-                                    }
-                                  />
+                                <SelectTrigger className="bg-muted/10">
+                                  <SelectValue placeholder="Pilih Meter" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {meters
-                                  .filter(
-                                    (meter) =>
-                                      !selectedMeterIds.includes(
-                                        meter.meter_id.toString()
-                                      ) || field.value === meter.meter_id.toString()
-                                  )
-                                  .map((meter) => (
-                                    <SelectItem
-                                      key={meter.meter_id}
-                                      value={String(meter.meter_id)}
-                                      disabled={
-                                        selectedMeterIds.includes(
-                                          meter.meter_id
-                                        ) && meter.meter_id !== field.value
-                                      }
-                                    >
-                                      {meter.meter_code}
-                                    </SelectItem>
-                                  ))}
+                                {meters.map((m) => (
+                                  <SelectItem
+                                    key={m.meter_id}
+                                    value={String(m.meter_id)}
+                                    disabled={
+                                      selectedMeterIds.includes(m.meter_id) &&
+                                      m.meter_id !== field.value
+                                    }
+                                  >
+                                    {m.meter_code}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
-                            <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                    <div className="col-span-10 sm:col-span-5">
+                    <div className="w-32">
                       <FormField
                         control={control}
                         name={`allocations.${index}.weight`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="sr-only">Bobot</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
                                 step="0.01"
-                                placeholder="Bobot (0-1)"
+                                placeholder="Bobot"
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                    <div className="col-span-2 sm:col-span-1 flex items-center justify-end">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        type="button"
-                        onClick={() => remove(index)}
-                      >
-                        <XCircle className="h-5 w-5 text-destructive" />
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="text-destructive hover:bg-destructive/10"
+                    >
+                      <XCircle className="h-5 w-5" />
+                    </Button>
                   </div>
                 ))}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() =>
-                  append({ meter_id: undefined, weight: undefined })
-                }
-                disabled={
-                  !selectedEnergyTypeId ||
-                  isLoadingMeters ||
-                  isLoadingEnergyTypes ||
-                  fields.length >= meters.length
-                }
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Tambah Alokasi
-              </Button>
-              <FormMessage />
-              <BudgetPreview />
+
+              <div className="mt-6 rounded-xl border-2 border-primary/10 overflow-hidden">
+                <BudgetPreview />
+              </div>
             </div>
           )}
         </div>
       </ScrollArea>
-      <DialogFooter className="p-4 pt-0">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Menyimpan..." : "Simpan"}
+
+      <DialogFooter className="sticky bottom-0 bg-background px-6 py-4 border-t">
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full md:w-auto px-12"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Memproses..." : "Simpan Anggaran"}
         </Button>
       </DialogFooter>
     </>

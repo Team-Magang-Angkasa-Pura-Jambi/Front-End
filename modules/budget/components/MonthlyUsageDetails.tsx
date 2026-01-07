@@ -11,16 +11,14 @@ import {
 import { formatCurrency } from "@/utils/formatCurrency";
 import { AnnualBudget } from "@/common/types/budget";
 
-
-
 export const MonthlyUsageDetails = ({
   annualBudget,
 }: {
   annualBudget: AnnualBudget;
 }) => {
   const year = new Date(annualBudget.period_start).getFullYear();
-  const monthlyData = annualBudget.monthlyAllocation  || [];
-  const isLoading = false; // Data is now passed directly
+  const monthlyData = annualBudget.monthlyAllocation || [];
+  const isLoading = false;
   const isError = !monthlyData;
 
   if (isLoading) {

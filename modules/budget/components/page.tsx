@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Search } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
-import { motion, Variants } from "framer-motion"; // 1. Import Framer Motion
+import { motion, Variants, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,39 +25,30 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { BudgetSummaryCarousel } from "./BudgetSummaryCarousel";
-import { MonthlyUsageDetails } from "./MonthlyUsageDetails";
 import { BudgetTable } from "./BudgetTable";
 import { getColumns } from "./columns";
 import { AnnualBudgetDialog } from "./AnnualBudgetDialog";
+import { MeterAllocationDetails } from "./MeterAllocationDetails";
 
 import { AnnualBudget } from "@/common/types/budget";
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
 import { useAnnualBudgetLogic } from "../hooks/useAnnualBudgetLogic";
 
-declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends RowData> {
-    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
-  }
-}
-
-// 2. Definisi Varian Animasi
-const containerVariants:Variants = {
-  hidden: { opacity: 0 },
+// Variabel Animasi Tambahan
+const tableContainerVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.98 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.15, // Delay antar elemen anak
-      when: "beforeChildren",
-    },
+    scale: 1,
+    transition: { duration: 0.4, ease: "easeOut" },
   },
 };
 
-const itemVariants:Variants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { type: "spring", stiffness: 50 },
+const pulseVariants: Variants = {
+  initial: { opacity: 1 },
+  animate: {
+    opacity: [1, 0.5, 1],
+    transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
   },
 };
 
@@ -66,15 +57,23 @@ export default function AnnualBudgetPage() {
     childBudgets,
     parentBudgets,
     isLoading,
+    isLoadingSummary,
+    summaryData,
     selectedYear,
     setSelectedYear,
+    availableYears,
+    selectedEnergyType,
+    setSelectedEnergyType,
+    energyTypes,
     createOrUpdateMutation,
     deleteMutation,
   } = useAnnualBudgetLogic();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<AnnualBudget | null>(null);
-  const [budgetToDelete, setBudgetToDelete] = useState<AnnualBudget | null>(null);
+  const [budgetToDelete, setBudgetToDelete] = useState<AnnualBudget | null>(
+    null
+  );
 
   const handleOpenDialog = (budget: AnnualBudget | null = null) => {
     setEditingBudget(budget);
@@ -86,10 +85,6 @@ export default function AnnualBudgetPage() {
     if (!open) setEditingBudget(null);
   };
 
-  const handleDeleteRequest = (budget: AnnualBudget) => {
-    setBudgetToDelete(budget);
-  };
-
   const handleFormSubmit = (values: AnnualBudgetFormValues) => {
     createOrUpdateMutation.mutate(
       { values, isEditing: !!editingBudget, id: editingBudget?.budget_id },
@@ -98,73 +93,179 @@ export default function AnnualBudgetPage() {
   };
 
   const columns = useMemo(
-    () => getColumns(handleOpenDialog, handleDeleteRequest),
+    () => getColumns(handleOpenDialog, (budget) => setBudgetToDelete(budget)),
     []
   );
 
   return (
-    // 3. Wrap Container Utama dengan motion.div
-    <motion.div 
-      className="container mx-auto py-10"
-      variants={containerVariants}
+    <motion.div
+      className="container mx-auto py-10 px-4"
       initial="hidden"
       animate="visible"
+      variants={{
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+      }}
     >
-      {/* --- Bagian Summary --- */}
-      <motion.div className="mb-8" variants={itemVariants}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Ringkasan & Analisis Budget</h2>
-          <div className="flex items-center gap-2">
+      {/* HEADER SECTION */}
+      <motion.header
+        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8"
+        variants={{
+          hidden: { y: -20, opacity: 0 },
+          visible: { y: 0, opacity: 1 },
+        }}
+      >
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            Manajemen Budget
+          </h1>
+          <p className="text-muted-foreground">
+            Kelola dan analisis anggaran energi tahunan Anda.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Select
-              value={selectedYear.toString()}
+              value={selectedYear ? selectedYear.toString() : ""}
               onValueChange={(value) => setSelectedYear(Number(value))}
             >
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Pilih Tahun" />
+              <SelectTrigger className="w-[120px] bg-background shadow-sm">
+                <SelectValue placeholder="Tahun" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from(
-                  { length: 10 },
-                  (_, i) => new Date().getFullYear() - 5 + i
-                ).map((year) => (
+                {availableYears?.map((year) => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
-        </div>
-        <BudgetSummaryCarousel />
-      </motion.div>
+          </motion.div>
 
-      {/* --- Bagian Header Tabel --- */}
-      <motion.div 
-        className="flex justify-between items-center mb-4" 
-        variants={itemVariants}
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Select
+              value={selectedEnergyType}
+              onValueChange={(value) => setSelectedEnergyType(value)}
+            >
+              <SelectTrigger className="w-[150px] bg-background shadow-sm">
+                <SelectValue placeholder="Energi" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Energi</SelectItem>
+                {energyTypes?.map((e) => (
+                  <SelectItem key={e.energy_type_id} value={e.type_name}>
+                    {e.type_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </motion.div>
+        </div>
+      </motion.header>
+
+      {/* CAROUSEL / ANALYTICS SECTION */}
+      <motion.section
+        className="mb-12"
+        variants={{
+          hidden: { opacity: 0, scale: 0.95 },
+          visible: { opacity: 1, scale: 1 },
+        }}
       >
-        <h1 className="text-2xl font-bold">Manajemen Budget Tahunan</h1>
-        <Button onClick={() => handleOpenDialog(null)} className="transition-transform active:scale-95">
-          <PlusCircle className="mr-2 h-4 w-4" /> Tambah Budget
+        <div className="flex items-center gap-2 mb-4">
+          <div className="h-2 w-2 rounded-full bg-primary" />
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Insight Anggaran
+          </h2>
+        </div>
+        <BudgetSummaryCarousel
+          data={summaryData}
+          isLoading={isLoadingSummary}
+          selectedEnergyType={selectedEnergyType}
+        />
+      </motion.section>
+
+      {/* TABLE ACTIONS */}
+      <motion.div
+        className="flex justify-between items-end mb-6"
+        variants={{
+          hidden: { opacity: 0, x: -20 },
+          visible: { opacity: 1, x: 0 },
+        }}
+      >
+        <div>
+          <h3 className="text-lg font-bold">Daftar Anggaran Periode</h3>
+          <p className="text-sm text-muted-foreground">
+            Menampilkan detail budget berdasarkan periode waktu.
+          </p>
+        </div>
+        <Button
+          onClick={() => handleOpenDialog(null)}
+          className="shadow-lg hover:shadow-primary/20 transition-all"
+          asChild
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <PlusCircle className="mr-2 h-4 w-4" /> Tambah Budget
+          </motion.button>
         </Button>
       </motion.div>
 
-      {/* --- Bagian Tabel --- */}
-      <motion.div variants={itemVariants}>
-        <div className="rounded-md border bg-card shadow-sm">
-           <BudgetTable
-            columns={columns}
-            data={childBudgets}
-            isLoading={isLoading}
-            getRowCanExpand={() => true}
-            renderSubComponent={({ row }) => (
-              <MonthlyUsageDetails annualBudget={row.original} />
-            )}
-          />
-        </div>
+      {/* DATA TABLE SECTION */}
+      <motion.div variants={tableContainerVariants} className="relative">
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              key="loading"
+              variants={pulseVariants}
+              initial="initial"
+              animate="animate"
+              className="h-[400px] w-full rounded-xl border bg-muted/20 flex flex-col items-center justify-center gap-3"
+            >
+              <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              <p className="text-sm font-medium text-muted-foreground">
+                Menyiapkan data...
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="table"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="rounded-xl border bg-card shadow-xl overflow-hidden"
+            >
+              <BudgetTable
+                columns={columns}
+                data={childBudgets}
+                isLoading={false}
+                getRowCanExpand={(row) => !!row.original.allocations?.length}
+                renderSubComponent={({ row }) => (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <MeterAllocationDetails annualBudget={row.original} />
+                  </motion.div>
+                )}
+              />
+
+              {childBudgets.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                  <Search className="h-10 w-10 mb-4 opacity-20" />
+                  <p>Tidak ada data anggaran ditemukan untuk filter ini.</p>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
-      {/* --- Dialogs (Tidak perlu di-animate via parent, Shadcn sudah handle) --- */}
+      {/* DIALOGS */}
       <AnnualBudgetDialog
         open={isDialogOpen}
         onOpenChange={handleCloseDialog}
@@ -178,25 +279,35 @@ export default function AnnualBudgetPage() {
         open={!!budgetToDelete}
         onOpenChange={() => setBudgetToDelete(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+            <AlertDialogTitle className="text-xl">
+              Konfirmasi Penghapusan
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Aksi ini akan menghapus budget periode{" "}
-              <span className="font-bold">
+              Anda akan menghapus budget periode{" "}
+              <span className="font-bold text-foreground">
                 {budgetToDelete &&
-                  new Date(budgetToDelete.period_start).toLocaleDateString("id-ID")}
+                  new Date(budgetToDelete.period_start).toLocaleDateString(
+                    "id-ID",
+                    { month: "long", year: "numeric", day: "numeric" }
+                  )}
               </span>
-              . Data yang terhapus tidak dapat dikembalikan.
+              . Data ini akan hilang permanen dari sistem.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl">Batal</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteMutation.mutate(budgetToDelete!.budget_id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl px-6"
+              onClick={() =>
+                deleteMutation.mutate(budgetToDelete!.budget_id, {
+                  onSuccess: () => setBudgetToDelete(null),
+                })
+              }
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus"}
+              {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus Data"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -9,9 +9,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
-import { BudgetForm } from "./BudgetForm"; 
+import { BudgetForm } from "./BudgetForm";
 import { AnnualBudget } from "@/common/types/budget";
-import { AnnualBudgetFormValues, annualBudgetFormSchema } from "../schemas/annualBudget.schema";
+import {
+  AnnualBudgetFormValues,
+  annualBudgetFormSchema,
+} from "../schemas/annualBudget.schema";
 import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { useQuery } from "@tanstack/react-query";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
@@ -43,80 +46,81 @@ export const AnnualBudgetDialog = ({
   onSubmit,
   isSubmitting,
 }: AnnualBudgetDialogProps) => {
-  
   const form = useForm<AnnualBudgetFormValues>({
-    resolver: zodResolver(annualBudgetFormSchema) as Resolver<AnnualBudgetFormValues>,
+    resolver: zodResolver(
+      annualBudgetFormSchema
+    ) as Resolver<AnnualBudgetFormValues>,
     defaultValues: DEFAULT_VALUES,
   });
 
-  
   const budgetType = useWatch({ control: form.control, name: "budgetType" });
-  const selectedEnergyTypeId = useWatch({ control: form.control, name: "energy_type_id" });
-  const parentBudgetId = useWatch({ control: form.control, name: "parent_budget_id" });
+  const selectedEnergyTypeId = useWatch({
+    control: form.control,
+    name: "energy_type_id",
+  });
+  const parentBudgetId = useWatch({
+    control: form.control,
+    name: "parent_budget_id",
+  });
 
-  
   useEffect(() => {
-  if (open) {
-    if (editingBudget) {
-      
-      const isChild = !!editingBudget.parent_budget_id;
+    if (open) {
+      if (editingBudget) {
+        const isChild = !!editingBudget.parent_budget_id;
 
-      if (isChild) {
-    
-        form.reset({
-          budgetType: "child",
-          period_start: new Date(editingBudget.period_start),
-          period_end: new Date(editingBudget.period_end),
-          
-          
-          parent_budget_id: editingBudget.parent_budget_id!, 
-          allocations: editingBudget.allocations?.map((alloc) => ({
-             meter_id: alloc.meter.meter_id, 
-             weight: alloc.weight
-          })) || [],
-          
-          
-          total_budget: undefined,
-          efficiency_tag: undefined,
-          energy_type_id: undefined,
-        });
+        if (isChild) {
+          form.reset({
+            budgetType: "child",
+            period_start: new Date(editingBudget.period_start),
+            period_end: new Date(editingBudget.period_end),
+
+            parent_budget_id: editingBudget.parent_budget_id!,
+            allocations:
+              editingBudget.allocations?.map((alloc) => ({
+                meter_id: alloc.meter.meter_id,
+                weight: alloc.weight,
+              })) || [],
+
+            total_budget: undefined,
+            efficiency_tag: undefined,
+            energy_type_id: undefined,
+          });
+        } else {
+          form.reset({
+            budgetType: "parent",
+            period_start: new Date(editingBudget.period_start),
+            period_end: new Date(editingBudget.period_end),
+
+            total_budget: editingBudget.total_budget ?? 0,
+            efficiency_tag: editingBudget.efficiency_tag ?? 0,
+            energy_type_id: editingBudget.energy_type?.energy_type_id,
+
+            parent_budget_id: null,
+            allocations: [],
+          });
+        }
       } else {
-        
-        
-        form.reset({
-          budgetType: "parent",
-          period_start: new Date(editingBudget.period_start),
-          period_end: new Date(editingBudget.period_end),
-          
-          
-          total_budget: editingBudget.total_budget ?? 0,
-          efficiency_tag: editingBudget.efficiency_tag ?? 0,
-          energy_type_id: editingBudget.energy_type?.energy_type_id,
-          
-          
-          parent_budget_id: null,
-          allocations: [],
-        });
+        form.reset(DEFAULT_VALUES);
       }
-    } else {
-      
-      form.reset(DEFAULT_VALUES);
     }
-  }
-}, [open, editingBudget, form]);
+  }, [open, editingBudget, form]);
 
-  
   const { data: energyTypesResponse, isLoading: isLoadingEnergy } = useQuery({
     queryKey: ["energyTypes"],
-    queryFn: ()=>getEnergyTypesApi(),
-    enabled: open, 
+    queryFn: () => getEnergyTypesApi(),
+    enabled: open,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
-  
-  const energyTypes = useMemo(() => energyTypesResponse?.data || [], [energyTypesResponse]);
+
+  const energyTypes = useMemo(
+    () => energyTypesResponse?.data || [],
+    [energyTypesResponse]
+  );
   const selectedEnergyTypeName = useMemo(
-    () => energyTypes.find((et) => et.energy_type_id === selectedEnergyTypeId)?.type_name,
+    () =>
+      energyTypes.find((et) => et.energy_type_id === selectedEnergyTypeId)
+        ?.type_name,
     [selectedEnergyTypeId, energyTypes]
   );
 
@@ -136,9 +140,7 @@ export const AnnualBudgetDialog = ({
     refetchOnWindowFocus: false,
   });
 
-  
   useEffect(() => {
-    
     if (budgetType === "parent") {
       form.setValue("parent_budget_id", null);
       form.setValue("allocations", []);
@@ -146,11 +148,15 @@ export const AnnualBudgetDialog = ({
   }, [budgetType, form]);
 
   useEffect(() => {
-    
     if (budgetType === "child" && parentBudgetId) {
-      const selectedParent = parentBudgets.find((p) => p.budget_id === parentBudgetId);
+      const selectedParent = parentBudgets.find(
+        (p) => p.budget_id === parentBudgetId
+      );
       if (selectedParent?.energy_type?.energy_type_id) {
-        form.setValue("energy_type_id", selectedParent.energy_type.energy_type_id);
+        form.setValue(
+          "energy_type_id",
+          selectedParent.energy_type.energy_type_id
+        );
       }
     }
   }, [parentBudgetId, budgetType, parentBudgets, form]);
@@ -165,7 +171,7 @@ export const AnnualBudgetDialog = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <BudgetForm
               budgetType={budgetType}
-              setBudgetType={(val) => form.setValue("budgetType", val)} 
+              setBudgetType={(val) => form.setValue("budgetType", val)}
               editingBudget={editingBudget}
               isSubmitting={isSubmitting}
               parentBudgets={parentBudgets}

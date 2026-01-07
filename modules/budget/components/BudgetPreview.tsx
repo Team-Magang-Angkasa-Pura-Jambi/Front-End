@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Loader2 } from "lucide-react";
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
 import { useDebounce } from "@uidotdev/usehooks";
-import { budgetApi } from "../services/budget.service";
+import { getBudgetPreviewApi } from "../services/analytics.service";
 
 export const BudgetPreview = () => {
   const {
@@ -16,7 +16,6 @@ export const BudgetPreview = () => {
     setValue,
   } = useFormContext<AnnualBudgetFormValues>();
 
-  
   const watchedFields = useWatch({
     control,
     name: [
@@ -28,7 +27,6 @@ export const BudgetPreview = () => {
     ],
   });
 
-  
   const debouncedFields = useDebounce(watchedFields, 500);
   const [
     total_budget,
@@ -38,16 +36,15 @@ export const BudgetPreview = () => {
     parent_budget_id,
   ] = debouncedFields;
 
-  
   const hasErrors =
     errors.total_budget || errors.period_start || errors.period_end;
 
   const canFetchPreview =
     !hasErrors &&
     (total_budget > 0 || parent_budget_id) &&
-    period_start instanceof Date && period_end instanceof Date;
+    period_start instanceof Date &&
+    period_end instanceof Date;
 
-  
   const {
     data: previewData,
     isLoading,
@@ -61,15 +58,19 @@ export const BudgetPreview = () => {
       period_end,
     ],
     queryFn: () =>
-      budgetApi.getPreview({
+      getBudgetPreviewApi({
         parent_budget_id,
         total_budget: Number(total_budget) || 0,
-        period_start: period_start ? format(period_start, "yyyy-MM-dd", { timeZone: "UTC" }) : "",
-        period_end: period_end ? format(period_end, "yyyy-MM-dd", { timeZone: "UTC" }) : "",
+        period_start: period_start
+          ? format(period_start, "yyyy-MM-dd", { timeZone: "UTC" })
+          : "",
+        period_end: period_end
+          ? format(period_end, "yyyy-MM-dd", { timeZone: "UTC" })
+          : "",
         allocations: allocations?.map((alloc) => ({
           meter_id: alloc.meter_id,
           weight: alloc.weight,
-        })), 
+        })),
       }),
     enabled: !!canFetchPreview,
     staleTime: 1000 * 60 * 5,
@@ -89,12 +90,12 @@ export const BudgetPreview = () => {
           </p>
         )}
         {isLoading && (
-       <div className="flex items-center gap-2 py-2">
-    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-    <span className="text-sm text-muted-foreground">
-      Menghitung pratinjau...
-    </span>
-  </div>
+          <div className="flex items-center gap-2 py-2">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            <span className="text-sm text-muted-foreground">
+              Menghitung pratinjau...
+            </span>
+          </div>
         )}
         {isError && (
           <p className="text-sm text-destructive">Gagal memuat pratinjau.</p>
