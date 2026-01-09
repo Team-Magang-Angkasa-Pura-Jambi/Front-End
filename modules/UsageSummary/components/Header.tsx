@@ -319,11 +319,13 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 onClick={() => recalculate()}
                 disabled={isRecalculating || isFetching}
               >
-                {isRecalculating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RotateCw className="mr-2 h-4 w-4" />
-                )}
+                <span className="mr-2 h-4 w-4 flex items-center justify-center">
+                  {isRecalculating ? (
+                    <Loader2 key="loading" className="animate-spin" />
+                  ) : (
+                    <RotateCw key="idle" />
+                  )}
+                </span>
                 Hitung Ulang
               </Button>
 

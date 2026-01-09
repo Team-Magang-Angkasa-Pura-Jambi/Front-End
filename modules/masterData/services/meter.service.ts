@@ -52,7 +52,10 @@ export const updateMeterApi = async (
   id: number,
   data: MeterPayload
 ): Promise<MeterDetailApiResponse> => {
-  const response = await api.put<MeterDetailApiResponse>(`/meters/${id}`, data);
+  const response = await api.patch<MeterDetailApiResponse>(
+    `/meters/${id}`,
+    data
+  );
   return response.data;
 };
 

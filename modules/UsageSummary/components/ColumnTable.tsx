@@ -32,7 +32,10 @@ import { cn } from "@/lib/utils";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
 import { RecapDataRow } from "../types/recap.type";
-import { runSingleClassificationApi, runSinglePredictionApi } from "../services/recap.service";
+import {
+  runSingleClassificationApi,
+  runSinglePredictionApi,
+} from "../services/recap.service";
 
 const formatCurrency = (amount: unknown): string => {
   const num = Number(amount);
@@ -158,11 +161,13 @@ const PredictionCell = ({
       disabled={isPending || !meterId}
       className="w-full"
     >
-      {isPending ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      ) : (
-        <BrainCircuit className="mr-2 h-4 w-4" />
-      )}
+      <span className="mr-2 h-4 w-4 flex items-center justify-center">
+        {isPending ? (
+          <Loader2 key="loading" className="animate-spin" />
+        ) : (
+          <BrainCircuit className="mr-2 h-4 w-4" />
+        )}
+      </span>
       Prediksi
     </Button>
   );
@@ -214,11 +219,13 @@ const ClassificationActionCell = ({
       disabled={isPending || !meterId}
       className="w-full"
     >
-      {isPending ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      ) : (
-        <Tags className="mr-2 h-4 w-4" />
-      )}
+      <span className="mr-2 h-4 w-4 flex items-center justify-center">
+        {isPending ? (
+          <Loader2 key="loading" className="animate-spin" />
+        ) : (
+          <BrainCircuit className="mr-2 h-4 w-4" />
+        )}
+      </span>
       Klasifikasi
     </Button>
   );
