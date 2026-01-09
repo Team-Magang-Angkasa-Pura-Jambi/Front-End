@@ -53,6 +53,13 @@ export type efficiencyRatioType = {
   pax: number;
 };
 
+export type BudgetBurnRateType = {
+  dayDate: number;
+  actual: number | null;
+  idea: number;
+  efficent: number;
+};
+
 export const MeterRankApi = async (): Promise<ApiResponse<MeterRankType[]>> => {
   const result = await api.get(`${prefix}/meter-rank`);
   return result.data;
@@ -137,6 +144,20 @@ export const getDailyAveragePaxApi = async (
 ): Promise<ApiResponse<DailyAveragePaxType[]>> => {
   // Kirim parameter via query string (params)
   const result = await api.get(`${prefix}/daily-average-pax`, {
+    params: {
+      year: year,
+      month: month,
+    },
+  });
+  return result.data;
+};
+
+export const getBudgetBurnRateApi = async (
+  year: number,
+  month: number
+): Promise<ApiResponse<BudgetBurnRateType[]>> => {
+  // Kirim parameter via query string (params)
+  const result = await api.get(`${prefix}/budget-burn-rate`, {
     params: {
       year: year,
       month: month,

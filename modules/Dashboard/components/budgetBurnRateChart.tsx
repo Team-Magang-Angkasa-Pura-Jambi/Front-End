@@ -1,117 +1,305 @@
 "use client";
-import React from "react";
+
+import React, { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
-  AreaChart,
-  Area,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, AlertCircle, DollarSign } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  TrendingUp,
+  AlertCircle,
+  DollarSign,
+  Calendar,
+  CalendarDays,
+  CheckCircle2,
+} from "lucide-react";
 
-// Data Akumulasi Harian (Burn Rate)
-const burnRateData = [
-  { day: 1, actual: 10, ideal: 10 },
-  { day: 5, actual: 55, ideal: 50 },
-  { day: 10, actual: 120, ideal: 100 },
-  { day: 15, actual: 210, ideal: 150 }, // Mulai menjauh (Over-burn)
-  { day: 20, actual: 300, ideal: 200 },
-  { day: 25, actual: null, ideal: 250 }, // Masa depan (Prediksi)
-  { day: 30, actual: null, ideal: 300 },
-];
+// Import API & Constants
+import { MONTH_CONFIG } from "../constants";
+import { getBudgetBurnRateApi } from "../service/visualizations.service";
 
 export const BudgetBurnRateChart = () => {
+  const currentDate = new Date();
+  const [year, setYear] = useState<string>(
+    currentDate.getFullYear().toString()
+  );
+  const [month, setMonth] = useState<string>(
+    (currentDate.getMonth() + 1).toString()
+  );
+
+  // --- FETCH DATA ---
+  const { data: apiResponse, isLoading } = useQuery({
+    queryKey: ["budget-burn-rate", year, month],
+    queryFn: () => getBudgetBurnRateApi(parseInt(year), parseInt(month)),
+  });
+
+  const chartData = useMemo(() => apiResponse?.data || [], [apiResponse?.data]);
+
+  // --- ANALISIS DINAMIS (INSIGHT) ---
+  const insight = useMemo(() => {
+    if (!chartData.length) return null;
+
+    // Cari data actual terakhir yang tidak 0 (hari berjalan)
+    const lastEntry = [...chartData].reverse().find((d) => d.actual > 0);
+
+    if (!lastEntry) return null;
+
+    const { actual, idea, efficent } = lastEntry;
+    const diff = actual - idea;
+    const isOverBudget = diff > 0;
+    const percentage = idea > 0 ? ((diff / idea) * 100).toFixed(1) : "0";
+
+    // Cek apakah mencapai target efisiensi (Actual < Efficient)
+    const isEfficient = actual <= efficent;
+
+    return {
+      day: lastEntry.dayDate,
+      isOverBudget,
+      percentage,
+      isEfficient,
+      diffVal: diff,
+    };
+  }, [chartData]);
+
+  // Helper Format Rupiah (Juta)
+  const formatYAxis = (val: number) => {
+    if (val >= 1000000) return `${(val / 1000000).toFixed(0)}jt`;
+    return `${val / 1000}k`;
+  };
+
+  const formatTooltip = (val: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(val);
+  };
+
   return (
-    <Card className="w-full shadow-lg border-none ring-1 ring-slate-200">
-      <CardHeader>
-        <CardTitle className="text-base font-bold flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-emerald-600" />
-          Budget Burn Rate (Penyerapan Anggaran)
-        </CardTitle>
-        <p className="text-sm text-muted-foreground italic">
-          Memantau akumulasi pengeluaran harian terhadap target bulanan.
-        </p>
+    <Card className="w-full shadow-lg border-none ring-1 ring-slate-200 flex flex-col">
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-50 pb-4">
+        <div>
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-emerald-600" />
+            Budget Burn Rate (Penyerapan Anggaran)
+          </CardTitle>
+          <p className="text-sm text-muted-foreground italic">
+            Akumulasi pengeluaran harian vs Target Ideal & Efisiensi.
+          </p>
+        </div>
+
+        {/* --- FILTER --- */}
+        <div className="flex gap-2 flex-wrap">
+          <Select value={month} onValueChange={setMonth}>
+            <SelectTrigger>
+              <CalendarDays className="w-3 h-3 mr-2 text-slate-500" />
+              <SelectValue placeholder="Bulan" />
+            </SelectTrigger>
+            <SelectContent>
+              {MONTH_CONFIG.map((opt) => (
+                <SelectItem
+                  key={opt.value}
+                  value={opt.value}
+                  className="text-xs"
+                >
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={year} onValueChange={setYear}>
+            <SelectTrigger>
+              <Calendar className="w-3 h-3 mr-2 text-slate-500" />
+              <SelectValue placeholder="Tahun" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2024" className="text-xs">
+                2024
+              </SelectItem>
+              <SelectItem value="2025" className="text-xs">
+                2025
+              </SelectItem>
+              <SelectItem value="2026" className="text-xs">
+                2026
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={burnRateData}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                vertical={false}
-                stroke="#f1f5f9"
-              />
-              <XAxis
-                dataKey="day"
-                label={{
-                  value: "Hari ke-",
-                  position: "insideBottomRight",
-                  offset: -5,
-                }}
-              />
-              <YAxis tickFormatter={(val) => `Rp${val}jt`} />
-              <Tooltip formatter={(val: number) => `Rp ${val} Juta`} />
-              <Legend verticalAlign="top" align="right" />
+      <CardContent className="flex-1 min-h-[350px] flex flex-col justify-between">
+        {isLoading ? (
+          <div className="h-full w-full flex items-center justify-center">
+            <Skeleton className="h-[250px] w-full rounded-xl bg-slate-100" />
+          </div>
+        ) : (
+          <div className="h-[320px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={chartData}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#f1f5f9"
+                />
+                <XAxis
+                  dataKey="dayDate"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: "#64748b" }}
+                  label={{
+                    value: "Tgl",
+                    position: "insideBottomRight",
+                    offset: -5,
+                    fontSize: 10,
+                  }}
+                />
+                <YAxis
+                  tickFormatter={formatYAxis}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: "#64748b" }}
+                  width={60}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "none",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  }}
+                  formatter={(val: number) => formatTooltip(val)}
+                />
+                <Legend verticalAlign="top" height={36} iconType="circle" />
 
-              {/* Garis Ideal (Linear) */}
-              <Area
-                type="monotone"
-                dataKey="ideal"
-                name="Budget Ideal (Linear)"
-                stroke="#94a3b8"
-                fill="#f1f5f9"
-                strokeDasharray="5 5"
-              />
+                {/* 1. Garis Ideal (Baseline) */}
+                <Area
+                  type="monotone"
+                  dataKey="idea"
+                  name="Budget Limit (Max)"
+                  stroke="#94a3b8"
+                  fill="transparent"
+                  strokeDasharray="5 5"
+                  strokeWidth={2}
+                />
 
-              {/* Garis Aktual (Burn Rate) */}
-              <Area
-                type="monotone"
-                dataKey="actual"
-                name="Akumulasi Aktual"
-                stroke="#059669"
-                fillOpacity={0.1}
-                fill="#10b981"
-                strokeWidth={3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+                {/* 2. Garis Target Efisiensi (Goal) */}
+                <Area
+                  type="monotone"
+                  dataKey="efficent"
+                  name="Target Efisiensi"
+                  stroke="#10b981"
+                  fill="transparent"
+                  strokeWidth={2}
+                />
 
-        {/* Actionable Insight */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 flex gap-3 items-center">
-            <AlertCircle className="w-8 h-8 text-amber-600" />
-            <div>
-              <p className="text-sm font-bold text-amber-900">
-                Peringatan Over-Budget
-              </p>
-              <p className="text-xs text-amber-700 leading-relaxed">
-                Hingga hari ke-20, penyerapan budget <b>40% lebih cepat</b> dari
-                rencana. Diperlukan efisiensi operasional segera.
-              </p>
+                {/* 3. Garis Realisasi (Actual) */}
+                <Area
+                  type="monotone"
+                  dataKey="actual"
+                  name="Realisasi (Actual)"
+                  stroke="#f43f5e" // Merah/Rose untuk actual cost
+                  fillOpacity={1}
+                  fill="url(#colorActual)"
+                  strokeWidth={3}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* --- DYNAMIC INSIGHT BOX --- */}
+        {!isLoading && insight && (
+          <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Box Status */}
+            <div
+              className={`p-4 rounded-xl border flex gap-3 items-center ${
+                insight.isOverBudget
+                  ? "bg-red-50 border-red-100"
+                  : insight.isEfficient
+                  ? "bg-emerald-50 border-emerald-100"
+                  : "bg-blue-50 border-blue-100"
+              }`}
+            >
+              {insight.isOverBudget ? (
+                <AlertCircle className="w-8 h-8 text-red-600" />
+              ) : insight.isEfficient ? (
+                <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+              ) : (
+                <TrendingUp className="w-8 h-8 text-blue-600" />
+              )}
+
+              <div>
+                <p
+                  className={`text-sm font-bold ${
+                    insight.isOverBudget
+                      ? "text-red-900"
+                      : insight.isEfficient
+                      ? "text-emerald-900"
+                      : "text-blue-900"
+                  }`}
+                >
+                  {insight.isOverBudget
+                    ? "Peringatan Over-Budget"
+                    : insight.isEfficient
+                    ? "Excellent Efficiency"
+                    : "On Track"}
+                </p>
+                <p
+                  className={`text-xs leading-relaxed ${
+                    insight.isOverBudget
+                      ? "text-red-700"
+                      : insight.isEfficient
+                      ? "text-emerald-700"
+                      : "text-blue-700"
+                  }`}
+                >
+                  Hingga tgl {insight.day}, penyerapan{" "}
+                  {Math.abs(Number(insight.percentage))}%{" "}
+                  {insight.isOverBudget ? "di atas" : "di bawah"} batas
+                  maksimal.
+                </p>
+              </div>
+            </div>
+
+            {/* Box Rekomendasi */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex gap-3 items-center">
+              <DollarSign className="w-8 h-8 text-slate-600" />
+              <div>
+                <p className="text-sm font-bold text-slate-900">Rekomendasi</p>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {insight.isOverBudget
+                    ? "Segera identifikasi kebocoran di area High Consumption. Batasi lembur."
+                    : "Pertahankan pola operasional saat ini. Potensi penghematan tercapai."}
+                </p>
+              </div>
             </div>
           </div>
-
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex gap-3 items-center">
-            <TrendingUp className="w-8 h-8 text-emerald-600" />
-            <div>
-              <p className="text-sm font-bold text-emerald-900">
-                Saran Keputusan
-              </p>
-              <p className="text-xs text-emerald-700 leading-relaxed">
-                Tunda kegiatan maintenance alat berat yang memakan daya besar
-                hingga awal bulan depan untuk menjaga cashflow.
-              </p>
-            </div>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
