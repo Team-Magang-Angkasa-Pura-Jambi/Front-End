@@ -23,8 +23,8 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Zap, Calendar, CalendarDays, Building2, Plane } from "lucide-react";
-import { getEfficiencyRatioApi } from "../service/visualizations.service";
-import { MONTH_CONFIG } from "../constants";
+import { getEfficiencyRatioApi } from "../../service/visualizations.service";
+import { MONTH_CONFIG } from "../../constants";
 
 export const EfficiencyRatioChart = () => {
   const currentDate = new Date();

@@ -78,6 +78,8 @@ export const yearlyHeatmapApi = async (
   return result.data;
 };
 
+export type DailyAveragePaxType = { day: string; avgPax: number };
+
 export const getBudgetTrackingApi = async (): Promise<
   ApiResponse<BudgetTrackingType[]>
 > => {
@@ -121,6 +123,20 @@ export const getEfficiencyRatioApi = async (
 ): Promise<ApiResponse<efficiencyRatioType[]>> => {
   // Kirim parameter via query string (params)
   const result = await api.get(`${prefix}/efficiency-ratio`, {
+    params: {
+      year: year,
+      month: month,
+    },
+  });
+  return result.data;
+};
+
+export const getDailyAveragePaxApi = async (
+  year: number,
+  month: number
+): Promise<ApiResponse<DailyAveragePaxType[]>> => {
+  // Kirim parameter via query string (params)
+  const result = await api.get(`${prefix}/daily-average-pax`, {
     params: {
       year: year,
       month: month,
