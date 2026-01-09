@@ -45,7 +45,7 @@ export const categoryApi = {
     id: number,
     payload: UpdateCategoryPayload
   ): Promise<CategoryDetailApiResponse> => {
-    const response = await api.put(`/meters-category/${id}`, payload);
+    const response = await api.patch(`/meters-category/${id}`, payload);
     return response.data;
   },
 

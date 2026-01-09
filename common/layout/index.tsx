@@ -138,7 +138,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10 ">
+        <SidebarBody className="justify-between gap-10">
           <div className="flex flex-1 flex-col overflow-y-auto overflow-hidden">
             <Logo />
             <motion.div
@@ -147,7 +147,6 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
               initial="hidden"
               animate="visible"
             >
-              {/* LANGKAH 3: Gunakan link yang sudah difilter */}
               {visibleLinks.map((link) => {
                 const isActive =
                   link.href === "/"
@@ -160,29 +159,57 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
                     variants={itemVariants}
                     className="relative"
                   >
-                    <SidebarLink link={link} isActive={isActive} open={open} />
+                    <SidebarLink
+                      key={link.href}
+                      link={link}
+                      isActive={pathname === link.href}
+                    />
                   </motion.div>
                 );
               })}
             </motion.div>
           </div>
 
-          <motion.div
-            variants={itemVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-              className="w-full justify-start mt-2"
+          {/* Section Bawah: Logout & Copyright */}
+          <div className="flex flex-col gap-4">
+            <motion.div
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
             >
-              <LogOut className="h-5 w-5 shrink-0 mr-2" />
-              <span className={cn("font-medium", !open && "hidden")}>
-                Logout
-              </span>
-            </Button>
-          </motion.div>
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                className="w-full justify-start"
+              >
+                <LogOut className="h-5 w-5 shrink-0 mr-2 text-red-500" />
+                <span className={cn("font-medium", !open && "hidden")}>
+                  Logout
+                </span>
+              </Button>
+            </motion.div>
+
+            {/* FOOTER COPYRIGHT DENGAN SULTAN THAHA JAMBI */}
+            <motion.div
+              className={cn(
+                "flex flex-col border-t border-border/50 pt-4 text-[10px] text-muted-foreground transition-all duration-300",
+                !open ? "opacity-0 h-0 overflow-hidden" : "px-2 opacity-100"
+              )}
+            >
+              <p className="font-semibold text-foreground/80 uppercase tracking-wider">
+                Sultan Thaha Jambi
+              </p>
+              <p className="mt-0.5">
+                © {new Date().getFullYear()} Angkasa Pura Indonesia
+              </p>
+              <p className="mt-1.5 opacity-70">
+                Developed by{" "}
+                <span className="font-medium text-primary/80">
+                  Qulls Project
+                </span>
+              </p>
+            </motion.div>
+          </div>
         </SidebarBody>
       </Sidebar>
       <main className="flex-1 overflow-y-auto p-8">{children}</main>

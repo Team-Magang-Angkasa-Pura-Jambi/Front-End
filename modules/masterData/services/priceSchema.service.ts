@@ -61,7 +61,7 @@ export const updatePriceSchemeApi = async (
   id: number,
   data: PriceSchemePayload
 ): Promise<PriceSchemeDetailApiResponse> => {
-  const response = await api.put<PriceSchemeDetailApiResponse>(
+  const response = await api.patch<PriceSchemeDetailApiResponse>(
     `/price-schemes/${id}`,
     data
   );

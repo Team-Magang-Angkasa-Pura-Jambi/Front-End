@@ -1,19 +1,22 @@
-    import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    } from "@/components/ui/form";
-    import { Input } from "@/components/ui/input";
-    import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-    } from "@/components/ui/select";
+"use client";
+
+import React from "react";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   TargetEfficiencyFormValues,
   targetEfficiencySchema,
@@ -23,7 +26,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { getMetersApi } from "../../services/meter.service";
 import { Textarea } from "@/components/ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
@@ -33,12 +40,14 @@ import { AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { TargetEfficiencyPreview } from "../targetEfficiencyPreview";
 import { MeterType } from "@/common/types/meters";
 import { EfficiencyTarget } from "@/common/types/efficiencyTarget";
+import { ScrollArea } from "@/components/ui/scroll-area"; // Pastikan sudah install ScrollArea
 
 interface TargetEfficiencyFormProps {
   initialData?: EfficiencyTarget | null;
   onSubmit: SubmitHandler<TargetEfficiencyFormValues>;
   isLoading?: boolean;
 }
+
 export function TargetEfficiencyForm({
   initialData,
   onSubmit,
@@ -72,174 +81,192 @@ export function TargetEfficiencyForm({
   });
 
   const meters = metersResponse?.data || [];
-
   const selectedMeterId = form.watch("meter_id");
 
   return (
     <Form {...form}>
-      <form
-        id="target-efficiency-form"
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="meter_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Meter</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value ? String(field.value) : ""}
-                disabled={isLoadingMeters}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={
-                        isLoadingMeters ? "Memuat meter..." : "Pilih Meter"
-                      }
-                    />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {meters.map((meter) => (
-                    <SelectItem
-                      key={meter.meter_id}
-                      value={String(meter.meter_id)}
-                    >
-                      {meter.meter_code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {selectedMeterId && (
-          <>
-            <FormField
-              control={form.control}
-              name="kpi_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama KPI</FormLabel>
+      {/* Container utama dengan tinggi maksimal dan overflow */}
+      <ScrollArea className="max-h-[70vh] px-4 md:px-0 pr-4">
+        <form
+          id="target-efficiency-form"
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6 pb-4" // Jarak antar elemen ditingkatkan agar lebih bersih
+        >
+          {/* Pemilihan Meter */}
+          <FormField
+            control={form.control}
+            name="meter_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Meter</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ? String(field.value) : ""}
+                  disabled={isLoadingMeters}
+                >
                   <FormControl>
-                    <Textarea
-                      placeholder="Contoh: Penghematan Listrik Gedung A"
-                      {...field}
-                    />
+                    <SelectTrigger className="w-full">
+                      <SelectValue
+                        placeholder={
+                          isLoadingMeters ? "Memuat meter..." : "Pilih Meter"
+                        }
+                      />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="target_value"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Nilai Target (
-                    {meters.find(
-                      (m: MeterType) => m.meter_id == selectedMeterId
-                    )?.energy_type?.unit_of_measurement || "%"}
-                    )
-                  </FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="Contoh: 5" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
+                  <SelectContent>
+                    {meters.map((meter) => (
+                      <SelectItem
+                        key={meter.meter_id}
+                        value={String(meter.meter_id)}
+                      >
+                        {meter.meter_code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {selectedMeterId && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-top-2">
+              {/* Nama KPI */}
               <FormField
                 control={form.control}
-                name="period_start"
+                name="kpi_name"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Periode Mulai</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pilih tanggal</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  <FormItem>
+                    <FormLabel>Nama KPI</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        className="min-h-[80px]"
+                        placeholder="Contoh: Penghematan Listrik Gedung A"
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {/* Nilai Target */}
               <FormField
                 control={form.control}
-                name="period_end"
+                name="target_value"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Periode Selesai</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pilih tanggal</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  <FormItem>
+                    <FormLabel>
+                      Nilai Target (
+                      {meters.find(
+                        (m: MeterType) => m.meter_id == selectedMeterId
+                      )?.energy_type?.unit_of_measurement || "%"}
+                      )
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Contoh: 5" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {/* Grid Periode - Stack di Mobile, Grid di Desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="period_start"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Periode Mulai</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pilih tanggal</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="period_end"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Periode Selesai</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pilih tanggal</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-          </>
-        )}
-        <TargetEfficiencyPreview />
-      </form>
-      <AlertDialogFooter className="pt-4">
+          )}
+
+          {/* Pratinjau diletakkan di dalam scroll area agar tidak memotong layar */}
+          <div className="pt-2">
+            <TargetEfficiencyPreview />
+          </div>
+        </form>
+      </ScrollArea>
+
+      {/* Footer tetap di bawah (Sticky/Fixed) diluar ScrollArea */}
+      <AlertDialogFooter className="border-t pt-4 mt-2">
         <Button
           type="submit"
           form="target-efficiency-form"
+          className="w-full md:w-auto"
           disabled={isLoading}
         >
           {isLoading ? "Menyimpan..." : "Simpan"}

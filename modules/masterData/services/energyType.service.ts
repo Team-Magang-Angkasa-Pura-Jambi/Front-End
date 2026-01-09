@@ -14,10 +14,12 @@ interface EnergyTypeDetailApiResponse {
 
 const BASE_URL = "/energy-types";
 
-export const getEnergyTypesApi = async (typeName?: EnergyTypeName): Promise<EnergyTypesApiResponse> => {
+export const getEnergyTypesApi = async (
+  typeName?: EnergyTypeName
+): Promise<EnergyTypesApiResponse> => {
   const response = await api.get<EnergyTypesApiResponse>(BASE_URL, {
     params: {
-      type_name: typeName, 
+      typeName: typeName,
     },
   });
   return response.data;
@@ -34,7 +36,7 @@ export const updateEnergyTypeApi = async (
   id: number,
   data: EnergyTypeFormValues
 ): Promise<EnergyTypeDetailApiResponse> => {
-  const response = await api.put<EnergyTypeDetailApiResponse>(
+  const response = await api.patch<EnergyTypeDetailApiResponse>(
     `${BASE_URL}/${id}`,
     data
   );

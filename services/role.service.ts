@@ -34,7 +34,7 @@ export const updateRoleApi = async (
   roleId: number,
   payload: UpdateRolePayload
 ) => {
-  const response = await api.put(`/roles/${roleId}`, payload);
+  const response = await api.patch(`/roles/${roleId}`, payload);
   return response.data;
 };
 

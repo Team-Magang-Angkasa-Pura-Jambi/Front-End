@@ -61,7 +61,7 @@ export const DailyAnalysisLog = () => {
     dayOptions.find((opt) => opt.offset === dayOffset)?.label || "Pilih Hari";
 
   return (
-    <div className="bg-card p-6 rounded-2xl shadow-sm col-span-1">
+    <div className="bg-card p-6 rounded-2xl shadow-sm h-full ">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-lg text-foreground">
           Log Analisis Harian
