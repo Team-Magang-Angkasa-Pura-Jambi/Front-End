@@ -11,24 +11,18 @@ import {
 } from "@/common/components/ui/tabs";
 import { Skeleton } from "@/common/components/ui/skeleton";
 import { Zap, Fuel, Droplets, Droplet, AlertCircle } from "lucide-react";
-import { EnergyOutlookApi } from "../../service/visualizations.service";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { ErrorFetchData } from "@/common/components/ErrorFetchData";
+import { useMultiEnergyForecast } from "../../hooks/useMultiEnergyForecast";
 
 export const MultiEnergyForecastCard = () => {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["energyOutlook"],
-    queryFn: EnergyOutlookApi,
-  });
-
-  const outlookData = useMemo(() => data?.data || [], []);
-
-  const electricForecast = useMemo(() => outlookData, [outlookData]);
+  const { isError, electricForecast, error, isLoading } =
+    useMultiEnergyForecast();
 
   if (isError)
     return (
       <Card>
-        <ErrorFetchData />
+        <ErrorFetchData message={error.message} />
       </Card>
     );
 
