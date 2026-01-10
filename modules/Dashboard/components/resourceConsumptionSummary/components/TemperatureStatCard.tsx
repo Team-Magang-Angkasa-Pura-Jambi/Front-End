@@ -3,6 +3,15 @@
 import { ArrowDown, ArrowUp, Thermometer } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+// Sesuaikan path import Card Anda
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardAction,
+  CardFooter,
+} from "@/common/components/ui/card";
 
 const formatTemp = (value: number | undefined | null) => {
   if (value === null || value === undefined) return "-";
@@ -23,29 +32,32 @@ const StatItem = ({
   unit: string;
   percentageChange?: number | null;
 }) => {
-  let percentageColor = "text-gray-500";
+  let percentageColor = "text-slate-500";
   let PercentageIcon = null;
 
   if (percentageChange !== null && percentageChange !== undefined) {
     if (percentageChange < 0) {
-      percentageColor = "text-green-600";
+      percentageColor = "text-emerald-600 dark:text-emerald-500";
       PercentageIcon = ArrowDown;
     } else if (percentageChange > 0) {
-      percentageColor = "text-red-600";
+      percentageColor = "text-red-600 dark:text-red-500";
       PercentageIcon = ArrowUp;
     }
   }
 
   return (
     <div>
-      <p className="text-xs">{label}</p>
-      <p className="font-bold ">
-        {value}
-        <span className="text-sm font-normal text-gray-600">{unit}</span>
-      </p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <div className="flex items-baseline gap-1">
+        <p className="text-xl font-bold text-foreground">{value}</p>
+        <span className="text-sm font-normal text-muted-foreground">
+          {unit}
+        </span>
+      </div>
+
       {percentageChange !== undefined && (
         <div
-          className={`flex items-center gap-1 text-xs font-medium ${percentageColor}`}
+          className={`flex items-center gap-1 text-xs font-bold mt-1 ${percentageColor}`}
         >
           {PercentageIcon && <PercentageIcon className="h-3 w-3" />}
           <span>{Math.abs(percentageChange ?? 0)}%</span>
@@ -70,20 +82,29 @@ export const TemperatureStatCard = ({ data }) => {
   }, [panels.length]);
 
   const panelVariants = {
-    enter: { opacity: 0, y: 20 },
-    center: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
+    enter: { opacity: 0, x: 20 }, // Ubah ke x agar slide ke samping
+    center: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -20 },
   };
 
   return (
-    <div className="bg-card p-5 rounded-2xl shadow-sm flex flex-col h-full">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold ">Suhu & Cuaca</p>
-        <div className="p-3 rounded-full bg-red-500">
-          <Thermometer className="w-6 h-6 text-white" />
+    <Card className="h-full border-l-4 border-l-transparent hover:border-l-red-500/50 transition-all">
+      {/* 1. HEADER: Judul & Icon */}
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+            Suhu & Cuaca
+          </CardTitle>
+          <CardAction>
+            <div className="p-2 rounded-xl bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-500">
+              <Thermometer className="w-5 h-5" />
+            </div>
+          </CardAction>
         </div>
-      </div>
-      <div className="flex-grow flex flex-col justify-center relative mt-2 min-h-[57px]">
+      </CardHeader>
+
+      {/* 2. CONTENT: Animasi Data */}
+      <CardContent className="flex-grow flex flex-col justify-center relative min-h-[80px]">
         <AnimatePresence mode="wait">
           {activePanel === 0 && (
             <motion.div
@@ -92,21 +113,22 @@ export const TemperatureStatCard = ({ data }) => {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.5 }}
-              className="grid grid-cols-2 gap-4"
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-2 gap-6 w-full"
             >
               <StatItem
-                label="Suhu Rata-rata"
+                label="Rata-rata Hari Ini"
                 value={formatTemp(todayTemperature?.avg_temp)}
                 unit="°C"
               />
               <StatItem
-                label="Suhu Maksimum"
+                label="Maksimum Hari Ini"
                 value={formatTemp(todayTemperature?.max_temp)}
                 unit="°C"
               />
             </motion.div>
           )}
+
           {activePanel === 1 && (
             <motion.div
               key="monthly"
@@ -114,17 +136,17 @@ export const TemperatureStatCard = ({ data }) => {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.5, type: "tween" }}
-              className="grid grid-cols-2 gap-4 "
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-2 gap-6 w-full"
             >
               <StatItem
-                label="Rerata Suhu"
+                label="Rerata Bulanan"
                 value={formatTemp(averageTemperature?.currentValue)}
                 unit="°C"
                 percentageChange={averageTemperature?.percentageChange}
               />
               <StatItem
-                label="Rerata Suhu Maks."
+                label="Rerata Maks. Bulanan"
                 value={formatTemp(averageMaxTemperature?.currentValue)}
                 unit="°C"
                 percentageChange={averageMaxTemperature?.percentageChange}
@@ -132,18 +154,25 @@ export const TemperatureStatCard = ({ data }) => {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-      <div className="flex justify-center items-center gap-2 pt-4">
-        {panels.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setActivePanel(index)}
-            className={`h-2 w-2 rounded-full transition-colors ${
-              activePanel === index ? "bg-red-500" : "bg-gray-300"
-            }`}
-          />
-        ))}
-      </div>
-    </div>
+      </CardContent>
+
+      {/* 3. FOOTER: Indikator Slide (Dots) */}
+      <CardFooter className="pt-0 pb-4 justify-center">
+        <div className="flex gap-2">
+          {panels.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setActivePanel(index)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                activePanel === index
+                  ? "w-6 bg-red-500"
+                  : "w-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300"
+              }`}
+              aria-label={`Switch to panel ${index + 1}`}
+            />
+          ))}
+        </div>
+      </CardFooter>
+    </Card>
   );
 };
