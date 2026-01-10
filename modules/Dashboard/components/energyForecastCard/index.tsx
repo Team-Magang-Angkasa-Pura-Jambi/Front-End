@@ -34,7 +34,7 @@ export const MultiEnergyForecastCard = () => {
           <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
             Prediksi Biaya Akhir Bulan
           </CardTitle>
-          <Badge variant="outline" className="bg-white text-[10px]">
+          <Badge variant="outline" className=" text-[10px]">
             {new Date().toLocaleString("id-ID", {
               month: "long",
               year: "numeric",

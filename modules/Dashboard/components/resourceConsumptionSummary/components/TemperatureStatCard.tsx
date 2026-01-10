@@ -166,7 +166,7 @@ export const TemperatureStatCard = ({ data }) => {
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 activePanel === index
                   ? "w-6 bg-red-500"
-                  : "w-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300"
+                  : "w-1.5 bg-background dark:bg-background hover:bg-background"
               }`}
               aria-label={`Switch to panel ${index + 1}`}
             />

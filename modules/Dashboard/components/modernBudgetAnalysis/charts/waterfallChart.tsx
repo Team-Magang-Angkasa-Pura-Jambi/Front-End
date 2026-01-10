@@ -134,7 +134,7 @@ export const SavedChart = ({
         </LineChart>
       </ResponsiveContainer>
     </div>
-    <div className="mt-2 p-3 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 shrink-0">
+    <div className="mt-2 p-3 bg-background rounded-lg border border-slate-100 text-[11px] text-slate-600 shrink-0">
       💡 Insight: Penghematan terbesar didorong oleh optimasi penggunaan.
     </div>
   </div>

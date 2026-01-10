@@ -45,73 +45,112 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.147 0.004 49.25);
+
+  /* === BASE COLORS (Soft Industrial) === */
+  /* Background: Slate 50 (Tetap soft) */
+  --background: oklch(0.984 0.003 247.858);
+
+  /* Foreground: Abu-abu Gelap (Sesuai tulisan "inJourney") */
+  --foreground: oklch(0.279 0.041 260.031);
+
+  /* Card: Putih bersih */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.147 0.004 49.25);
+  --card-foreground: oklch(0.279 0.041 260.031);
+
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.147 0.004 49.25);
-  --primary: oklch(0.216 0.006 56.043);
-  --primary-foreground: oklch(0.985 0.001 106.423);
-  --secondary: oklch(0.97 0.001 106.424);
-  --secondary-foreground: oklch(0.216 0.006 56.043);
-  --muted: oklch(0.97 0.001 106.424);
-  --muted-foreground: oklch(0.553 0.013 58.071);
-  --accent: oklch(0.97 0.001 106.424);
-  --accent-foreground: oklch(0.216 0.006 56.043);
+  --popover-foreground: oklch(0.279 0.041 260.031);
+
+  /* === PRIMARY COLOR (INJOURNEY TEAL) === */
+  /* Sebelumnya Hijau, sekarang Biru Tosca/Cyan khas InJourney */
+  /* Hex Estimasi: #00A9BD -> OKLCH approx */
+  --primary: oklch(0.64 0.18 230);
+  --primary-foreground: oklch(1 0 0); /* Teks putih di atas tombol biru */
+
+  /* Secondary Colors */
+  --secondary: oklch(0.967 0.001 263.477);
+  --secondary-foreground: oklch(0.279 0.041 260.031);
+
+  --muted: oklch(0.967 0.001 263.477);
+  --muted-foreground: oklch(0.55 0.04 256);
+
+  --accent: oklch(0.95 0.02 230); /* Cyan sangat muda untuk hover */
+  --accent-foreground: oklch(0.279 0.041 260.031);
+
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.923 0.003 48.717);
-  --input: oklch(0.923 0.003 48.717);
-  --ring: oklch(0.709 0.01 56.259);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0.001 106.423);
-  --sidebar-foreground: oklch(0.147 0.004 49.25);
-  --sidebar-primary: oklch(0.216 0.006 56.043);
-  --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-accent: oklch(0.97 0.001 106.424);
-  --sidebar-accent-foreground: oklch(0.216 0.006 56.043);
-  --sidebar-border: oklch(0.923 0.003 48.717);
-  --sidebar-ring: oklch(0.709 0.01 56.259);
+
+  --border: oklch(0.92 0.004 264.542);
+  --input: oklch(0.92 0.004 264.542);
+
+  /* Ring mengikuti warna Primary (Cyan) */
+  --ring: oklch(0.64 0.18 230);
+
+  /* Sidebar Light */
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.279 0.041 260.031);
+  --sidebar-primary: oklch(0.64 0.18 230); /* Active Menu jadi Cyan */
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.95 0.02 230);
+  --sidebar-accent-foreground: oklch(0.64 0.18 230);
+  --sidebar-border: oklch(0.92 0.004 264.542);
+  --sidebar-ring: oklch(0.64 0.18 230);
+
+  /* Chart Colors (Opsional: Mengambil aksen logo InJourney) */
+  --chart-1: oklch(0.64 0.18 230); /* Cyan (Primary) */
+  --chart-2: oklch(0.65 0.2 45); /* Orange (Logo Icon) */
+  --chart-3: oklch(0.7 0.2 140); /* Green (Logo Icon) */
+  --chart-4: oklch(0.55 0.15 250); /* Blue (Logo Icon) */
+  --chart-5: oklch(0.8 0.1 80); /* Yellowish */
 }
 
 .dark {
-  --background: oklch(0.147 0.004 49.25);
-  --foreground: oklch(0.985 0.001 106.423);
-  --card: oklch(0.216 0.006 56.043);
-  --card-foreground: oklch(0.985 0.001 106.423);
-  --popover: oklch(0.216 0.006 56.043);
-  --popover-foreground: oklch(0.985 0.001 106.423);
-  --primary: oklch(0.923 0.003 48.717);
-  --primary-foreground: oklch(0.216 0.006 56.043);
-  --secondary: oklch(0.268 0.007 34.298);
-  --secondary-foreground: oklch(0.985 0.001 106.423);
-  --muted: oklch(0.268 0.007 34.298);
-  --muted-foreground: oklch(0.709 0.01 56.259);
-  --accent: oklch(0.268 0.007 34.298);
-  --accent-foreground: oklch(0.985 0.001 106.423);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.553 0.013 58.071);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.216 0.006 56.043);
-  --sidebar-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-accent: oklch(0.268 0.007 34.298);
-  --sidebar-accent-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.553 0.013 58.071);
-}
+  /* === DARK MODE (Deep Aviation Blue/Grey) === */
 
+  /* Background: Slate 950 (Deep Graphite) */
+  --background: oklch(0.13 0.028 261.692);
+  --foreground: oklch(0.898 0.018 253.595);
+
+  --card: oklch(0.18 0.03 260); /* Sedikit lebih terang dari bg */
+  --card-foreground: oklch(0.898 0.018 253.595);
+
+  --popover: oklch(0.18 0.03 260);
+  --popover-foreground: oklch(0.898 0.018 253.595);
+
+  /* Primary: Cyan sedikit lebih terang agar menyala di gelap */
+  --primary: oklch(0.64 0.18 230);
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.25 0.04 260);
+  --secondary-foreground: oklch(0.898 0.018 253.595);
+
+  --muted: oklch(0.25 0.04 260);
+  --muted-foreground: oklch(0.7 0.04 256);
+
+  --accent: oklch(0.25 0.04 260);
+  --accent-foreground: oklch(0.898 0.018 253.595);
+
+  --destructive: oklch(0.7 0.19 22);
+
+  --border: oklch(0.25 0.04 260);
+  --input: oklch(0.25 0.04 260);
+  --ring: oklch(0.64 0.18 230);
+
+  /* Sidebar Dark */
+  --sidebar: oklch(0.13 0.028 261.692);
+  --sidebar-foreground: oklch(0.898 0.018 253.595);
+  --sidebar-primary: oklch(0.64 0.18 230);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.25 0.04 260);
+  --sidebar-accent-foreground: oklch(0.898 0.018 253.595);
+  --sidebar-border: oklch(0.25 0.04 260);
+  --sidebar-ring: oklch(0.64 0.18 230);
+
+  /* Chart Colors Dark Mode */
+  --chart-1: oklch(0.64 0.18 230); /* Cyan */
+  --chart-2: oklch(0.7 0.18 45); /* Orange */
+  --chart-3: oklch(0.75 0.18 140); /* Green */
+  --chart-4: oklch(0.6 0.15 250); /* Blue */
+  --chart-5: oklch(0.85 0.1 80); /* Yellow */
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;

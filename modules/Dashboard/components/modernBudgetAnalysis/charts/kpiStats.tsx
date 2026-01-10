@@ -20,7 +20,7 @@ export const KpiStats = ({
       label: "Anggaran Awal",
       val: totals.initial,
       color: "text-slate-800",
-      bg: "bg-white",
+      bg: "",
     },
     {
       label: "Terpakai (YTD)",

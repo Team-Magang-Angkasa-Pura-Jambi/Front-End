@@ -146,7 +146,7 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
             return (
               <div
                 key={field.id}
-                className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-3 rounded-lg border"
+                className="grid grid-cols-12 gap-4 items-center bg-background p-3 rounded-lg border"
               >
                 <div className="col-span-5">
                   <span className="text-sm font-medium">{label}</span>

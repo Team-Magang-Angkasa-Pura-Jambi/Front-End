@@ -1,29 +1,20 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
-import { Droplet, Fuel, LucideIcon, Plane, Zap } from "lucide-react";
-
 import { Header } from "./Header";
-import { StatCard } from "./resourceConsumptionSummary/components/StatCard";
-import { StatCardSkeleton } from "./resourceConsumptionSummary/components/statCardSkeleton";
-import { TemperatureStatCard } from "./resourceConsumptionSummary/components/TemperatureStatCard";
 import { AnalysisChart } from "./analysisChart";
-import { DailyAnalysisLog } from "./DailyAnalysisLog";
-import { ClassificationSummaryChart } from "./ClassificationSummaryChart";
 import { AnalysisYearlyChart } from "./analysisYearlyChart";
 import { UnifiedEnergyComparisonChart } from "./dayTypeComparisonChart";
 import { ModernEfficiencyDashboard } from "./modernEfficiencyDashboard";
 import { MeterEfficiencyRanking } from "./meterEfficiencyRanking";
 import { DailyAveragePaxChart } from "./dailyAveragePaxChart";
-import { FuelRefillAnalysis } from "./fuelRefillAnalysis";
+import { FuelRefillAnalysis } from "./fuelRefillAnalysis/fuelRefillAnalysis";
 import { EfficiencyRatioChart } from "./efficiencyRatioChart";
 import { BudgetBurnRateChart } from "./budgetBurnRateChart";
 import { ModernBudgetAnalysis } from "./modernBudgetAnalysis";
 import { useRealtimeNotification } from "@/hooks/useRealtimeNotification";
 import { MultiEnergyForecastCard } from "./energyForecastCard";
-import { summaryApi } from "@/services/summary.service";
 import { NotificationStyle } from "./notificationStyle";
 import { ResourceConsumptionSummary } from "./resourceConsumptionSummary";
 
@@ -108,7 +99,7 @@ export const Page = () => {
             </motion.div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
               <DailyAveragePaxChart />
             </motion.div>
@@ -117,9 +108,6 @@ export const Page = () => {
             </motion.div>
             <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
               <FuelRefillAnalysis />
-            </motion.div>
-            <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
-              <DailyAnalysisLog />
             </motion.div>
           </div>
 

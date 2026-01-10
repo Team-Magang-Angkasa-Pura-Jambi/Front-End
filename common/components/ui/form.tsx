@@ -12,8 +12,9 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+import { AlertCircle } from "lucide-react"; // Tambahkan icon untuk error
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"; // Pastikan path utils benar
 import { Label } from "@/common/components/ui/label";
 
 const Form = FormProvider;
@@ -80,7 +81,8 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
     <FormItemContext.Provider value={{ id }}>
       <div
         data-slot="form-item"
-        className={cn("grid gap-2", className)}
+        // Ubah gap agar terlihat lebih renggang (seperti panel instrumen)
+        className={cn("grid gap-1.5 space-y-1", className)}
         {...props}
       />
     </FormItemContext.Provider>
@@ -97,7 +99,13 @@ function FormLabel({
     <Label
       data-slot="form-label"
       data-error={!!error}
-      className={cn("data-[error=true]:text-destructive", className)}
+      className={cn(
+        // Style Khas Energi: Warna Slate, Font Medium
+        "text-slate-600 dark:text-slate-300 font-semibold text-xs uppercase tracking-wide",
+        // Saat Error: Warna merah industrial
+        "data-[error=true]:text-red-600 dark:data-[error=true]:text-red-400",
+        className
+      )}
       htmlFor={formItemId}
       {...props}
     />
@@ -118,6 +126,8 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
           : `${formDescriptionId} ${formMessageId}`
       }
       aria-invalid={!!error}
+      // Kita bisa menambahkan styling border di komponen Input (terpisah),
+      // tapi Slot meneruskan props ke child.
       {...props}
     />
   );
@@ -130,7 +140,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn("text-slate-500 text-[11px] leading-tight", className)}
       {...props}
     />
   );
@@ -145,14 +155,22 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   }
 
   return (
-    <p
+    <div
       data-slot="form-message"
       id={formMessageId}
-      className={cn("text-destructive text-sm", className)}
+      // Style Khas Energi: Pesan Error seperti "System Alert" di dashboard
+      className={cn(
+        "flex items-center gap-2 mt-1.5 p-2 rounded-md",
+        "bg-red-50 border border-red-100 dark:bg-red-900/20 dark:border-red-900/30",
+        "text-red-600 dark:text-red-400 text-[11px] font-medium",
+        className
+      )}
       {...props}
     >
-      {body}
-    </p>
+      {/* Icon Peringatan Kecil */}
+      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+      <span>{body}</span>
+    </div>
   );
 }
 

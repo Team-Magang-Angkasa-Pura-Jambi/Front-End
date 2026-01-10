@@ -104,7 +104,7 @@ export const ModernBudgetAnalysis = () => {
         ref={ref}
         className="flex-1 flex flex-col overflow-hidden shadow-md border-slate-200"
       >
-        <CardHeader className="px-6 py-4 border-b bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
+        <CardHeader className="px-6 py-4 border-b bg-background/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
           <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-800">
             <div className="p-1.5 bg-blue-100 rounded-md">
               <Coins className="w-4 h-4 text-blue-600" />

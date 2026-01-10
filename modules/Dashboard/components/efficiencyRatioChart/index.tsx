@@ -135,7 +135,7 @@ export const EfficiencyRatioChart = () => {
         <div className="h-[400px] w-full">
           {isLoading ? (
             <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
-              <Skeleton className="h-[300px] w-full rounded-xl bg-slate-100" />
+              <Skeleton className="h-[300px] w-full rounded-xl bg-background" />
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -240,7 +240,7 @@ export const EfficiencyRatioChart = () => {
 
         <div className="mt-6 flex flex-col md:flex-row gap-4">
           <div className="flex-1 p-4 rounded-xl bg-orange-50/50 border border-orange-100 flex gap-3">
-            <div className="p-2 h-fit bg-white rounded-lg shadow-sm">
+            <div className="p-2 h-fit  rounded-lg shadow-sm">
               <Plane className="w-4 h-4 text-orange-600" />
             </div>
             <div>
@@ -255,8 +255,8 @@ export const EfficiencyRatioChart = () => {
             </div>
           </div>
 
-          <div className="flex-1 p-4 rounded-xl bg-slate-50 border border-slate-100 flex gap-3">
-            <div className="p-2 h-fit bg-white rounded-lg shadow-sm">
+          <div className="flex-1 p-4 rounded-xl bg-background border border-slate-100 flex gap-3">
+            <div className="p-2 h-fit  rounded-lg shadow-sm">
               <Building2 className="w-4 h-4 text-slate-600" />
             </div>
             <div>

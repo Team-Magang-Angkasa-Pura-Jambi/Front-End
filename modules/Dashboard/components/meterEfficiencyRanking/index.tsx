@@ -116,7 +116,7 @@ export const MeterEfficiencyRanking = () => {
                       </div>
                     </div>
 
-                    <div className="relative h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="relative h-2.5 w-full bg-background rounded-full overflow-hidden">
                       <div
                         className={`absolute top-0 left-0 h-full transition-all duration-1000 ${statusCfg.color}`}
                         style={{ width: `${percentage}%` }}
@@ -129,14 +129,14 @@ export const MeterEfficiencyRanking = () => {
         </div>
 
         {!isLoading && statistics && (
-          <div className="mt-6 bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <div className="mt-6  rounded-xl shadow-sm border border-slate-200 p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                   <Activity className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+                  <h3 className="text-sm font-bold uppercase tracking-wide">
                     Kesehatan Sistem Metering
                   </h3>
                   <p className="text-xs text-slate-500">
@@ -205,7 +205,7 @@ export const MeterEfficiencyRanking = () => {
                 </span>
               </div>
 
-              <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden flex">
+              <div className="w-full h-2.5 bg-background rounded-full overflow-hidden flex">
                 <div
                   className="h-full bg-emerald-500 transition-all duration-500"
                   style={{

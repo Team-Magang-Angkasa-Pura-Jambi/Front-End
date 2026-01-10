@@ -49,7 +49,7 @@ export const getStatusConfig = (status: string) => {
       };
     default:
       return {
-        color: "bg-slate-300",
+        color: "bg-background",
         label: "Unknown",
         text: "text-slate-700",
       };

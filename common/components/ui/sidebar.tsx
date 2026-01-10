@@ -1,11 +1,11 @@
 "use client";
-import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext } from "react";
-import { AnimatePresence, motion } from "framer-motion"; // Pastikan install framer-motion atau ubah ke motion/react
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import Link, { LinkProps } from "next/link";
+import { cn } from "@/lib/utils"; // Pastikan path utils Anda benar
+import { AnimatePresence, motion, HTMLMotionProps } from "framer-motion";
 
-// 1. Perbaikan Interface agar lebih fleksibel
+// --- Types ---
 interface Links {
   label: string;
   href: string;
@@ -24,6 +24,7 @@ interface SidebarContextProps {
   animate: boolean;
 }
 
+// --- Context ---
 const SidebarContext = createContext<SidebarContextProps | undefined>(
   undefined
 );
@@ -36,7 +37,7 @@ export const useSidebar = () => {
   return context;
 };
 
-// 2. SidebarProvider: Memastikan sinkronisasi antara prop dan internal state
+// --- Provider ---
 export const SidebarProvider = ({
   children,
   open: openProp,
@@ -60,6 +61,8 @@ export const SidebarProvider = ({
   );
 };
 
+// --- Main Components ---
+
 export const Sidebar = (props: {
   children: React.ReactNode;
   open?: boolean;
@@ -69,11 +72,15 @@ export const Sidebar = (props: {
   return <SidebarProvider {...props}>{props.children}</SidebarProvider>;
 };
 
-export const SidebarBody = (props: React.ComponentProps<typeof motion.div>) => {
+// SidebarBody menerima props animasi, tapi memilahnya untuk child components
+export const SidebarBody = (props: HTMLMotionProps<"div">) => {
   return (
     <>
       <DesktopSidebar {...props} />
-      <MobileSidebar {...(props as React.ComponentProps<"div">)} />
+      {/* MobileSidebar adalah div biasa, jadi kita filter props animasi 
+         dengan casting ke HTMLAttributes agar TypeScript tidak error 
+      */}
+      <MobileSidebar {...(props as React.HTMLAttributes<HTMLDivElement>)} />
     </>
   );
 };
@@ -82,12 +89,12 @@ export const DesktopSidebar = ({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof motion.div>) => {
+}: HTMLMotionProps<"div"> & { children?: React.ReactNode }) => {
   const { open, setOpen, animate } = useSidebar();
   return (
     <motion.div
       className={cn(
-        "h-full px-4 py-4 hidden md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 shrink-0",
+        "h-full px-4 py-4 hidden md:flex md:flex-col bg-white dark:bg-slate-950 shrink-0 border-r border-slate-200 dark:border-slate-800",
         className
       )}
       animate={{
@@ -97,6 +104,9 @@ export const DesktopSidebar = ({
       onMouseLeave={() => setOpen(false)}
       {...props}
     >
+      {!open && (
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-emerald-500 rounded-full shadow-[0_0_8px_2px_rgba(16,185,129,0.6)]" />
+      )}
       {children}
     </motion.div>
   );
@@ -106,18 +116,18 @@ export const MobileSidebar = ({
   className,
   children,
   ...props
-}: React.ComponentProps<"div">) => {
+}: React.HTMLAttributes<HTMLDivElement>) => {
   const { open, setOpen } = useSidebar();
   return (
     <div
       className={cn(
-        "h-14 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full"
+        "h-14 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 w-full"
       )}
       {...props}
     >
       <div className="flex justify-end z-20 w-full">
         <IconMenu2
-          className="text-neutral-800 dark:text-neutral-200 cursor-pointer"
+          className="text-slate-700 dark:text-slate-200 cursor-pointer"
           onClick={() => setOpen(!open)}
         />
       </div>
@@ -129,12 +139,12 @@ export const MobileSidebar = ({
             exit={{ x: "-100%", opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className={cn(
-              "fixed h-full w-full inset-0 bg-white dark:bg-neutral-900 p-10 z-[100] flex flex-col justify-between",
+              "fixed h-full w-full inset-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm p-10 z-[100] flex flex-col justify-between",
               className
             )}
           >
             <div
-              className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+              className="absolute right-10 top-10 z-50 text-slate-800 dark:text-slate-200 cursor-pointer hover:text-red-500 transition-colors"
               onClick={() => setOpen(!open)}
             >
               <IconX />
@@ -147,30 +157,48 @@ export const MobileSidebar = ({
   );
 };
 
-// 3. Perbaikan SidebarLink: Mengatasi error 'href' missing
+// Menggunakan LinkProps dari next/link untuk type safety yang lebih baik
 export const SidebarLink = ({
   link,
   className,
   isActive,
   ...rest
-}: SidebarLinkProps & Omit<React.ComponentProps<typeof Link>, "href">) => {
+}: SidebarLinkProps &
+  Omit<LinkProps, "href"> &
+  React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
   const { open, animate } = useSidebar();
 
   return (
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-3 group/sidebar py-2 px-2 rounded-lg",
-        "transition-all duration-200 mb-1",
+        "flex items-center justify-start gap-3 group/sidebar py-2.5 px-3 rounded-md relative overflow-hidden",
+        "transition-all duration-300 ease-in-out mb-1",
         isActive
-          ? "bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 shadow-sm"
-          : "text-neutral-600 hover:bg-neutral-200/50 dark:text-neutral-400 dark:hover:bg-neutral-700/50",
+          ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-medium"
+          : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200",
         className
       )}
       {...rest}
     >
-      {/* Icon Wrapper agar tetap konsisten ukurannya */}
-      <div className="h-6 w-6 flex-shrink-0 flex items-center justify-center">
+      {isActive && (
+        <motion.div
+          layoutId="active-pill"
+          className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "100%" }}
+          transition={{ duration: 0.2 }}
+        />
+      )}
+
+      <div
+        className={cn(
+          "h-6 w-6 flex-shrink-0 flex items-center justify-center transition-colors",
+          isActive
+            ? "text-emerald-600 dark:text-emerald-400"
+            : "text-slate-500 dark:text-slate-500 group-hover/sidebar:text-slate-700 dark:group-hover/sidebar:text-slate-300"
+        )}
+      >
         {link.icon}
       </div>
 

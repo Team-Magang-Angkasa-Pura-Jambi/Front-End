@@ -89,7 +89,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
   const statusStyles = {
     Active: "",
     UnderMaintenance: "bg-amber-500 text-white",
-    Inactive: "bg-slate-500 text-white",
+    Inactive: "bg-background0 text-white",
     Deleted: "bg-red-500 text-white",
   };
   return (

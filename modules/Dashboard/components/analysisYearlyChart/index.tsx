@@ -271,7 +271,7 @@ export const AnalysisYearlyChart = () => {
           )}
         </div>
         {!isLoading && summary && (
-          <div className="mt-4 p-5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col xl:flex-row items-center justify-between gap-6 transition-all hover:shadow-sm">
+          <div className="mt-4 p-5 rounded-xl bg-background border border-slate-100 flex flex-col xl:flex-row items-center justify-between gap-6 transition-all hover:shadow-sm">
             <div className="flex items-start gap-4 w-full  border-b xl:border-b-0 xl:border-r border-slate-200 pb-4 xl:pb-0 xl:pr-6">
               <div
                 className={`rounded-full p-2.5 shrink-0 ${
@@ -377,7 +377,7 @@ export const AnalysisYearlyChart = () => {
                 >
                   {summary.budgetUtilization.toFixed(1)}%
                 </p>
-                <div className="w-full h-1.5 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
+                <div className="w-full h-1.5 bg-background rounded-full mt-1.5 overflow-hidden">
                   <div
                     className={`h-full rounded-full ${
                       summary.budgetUtilization > 100

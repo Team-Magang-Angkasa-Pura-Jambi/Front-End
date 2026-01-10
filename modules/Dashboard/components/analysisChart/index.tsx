@@ -144,7 +144,7 @@ export const AnalysisChart = () => {
 
       <CardContent className="space-y-6">
         {isError || chartData.length === 0 ? (
-          <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-xl bg-slate-50">
+          <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-xl bg-background">
             <p className="text-muted-foreground text-sm">
               Data tidak tersedia untuk kombinasi filter ini.
             </p>
@@ -219,7 +219,7 @@ export const AnalysisChart = () => {
 
         {insights && (
           <div
-            className={`p-4 rounded-xl flex gap-3 items-start ${
+            className={`p-2 rounded-xl flex gap-3 items-start ${
               insights.type === "warning"
                 ? "bg-amber-50 border border-amber-100"
                 : "bg-emerald-50 border border-emerald-100"
