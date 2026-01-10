@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { startOfMonth } from "date-fns";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/common/components/ui/card";
 import { Loader2, ListFilter, AlertTriangle } from "lucide-react";
 import { createColumns } from "./ColumnTable";
 import { RecapHeader } from "./Header";

@@ -13,15 +13,15 @@ import {
 } from "lucide-react"; // Pastikan ChevronDown diimpor
 import { useQuery, UndefinedInitialDataOptions } from "@tanstack/react-query";
 import React, { useState, useMemo } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { getLogbooksApi, LogbookEntry } from "@/services/logbook.service";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/dropdown-menu";
+import { Button } from "@/common/components/ui/button";
 
 const dayOptions = [
   { label: "Hari Ini", offset: 0 },

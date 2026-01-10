@@ -6,8 +6,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 
 interface DataEntryCardProops {
   icon: React.ReactNode;

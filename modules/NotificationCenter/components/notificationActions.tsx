@@ -1,7 +1,7 @@
 // src/app/notification-center/_components/notification-actions.tsx
 import { CheckCheck, MailOpen, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/common/components/ui/button";
+import { Checkbox } from "@/common/components/ui/checkbox";
 
 interface NotificationActionsProps {
   isAllSelected: boolean;

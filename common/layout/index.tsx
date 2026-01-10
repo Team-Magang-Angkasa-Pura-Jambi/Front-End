@@ -1,10 +1,14 @@
 "use client";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarBody,
+  SidebarLink,
+} from "@/common/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "./components/logo";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   BarChart3,
   BookText,

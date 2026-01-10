@@ -13,9 +13,11 @@ import {
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { fetchLatestAlertApi } from "@/services/notification.service";
-import { getNotificationStyle } from "./constants/notificationStyle";
 
-export const ResourceConsumptionSummary = () => {
+import { ComponentLoader } from "@/common/components/ComponentLoader";
+import { colorClasses, getNotificationStyle } from "../constants";
+
+export const NotificationStyle = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { data: latestAlertResponse, isLoading } = useQuery({
     queryKey: ["latestNotification"],
@@ -41,12 +43,7 @@ export const ResourceConsumptionSummary = () => {
   const notification = notifications[currentIndex];
 
   if (isLoading) {
-    return (
-      <div className="bg-card p-6 rounded-2xl flex items-center shadow-sm">
-        <IconLoader className="animate-spin text-gray-400" />
-        <p className="ml-4 text-muted-foreground">Memuat notifikasi...</p>
-      </div>
-    );
+    return <ComponentLoader />;
   }
 
   if (!notification) {
@@ -61,12 +58,8 @@ export const ResourceConsumptionSummary = () => {
   }
 
   const { Icon, color } = getNotificationStyle(notification.title);
-  const colorClasses = {
-    red: { bg: "bg-red-100", text: "text-red-600" },
-    yellow: { bg: "bg-yellow-100", text: "text-yellow-600" },
-    green: { bg: "bg-green-100", text: "text-green-600" },
-  };
-  const styles = colorClasses[color as keyof typeof colorClasses];
+
+  const styles = colorClasses[color];
 
   return (
     <div className="bg-card p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm overflow-hidden">

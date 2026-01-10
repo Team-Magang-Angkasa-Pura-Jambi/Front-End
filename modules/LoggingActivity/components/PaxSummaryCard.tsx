@@ -2,7 +2,12 @@
 
 import React, { useMemo } from "react";
 import { Users, Loader2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import { ReadingHistory } from "../services/reading.service";
 
 interface PaxSummaryCardProps {

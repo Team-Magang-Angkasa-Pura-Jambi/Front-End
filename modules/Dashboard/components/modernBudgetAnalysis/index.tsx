@@ -1,17 +1,22 @@
 "use client";
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
+import { Badge } from "@/common/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/common/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/common/components/ui/select";
 import { Calendar, Coins, AlertCircle } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { EnergyTypeName } from "@/common/types/energy";
 import { useBudgetAnalytics } from "../../hooks/useBudgetAnalytics";
 import { KpiStats } from "./charts/kpiStats";

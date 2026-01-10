@@ -12,10 +12,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
+import { DialogFooter } from "@/common/components/ui/dialog";
+import { Button } from "@/common/components/ui/button";
 
 interface TariffGroupFormProps {
   initialData?: TariffGroup | null;

@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,9 +31,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/table/dataTable";
+} from "@/common/components/ui/alert-dialog";
+import { Badge } from "@/common/components/ui/badge";
+import { DataTable } from "@/common/components/table/dataTable";
 
 import { PriceSchemeForm } from "./forms/priceSchema.form";
 
@@ -49,7 +49,7 @@ import {
 import { getReadingTypesApi } from "../services/readingsType.service";
 import { getTaxesApi } from "../services/tax.service";
 import { schemaFormValues } from "../schemas/schemaPrice.schema";
-import { DataTableRowActions } from "@/components/table/dataTableRowActions";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
 
 const RatesCell = ({
   row,
@@ -157,11 +157,7 @@ export const createPriceSchemeColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <DataTableRowActions
-        row={row}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+      <DataTableRowActions row={row} onEdit={onEdit} onDelete={onDelete} />
     ),
   },
 ];

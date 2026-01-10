@@ -12,7 +12,6 @@ const formatTemp = (value: number | undefined | null) => {
   });
 };
 
-// Helper component untuk menampilkan item statistik dengan perubahan persentase
 const StatItem = ({
   label,
   value,
@@ -29,10 +28,10 @@ const StatItem = ({
 
   if (percentageChange !== null && percentageChange !== undefined) {
     if (percentageChange < 0) {
-      percentageColor = "text-green-600"; // Suhu turun (lebih dingin) itu bagus
+      percentageColor = "text-green-600";
       PercentageIcon = ArrowDown;
     } else if (percentageChange > 0) {
-      percentageColor = "text-red-600"; // Suhu naik (lebih panas)
+      percentageColor = "text-red-600";
       PercentageIcon = ArrowUp;
     }
   }
@@ -57,8 +56,6 @@ const StatItem = ({
 };
 
 export const TemperatureStatCard = ({ data }) => {
-  if (!data) return null;
-
   const { averageTemperature, averageMaxTemperature, todayTemperature } = data;
 
   const [activePanel, setActivePanel] = useState(0);
@@ -67,9 +64,9 @@ export const TemperatureStatCard = ({ data }) => {
   useEffect(() => {
     const timer = setInterval(() => {
       setActivePanel((prev) => (prev + 1) % panels.length);
-    }, 10000); // Ganti panel setiap 10 detik
+    }, 10000);
 
-    return () => clearInterval(timer); // Membersihkan interval saat komponen unmount
+    return () => clearInterval(timer);
   }, [panels.length]);
 
   const panelVariants = {

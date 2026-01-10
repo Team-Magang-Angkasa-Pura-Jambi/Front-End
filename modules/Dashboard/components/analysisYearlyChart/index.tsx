@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ComposedChart,
@@ -13,21 +13,36 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Download, AlertCircle, Calendar } from "lucide-react";
-import { downloadElementAsJpg } from "@/utils/exportImage";
-import { toast } from "sonner";
+} from "@/common/components/ui/select";
+import { Button } from "@/common/components/ui/button";
+import {
+  Download,
+  Calendar,
+  TrendingUp,
+  CheckCircle2,
+  AlertTriangle,
+  PieChart,
+  BarChart3,
+} from "lucide-react";
 import { ENERGY_TYPES, EnergyTypeName } from "@/common/types/energy";
 import { getYearlyAnalysisApi } from "../../service/visualizations.service";
+import { ErrorFetchData } from "@/common/components/ErrorFetchData";
+import { EmptyData } from "@/common/components/EmptyData";
+import { ComponentLoader } from "@/common/components/ComponentLoader";
+import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
+import { useDownloadImage } from "../../hooks/useDownloadImage";
 
 export const AnalysisYearlyChart = () => {
   const [energyType, setEnergyType] = useState<EnergyTypeName>(
@@ -36,15 +51,19 @@ export const AnalysisYearlyChart = () => {
 
   const [year, setYear] = useState<string>(new Date().getFullYear().toString());
 
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
+  const { ref, download, isExporting } = useDownloadImage<HTMLDivElement>();
 
-  const { data, isLoading, isError } = useQuery({
+  const handleDownloadClick = () => {
+    download(`Analysis-Yearly-${energyType}-${year}.jpg`);
+  };
+
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["yearlyAnalysis", energyType, year],
     queryFn: () => getYearlyAnalysisApi(energyType, parseInt(year)),
   });
 
-  const chartData = data?.data || [];
+  const chartData = useMemo(() => data?.data.chartData || [], [data?.data]);
+  const summary = useMemo(() => data?.data.summary || null, [data?.data]);
 
   const volumeUnit = useMemo(() => {
     switch (energyType) {
@@ -59,30 +78,11 @@ export const AnalysisYearlyChart = () => {
     }
   }, [energyType]);
 
-  const formatIDR = (value: number) =>
-    new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(value);
-
-  const handleDownload = async () => {
-    if (!cardRef.current) return;
-    setIsExporting(true);
-    try {
-      await downloadElementAsJpg(cardRef, {
-        fileName: `Analysis-Yearly-${energyType}-${year}.jpg`,
-      });
-      toast.success("Gambar berhasil diunduh");
-    } catch (error) {
-      toast.error("Gagal mengunduh gambar");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   return (
-    <Card ref={cardRef} className="w-full h-full shadow-md border-slate-200">
+    <Card
+      ref={ref}
+      className="w-full h-full shadow-md border-slate-200 flex flex-col"
+    >
       <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
           <CardTitle className="text-lg font-bold">
@@ -94,9 +94,8 @@ export const AnalysisYearlyChart = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          {/* FILTER: TAHUN */}
           <Select value={year} onValueChange={setYear}>
-            <SelectTrigger>
+            <SelectTrigger className="w-[100px]">
               <Calendar className="w-3 h-3 mr-2 text-slate-500" />
               <SelectValue placeholder="Tahun" />
             </SelectTrigger>
@@ -107,12 +106,11 @@ export const AnalysisYearlyChart = () => {
             </SelectContent>
           </Select>
 
-          {/* FILTER: TIPE ENERGI */}
           <Select
             value={energyType}
             onValueChange={(value) => setEnergyType(value as EnergyTypeName)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Pilih Energi" />
             </SelectTrigger>
             <SelectContent>
@@ -122,17 +120,15 @@ export const AnalysisYearlyChart = () => {
             </SelectContent>
           </Select>
 
-          {/* TOMBOL DOWNLOAD */}
           <Button
             variant="outline"
-            size="sm"
-            onClick={handleDownload}
+            size="icon"
+            onClick={handleDownloadClick}
             disabled={isExporting || isLoading}
-            className="h-9 px-3 text-slate-600 hover:text-blue-600 hover:bg-blue-50"
             title="Download JPG"
           >
             {isExporting ? (
-              <span className="text-xs">Saving...</span>
+              <span className="text-[10px]">...</span>
             ) : (
               <Download className="w-4 h-4" />
             )}
@@ -140,25 +136,14 @@ export const AnalysisYearlyChart = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="pt-4">
-        <div className="h-[450px] w-full min-h-[400px]">
+      <CardContent className="flex-1 flex flex-col">
+        <div className="h-[400px] w-full min-h-[350px]">
           {isLoading ? (
-            <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
-              <Skeleton className="h-[350px] w-full rounded-xl bg-slate-100" />
-              <div className="flex gap-4 w-full justify-center">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-            </div>
+            <ComponentLoader />
           ) : isError ? (
-            <div className="h-full w-full flex flex-col items-center justify-center text-red-500 bg-red-50 rounded-xl">
-              <AlertCircle className="w-8 h-8 mb-2" />
-              <p>Gagal memuat data grafik.</p>
-            </div>
+            <ErrorFetchData message={error?.message} />
           ) : chartData.length === 0 ? (
-            <div className="h-full w-full flex items-center justify-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-              <p>Tidak ada data tersedia untuk periode ini.</p>
-            </div>
+            <EmptyData />
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
@@ -178,12 +163,14 @@ export const AnalysisYearlyChart = () => {
                   dy={10}
                 />
 
-                {/* Y-Axis Kiri: Volume */}
                 <YAxis
                   yAxisId="left"
                   tick={{ fill: "#64748b", fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
+                  tickFormatter={(val) =>
+                    `${formatCurrencySmart(val).val} ${volumeUnit}`
+                  }
                   label={{
                     value: `Volume (${volumeUnit})`,
                     angle: -90,
@@ -197,14 +184,13 @@ export const AnalysisYearlyChart = () => {
                   }}
                 />
 
-                {/* Y-Axis Kanan: Biaya */}
                 <YAxis
                   yAxisId="right"
                   orientation="right"
                   tick={{ fill: "#64748b", fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(val) => `${val / 1_000_000}jt`}
+                  tickFormatter={(val) => `${formatCurrencySmart(val).full}`}
                   label={{
                     value: "Biaya (IDR)",
                     angle: 90,
@@ -221,8 +207,6 @@ export const AnalysisYearlyChart = () => {
                 <Tooltip
                   cursor={{ fill: "#f1f5f9" }}
                   contentStyle={{
-                    backgroundColor: "#fff",
-                    border: "1px solid #e2e8f0",
                     borderRadius: "8px",
                     boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                   }}
@@ -233,9 +217,19 @@ export const AnalysisYearlyChart = () => {
                         "Volume",
                       ];
                     if (name === "budget")
-                      return [formatIDR(value), "Budget Plan"];
+                      return [
+                        `${formatCurrencySmart(value).val} ${
+                          formatCurrencySmart(value).unit
+                        }`,
+                        "Budget Plan",
+                      ];
                     if (name === "cost")
-                      return [formatIDR(value), "Biaya Aktual"];
+                      return [
+                        `${formatCurrencySmart(value).val} ${
+                          formatCurrencySmart(value).unit
+                        }`,
+                        "Biaya Aktual",
+                      ];
                     return [value, name];
                   }}
                 />
@@ -283,6 +277,129 @@ export const AnalysisYearlyChart = () => {
             </ResponsiveContainer>
           )}
         </div>
+        {!isLoading && summary && (
+          <div className="mt-4 p-5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col xl:flex-row items-center justify-between gap-6 transition-all hover:shadow-sm">
+            <div className="flex items-start gap-4 w-full  border-b xl:border-b-0 xl:border-r border-slate-200 pb-4 xl:pb-0 xl:pr-6">
+              <div
+                className={`rounded-full p-2.5 shrink-0 ${
+                  summary.isDeficit
+                    ? "bg-red-100 text-red-600"
+                    : "bg-emerald-100 text-emerald-600"
+                }`}
+              >
+                {summary.isDeficit ? (
+                  <AlertTriangle className="w-6 h-6" />
+                ) : (
+                  <CheckCircle2 className="w-6 h-6" />
+                )}
+              </div>
+              <div>
+                <p className="font-bold text-slate-800 text-base">
+                  Status:{" "}
+                  <span
+                    className={
+                      summary.isDeficit ? "text-red-600" : "text-emerald-600"
+                    }
+                  >
+                    {summary.isDeficit
+                      ? "Defisit Anggaran"
+                      : "Efisien & Terkendali"}
+                  </span>
+                </p>
+                <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+                  {summary.isDeficit
+                    ? `Pengeluaran melebihi target sebesar `
+                    : `Berhasil menghemat `}
+                  <span className="font-semibold text-slate-700">
+                    {formatCurrencySmart(summary.realizedSavings).full}
+                  </span>
+                  {summary.isDeficit
+                    ? ` dari anggaran berjalan.`
+                    : ` dari target anggaran berjalan.`}
+                </p>
+              </div>
+            </div>
+
+            <div className="w-full  grid grid-cols-2 md:grid-cols-2 gap-x-4 gap-y-6">
+              <div className="flex flex-col border-r border-slate-100 last:border-0 px-2">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1 mb-1">
+                  <TrendingUp className="w-3 h-3 text-slate-400" />
+                  Puncak
+                </p>
+                <p className="font-bold text-slate-800 text-sm truncate">
+                  {summary.peakMonth}
+                </p>
+                <p className="text-xs text-red-600 font-medium mt-0.5">
+                  {formatCurrencySmart(summary.peakCost).full}
+                </p>
+              </div>
+
+              <div className="flex flex-col border-r border-slate-100 last:border-0 px-2">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                  {summary.isDeficit ? "Total Defisit" : "Total Hemat"}
+                </p>
+                <p
+                  className={`font-bold text-sm truncate ${
+                    summary.isDeficit ? "text-red-600" : "text-emerald-600"
+                  }`}
+                >
+                  {summary.isDeficit ? "-" : "+"}
+                  {formatCurrencySmart(Math.abs(summary.realizedSavings)).val}
+                  <span className="text-xs ml-0.5">
+                    {
+                      formatCurrencySmart(Math.abs(summary.realizedSavings))
+                        .unit
+                    }
+                  </span>
+                </p>
+                <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                  (Realized / YTD)
+                </p>
+              </div>
+
+              <div className="flex flex-col border-r border-slate-100 last:border-0 px-2">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1 mb-1">
+                  <BarChart3 className="w-3 h-3 text-slate-400" />
+                  Rata-rata
+                </p>
+                <p className="font-bold text-slate-800 text-sm truncate">
+                  {formatCurrencySmart(summary.avgCostYTD).full}
+                </p>
+                <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                  Per Bulan
+                </p>
+              </div>
+
+              <div className="flex flex-col px-2">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1 mb-1">
+                  <PieChart className="w-3 h-3 text-slate-400" />
+                  Serapan
+                </p>
+                <p
+                  className={`font-bold text-sm truncate ${
+                    summary.budgetUtilization > 100
+                      ? "text-red-600"
+                      : "text-blue-600"
+                  }`}
+                >
+                  {summary.budgetUtilization.toFixed(1)}%
+                </p>
+                <div className="w-full h-1.5 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${
+                      summary.budgetUtilization > 100
+                        ? "bg-red-500"
+                        : "bg-blue-500"
+                    }`}
+                    style={{
+                      width: `${Math.min(summary.budgetUtilization, 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -6,17 +6,17 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/common/components/ui/popover";
 import {
   fetchAllNotificationsApi,
   markAsReadApi,
 } from "@/services/notification.service";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/common/components/ui/scroll-area";
 
 export const NotificationPopover = () => {
   const queryClient = useQueryClient();

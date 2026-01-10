@@ -3,14 +3,14 @@
 import { Row } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/common/components/ui/dropdown-menu";
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
@@ -39,9 +39,7 @@ export function DataTableRowActions<TData>({
           Edit
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => onDelete(row.original)}
-        >
+        <DropdownMenuItem onClick={() => onDelete(row.original)}>
           Hapus
         </DropdownMenuItem>
       </DropdownMenuContent>

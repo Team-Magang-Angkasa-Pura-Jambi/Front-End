@@ -7,8 +7,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/alert-dialog";
+import { Button } from "@/common/components/ui/button";
 
 interface DeleteUserDialogProps {
   isOpen: boolean;

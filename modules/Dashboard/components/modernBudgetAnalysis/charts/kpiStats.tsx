@@ -1,5 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/common/components/ui/card";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 
 export const KpiStats = ({

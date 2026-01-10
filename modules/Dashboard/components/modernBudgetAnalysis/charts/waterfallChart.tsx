@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { CHART_COLORS } from "../../../constants";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/common/components/ui/badge";
 import { TrendingDown } from "lucide-react";
 
 export const WaterfallChart = ({ data }: { data }) => (
@@ -82,7 +82,7 @@ export const SavedChart = ({
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
-          margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+          // margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
         >
           <CartesianGrid
             strokeDasharray="3 3"

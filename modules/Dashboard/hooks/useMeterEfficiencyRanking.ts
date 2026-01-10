@@ -4,49 +4,43 @@ import { MeterRankApi } from "../service/visualizations.service";
 import { getStatusConfig } from "../constants";
 
 export const useMeterEfficiencyRanking = () => {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["meterEfficiencyRanking"],
     queryFn: MeterRankApi,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
   });
 
-  const meterData = useMemo(() => data?.data || [], [data]);
+  const meters = useMemo(() => {
+    return data?.data || [];
+  }, [data]);
 
-  const topIssueMeter = useMemo(() => {
-    if (meterData.length === 0) return null;
+  const statistics = useMemo(() => {
+    if (!meters.length) return null;
 
-    const sorted = [...meterData].sort(
-      (a, b) => b.consumption / b.budget - a.consumption / a.budget
-    );
+    const totalMeters = meters.length;
 
-    return sorted[0];
-  }, [meterData]);
+    const criticalCount = meters.filter(
+      (m) => m.insight.percentage_used > 100
+    ).length;
 
-  const insightMessage = useMemo(() => {
-    if (!topIssueMeter) return "Data tidak tersedia.";
+    const efficientCount = totalMeters - criticalCount;
 
-    const ratio = (topIssueMeter.consumption / topIssueMeter.budget) * 100;
-
-    if (ratio >= 100) {
-      return `Perhatian: ${
-        topIssueMeter.code
-      } telah melebihi budget (${ratio.toFixed(
-        0
-      )}%). Segera lakukan pemeriksaan.`;
-    } else if (ratio > 80) {
-      return `Waspada: ${
-        topIssueMeter.code
-      } mendekati batas anggaran (${ratio.toFixed(0)}%).`;
-    } else {
-      return "Efisiensi terjaga. Semua meteran beroperasi dalam batas anggaran.";
-    }
-  }, [topIssueMeter]);
+    return {
+      total: totalMeters,
+      critical: criticalCount,
+      efficient: efficientCount,
+      hasCritical: criticalCount > 0,
+    };
+  }, [meters]);
 
   return {
-    meters: meterData,
+    meters,
+    statistics,
     isLoading,
     isError,
-    topIssueMeter,
-    insightMessage,
+    error,
+    refetch,
     getStatusConfig,
   };
 };

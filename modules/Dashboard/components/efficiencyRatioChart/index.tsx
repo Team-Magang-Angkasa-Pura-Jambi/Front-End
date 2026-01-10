@@ -13,15 +13,20 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/common/components/ui/select";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { Zap, Calendar, CalendarDays, Building2, Plane } from "lucide-react";
 import { getEfficiencyRatioApi } from "../../service/visualizations.service";
 import { MONTH_CONFIG } from "../../constants";

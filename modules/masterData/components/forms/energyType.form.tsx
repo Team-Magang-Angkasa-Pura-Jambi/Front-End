@@ -10,11 +10,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { DialogFooter } from "@/components/ui/dialog";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
+import { Button } from "@/common/components/ui/button";
+import { Switch } from "@/common/components/ui/switch";
+import { DialogFooter } from "@/common/components/ui/dialog";
 import { EnergyType } from "@/common/types/energy";
 import {
   EnergyTypeFormValues,

@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/common/components/ui/table";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { AnnualBudget } from "@/common/types/budget";
 

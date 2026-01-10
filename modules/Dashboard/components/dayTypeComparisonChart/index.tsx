@@ -12,17 +12,22 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/common/components/ui/tabs";
+import { Badge } from "@/common/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/common/components/ui/select";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { Zap, Droplets, Fuel, Calendar, CalendarDays } from "lucide-react";
 
 import { ENERGY_TYPES } from "@/common/types/energy";

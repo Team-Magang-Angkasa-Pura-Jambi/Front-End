@@ -15,8 +15,8 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/common/components/ui/button";
+import { Input } from "@/common/components/ui/input";
 
 import {
   Form,
@@ -25,7 +25,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/common/components/ui/form";
 
 import {
   formSchema,

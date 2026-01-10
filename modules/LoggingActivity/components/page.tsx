@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
+} from "@/common/components/ui/card";
 import { Loader2, AlertTriangle, BookLock } from "lucide-react";
 import {
   AlertDialog,
@@ -21,7 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/common/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 import { createColumns } from "./ColumnTable";

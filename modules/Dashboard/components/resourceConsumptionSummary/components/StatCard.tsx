@@ -1,5 +1,5 @@
 "use client";
-import { ArrowDown, ArrowUp } from "lucide-react"; // Impor ikon panah
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 export const StatCard = ({
   icon,
@@ -11,31 +11,26 @@ export const StatCard = ({
 }) => {
   const IconComponent = icon;
 
-  // Tentukan warna dan ikon berdasarkan percentageChange
-  let percentageColor = "text-gray-500"; // Default
-  let PercentageIcon = null; // Default
+  let percentageColor = "text-gray-500";
+  let PercentageIcon = null;
   let percentageText = percentageChange
     ? `${Math.abs(percentageChange)}%`
     : "N/A";
 
   if (percentageChange !== null && percentageChange !== undefined) {
     if (percentageChange < 0) {
-      // Jika nilai negatif, artinya lebih hemat/turun
       percentageColor = "text-green-600";
       PercentageIcon = ArrowDown;
     } else if (percentageChange > 0) {
-      // Jika nilai positif, artinya lebih boros/naik
       percentageColor = "text-red-600";
       PercentageIcon = ArrowUp;
     } else {
-      // percentageChange === 0
       percentageColor = "text-gray-500";
-      percentageText = "0%"; // Tampilkan 0% jika tidak ada perubahan
+      percentageText = "0%";
     }
   } else {
-    // Jika percentageChange adalah null (misal dari 0 ke X)
-    percentageColor = "text-blue-600"; // Warna netral untuk "Baru" atau "N/A"
-    percentageText = "Baru"; // Atau "N/A" atau "Data Baru"
+    percentageColor = "text-blue-600";
+    percentageText = "Baru";
   }
 
   return (
@@ -46,7 +41,7 @@ export const StatCard = ({
           {value} {unit}
         </p>
         {/* Tambahkan bagian untuk menampilkan persentase perubahan */}
-        {percentageChange !== undefined && ( // Hanya tampilkan jika prop percentageChange ada
+        {percentageChange !== undefined && (
           <div
             className={`flex items-center gap-1 text-sm font-medium ${percentageColor} mt-1`}
           >

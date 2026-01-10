@@ -9,7 +9,12 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 
 interface EnergyData {
   energyType: string;

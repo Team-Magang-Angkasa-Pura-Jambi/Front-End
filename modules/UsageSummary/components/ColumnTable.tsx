@@ -22,8 +22,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { Minus } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/common/components/ui/badge";
+import { Button } from "@/common/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns";

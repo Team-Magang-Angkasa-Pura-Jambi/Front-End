@@ -1,4 +1,4 @@
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebar } from "@/common/components/ui/sidebar";
 import { motion } from "framer-motion";
 import Image from "next/image";
 

@@ -18,9 +18,14 @@ import {
 } from "@/types/users.types";
 
 // --- Komponen UI ---
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import { createColumns } from "./CreateColumns";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import {
   Dialog,
@@ -28,11 +33,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import { toast } from "sonner";
 import { UserForm } from "./UserForm";
 import { DeleteUserDialog } from "./DeleteUserDialog";
-import { DataTable } from "../../../components/table/dataTable";
+import { DataTable } from "../../../common/components/table/dataTable";
 import RolesPage from "./role";
 
 // PERBAIKAN: Definisikan skema Zod untuk create dan update

@@ -4,7 +4,12 @@ import { Settings } from "lucide-react";
 import React from "react";
 import { motion } from "framer-motion";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/common/components/ui/tabs";
 import { masterDataGroups } from "../constants/data";
 
 const fadeInUp = {

@@ -18,14 +18,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/common/components/ui/button";
+import { Input } from "@/common/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+} from "@/common/components/ui/popover";
+import { Calendar } from "@/common/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -34,7 +34,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/common/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -42,8 +42,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-
+} from "@/common/components/ui/select";
 
 import { useAuthStore } from "@/stores/authStore";
 import { AxiosError } from "axios";
@@ -84,11 +83,10 @@ export const FormReadingWater = ({
     name: "details",
   });
 
-  const { data: energyTypeData, isLoading: isLoadingData } =
-    useQuery({
-      queryKey: ["energyData", type_name],
-      queryFn: () => getEnergyTypesApi(type_name),
-    });
+  const { data: energyTypeData, isLoading: isLoadingData } = useQuery({
+    queryKey: ["energyData", type_name],
+    queryFn: () => getEnergyTypesApi(type_name),
+  });
 
   const meters = useMemo(
     () => energyTypeData?.data[0]?.meters || [],

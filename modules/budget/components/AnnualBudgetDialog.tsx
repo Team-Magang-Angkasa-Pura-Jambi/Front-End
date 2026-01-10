@@ -7,8 +7,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
+} from "@/common/components/ui/dialog";
+import { Form } from "@/common/components/ui/form";
 import { BudgetForm } from "./BudgetForm";
 import { AnnualBudget } from "@/common/types/budget";
 import {

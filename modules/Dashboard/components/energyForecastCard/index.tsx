@@ -1,10 +1,15 @@
 "use client";
 import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardHeader, CardTitle } from "@/common/components/ui/card";
+import { Badge } from "@/common/components/ui/badge";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/common/components/ui/tabs";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { Zap, Fuel, Droplets, Droplet, AlertCircle } from "lucide-react";
 import { EnergyOutlookApi } from "../../service/visualizations.service";
 

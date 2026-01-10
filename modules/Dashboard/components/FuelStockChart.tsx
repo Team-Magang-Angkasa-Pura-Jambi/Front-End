@@ -11,8 +11,13 @@ import {
   ResponsiveContainer,
   Rectangle,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { ServerCrash } from "lucide-react";
 import { getFuelStockAnalysisApi } from "@/services/analysis.service";
 

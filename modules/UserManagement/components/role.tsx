@@ -7,21 +7,21 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { MoreHorizontal, PlusCircle, ShieldCheck, Trash2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/common/components/ui/dropdown-menu";
 import {
   createRoleApi,
   CreateRolePayload,
@@ -31,7 +31,7 @@ import {
   updateRoleApi,
   UpdateRolePayload,
 } from "@/services/role.service";
-import { DataTable } from "@/components/table/dataTable";
+import { DataTable } from "@/common/components/table/dataTable";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +41,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/common/components/ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -49,8 +49,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 

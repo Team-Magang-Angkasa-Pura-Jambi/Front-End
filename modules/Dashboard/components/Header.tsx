@@ -1,8 +1,8 @@
-import { Input } from "@/components/ui/input";
+import { Input } from "@/common/components/ui/input";
 import { useAuthStore } from "@/stores/authStore";
 import Image from "next/image";
 import { NotificationPopover } from "./NotificationPopover";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ThemeToggle } from "@/common/components/ui/ThemeToggle";
 
 export const Header = () => {
   const { user } = useAuthStore();

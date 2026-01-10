@@ -11,8 +11,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,9 +30,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { DataTable } from "@/components/table/dataTable";
-
+} from "@/common/components/ui/alert-dialog";
+import { DataTable } from "@/common/components/table/dataTable";
 
 import { ApiErrorResponse } from "@/common/types/api";
 
@@ -45,7 +44,7 @@ import {
 import { Taxes } from "@/common/types/taxes";
 import { taxFormValue } from "../schemas/taxes.schema";
 import { TaxForm } from "./forms/taxes.form";
-import { DataTableRowActions } from "@/components/table/dataTableRowActions";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
 
 const RateCell = ({ value }: { value: number }) => {
   const rate = Number(value);
@@ -71,11 +70,7 @@ export const createTaxColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <DataTableRowActions
-        row={row}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+      <DataTableRowActions row={row} onEdit={onEdit} onDelete={onDelete} />
     ),
   },
 ];

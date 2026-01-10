@@ -4,7 +4,7 @@ import React from "react";
 import { id } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { NotificationOrAlert } from "@/services/notification.service";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/common/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 interface NotificationItemProps {
@@ -46,9 +46,7 @@ export const NotificationItem = React.forwardRef<
         {notification.description}
       </p>
 
-      <p className="text-sm text-muted-foreground">
-        {notification.message}
-      </p>
+      <p className="text-sm text-muted-foreground">{notification.message}</p>
       {notification.created_at && (
         <p className="text-xs text-muted-foreground/80 mt-1">
           {formatDistanceToNow(new Date(notification.created_at), {

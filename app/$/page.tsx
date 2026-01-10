@@ -8,8 +8,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"; // Sesuaikan path jika berbeda
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card"; // Sesuaikan path jika berbeda
+import { Button } from "@/common/components/ui/button";
 import { Home, Map, TreePine, ZapOff } from "lucide-react";
 
 /**

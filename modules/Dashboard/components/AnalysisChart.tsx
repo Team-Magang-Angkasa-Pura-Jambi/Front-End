@@ -16,14 +16,19 @@ import { Lightbulb, AlertCircle, Activity } from "lucide-react";
 import { analysisApi } from "@/services/analysis.service";
 import { getMetersApi } from "@/modules/masterData/services/meter.service";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/common/components/ui/select";
 import { AnalysisChartSkeleton } from "./analystChartSkeleton";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 

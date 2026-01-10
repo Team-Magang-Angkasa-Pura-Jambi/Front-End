@@ -1,60 +1,43 @@
 "use client";
-import React, { useRef, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
+import { Badge } from "@/common/components/ui/badge";
 import {
   Activity,
   ArrowUpRight,
   TrendingUp,
-  AlertCircle,
   Download,
+  AlertCircle,
+  CheckCircle2,
+  AlertTriangle,
+  Zap,
 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { downloadElementAsJpg } from "@/utils/exportImage";
+import { Skeleton } from "@/common/components/ui/skeleton";
+import { Button } from "@/common/components/ui/button";
 import { useMeterEfficiencyRanking } from "../../hooks/useMeterEfficiencyRanking";
+import { useDownloadImage } from "../../hooks/useDownloadImage";
+import { ErrorFetchData } from "@/common/components/ErrorFetchData";
+import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
+import { getStatusConfig } from "../../constants";
 
 export const MeterEfficiencyRanking = () => {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [isexporting, setIsExporting] = useState(false);
+  const { ref, download, isExporting } = useDownloadImage<HTMLDivElement>();
 
-  const {
-    meters: meterData,
-    isLoading,
-    isError,
-    topIssueMeter,
-    insightMessage,
-    getStatusConfig, // Diexport jika UI butuh akses manual
-  } = useMeterEfficiencyRanking();
-
-  if (isError)
-    return (
-      <Card className="h-full col-span-12 md:col-span-8 border-red-100 bg-red-50">
-        <CardContent className="p-6 text-center text-red-600 flex flex-col items-center justify-center h-full gap-2">
-          <AlertCircle />
-          <p className="text-sm font-medium">
-            Gagal memuat ranking efisiensi meteran
-          </p>
-        </CardContent>
-      </Card>
-    );
+  const { meters, statistics, isLoading, isError } =
+    useMeterEfficiencyRanking();
 
   const handleDownload = async () => {
-    setIsExporting(true);
-    try {
-      await downloadElementAsJpg(cardRef, {
-        fileName: `Ranking-Efisiensi-${meterData[0]?.code || "unit"}.jpg`,
-      });
-    } catch (error) {
-      // Optional: Munculkan toast error di sini
-    } finally {
-      setIsExporting(false);
-    }
+    download("meter-efficiency-rank");
   };
 
   return (
     <Card
-      ref={cardRef}
+      ref={ref}
       className="h-full flex flex-col shadow-md border-none ring-1 ring-slate-200"
     >
       <CardHeader className="flex-none flex flex-row items-center justify-between space-y-0 pb-4 pt-6 px-6">
@@ -69,10 +52,14 @@ export const MeterEfficiencyRanking = () => {
             size="sm"
             onClick={handleDownload}
             className="h-8 px-2 text-slate-500 hover:text-blue-600"
+            disabled={isExporting || isLoading}
             title="Download JPG"
           >
-            <Download className="w-4 h-4 mr-1" />
-            <span className="text-[10px]">JPG</span>
+            {isExporting ? (
+              <span className="text-[10px]">...</span>
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
           </Button>
 
           <Badge variant="outline" className="text-xs font-normal">
@@ -81,11 +68,11 @@ export const MeterEfficiencyRanking = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto min-h-0 w-full px-6 pb-6">
+      <CardContent className="flex-1 overflow-y-auto min-h-0 w-full px-6 ">
         <div className="space-y-6">
+          {isError && <ErrorFetchData />}
           {isLoading
-            ? // Loading Skeleton
-              Array.from({ length: 4 }).map((_, i) => (
+            ? Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="space-y-2">
                   <div className="flex justify-between">
                     <Skeleton className="h-4 w-24" />
@@ -94,7 +81,7 @@ export const MeterEfficiencyRanking = () => {
                   <Skeleton className="h-3 w-full" />
                 </div>
               ))
-            : meterData.map((meter, idx) => {
+            : meters.map((meter, idx) => {
                 const statusCfg = getStatusConfig(meter.status);
                 const isOver = meter.consumption > meter.budget;
                 const percentage = Math.min(
@@ -116,15 +103,15 @@ export const MeterEfficiencyRanking = () => {
                             isOver ? "text-red-600" : "text-green-600"
                           }`}
                         >
-                          {meter.consumption.toLocaleString("id-ID")}{" "}
-                          <span className="text-[10px] font-normal text-slate-400">
+                          {formatCurrencySmart(meter.consumption).val}{" "}
+                          <span className="text-[12px] font-normal text-slate-400">
                             {meter.unit_of_measurement}
                           </span>
                           {isOver && <ArrowUpRight className="w-3 h-3" />}
                         </div>
                         <p className="text-[10px] text-slate-400">
-                          Limit: {meter.budget.toLocaleString("id-ID")}{" "}
-                          {meter.unit_of_measurement}
+                          {`Limit: ${formatCurrencySmart(meter.budget).val}
+                          ${meter.unit_of_measurement}`}
                         </p>
                       </div>
                     </div>
@@ -141,32 +128,112 @@ export const MeterEfficiencyRanking = () => {
               })}
         </div>
 
-        {/* Dynamic AI-Style Insight Footer (Ikut di dalam scroll) */}
-        {!isLoading && topIssueMeter && (
-          <div
-            className={`mt-8 p-4 rounded-xl border ${
-              topIssueMeter.consumption > topIssueMeter.budget
-                ? "bg-red-50 border-red-100 text-red-800"
-                : "bg-blue-50 border-blue-100 text-blue-800"
-            }`}
-          >
-            <div className="flex gap-3 items-start">
-              <TrendingUp className="w-5 h-5 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-xs font-bold uppercase tracking-wider">
-                  Analisis Efisiensi
+        {!isLoading && statistics && (
+          <div className="mt-6 bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+                    Kesehatan Sistem Metering
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Ringkasan status operasional seluruh perangkat
+                  </p>
+                </div>
+              </div>
+
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                  statistics.hasCritical
+                    ? "bg-red-50 text-red-700 border-red-100"
+                    : "bg-emerald-50 text-emerald-700 border-emerald-100"
+                }`}
+              >
+                {statistics.hasCritical ? "Perlu Perhatian" : "Sistem Sehat"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 divide-x divide-slate-100">
+              <div className="px-2">
+                <p className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
+                  <Zap className="w-3 h-3" /> Total Unit
                 </p>
-                <p className="text-xs leading-relaxed">
-                  Meteran <b>{topIssueMeter.code}</b> menunjukkan anomali beban
-                  tertinggi.
-                  {topIssueMeter.consumption > topIssueMeter.budget
-                    ? ` Melampaui budget sebesar ${(
-                        (topIssueMeter.consumption / topIssueMeter.budget - 1) *
-                        100
-                      ).toFixed(1)}%. Disarankan audit segera.`
-                    : ` Berjalan efisien di bawah batas limit. Pertahankan pola penggunaan ini.`}
+                <p className="text-2xl font-bold text-slate-800">
+                  {statistics.total}
+                </p>
+                <p className="text-[10px] text-slate-400">Terdaftar Aktif</p>
+              </div>
+
+              <div className="px-4">
+                <p className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-red-500" /> Kritis
+                </p>
+                <p className="text-2xl font-bold text-red-600">
+                  {statistics.critical}
+                </p>
+                <p className="text-[10px] text-red-400 font-medium">
+                  Over Budget
                 </p>
               </div>
+
+              <div className="px-4">
+                <p className="text-[10px] uppercase text-slate-400 font-bold mb-1 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Efisien
+                </p>
+                <p className="text-2xl font-bold text-emerald-600">
+                  {statistics.efficient}
+                </p>
+                <p className="text-[10px] text-emerald-500 font-medium">
+                  Terkendali
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <div className="flex justify-between text-[10px] font-medium mb-1.5 text-slate-500">
+                <span>Rasio Efisiensi</span>
+                <span>
+                  {statistics.total > 0
+                    ? Math.round(
+                        (statistics.efficient / statistics.total) * 100
+                      )
+                    : 0}
+                  %
+                </span>
+              </div>
+
+              <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden flex">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-500"
+                  style={{
+                    width: `${
+                      statistics.total > 0
+                        ? (statistics.efficient / statistics.total) * 100
+                        : 0
+                    }%`,
+                  }}
+                />
+                <div
+                  className="h-full bg-red-500 transition-all duration-500"
+                  style={{
+                    width: `${
+                      statistics.total > 0
+                        ? (statistics.critical / statistics.total) * 100
+                        : 0
+                    }%`,
+                  }}
+                />
+              </div>
+
+              {statistics.hasCritical && (
+                <p className="mt-2 text-[10px] text-red-500 text-center font-medium bg-red-50 py-1 rounded border border-red-100">
+                  {statistics.critical} meteran memerlukan peninjauan budget
+                  atau audit teknis.
+                </p>
+              )}
             </div>
           </div>
         )}

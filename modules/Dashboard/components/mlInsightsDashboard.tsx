@@ -1,9 +1,14 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
+import { Badge } from "@/common/components/ui/badge";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { Activity, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 // --- 1. Definisi Tipe Data ---

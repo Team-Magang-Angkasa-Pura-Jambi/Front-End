@@ -3,12 +3,22 @@ import api from "@/lib/api";
 const prefix = "/visualizations";
 
 type UsageCategory = "HEMAT" | "NORMAL" | "BOROS" | "UNKNOWN";
+export type MeterRankInsightType = {
+  percentage_used: number;
+  estimated_cost: number;
+  avg_daily_consumption: number;
+  trend: "NAIK" | "TURUN" | "STABIL" | "UNKNOWN";
+  trend_percentage: number;
+  recommendation: string;
+};
+
 export type MeterRankType = {
   code: string;
+  unit_of_measurement: string;
   consumption: number;
   budget: number;
-  status: UsageCategory;
-  unit_of_measurement: string;
+  status: string;
+  insight: MeterRankInsightType;
 };
 
 export type EnergyOutlookType = {
@@ -18,7 +28,7 @@ export type EnergyOutlookType = {
   over: number;
 };
 export type YearlyHeatmapType = {
-  classification_date: string; // API mengembalikan ISO String, bukan Date object
+  classification_date: string;
   classification: UsageCategory;
   confidence_score?: number;
 };
@@ -31,10 +41,26 @@ export type BudgetTrackingType = {
 };
 
 export type YearlyAnalysisType = {
-  month: string; // Sumbu X: Nama bulan (Jan, Feb, dst)
-  consumption: number; // Sumbu Y Kiri (Bar): Volume penggunaan (kWh/m³/Liter)
-  cost: number; // Sumbu Y Kanan (Line): Biaya aktual (Rupiah)
-  budget: number; // Sumbu Y Kanan (Line Putus-putus): Anggaran (Rupiah)
+  month: string;
+  consumption: number;
+  cost: number;
+  budget: number;
+};
+export type YearlyAnalysisResult = {
+  chartData: YearlyAnalysisType[];
+  summary: {
+    peakMonth: string;
+    peakCost: number;
+    peakConsumptionMonth: string;
+    peakConsumptionValue: number;
+    totalAnnualBudget: number;
+    totalRealizedCost: number;
+    realizedSavings: number;
+    isDeficit: boolean;
+    overBudgetCount: number;
+    budgetUtilization: number;
+    avgCostYTD: number;
+  };
 };
 
 export type UnifiedEnergyComparisonType = {
@@ -104,8 +130,7 @@ export const getBudgetTrackingApi = async (): Promise<
 export const getYearlyAnalysisApi = async (
   energyTypeName: string,
   year: number
-): Promise<ApiResponse<YearlyAnalysisType[]>> => {
-  // Kirim parameter via query string (params)
+): Promise<ApiResponse<YearlyAnalysisResult>> => {
   const result = await api.get(`${prefix}/yearly-analysis`, {
     params: {
       energyTypeName: energyTypeName,
@@ -120,7 +145,6 @@ export const getUnifiedComparisonApi = async (
   year: number,
   month: number
 ): Promise<ApiResponse<UnifiedEnergyComparisonType>> => {
-  // Kirim parameter via query string (params)
   const result = await api.get(`${prefix}/unified-comparison`, {
     params: {
       energyTypeName: energyTypeName,
@@ -135,7 +159,6 @@ export const getEfficiencyRatioApi = async (
   year: number,
   month: number
 ): Promise<ApiResponse<efficiencyRatioType[]>> => {
-  // Kirim parameter via query string (params)
   const result = await api.get(`${prefix}/efficiency-ratio`, {
     params: {
       year: year,
@@ -149,7 +172,6 @@ export const getDailyAveragePaxApi = async (
   year: number,
   month: number
 ): Promise<ApiResponse<DailyAveragePaxType[]>> => {
-  // Kirim parameter via query string (params)
   const result = await api.get(`${prefix}/daily-average-pax`, {
     params: {
       year: year,
@@ -163,7 +185,6 @@ export const getBudgetBurnRateApi = async (
   year: number,
   month: number
 ): Promise<ApiResponse<BudgetBurnRateType[]>> => {
-  // Kirim parameter via query string (params)
   const result = await api.get(`${prefix}/budget-burn-rate`, {
     params: {
       year: year,

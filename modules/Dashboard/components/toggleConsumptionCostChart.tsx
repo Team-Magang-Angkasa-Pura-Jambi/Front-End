@@ -10,8 +10,13 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Menggunakan Shadcn Tabs
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/common/components/ui/tabs"; // Menggunakan Shadcn Tabs
 
 const mixedData = [
   {
