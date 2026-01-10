@@ -9,7 +9,7 @@ import { Header } from "./Header";
 import { StatCard } from "./resourceConsumptionSummary/components/StatCard";
 import { StatCardSkeleton } from "./resourceConsumptionSummary/components/statCardSkeleton";
 import { TemperatureStatCard } from "./resourceConsumptionSummary/components/TemperatureStatCard";
-import { AnalysisChart } from "./AnalysisChart";
+import { AnalysisChart } from "./analysisChart";
 import { DailyAnalysisLog } from "./DailyAnalysisLog";
 import { ClassificationSummaryChart } from "./ClassificationSummaryChart";
 import { AnalysisYearlyChart } from "./analysisYearlyChart";

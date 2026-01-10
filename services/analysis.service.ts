@@ -1,26 +1,10 @@
 import api from "@/lib/api";
 
 // Tipe untuk data harian yang diterima dari API analisis
-export interface DailyRecord {
-  date: string;
-  actual_consumption: number | null;
-  prediction: number | null;
-  classification: "HEMAT" | "NORMAL" | "BOROS" | null;
-  efficiency_target: number | null;
-  totalDaysWithClassification: number | null;
-}
 
 // Tipe untuk data per meter
-export interface MeterAnalysisData {
-  meterId: number;
-  meterName: string;
-  data: DailyRecord[];
-}
 
 // Tipe untuk respons API analisis secara keseluruhan
-interface AnalysisApiResponse {
-  data: MeterAnalysisData[];
-}
 
 // Tipe untuk respons API ringkasan klasifikasi
 interface ClassificationSummaryResponse {
@@ -61,18 +45,6 @@ export type BudgetSummaryByEnergy = {
     remainingBudget: number;
     realizationPercentage: number | null;
   } | null;
-};
-
-export const analysisApi = async (
-  type: "Electricity" | "Water" | "Fuel",
-  mount: string,
-  meterId: number[]
-): Promise<AnalysisApiResponse> => {
-  const meterIdParams = meterId.map((id) => `meterId=${id}`).join("&");
-  const response = await api.get(
-    `/analytics?energyType=${type}&month=${mount}&${meterIdParams}`
-  );
-  return response.data;
 };
 
 export const getClassificationSummaryApi = async (

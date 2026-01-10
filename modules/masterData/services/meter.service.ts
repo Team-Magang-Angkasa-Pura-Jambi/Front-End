@@ -24,7 +24,7 @@ export interface MeterPayload {
 }
 
 export const getMetersApi = async (
-  typeName?: EnergyTypeName
+  typeName?: string
 ): Promise<MetersApiResponse> => {
   const response = await api.get<MetersApiResponse>("/meters", {
     params: {

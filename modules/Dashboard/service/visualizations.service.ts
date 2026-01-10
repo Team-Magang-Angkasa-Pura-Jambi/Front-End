@@ -119,6 +119,46 @@ export type getFuelRefillAnalysisType = {
   consumption: number;
   remainingStock: number;
 };
+export type GetAnalysisQuery = {
+  energyType: string;
+  month: string;
+  meterId?: number;
+};
+
+export type DailyAnalysisRecord = {
+  date: Date;
+  actual_consumption: number | null;
+  consumption_cost: number | null;
+  prediction: number | null;
+  classification: UsageCategory | null;
+  confidence_score: number | null;
+  efficiency_target: number | null;
+  efficiency_target_cost: number | null;
+};
+
+export type MeterAnalysisData = {
+  meterId: number;
+  meterName: string;
+  data: DailyAnalysisRecord[];
+};
+
+export const getTrentConsumptionApi = async (
+  energyType: string,
+  year: number,
+  month: number,
+  meterId: number
+): Promise<ApiResponse<MeterAnalysisData[]>> => {
+  const response = await api.get(`${prefix}/trent-consumption`, {
+    params: {
+      energyTypeName: energyType,
+      month: month,
+      meterId: meterId,
+      year,
+    },
+  });
+
+  return response.data;
+};
 
 export const getBudgetTrackingApi = async (): Promise<
   ApiResponse<BudgetTrackingType[]>
