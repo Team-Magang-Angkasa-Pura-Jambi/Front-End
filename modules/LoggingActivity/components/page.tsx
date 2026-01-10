@@ -77,7 +77,6 @@ export const Page = () => {
   const [paxToDelete, setPaxToDelete] = useState<DailyPaxData | null>(null);
 
   const { type, date, sortBy, sortOrder, meterId } = filters;
-  console.log(date!.from!.toISOString());
 
   const {
     data: queryData,

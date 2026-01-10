@@ -1,4 +1,4 @@
-import "./globals.css";
+import "./globals.css"; // Pastikan file ini ada di folder yang sama (src/app/)
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
@@ -33,14 +33,23 @@ export default function RootLayout({
         className={cn(
           geistSans.variable,
           geistMono.variable,
-          "antialiased",
+          "antialiased min-h-screen",
 
-          // --- PERBAIKAN DI SINI ---
-          // Jangan gunakan hardcode (bg-slate-50).
-          // Gunakan variable semantik agar sinkron dengan globals.css
+          // 1. BASE COLORS (Sesuai globals.css)
           "bg-background text-foreground",
 
-          "selection:bg-emerald-500/30 selection:text-emerald-900 dark:selection:text-emerald-50"
+          // 2. SELECTION COLOR (ADAPTIF)
+          // Menggunakan 'primary' agar warnanya Cyan (InJourney) atau Emerald (tergantung CSS)
+          // Tidak lagi hardcoded warna hijau/emerald.
+          "selection:bg-primary/20 selection:text-primary",
+
+          // 3. GLOBAL INDUSTRIAL SCROLLBAR
+          // Membuat scrollbar browser terlihat menyatu dengan tema dashboard
+          "[&::-webkit-scrollbar]:w-2", // Lebar scrollbar 8px
+          "[&::-webkit-scrollbar-track]:bg-transparent", // Track transparan
+          "[&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700", // Warna thumb
+          "[&::-webkit-scrollbar-thumb]:rounded-full", // Rounded
+          "[&::-webkit-scrollbar-thumb]:border-[1px] [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-clip-content" // Padding trik
         )}
       >
         <ThemeProvider
@@ -52,6 +61,7 @@ export default function RootLayout({
           <QueryProvider>
             <SocketProvider />
             {children}
+            {/* Toaster Global */}
             <Toaster />
           </QueryProvider>
         </ThemeProvider>

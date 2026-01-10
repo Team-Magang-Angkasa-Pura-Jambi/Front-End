@@ -29,7 +29,7 @@ export const MultiEnergyForecastCard = () => {
 
   return (
     <Card className="col-span-12  md:col-span-4 shadow-md border-none ring-1  ring-slate-200 overflow-hidden">
-      <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+      <CardHeader className=" border-b border-slate-100">
         <div className="flex justify-between items-center">
           <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
             Prediksi Biaya Akhir Bulan
@@ -67,11 +67,11 @@ export const MultiEnergyForecastCard = () => {
               : outlookData?.map((m, i) => (
                   <div
                     key={i}
-                    className="p-3 rounded-xl border border-slate-100 bg-white hover:shadow-sm transition-shadow"
+                    className="p-3 rounded-xl border border-slate-100 hover:shadow-sm transition-shadow"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-sm font-bold text-slate-700">
+                        <p className="text-sm font-bold text-slate-500">
                           {m.meter_code}
                         </p>
                       </div>

@@ -75,8 +75,6 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
       .filter((item) => item.paxId !== null);
   }, [data]);
 
-  console.log(dailyPaxData);
-
   if (dailyPaxData.length === 0) {
     return null;
   }

@@ -1,15 +1,42 @@
+import Link from "next/link";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
-export const LogoIcon = () => {
+interface LogoProps {
+  className?: string;
+  width?: number;
+  height?: number;
+}
+
+export const LogoIcon = ({
+  className,
+  width = 120,
+  height = 40,
+}: LogoProps) => {
   return (
-    <div className="relative z-20 flex items-center py-1">
+    <Link
+      href="/"
+      className={cn(
+        "relative z-20 flex items-center py-1 transition-opacity hover:opacity-90",
+        className
+      )}
+    >
       <Image
-        src="/img/logo.png" // Path dari folder public
-        alt="Company Logo"
-        width={120} // Ganti dengan lebar asli gambar Anda (dalam piksel)
-        height={40} // Ganti dengan tinggi asli gambar Anda (dalam piksel)
-        className="h-8 w-auto" // Styling tambahan dengan Tailwind CSS
+        src="/img/logo.png"
+        alt="Sentinel Angkasa Pura"
+        width={width}
+        height={height}
+        // PRIORITAS TINGGI: Agar logo dimuat instan (LCP)
+        priority
+        className={cn(
+          "h-8 w-auto object-contain",
+          // TRIK DARK MODE:
+          // Jika logo asli Anda teks hitam transparan:
+          // Filter ini akan membalik warnanya jadi putih saat dark mode.
+          // Hapus baris di bawah ini jika logo Anda sudah berwarna (misal biru/orange)
+          "dark:brightness-0 dark:invert"
+        )}
       />
-    </div>
+    </Link>
   );
 };
