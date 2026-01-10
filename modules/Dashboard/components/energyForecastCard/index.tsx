@@ -14,17 +14,18 @@ import { Zap, Fuel, Droplets, Droplet, AlertCircle } from "lucide-react";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { ErrorFetchData } from "@/common/components/ErrorFetchData";
 import { useMultiEnergyForecast } from "../../hooks/useMultiEnergyForecast";
+import { EmptyData } from "@/common/components/EmptyData";
 
 export const MultiEnergyForecastCard = () => {
-  const { isError, electricForecast, error, isLoading } =
-    useMultiEnergyForecast();
+  const { isError, outlookData, error, isLoading } = useMultiEnergyForecast();
 
-  if (isError)
-    return (
-      <Card>
-        <ErrorFetchData message={error.message} />
-      </Card>
-    );
+  if (isError) {
+    return <ErrorFetchData message={error?.message} />;
+  }
+
+  if (!isLoading && !outlookData) {
+    return <EmptyData />;
+  }
 
   return (
     <Card className="col-span-12  md:col-span-4 shadow-md border-none ring-1  ring-slate-200 overflow-hidden">
@@ -63,7 +64,7 @@ export const MultiEnergyForecastCard = () => {
               ? [1, 2].map((i) => (
                   <Skeleton key={i} className="h-20 w-full rounded-xl" />
                 ))
-              : electricForecast.map((m, i) => (
+              : outlookData?.map((m, i) => (
                   <div
                     key={i}
                     className="p-3 rounded-xl border border-slate-100 bg-white hover:shadow-sm transition-shadow"

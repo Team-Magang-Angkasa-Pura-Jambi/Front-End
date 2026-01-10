@@ -42,7 +42,7 @@ export const formatCurrencySmart = (rawValue: number) => {
 
   return {
     val: Math.abs(rawValue).toLocaleString("id-ID"),
-    unit: "",
+    unit: "k",
     full: `Rp ${rawValue.toLocaleString("id-ID")}`,
   };
 };

@@ -30,8 +30,11 @@ export const WaterfallChart = ({ data }: { data }) => (
         axisLine={false}
         tickLine={false}
         fontSize={11}
-        tickFormatter={(v) => `Rp${v}j`}
+        tickFormatter={(v) =>
+          `Rp ${formatCurrencySmart(v).val} ${formatCurrencySmart(v).unit} `
+        }
         tick={{ fill: "#64748b" }}
+        // format={(val) => formatCurrencySmart(val).full}
       />
       <Tooltip
         cursor={{ fill: "transparent" }}
@@ -101,6 +104,9 @@ export const SavedChart = ({
             tickLine={false}
             fontSize={11}
             tick={{ fill: "#64748b" }}
+            tickFormatter={(v) =>
+              `Rp ${formatCurrencySmart(v).val} ${formatCurrencySmart(v).unit} `
+            }
           />
           <Tooltip
             contentStyle={{

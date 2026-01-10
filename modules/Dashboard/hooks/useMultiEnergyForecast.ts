@@ -9,13 +9,10 @@ export const useMultiEnergyForecast = () => {
     refetchOnWindowFocus: false,
   });
 
-  const outlookData = useMemo(() => data?.data || [], []);
+  const outlookData = useMemo(() => data?.data || [], [data?.data]);
 
-  const electricForecast = useMemo(() => outlookData, [outlookData]);
   return {
     outlookData,
-    electricForecast,
-    data,
     isLoading,
     isError,
     error,
