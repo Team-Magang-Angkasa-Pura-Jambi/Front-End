@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ComposedChart,
@@ -27,29 +27,57 @@ import {
   SelectValue,
 } from "@/common/components/ui/select";
 import { Skeleton } from "@/common/components/ui/skeleton";
-import { Zap, Calendar, CalendarDays, Building2, Plane } from "lucide-react";
-import { getEfficiencyRatioApi } from "../../service/visualizations.service";
+import {
+  Zap,
+  Calendar,
+  CalendarDays,
+  Building2,
+  Plane,
+  Download,
+} from "lucide-react";
 import { MONTH_CONFIG } from "../../constants";
+import { ComponentLoader } from "@/common/components/ComponentLoader";
+import { ErrorFetchData } from "@/common/components/ErrorFetchData";
+import { EmptyData } from "@/common/components/EmptyData";
+import { useEfficiencyRatio } from "../../hooks/useEfficiencyRatio";
+import { useDownloadImage } from "../../hooks/useDownloadImage";
+import { Button } from "@/common/components/ui/button";
 
 export const EfficiencyRatioChart = () => {
   const currentDate = new Date();
+
   const [year, setYear] = useState<string>(
     currentDate.getFullYear().toString()
   );
   const [month, setMonth] = useState<string>(
     (currentDate.getMonth() + 1).toString()
   );
+  const { ref, download, isExporting } = useDownloadImage<HTMLDivElement>();
 
-  // --- FETCH DATA ---
-  const { data: apiResponse, isLoading } = useQuery({
-    queryKey: ["efficiency-ratio", year, month],
-    queryFn: () => getEfficiencyRatioApi(parseInt(year), parseInt(month)),
-  });
+  const handleDownloadClick = () => {
+    download(`Efficiency-Ratio-${year}-${month}.jpg`);
+  };
+  const { chartData, error, isError, isLoading } = useEfficiencyRatio(
+    year,
+    month
+  );
 
-  const chartData = apiResponse?.data || [];
+  if (isLoading) {
+    return <ComponentLoader />;
+  }
+  if (isError) {
+    return <ErrorFetchData message={error.message} />;
+  }
+
+  if (!chartData) {
+    return <EmptyData />;
+  }
 
   return (
-    <Card className="w-full shadow-lg border-none ring-1 ring-slate-200">
+    <Card
+      ref={ref}
+      className="w-full shadow-lg border-none ring-1 ring-slate-200"
+    >
       <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-50 pb-4">
         <div>
           <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -61,7 +89,6 @@ export const EfficiencyRatioChart = () => {
           </p>
         </div>
 
-        {/* --- FILTER --- */}
         <div className="flex gap-2">
           <Select value={month} onValueChange={setMonth}>
             <SelectTrigger className="w-[130px] h-9">
@@ -88,6 +115,19 @@ export const EfficiencyRatioChart = () => {
               <SelectItem value="2026">2026</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleDownloadClick}
+            disabled={isExporting || isLoading}
+            title="Download JPG"
+          >
+            {isExporting ? (
+              <span className="text-[10px]">...</span>
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+          </Button>
         </div>
       </CardHeader>
 
@@ -128,7 +168,6 @@ export const EfficiencyRatioChart = () => {
                 />
                 <Legend verticalAlign="top" height={36} />
 
-                {/* --- SUMBU KIRI (Office) --- */}
                 <YAxis
                   yAxisId="left"
                   orientation="left"
@@ -150,7 +189,6 @@ export const EfficiencyRatioChart = () => {
                   }}
                 />
 
-                {/* --- SUMBU KANAN (Terminal) --- */}
                 <YAxis
                   yAxisId="right"
                   orientation="right"
@@ -171,7 +209,6 @@ export const EfficiencyRatioChart = () => {
                   }}
                 />
 
-                {/* GRAFIK 1: Office */}
                 <Bar
                   yAxisId="left"
                   dataKey="officeRatio"
@@ -181,7 +218,6 @@ export const EfficiencyRatioChart = () => {
                   barSize={40}
                 />
 
-                {/* GRAFIK 2: Terminal */}
                 <Line
                   yAxisId="right"
                   type="monotone"
@@ -202,7 +238,6 @@ export const EfficiencyRatioChart = () => {
           )}
         </div>
 
-        {/* Insight Box */}
         <div className="mt-6 flex flex-col md:flex-row gap-4">
           <div className="flex-1 p-4 rounded-xl bg-orange-50/50 border border-orange-100 flex gap-3">
             <div className="p-2 h-fit bg-white rounded-lg shadow-sm">

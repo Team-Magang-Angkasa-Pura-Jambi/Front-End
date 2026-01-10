@@ -56,6 +56,7 @@ export const AnalysisYearlyChart = () => {
 
   const { chartData, data, error, isError, isLoading, summary, volumeUnit } =
     useAnalysisYearly(energyType, year);
+
   const handleDownloadClick = () => {
     download(`Analysis-Yearly-${energyType}-${year}.jpg`);
   };
