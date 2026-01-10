@@ -1,7 +1,7 @@
 // components/NotificationCard.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   IconBell,
@@ -13,50 +13,30 @@ import {
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { fetchLatestAlertApi } from "@/services/notification.service";
+import { getNotificationStyle } from "./constants/notificationStyle";
 
-// --- Helper untuk menentukan gaya notifikasi ---
-const getNotificationStyle = (title: string) => {
-  const lowerCaseTitle = title?.toLowerCase();
-  if (
-    lowerCaseTitle?.includes("risiko") ||
-    lowerCaseTitle?.includes("anomali")
-  ) {
-    return { Icon: IconAlertTriangle, color: "red" };
-  }
-  if (
-    lowerCaseTitle?.includes("sukses") ||
-    lowerCaseTitle?.includes("selesai")
-  ) {
-    return { Icon: IconCircleCheck, color: "green" };
-  }
-  // Default untuk "Pengingat", "Peringatan", dll.
-  return { Icon: IconBell, color: "yellow" };
-};
-
-export const NotificationCard = () => {
+export const ResourceConsumptionSummary = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { data: latestAlertResponse, isLoading } = useQuery({
     queryKey: ["latestNotification"],
     queryFn: () => fetchLatestAlertApi(),
-    // Mengambil data setiap 1 menit untuk menjaga kesegaran
     refetchInterval: 60000,
   });
-  console.log(latestAlertResponse);
 
-  // API mengembalikan array, jadi kita ambil datanya
-  const notifications = latestAlertResponse?.data || [];
-  // console.log(notifications);
+  const notifications = useMemo(
+    () => latestAlertResponse?.data || [],
+    [latestAlertResponse]
+  );
 
   useEffect(() => {
-    // Hanya jalankan interval jika ada lebih dari satu notifikasi
     if (notifications.length > 1) {
       const interval = setInterval(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % notifications.length);
-      }, 5000); // Ganti notifikasi setiap 5 detik
+      }, 5000);
 
       return () => clearInterval(interval);
     }
-  }, [notifications.length]); // PERBAIKAN: Ubah dependensi ke panjang array
+  }, [notifications.length]);
 
   const notification = notifications[currentIndex];
 
@@ -80,7 +60,6 @@ export const NotificationCard = () => {
     );
   }
 
-  // Tentukan ikon dan warna secara dinamis
   const { Icon, color } = getNotificationStyle(notification.title);
   const colorClasses = {
     red: { bg: "bg-red-100", text: "text-red-600" },

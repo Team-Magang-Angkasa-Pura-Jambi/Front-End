@@ -30,7 +30,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-// Import API & Constants
 import { MONTH_CONFIG } from "../constants";
 import { getBudgetBurnRateApi } from "../service/visualizations.service";
 
@@ -43,7 +42,6 @@ export const BudgetBurnRateChart = () => {
     (currentDate.getMonth() + 1).toString()
   );
 
-  // --- FETCH DATA ---
   const { data: apiResponse, isLoading } = useQuery({
     queryKey: ["budget-burn-rate", year, month],
     queryFn: () => getBudgetBurnRateApi(parseInt(year), parseInt(month)),
@@ -51,11 +49,9 @@ export const BudgetBurnRateChart = () => {
 
   const chartData = useMemo(() => apiResponse?.data || [], [apiResponse?.data]);
 
-  // --- ANALISIS DINAMIS (INSIGHT) ---
   const insight = useMemo(() => {
     if (!chartData.length) return null;
 
-    // Cari data actual terakhir yang tidak 0 (hari berjalan)
     const lastEntry = [...chartData].reverse().find((d) => d.actual > 0);
 
     if (!lastEntry) return null;
@@ -65,7 +61,6 @@ export const BudgetBurnRateChart = () => {
     const isOverBudget = diff > 0;
     const percentage = idea > 0 ? ((diff / idea) * 100).toFixed(1) : "0";
 
-    // Cek apakah mencapai target efisiensi (Actual < Efficient)
     const isEfficient = actual <= efficent;
 
     return {
@@ -77,7 +72,6 @@ export const BudgetBurnRateChart = () => {
     };
   }, [chartData]);
 
-  // Helper Format Rupiah (Juta)
   const formatYAxis = (val: number) => {
     if (val >= 1000000) return `${(val / 1000000).toFixed(0)}jt`;
     return `${val / 1000}k`;
@@ -93,7 +87,7 @@ export const BudgetBurnRateChart = () => {
 
   return (
     <Card className="w-full shadow-lg border-none ring-1 ring-slate-200 flex flex-col">
-      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-50 pb-4">
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 border-b border-slate-50 ">
         <div>
           <CardTitle className="text-base font-bold flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-emerald-600" />
@@ -104,7 +98,6 @@ export const BudgetBurnRateChart = () => {
           </p>
         </div>
 
-        {/* --- FILTER --- */}
         <div className="flex gap-2 flex-wrap">
           <Select value={month} onValueChange={setMonth}>
             <SelectTrigger>
@@ -152,10 +145,8 @@ export const BudgetBurnRateChart = () => {
         ) : (
           <div className="h-[320px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={chartData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-              >
+              <AreaChart data={chartData}>
+                <Legend verticalAlign="top" iconType="circle" />
                 <defs>
                   <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
@@ -183,7 +174,7 @@ export const BudgetBurnRateChart = () => {
                   tickFormatter={formatYAxis}
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fontSize: 12, fill: "#64748b" }}
+                  tick={{ fontSize: 10, fill: "#64748b" }}
                   width={60}
                 />
                 <Tooltip
@@ -194,9 +185,7 @@ export const BudgetBurnRateChart = () => {
                   }}
                   formatter={(val: number) => formatTooltip(val)}
                 />
-                <Legend verticalAlign="top" height={36} iconType="circle" />
 
-                {/* 1. Garis Ideal (Baseline) */}
                 <Area
                   type="monotone"
                   dataKey="idea"
@@ -207,7 +196,6 @@ export const BudgetBurnRateChart = () => {
                   strokeWidth={2}
                 />
 
-                {/* 2. Garis Target Efisiensi (Goal) */}
                 <Area
                   type="monotone"
                   dataKey="efficent"
@@ -217,12 +205,11 @@ export const BudgetBurnRateChart = () => {
                   strokeWidth={2}
                 />
 
-                {/* 3. Garis Realisasi (Actual) */}
                 <Area
                   type="monotone"
                   dataKey="actual"
                   name="Realisasi (Actual)"
-                  stroke="#f43f5e" // Merah/Rose untuk actual cost
+                  stroke="#f43f5e"
                   fillOpacity={1}
                   fill="url(#colorActual)"
                   strokeWidth={3}
@@ -232,12 +219,10 @@ export const BudgetBurnRateChart = () => {
           </div>
         )}
 
-        {/* --- DYNAMIC INSIGHT BOX --- */}
         {!isLoading && insight && (
-          <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Box Status */}
+          <div className=" grid grid-cols-1 md:grid-cols-2 gap-4 p-1">
             <div
-              className={`p-4 rounded-xl border flex gap-3 items-center ${
+              className={`px-2 rounded-xl border flex gap-3 items-center ${
                 insight.isOverBudget
                   ? "bg-red-50 border-red-100"
                   : insight.isEfficient
@@ -286,7 +271,6 @@ export const BudgetBurnRateChart = () => {
               </div>
             </div>
 
-            {/* Box Rekomendasi */}
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex gap-3 items-center">
               <DollarSign className="w-8 h-8 text-slate-600" />
               <div>

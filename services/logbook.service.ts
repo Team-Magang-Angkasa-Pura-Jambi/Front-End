@@ -1,3 +1,4 @@
+import { ApiResponse } from "@/common/types/api";
 import api from "@/lib/api";
 
 export interface LogbookEntry {
@@ -25,8 +26,10 @@ export interface LogbookApiResponse {
   };
 }
 
-export const getLogbooksApi = (startDate: string, endDate: string) => {
-  return api.get<LogbookApiResponse>(
+export const getLogbooksApi = async (startDate: string, endDate: string) => {
+  const response = await api.get<ApiResponse<LogbookApiResponse[]>>(
     `/logbooks?startDate=${startDate}&endDate=${endDate}`
   );
+
+  return response.data.data;
 };

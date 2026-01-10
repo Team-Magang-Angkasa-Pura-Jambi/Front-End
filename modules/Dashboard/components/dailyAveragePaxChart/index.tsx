@@ -43,7 +43,7 @@ export const DailyAveragePaxChart = () => {
 
   return (
     <Card className="w-full h-full shadow-lg border-none ring-1 ring-slate-200 flex flex-col">
-      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-50 pb-4">
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 border-b border-slate-50 ">
         <div>
           <CardTitle className="text-base font-bold flex items-center gap-2">
             <Users className="w-4 h-4 text-orange-500" />

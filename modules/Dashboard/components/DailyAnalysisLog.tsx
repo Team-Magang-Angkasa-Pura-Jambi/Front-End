@@ -50,10 +50,10 @@ export const DailyAnalysisLog = () => {
     data: logbookData,
     isLoading,
     isError, // PERBAIKAN: Gunakan `isPending` untuk loading awal dan `isFetching` untuk background refresh
-  } = useQuery<LogbookEntry[], Error>({
+  } = useQuery({
     queryKey: ["logbooks", startDate, endDate],
     queryFn: () => getLogbooksApi(startDate, endDate),
-    select: (response: any) => response.data?.data || [], // PERBAIKAN: Akses data dengan aman
+    select: (response) => response?.data || [], // PERBAIKAN: Akses data dengan aman
     staleTime: 1000 * 60 * 5, // 5 menit
   });
 
@@ -102,7 +102,7 @@ export const DailyAnalysisLog = () => {
             <p className="text-sm">Gagal memuat data log.</p>
           </div>
         ) : logbookData && logbookData?.length > 0 ? (
-          logbookData.map((log: Logbook) => {
+          logbookData?.map((log) => {
             const isSavings = log.savings_value !== null;
             const energy = energyConfig[log.meter.energy_type.type_name];
             const Icon = isSavings ? CheckCircle2 : AlertTriangle;

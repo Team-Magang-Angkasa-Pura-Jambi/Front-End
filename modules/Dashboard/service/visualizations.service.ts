@@ -87,6 +87,13 @@ export const yearlyHeatmapApi = async (
 
 export type DailyAveragePaxType = { day: string; avgPax: number };
 
+export type getFuelRefillAnalysisType = {
+  month: string;
+  refill: number;
+  consumption: number;
+  remainingStock: number;
+};
+
 export const getBudgetTrackingApi = async (): Promise<
   ApiResponse<BudgetTrackingType[]>
 > => {
@@ -161,6 +168,19 @@ export const getBudgetBurnRateApi = async (
     params: {
       year: year,
       month: month,
+    },
+  });
+  return result.data;
+};
+
+export const getFuelRefillAnalysisApi = async (
+  year: number,
+  meterId: number
+): Promise<ApiResponse<getFuelRefillAnalysisType[]>> => {
+  const result = await api.get(`${prefix}/fuel-refill-analysis`, {
+    params: {
+      year: year,
+      meterId: meterId,
     },
   });
   return result.data;
