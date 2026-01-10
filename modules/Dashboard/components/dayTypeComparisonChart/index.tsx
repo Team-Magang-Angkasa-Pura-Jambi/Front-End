@@ -33,6 +33,9 @@ import { Zap, Droplets, Fuel, Calendar, CalendarDays } from "lucide-react";
 import { ENERGY_TYPES } from "@/common/types/energy";
 import { getUnifiedComparisonApi } from "../../service/visualizations.service";
 import { MONTH_CONFIG } from "../../constants";
+import { ComponentLoader } from "@/common/components/ComponentLoader";
+import { ErrorFetchData } from "@/common/components/ErrorFetchData";
+import { EmptyData } from "@/common/components/EmptyData";
 
 export const UnifiedEnergyComparisonChart = () => {
   const [view, setView] = useState<"consumption" | "cost">("consumption");
@@ -80,6 +83,8 @@ export const UnifiedEnergyComparisonChart = () => {
   });
 
   const isLoading = results.some((r) => r.isLoading);
+  const isError = results.some((r) => r.isError);
+  const error = results.some((r) => r.error);
 
   const allEnergyData = useMemo(() => {
     return results
@@ -102,6 +107,17 @@ export const UnifiedEnergyComparisonChart = () => {
     }
     return `${val.toLocaleString("id-ID")} ${unit}`;
   };
+
+  if (isLoading) {
+    return <ComponentLoader />;
+  }
+  if (isError) {
+    return <ErrorFetchData />;
+  }
+
+  if (!allEnergyData) {
+    return <EmptyData />;
+  }
 
   return (
     <Card className="w-full shadow-lg border-none ring-1 ring-slate-200">

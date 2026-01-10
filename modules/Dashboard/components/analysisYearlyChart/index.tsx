@@ -43,6 +43,7 @@ import { EmptyData } from "@/common/components/EmptyData";
 import { ComponentLoader } from "@/common/components/ComponentLoader";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { useDownloadImage } from "../../hooks/useDownloadImage";
+import { useAnalysisYearly } from "../../hooks/useAnalysisYearlyChart";
 
 export const AnalysisYearlyChart = () => {
   const [energyType, setEnergyType] = useState<EnergyTypeName>(
@@ -53,31 +54,22 @@ export const AnalysisYearlyChart = () => {
 
   const { ref, download, isExporting } = useDownloadImage<HTMLDivElement>();
 
+  const { chartData, data, error, isError, isLoading, summary, volumeUnit } =
+    useAnalysisYearly(energyType, year);
   const handleDownloadClick = () => {
     download(`Analysis-Yearly-${energyType}-${year}.jpg`);
   };
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["yearlyAnalysis", energyType, year],
-    queryFn: () => getYearlyAnalysisApi(energyType, parseInt(year)),
-  });
+  if (isLoading) {
+    return <ComponentLoader />;
+  }
+  if (isError) {
+    return <ErrorFetchData message={error?.message} />;
+  }
 
-  const chartData = useMemo(() => data?.data.chartData || [], [data?.data]);
-  const summary = useMemo(() => data?.data.summary || null, [data?.data]);
-
-  const volumeUnit = useMemo(() => {
-    switch (energyType) {
-      case "Electricity":
-        return "kWh";
-      case "Water":
-        return "m³";
-      case "Fuel":
-        return "L";
-      default:
-        return "Unit";
-    }
-  }, [energyType]);
-
+  if (!data) {
+    return <EmptyData />;
+  }
   return (
     <Card
       ref={ref}

@@ -29,6 +29,9 @@ import { Users, Calendar, CalendarDays } from "lucide-react";
 
 import { MONTH_CONFIG } from "../../constants";
 import { getDailyAveragePaxApi } from "../../service/visualizations.service";
+import { ComponentLoader } from "@/common/components/ComponentLoader";
+import { ErrorFetchData } from "@/common/components/ErrorFetchData";
+import { EmptyData } from "@/common/components/EmptyData";
 
 export const DailyAveragePaxChart = () => {
   const currentDate = new Date();
@@ -39,13 +42,28 @@ export const DailyAveragePaxChart = () => {
     (currentDate.getMonth() + 1).toString()
   );
 
-  const { data: apiResponse, isLoading } = useQuery({
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["daily-average-pax", year, month],
     queryFn: () => getDailyAveragePaxApi(parseInt(year), parseInt(month)),
   });
 
   const chartData = useMemo(() => apiResponse?.data || [], [apiResponse?.data]);
 
+  if (isLoading) {
+    return <ComponentLoader />;
+  }
+  if (isError) {
+    return <ErrorFetchData message={error?.message} />;
+  }
+
+  if (!chartData) {
+    return <EmptyData />;
+  }
   return (
     <Card className="w-full h-full shadow-lg border-none ring-1 ring-slate-200 flex flex-col">
       <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 border-b border-slate-50 ">
