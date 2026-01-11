@@ -92,7 +92,7 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
       </CardHeader>
       <CardContent>
         {/* PERBAIKAN: Mengganti placeholder dengan tabel data Pax yang fungsional */}
-        <div className="border rounded-md">
+        <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -104,8 +104,8 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
             <TableBody>
               {dailyPaxData.map((paxData) => (
                 <TableRow key={paxData.date}>
-                  <TableCell className="font-medium flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                  <TableCell className="flex items-center gap-2 font-medium">
+                    <CalendarDays className="text-muted-foreground h-4 w-4" />
                     {format(new Date(paxData.date), "dd MMMM yyyy", {
                       locale: id,
                     })}

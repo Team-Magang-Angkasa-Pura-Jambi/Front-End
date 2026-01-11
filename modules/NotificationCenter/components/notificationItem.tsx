@@ -63,7 +63,7 @@ export const NotificationItem = React.forwardRef<
       layout="position" // Penting untuk animasi list yang halus saat delete
       onClick={() => onClick(notification)}
       className={cn(
-        "group relative flex items-start gap-4 p-4 rounded-md border transition-all duration-200 cursor-pointer overflow-hidden select-none",
+        "group relative flex cursor-pointer items-start gap-4 overflow-hidden rounded-md border p-4 transition-all duration-200 select-none",
 
         // Logic Background: Jika Read & Bukan Handled -> Putih/Netral. Sisanya pakai warna status.
         !isUnread && status !== AlertStatus.HANDLED
@@ -71,27 +71,27 @@ export const NotificationItem = React.forwardRef<
           : cardStyles[status] || cardStyles.DEFAULT,
 
         // Highlight saat checkbox dipilih
-        isSelected && "ring-1 ring-primary border-primary/50 bg-primary/[0.02]"
+        isSelected && "ring-primary border-primary/50 bg-primary/[0.02] ring-1"
       )}
     >
       {/* UNREAD INDICATOR STRIP */}
       {isUnread && (
         <div
           className={cn(
-            "absolute left-0 top-0 bottom-0 w-[3px] shadow-[0_0_8px_rgba(var(--primary),0.6)]",
+            "absolute top-0 bottom-0 left-0 w-[3px] shadow-[0_0_8px_rgba(var(--primary),0.6)]",
             status === AlertStatus.NEW ? "bg-destructive" : "bg-primary"
           )}
         />
       )}
 
       {/* CHECKBOX */}
-      <div className="mt-1 z-10">
+      <div className="z-10 mt-1">
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => onSelect(notification.id)}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "transition-colors shadow-sm",
+            "shadow-sm transition-colors",
             !isUnread && status !== AlertStatus.HANDLED
               ? "border-muted-foreground/30"
               : checkboxStyles[status] || checkboxStyles.DEFAULT
@@ -102,7 +102,7 @@ export const NotificationItem = React.forwardRef<
       {/* ICON TYPE */}
       <div
         className={cn(
-          "mt-0.5 p-2 rounded-full shrink-0 shadow-sm ring-1 ring-inset ring-black/5",
+          "mt-0.5 shrink-0 rounded-full p-2 shadow-sm ring-1 ring-black/5 ring-inset",
           isAlert
             ? "bg-red-500/10 text-red-600"
             : "bg-blue-500/10 text-blue-600"
@@ -116,16 +116,16 @@ export const NotificationItem = React.forwardRef<
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 min-w-0 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-1.5">
         {/* Header Row: Title & Status */}
         <div className="flex items-start justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <p
               className={cn(
-                "text-sm truncate pr-1 transition-colors",
+                "truncate pr-1 text-sm transition-colors",
                 isUnread
-                  ? "font-bold text-foreground"
-                  : "font-medium text-muted-foreground"
+                  ? "text-foreground font-bold"
+                  : "text-muted-foreground font-medium"
               )}
             >
               {notification.title}
@@ -135,14 +135,14 @@ export const NotificationItem = React.forwardRef<
             {status !== "INFO" && (
               <StatusIndicator
                 status={status}
-                className="shrink-0 scale-90 origin-left"
+                className="shrink-0 origin-left scale-90"
               />
             )}
           </div>
 
           {/* Timestamp */}
           {notification.date && (
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60 font-mono shrink-0 bg-background/50 px-1.5 py-0.5 rounded border border-border/50">
+            <div className="text-muted-foreground/60 bg-background/50 border-border/50 flex shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[10px]">
               <Clock className="h-3 w-3" />
               <span>
                 {formatDistanceToNow(new Date(notification.date), {
@@ -157,7 +157,7 @@ export const NotificationItem = React.forwardRef<
         {/* Description */}
         <p
           className={cn(
-            "text-xs leading-relaxed line-clamp-2",
+            "line-clamp-2 text-xs leading-relaxed",
             isUnread ? "text-foreground/80" : "text-muted-foreground/60"
           )}
         >
@@ -166,12 +166,12 @@ export const NotificationItem = React.forwardRef<
 
         {/* Metadata Footer: Verified By (Khusus Alert) */}
         {notification.acknowledged_by && (
-          <div className="flex items-center gap-2 pt-2 mt-1">
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/5 border border-primary/10">
-              <User className="h-3 w-3 text-primary" />
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-tight">
+          <div className="mt-1 flex items-center gap-2 pt-2">
+            <div className="bg-primary/5 border-primary/10 flex items-center gap-1.5 rounded-full border px-2 py-1">
+              <User className="text-primary h-3 w-3" />
+              <span className="text-muted-foreground text-[10px] font-medium tracking-tight uppercase">
                 Verified by{" "}
-                <span className="text-foreground font-bold ml-0.5">
+                <span className="text-foreground ml-0.5 font-bold">
                   {notification.acknowledged_by.username}
                 </span>
               </span>
@@ -181,8 +181,8 @@ export const NotificationItem = React.forwardRef<
       </div>
 
       {/* Hover Action Hint */}
-      <div className="self-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-        <ChevronRight className="h-5 w-5 text-muted-foreground/50" />
+      <div className="translate-x-2 self-center opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+        <ChevronRight className="text-muted-foreground/50 h-5 w-5" />
       </div>
     </motion.li>
   );

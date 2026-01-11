@@ -97,8 +97,8 @@ export const NotificationPopover = () => {
           {/* Badge Counter */}
           {unreadCount > 0 && (
             <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive border border-background"></span>
+              <span className="bg-destructive absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"></span>
+              <span className="bg-destructive border-background relative inline-flex h-2.5 w-2.5 rounded-full border"></span>
             </span>
           )}
         </Button>
@@ -106,14 +106,14 @@ export const NotificationPopover = () => {
 
       <PopoverContent
         className={cn(
-          "w-[380px] p-0 mr-4 shadow-2xl",
-          "bg-card border border-border",
-          "border-t-[4px] border-t-primary"
+          "mr-4 w-[380px] p-0 shadow-2xl",
+          "bg-card border-border border",
+          "border-t-primary border-t-[4px]"
         )}
         align="end"
       >
         {/* --- Header --- */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/20">
+        <div className="border-border bg-muted/20 flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
             <Radio
               className={cn(
@@ -123,32 +123,32 @@ export const NotificationPopover = () => {
                   : "text-muted-foreground"
               )}
             />
-            <h4 className="font-bold text-sm text-foreground tracking-tight">
+            <h4 className="text-foreground text-sm font-bold tracking-tight">
               System Logs
             </h4>
           </div>
 
           {unreadCount > 0 ? (
-            <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-sm border border-primary/20">
+            <span className="text-primary bg-primary/10 border-primary/20 rounded-sm border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
               {unreadCount} New
             </span>
           ) : (
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground opacity-70">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase opacity-70">
               All Clear
             </span>
           )}
         </div>
 
-        <ScrollArea className="h-[400px] relative">
+        <ScrollArea className="relative h-[400px]">
           {/* Grid Texture */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:24px_24px] opacity-[0.05] pointer-events-none" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:24px_24px] opacity-[0.05]" />
 
           <div className="relative z-10 p-0">
             {/* Loading State */}
             {isLoading && (
-              <div className="flex flex-col items-center justify-center py-12 gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-primary/50" />
-                <p className="text-xs text-muted-foreground animate-pulse">
+              <div className="flex flex-col items-center justify-center gap-3 py-12">
+                <Loader2 className="text-primary/50 h-8 w-8 animate-spin" />
+                <p className="text-muted-foreground animate-pulse text-xs">
                   Synchronizing data...
                 </p>
               </div>
@@ -157,11 +157,11 @@ export const NotificationPopover = () => {
             {/* Empty State */}
             {!isLoading && combinedNotifications.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center opacity-80">
-                <div className="bg-muted p-4 rounded-full mb-3 ring-1 ring-border">
-                  <Inbox className="h-8 w-8 text-muted-foreground" />
+                <div className="bg-muted ring-border mb-3 rounded-full p-4 ring-1">
+                  <Inbox className="text-muted-foreground h-8 w-8" />
                 </div>
-                <p className="text-sm font-bold text-foreground">System Idle</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-foreground text-sm font-bold">System Idle</p>
+                <p className="text-muted-foreground mt-1 text-xs">
                   No new activities recorded.
                 </p>
               </div>
@@ -176,10 +176,10 @@ export const NotificationPopover = () => {
                     key={item.id}
                     onClick={() => handleItemClick(item)}
                     className={cn(
-                      "group relative p-4 cursor-pointer transition-all duration-200 border-b border-border/50 last:border-0",
+                      "group border-border/50 relative cursor-pointer border-b p-4 transition-all duration-200 last:border-0",
                       "hover:bg-muted/40",
                       !item.is_read
-                        ? "bg-primary/[0.03] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px] before:bg-primary"
+                        ? "bg-primary/[0.03] before:bg-primary before:absolute before:top-0 before:bottom-0 before:left-0 before:w-[3px]"
                         : "opacity-80 hover:opacity-100"
                     )}
                   >
@@ -187,7 +187,7 @@ export const NotificationPopover = () => {
                       {/* Icon Status */}
                       <div
                         className={cn(
-                          "mt-0.5 shrink-0 p-1.5 rounded-full",
+                          "mt-0.5 shrink-0 rounded-full p-1.5",
                           !item.is_read
                             ? isAlert
                               ? "bg-red-500/10 text-red-500"
@@ -205,19 +205,19 @@ export const NotificationPopover = () => {
                       </div>
 
                       <div className="flex-1 space-y-1">
-                        <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-start justify-between gap-2">
                           <p
                             className={cn(
-                              "text-sm leading-tight pr-2",
+                              "pr-2 text-sm leading-tight",
                               !item.is_read
-                                ? "font-bold text-foreground"
-                                : "font-medium text-muted-foreground"
+                                ? "text-foreground font-bold"
+                                : "text-muted-foreground font-medium"
                             )}
                           >
                             {item.title}
                           </p>
 
-                          <span className="text-[10px] text-muted-foreground/70 font-mono tabular-nums whitespace-nowrap shrink-0">
+                          <span className="text-muted-foreground/70 shrink-0 font-mono text-[10px] whitespace-nowrap tabular-nums">
                             {formatDistanceToNow(new Date(item.date), {
                               addSuffix: false,
                               locale: localeId,
@@ -227,7 +227,7 @@ export const NotificationPopover = () => {
 
                         <p
                           className={cn(
-                            "text-xs line-clamp-2 leading-relaxed",
+                            "line-clamp-2 text-xs leading-relaxed",
                             !item.is_read
                               ? "text-muted-foreground"
                               : "text-muted-foreground/70"
@@ -238,7 +238,7 @@ export const NotificationPopover = () => {
 
                         {/* Tag Kecil untuk Alert */}
                         {isAlert && !item.is_read && (
-                          <span className="inline-block mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive border border-destructive/20">
+                          <span className="bg-destructive/10 text-destructive border-destructive/20 mt-1 inline-block rounded border px-1.5 py-0.5 text-[9px] font-bold">
                             ACTION REQUIRED
                           </span>
                         )}
@@ -251,16 +251,16 @@ export const NotificationPopover = () => {
         </ScrollArea>
 
         {/* --- Footer --- */}
-        <div className="p-2 border-t border-border bg-muted/20">
+        <div className="border-border bg-muted/20 border-t p-2">
           <Link
             href="/notification-center"
-            className="w-full block"
+            className="block w-full"
             onClick={() => setIsOpen(false)}
           >
             <Button
               variant="ghost"
               size="sm"
-              className="w-full h-8 text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors uppercase tracking-wider"
+              className="text-muted-foreground hover:text-primary hover:bg-primary/5 h-8 w-full text-xs font-medium tracking-wider uppercase transition-colors"
             >
               Open Notification Center
             </Button>

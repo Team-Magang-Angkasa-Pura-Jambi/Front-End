@@ -65,7 +65,7 @@ export const BudgetSummaryCarousel = ({
 
   if (!filteredData || filteredData.length === 0) {
     return (
-      <div className="flex h-[126px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
+      <div className="text-muted-foreground flex h-[126px] items-center justify-center rounded-lg border border-dashed">
         Data ringkasan tidak ditemukan untuk filter ini.
       </div>
     );

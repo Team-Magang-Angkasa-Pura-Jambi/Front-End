@@ -64,13 +64,13 @@ export const Page = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
         >
-          <Card className="flex flex-col items-center justify-center text-center h-96 border-dashed">
+          <Card className="flex h-96 flex-col items-center justify-center border-dashed text-center">
             <CardContent className="p-6">
-              <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary/60" />
-              <h3 className="mt-4 text-lg font-semibold text-foreground">
+              <Loader2 className="text-primary/60 mx-auto h-12 w-12 animate-spin" />
+              <h3 className="text-foreground mt-4 text-lg font-semibold">
                 Menganalisis Data Beban...
               </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-2 text-sm">
                 Kalkulasi besar sedang diproses di server.
               </p>
             </CardContent>
@@ -86,13 +86,13 @@ export const Page = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <Card className="flex flex-col items-center justify-center text-center h-96 bg-destructive/5 border-destructive/20">
+          <Card className="bg-destructive/5 border-destructive/20 flex h-96 flex-col items-center justify-center text-center">
             <CardContent className="p-6">
-              <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
-              <h3 className="mt-4 text-lg font-semibold text-destructive">
+              <AlertTriangle className="text-destructive mx-auto h-12 w-12" />
+              <h3 className="text-destructive mt-4 text-lg font-semibold">
                 Gagal Sinkronisasi Data
               </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-2 text-sm">
                 Pastikan koneksi internet stabil atau hubungi admin.
               </p>
             </CardContent>
@@ -109,13 +109,13 @@ export const Page = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <Card className="flex flex-col items-center justify-center text-center h-96">
+          <Card className="flex h-96 flex-col items-center justify-center text-center">
             <CardContent className="p-6">
-              <ListFilter className="mx-auto h-12 w-12 text-muted-foreground/50" />
+              <ListFilter className="text-muted-foreground/50 mx-auto h-12 w-12" />
               <h3 className="mt-4 text-lg font-semibold">
                 Data Tidak Ditemukan
               </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-2 text-sm">
                 Coba sesuaikan rentang tanggal atau pilih meteran lain.
               </p>
             </CardContent>
@@ -143,7 +143,7 @@ export const Page = () => {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto space-y-6 py-6">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

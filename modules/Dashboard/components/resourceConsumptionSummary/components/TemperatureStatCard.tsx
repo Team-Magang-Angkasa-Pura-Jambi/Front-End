@@ -47,17 +47,17 @@ const StatItem = ({
 
   return (
     <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-muted-foreground text-xs">{label}</p>
       <div className="flex items-baseline gap-1">
-        <p className="text-xl font-bold text-foreground">{value}</p>
-        <span className="text-sm font-normal text-muted-foreground">
+        <p className="text-foreground text-xl font-bold">{value}</p>
+        <span className="text-muted-foreground text-sm font-normal">
           {unit}
         </span>
       </div>
 
       {percentageChange !== undefined && (
         <div
-          className={`flex items-center gap-1 text-xs font-bold mt-1 ${percentageColor}`}
+          className={`mt-1 flex items-center gap-1 text-xs font-bold ${percentageColor}`}
         >
           {PercentageIcon && <PercentageIcon className="h-3 w-3" />}
           <span>{Math.abs(percentageChange ?? 0)}%</span>
@@ -88,23 +88,23 @@ export const TemperatureStatCard = ({ data }) => {
   };
 
   return (
-    <Card className="h-full border-l-4 border-l-transparent hover:border-l-red-500/50 transition-all">
+    <Card className="h-full border-l-4 border-l-transparent transition-all hover:border-l-red-500/50">
       {/* 1. HEADER: Judul & Icon */}
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+          <CardTitle className="text-muted-foreground text-sm font-bold tracking-wide uppercase">
             Suhu & Cuaca
           </CardTitle>
           <CardAction>
-            <div className="p-2 rounded-xl bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-500">
-              <Thermometer className="w-5 h-5" />
+            <div className="rounded-xl bg-red-100 p-2 text-red-600 dark:bg-red-500/20 dark:text-red-500">
+              <Thermometer className="h-5 w-5" />
             </div>
           </CardAction>
         </div>
       </CardHeader>
 
       {/* 2. CONTENT: Animasi Data */}
-      <CardContent className="flex-grow flex flex-col justify-center relative min-h-[80px]">
+      <CardContent className="relative flex min-h-[80px] flex-grow flex-col justify-center">
         <AnimatePresence mode="wait">
           {activePanel === 0 && (
             <motion.div
@@ -114,7 +114,7 @@ export const TemperatureStatCard = ({ data }) => {
               animate="center"
               exit="exit"
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-2 gap-6 w-full"
+              className="grid w-full grid-cols-2 gap-6"
             >
               <StatItem
                 label="Rata-rata Hari Ini"
@@ -137,7 +137,7 @@ export const TemperatureStatCard = ({ data }) => {
               animate="center"
               exit="exit"
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-2 gap-6 w-full"
+              className="grid w-full grid-cols-2 gap-6"
             >
               <StatItem
                 label="Rerata Bulanan"
@@ -157,7 +157,7 @@ export const TemperatureStatCard = ({ data }) => {
       </CardContent>
 
       {/* 3. FOOTER: Indikator Slide (Dots) */}
-      <CardFooter className="pt-0 pb-4 justify-center">
+      <CardFooter className="justify-center pt-0 pb-4">
         <div className="flex gap-2">
           {panels.map((_, index) => (
             <button
@@ -166,7 +166,7 @@ export const TemperatureStatCard = ({ data }) => {
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 activePanel === index
                   ? "w-6 bg-red-500"
-                  : "w-1.5 bg-background dark:bg-background hover:bg-background"
+                  : "bg-background dark:bg-background hover:bg-background w-1.5"
               }`}
               aria-label={`Switch to panel ${index + 1}`}
             />

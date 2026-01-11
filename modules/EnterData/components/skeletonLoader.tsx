@@ -5,17 +5,17 @@ export const AnalysisChartSkeleton = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <Skeleton className="h-6 w-1/3" />
           <Skeleton className="h-8 w-1/4" />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="w-full h-[320px] flex items-end space-x-4 p-4">
+        <div className="flex h-[320px] w-full items-end space-x-4 p-4">
           {Array.from({ length: 10 }).map((_, i) => (
             <Skeleton
               key={i}
-              className="w-full h-full"
+              className="h-full w-full"
               style={{ height: `${Math.random() * 80 + 10}%` }}
             />
           ))}

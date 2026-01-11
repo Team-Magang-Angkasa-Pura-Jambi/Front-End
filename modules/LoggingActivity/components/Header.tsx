@@ -102,8 +102,8 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
             pemakaian.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
-          <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full">
+        <CardContent className="flex flex-col items-center justify-between gap-2 md:flex-row">
+          <div className="flex w-full flex-col flex-wrap gap-2 sm:flex-row">
             <Tabs
               value={filters.type as unknown as string}
               onValueChange={(value) =>
@@ -130,7 +130,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {isLoadingMeters ? (
-                  <div className="p-4 text-center text-sm text-muted-foreground">
+                  <div className="text-muted-foreground p-4 text-center text-sm">
                     Memuat...
                   </div>
                 ) : (
@@ -141,7 +141,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                         key={meter.meter_id}
                         value={String(meter.meter_id)}
                         className={cn(
-                          "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border",
+                          "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
                           statusStyles[meter.status]
                         )}
                       >
@@ -159,7 +159,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full sm:w-[280px] justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal sm:w-[280px]",
                     !filters.date && "text-muted-foreground"
                   )}
                 >

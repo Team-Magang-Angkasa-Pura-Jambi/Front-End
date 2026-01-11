@@ -1,8 +1,7 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useQuery } from "@tanstack/react-query";
 import { getRolesApi } from "@/services/role.service";
 import { Button } from "@/common/components/ui/button";
@@ -22,8 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/common/components/ui/select";
-import { formSchema, UserFormProps } from "../types";
-import { Skeleton } from "@/common/components/ui/skeleton";
+import { UserFormProps } from "../types";
+import { formSchema, FormUserValues } from "../schemas/user.schema";
 
 export const UserForm: React.FC<UserFormProps> = ({
   onSubmit,
@@ -39,8 +38,8 @@ export const UserForm: React.FC<UserFormProps> = ({
     queryFn: getRolesApi,
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<FormUserValues>({
+    resolver: zodResolver(formSchema) as Resolver<FormUserValues>,
     defaultValues: {
       username: defaultValues?.username || "",
       role_id: defaultValues?.role?.role_id || undefined,
@@ -106,8 +105,8 @@ export const UserForm: React.FC<UserFormProps> = ({
                         isLoadingRoles
                           ? "Memuat peran..."
                           : isError
-                          ? "Gagal memuat peran"
-                          : "Pilih peran pengguna"
+                            ? "Gagal memuat peran"
+                            : "Pilih peran pengguna"
                       }
                     />
                   </SelectTrigger>

@@ -2,13 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import {
-  FolderOpen,
-  Plus,
-  RefreshCcw,
-  SearchX,
-  LucideIcon,
-} from "lucide-react";
+import { FolderOpen, Plus, RefreshCcw, LucideIcon } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface EmptyDataProps {
@@ -31,7 +25,7 @@ export const EmptyData: React.FC<EmptyDataProps> = ({
 }) => {
   return (
     <div
-      className={`w-full h-full flex items-center justify-center p-4 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 ${
+      className={`flex h-full w-full items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-4 ${
         compact ? "min-h-[120px]" : "min-h-[300px]"
       }`}
     >
@@ -39,21 +33,21 @@ export const EmptyData: React.FC<EmptyDataProps> = ({
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
-        className="flex flex-col items-center text-center max-w-[300px]"
+        className="flex max-w-[300px] flex-col items-center text-center"
       >
         {/* --- ICON CIRCLE --- */}
         <div
-          className={`relative flex items-center justify-center rounded-full bg-white shadow-sm mb-3 ${
-            compact ? "w-10 h-10" : "w-16 h-16"
+          className={`relative mb-3 flex items-center justify-center rounded-full bg-white shadow-sm ${
+            compact ? "h-10 w-10" : "h-16 w-16"
           }`}
         >
           <Icon
-            className={`text-slate-400 ${compact ? "w-5 h-5" : "w-7 h-7"}`}
+            className={`text-slate-400 ${compact ? "h-5 w-5" : "h-7 w-7"}`}
           />
           {/* Decorative Dot */}
           <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-slate-500"></span>
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-slate-400 opacity-75"></span>
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-slate-500"></span>
           </span>
         </div>
 
@@ -67,7 +61,7 @@ export const EmptyData: React.FC<EmptyDataProps> = ({
         </h3>
 
         {!compact && (
-          <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+          <p className="mt-1 text-xs leading-relaxed text-slate-500">
             {description}
           </p>
         )}
@@ -79,17 +73,17 @@ export const EmptyData: React.FC<EmptyDataProps> = ({
               variant="outline"
               size={compact ? "sm" : "default"}
               onClick={action.onClick}
-              className={`bg-white border-slate-200 hover:bg-slate-50 text-slate-700 ${
-                compact ? "h-7 text-[10px] px-3" : ""
+              className={`border-slate-200 bg-white text-slate-700 hover:bg-slate-50 ${
+                compact ? "h-7 px-3 text-[10px]" : ""
               }`}
             >
               {/* Cek label untuk kasih icon otomatis */}
               {action.label.toLowerCase().includes("refresh") ? (
                 <RefreshCcw
-                  className={`mr-2 ${compact ? "w-3 h-3" : "w-4 h-4"}`}
+                  className={`mr-2 ${compact ? "h-3 w-3" : "h-4 w-4"}`}
                 />
               ) : action.label.toLowerCase().includes("tambah") ? (
-                <Plus className={`mr-2 ${compact ? "w-3 h-3" : "w-4 h-4"}`} />
+                <Plus className={`mr-2 ${compact ? "h-3 w-3" : "h-4 w-4"}`} />
               ) : null}
               {action.label}
             </Button>

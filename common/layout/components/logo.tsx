@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useSidebar } from "@/common/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 
 export const Logo = () => {
   const { open } = useSidebar();
@@ -44,18 +43,18 @@ export const Logo = () => {
   return (
     <Link
       href="/"
-      className="relative z-20 flex items-center space-x-3 py-1 w-full overflow-hidden group"
+      className="group relative z-20 flex w-full items-center space-x-3 overflow-hidden py-1"
     >
       {/* --- LOGO ICON WITH TECH GLOW --- */}
       <div className="relative flex-shrink-0">
-        <div className="absolute inset-0 bg-primary/20 blur-md rounded-full scale-0 group-hover:scale-125 transition-transform duration-500" />
+        <div className="bg-primary/20 absolute inset-0 scale-0 rounded-full blur-md transition-transform duration-500 group-hover:scale-125" />
         <Image
           src="/image/logo.png" // Pastikan path ini benar sesuai folder public Anda
           alt="Sentinel Logo"
           width={32}
           height={32}
           priority
-          className="relative h-8 w-8 object-contain dark:brightness-0 dark:invert transition-transform group-hover:scale-105"
+          className="relative h-8 w-8 object-contain transition-transform group-hover:scale-105 dark:brightness-0 dark:invert"
         />
       </div>
 
@@ -70,7 +69,7 @@ export const Logo = () => {
             className="flex flex-col justify-center leading-none whitespace-nowrap"
           >
             {/* Baris 1: SENTINEL (Primary & Bold) */}
-            <div className="flex overflow-hidden text-sm font-black tracking-wide text-primary uppercase">
+            <div className="text-primary flex overflow-hidden text-sm font-black tracking-wide uppercase">
               {brandName.split("").map((char, index) => (
                 <motion.span key={`brand-${index}`} variants={letterVariants}>
                   {char === " " ? "\u00A0" : char}
@@ -82,7 +81,7 @@ export const Logo = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.3 } }}
-              className="text-[10px] font-medium text-muted-foreground tracking-widest uppercase mt-0.5"
+              className="text-muted-foreground mt-0.5 text-[10px] font-medium tracking-widest uppercase"
             >
               {subBrand}
             </motion.div>

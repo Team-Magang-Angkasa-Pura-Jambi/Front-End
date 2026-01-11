@@ -48,9 +48,9 @@ export const NotificationStyle = () => {
 
   if (!notification) {
     return (
-      <div className="bg-card p-6 rounded-2xl flex items-center shadow-sm">
+      <div className="bg-card flex items-center rounded-2xl p-6 shadow-sm">
         <IconInfoCircle className="text-green-500" />
-        <p className="ml-4 text-muted-foreground">
+        <p className="text-muted-foreground ml-4">
           Tidak ada notifikasi baru saat ini. Kerja bagus!
         </p>
       </div>
@@ -62,7 +62,7 @@ export const NotificationStyle = () => {
   const styles = colorClasses[color];
 
   return (
-    <div className="bg-card p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm overflow-hidden">
+    <div className="bg-card flex flex-col justify-between gap-4 overflow-hidden rounded-2xl p-6 shadow-sm md:flex-row md:items-center">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -70,14 +70,14 @@ export const NotificationStyle = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center w-full"
+          className="flex w-full items-center"
         >
           <div className="flex items-center space-x-4">
-            <div className={`${styles.bg} p-3 rounded-full`}>
-              <Icon className={`w-6 h-6 ${styles.text}`} />
+            <div className={`${styles.bg} rounded-full p-3`}>
+              <Icon className={`h-6 w-6 ${styles.text}`} />
             </div>
             <div>
-              <h2 className="font-bold text-foreground">
+              <h2 className="text-foreground font-bold">
                 {notification.title}
               </h2>
               <p className="text-muted-foreground">
@@ -89,7 +89,7 @@ export const NotificationStyle = () => {
       </AnimatePresence>
       <Link
         href="/notification-center"
-        className="bg-blue-600 text-white text-center px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition md:ml-4 shrink-0 w-full md:w-auto"
+        className="w-full shrink-0 rounded-lg bg-blue-600 px-5 py-2.5 text-center font-semibold text-white transition hover:bg-blue-700 md:ml-4 md:w-auto"
       >
         Lihat Semua
       </Link>

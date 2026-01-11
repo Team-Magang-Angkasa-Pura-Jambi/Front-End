@@ -99,7 +99,7 @@ export default function AnnualBudgetPage() {
 
   return (
     <motion.div
-      className="container mx-auto py-10 px-4"
+      className="container mx-auto px-4 py-10"
       initial="hidden"
       animate="visible"
       variants={{
@@ -109,7 +109,7 @@ export default function AnnualBudgetPage() {
     >
       {/* HEADER SECTION */}
       <motion.header
-        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8"
+        className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"
         variants={{
           hidden: { y: -20, opacity: 0 },
           visible: { y: 0, opacity: 1 },
@@ -130,7 +130,7 @@ export default function AnnualBudgetPage() {
               value={selectedYear ? selectedYear.toString() : ""}
               onValueChange={(value) => setSelectedYear(Number(value))}
             >
-              <SelectTrigger className="w-[120px] bg-background shadow-sm">
+              <SelectTrigger className="bg-background w-[120px] shadow-sm">
                 <SelectValue placeholder="Tahun" />
               </SelectTrigger>
               <SelectContent>
@@ -148,7 +148,7 @@ export default function AnnualBudgetPage() {
               value={selectedEnergyType}
               onValueChange={(value) => setSelectedEnergyType(value)}
             >
-              <SelectTrigger className="w-[150px] bg-background shadow-sm">
+              <SelectTrigger className="bg-background w-[150px] shadow-sm">
                 <SelectValue placeholder="Energi" />
               </SelectTrigger>
               <SelectContent>
@@ -172,9 +172,9 @@ export default function AnnualBudgetPage() {
           visible: { opacity: 1, scale: 1 },
         }}
       >
-        <div className="flex items-center gap-2 mb-4">
-          <div className="h-2 w-2 rounded-full bg-primary" />
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="bg-primary h-2 w-2 rounded-full" />
+          <h2 className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
             Insight Anggaran
           </h2>
         </div>
@@ -187,7 +187,7 @@ export default function AnnualBudgetPage() {
 
       {/* TABLE ACTIONS */}
       <motion.div
-        className="flex justify-between items-end mb-6"
+        className="mb-6 flex items-end justify-between"
         variants={{
           hidden: { opacity: 0, x: -20 },
           visible: { opacity: 1, x: 0 },
@@ -195,13 +195,13 @@ export default function AnnualBudgetPage() {
       >
         <div>
           <h3 className="text-lg font-bold">Daftar Anggaran Periode</h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Menampilkan detail budget berdasarkan periode waktu.
           </p>
         </div>
         <Button
           onClick={() => handleOpenDialog(null)}
-          className="shadow-lg hover:shadow-primary/20 transition-all"
+          className="hover:shadow-primary/20 shadow-lg transition-all"
           asChild
         >
           <motion.button
@@ -222,10 +222,10 @@ export default function AnnualBudgetPage() {
               variants={pulseVariants}
               initial="initial"
               animate="animate"
-              className="h-[400px] w-full rounded-xl border bg-muted/20 flex flex-col items-center justify-center gap-3"
+              className="bg-muted/20 flex h-[400px] w-full flex-col items-center justify-center gap-3 rounded-xl border"
             >
-              <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm font-medium text-muted-foreground">
+              <div className="border-primary h-10 w-10 animate-spin rounded-full border-4 border-t-transparent" />
+              <p className="text-muted-foreground text-sm font-medium">
                 Menyiapkan data...
               </p>
             </motion.div>
@@ -235,7 +235,7 @@ export default function AnnualBudgetPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="rounded-xl border bg-card shadow-xl overflow-hidden"
+              className="bg-card overflow-hidden rounded-xl border shadow-xl"
             >
               <BudgetTable
                 columns={columns}
@@ -255,8 +255,8 @@ export default function AnnualBudgetPage() {
               />
 
               {childBudgets.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                  <Search className="h-10 w-10 mb-4 opacity-20" />
+                <div className="text-muted-foreground flex flex-col items-center justify-center py-20">
+                  <Search className="mb-4 h-10 w-10 opacity-20" />
                   <p>Tidak ada data anggaran ditemukan untuk filter ini.</p>
                 </div>
               )}
@@ -286,7 +286,7 @@ export default function AnnualBudgetPage() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               Anda akan menghapus budget periode{" "}
-              <span className="font-bold text-foreground">
+              <span className="text-foreground font-bold">
                 {budgetToDelete &&
                   new Date(budgetToDelete.period_start).toLocaleDateString(
                     "id-ID",

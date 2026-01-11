@@ -30,7 +30,7 @@ export function DataTableRowActions<TData>({
           variant="ghost"
           // text-muted-foreground: Icon titik tiga warnanya abu soft
           // data-[state=open]:bg-muted: Saat menu terbuka, background jadi abu
-          className="flex h-8 w-8 p-0 text-muted-foreground hover:text-foreground data-[state=open]:bg-muted"
+          className="text-muted-foreground hover:text-foreground data-[state=open]:bg-muted flex h-8 w-8 p-0"
         >
           <MoreHorizontal className="h-4 w-4" />
           <span className="sr-only">Buka menu</span>
@@ -41,7 +41,7 @@ export function DataTableRowActions<TData>({
       <DropdownMenuContent align="end" className="w-[160px]">
         {/* Tombol Edit */}
         <DropdownMenuItem onClick={() => onEdit(row.original)}>
-          <Pencil className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+          <Pencil className="text-muted-foreground/70 mr-2 h-3.5 w-3.5" />
           Edit
         </DropdownMenuItem>
 

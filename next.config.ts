@@ -16,19 +16,6 @@ const nextConfig = {
       },
     ],
   },
-
-  // Mengabaikan error TypeScript selama build
-  typescript: {
-    // PERINGATAN: Opsi ini akan membuat Next.js secara diam-diam mengabaikan
-    // semua error TypeScript saat build produksi.
-    ignoreBuildErrors: false,
-  },
-
-  // Mengabaikan error ESLint selama build
-  eslint: {
-    // PERINGATAN: Opsi ini akan mencegah build gagal jika ada error ESLint.
-    ignoreDuringBuilds: false,
-  },
 };
 
 module.exports = nextConfig;

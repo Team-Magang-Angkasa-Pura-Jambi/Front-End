@@ -1,6 +1,5 @@
 import { ReadingType } from "./readingTypes";
 import { TariffGroup } from "./tariffGroup";
-import { Taxes } from "./taxes";
 
 export type Rate = {
   rate_id: number;

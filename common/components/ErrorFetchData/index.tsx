@@ -19,7 +19,7 @@ export const ErrorFetchData: React.FC<ErrorFetchDataProps> = ({
   compact = false,
 }) => {
   return (
-    <div className="w-full h-full min-h-[150px] flex items-center justify-center p-4">
+    <div className="flex h-full min-h-[150px] w-full items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -30,13 +30,13 @@ export const ErrorFetchData: React.FC<ErrorFetchDataProps> = ({
       >
         <div
           className={`relative flex items-center justify-center rounded-full bg-red-50 text-red-500 ${
-            compact ? "w-10 h-10" : "w-16 h-16"
+            compact ? "h-10 w-10" : "h-16 w-16"
           }`}
         >
           {compact ? (
-            <AlertCircle className="w-5 h-5" />
+            <AlertCircle className="h-5 w-5" />
           ) : (
-            <WifiOff className="w-7 h-7" />
+            <WifiOff className="h-7 w-7" />
           )}
 
           {!compact && (
@@ -53,7 +53,7 @@ export const ErrorFetchData: React.FC<ErrorFetchDataProps> = ({
             {title}
           </h4>
           {!compact && (
-            <p className="text-xs text-slate-500 mt-1 max-w-[250px] mx-auto">
+            <p className="mx-auto mt-1 max-w-[250px] text-xs text-slate-500">
               {message}
             </p>
           )}
@@ -64,12 +64,12 @@ export const ErrorFetchData: React.FC<ErrorFetchDataProps> = ({
             variant="outline"
             size={compact ? "sm" : "default"}
             onClick={onRetry}
-            className={`border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-colors ${
-              compact ? "h-7 text-[10px] px-3" : "h-9 text-xs"
+            className={`border-red-200 text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-700 ${
+              compact ? "h-7 px-3 text-[10px]" : "h-9 text-xs"
             }`}
           >
             <RefreshCcw
-              className={`mr-2 ${compact ? "w-3 h-3" : "w-3.5 h-3.5"}`}
+              className={`mr-2 ${compact ? "h-3 w-3" : "h-3.5 w-3.5"}`}
             />
             {compact ? "Retry" : "Coba Lagi"}
           </Button>

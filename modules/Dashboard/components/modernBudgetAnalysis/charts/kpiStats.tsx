@@ -45,13 +45,13 @@ export const KpiStats = ({
       >
         <CardContent className="p-4">
           <p
-            className={`text-[8px] font-bold uppercase tracking-wider ${
+            className={`text-[8px] font-bold tracking-wider uppercase ${
               i === 2 ? "text-emerald-100" : "text-slate-400"
             }`}
           >
             {stat.label}
           </p>
-          <h3 className={`text-xl font-black mt-1 ${stat.color}`}>{full}</h3>
+          <h3 className={`mt-1 text-xl font-black ${stat.color}`}>{full}</h3>
         </CardContent>
       </Card>
     );

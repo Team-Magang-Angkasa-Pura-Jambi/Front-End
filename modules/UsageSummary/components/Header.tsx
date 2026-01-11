@@ -213,8 +213,8 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-3 items-end justify-between">
-            <div className="flex flex-wrap gap-3 items-end">
+          <div className="flex flex-col items-end justify-between gap-3 md:flex-row">
+            <div className="flex flex-wrap items-end gap-3">
               {/* Tipe Energi */}
               <div className="space-y-1.5">
                 <Label className="text-xs">Jenis Energi</Label>
@@ -319,7 +319,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 onClick={() => recalculate()}
                 disabled={isRecalculating || isFetching}
               >
-                <span className="mr-2 h-4 w-4 flex items-center justify-center">
+                <span className="mr-2 flex h-4 w-4 items-center justify-center">
                   {isRecalculating ? (
                     <Loader2 key="loading" className="animate-spin" />
                   ) : (

@@ -20,7 +20,6 @@ import { SchemePriceManagement } from "../components/SchemePriceManagement";
 import { TaxManagement } from "../components/TaxManagement";
 import { TargetEfficiencyManagement } from "../components/targetEfficienyManagement";
 
-
 export const masterDataGroups = [
   {
     groupKey: "asset-energy",

@@ -13,7 +13,7 @@ import { FuelRefillAnalysis } from "./fuelRefillAnalysis/fuelRefillAnalysis";
 import { EfficiencyRatioChart } from "./efficiencyRatioChart";
 import { BudgetBurnRateChart } from "./budgetBurnRateChart";
 import { ModernBudgetAnalysis } from "./modernBudgetAnalysis";
-import { useRealtimeNotification } from "@/hooks/useRealtimeNotification";
+import { useRealtimeNotification } from "@/modules/Dashboard/hooks/useRealtimeNotification";
 import { MultiEnergyForecastCard } from "./energyForecastCard";
 import { NotificationStyle } from "./notificationStyle";
 import { ResourceConsumptionSummary } from "./resourceConsumptionSummary";
@@ -43,7 +43,7 @@ export const Page = () => {
   useRealtimeNotification();
 
   return (
-    <main className="w-full min-h-screen p-1 space-y-8 pb-20">
+    <main className="min-h-screen w-full space-y-8 p-1 pb-20">
       <Header />
 
       <AnimatePresence mode="wait">
@@ -60,9 +60,9 @@ export const Page = () => {
 
           <ResourceConsumptionSummary />
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <motion.div variants={itemVariants} className="flex flex-col gap-6">
-              <div className="flex-1 min-h-0">
+              <div className="min-h-0 flex-1">
                 <MeterEfficiencyRanking />
               </div>
             </motion.div>
@@ -81,7 +81,7 @@ export const Page = () => {
             </motion.div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <motion.div variants={itemVariants} className="w-full">
               <AnalysisYearlyChart />
             </motion.div>
@@ -90,7 +90,7 @@ export const Page = () => {
             </motion.div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <motion.div variants={itemVariants}>
               <AnalysisChart />
             </motion.div>
@@ -99,7 +99,7 @@ export const Page = () => {
             </motion.div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
             <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
               <DailyAveragePaxChart />
             </motion.div>
@@ -113,9 +113,9 @@ export const Page = () => {
 
           <motion.footer
             variants={itemVariants}
-            className="text-center py-10 opacity-40"
+            className="py-10 text-center opacity-40"
           >
-            <p className="text-[10px] font-mono tracking-widest uppercase italic">
+            <p className="font-mono text-[10px] tracking-widest uppercase italic">
               Airport Operational Intelligence Dashboard
             </p>
           </motion.footer>

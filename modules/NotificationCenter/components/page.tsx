@@ -165,31 +165,31 @@ const NotificationCenterPage = () => {
   );
 
   return (
-    <div className="container mx-auto max-w-5xl py-8 px-4">
-      <Card className="border-t-4 border-t-primary shadow-lg bg-card">
+    <div className="container mx-auto max-w-5xl px-4 py-8">
+      <Card className="border-t-primary bg-card border-t-4 shadow-lg">
         <Tabs
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as TabType)}
           className="w-full"
         >
           {/* HEADER */}
-          <div className="flex items-center justify-between pr-6 border-b border-border/50 bg-muted/5">
+          <div className="border-border/50 bg-muted/5 flex items-center justify-between border-b pr-6">
             <NotificationHeader unreadCount={unreadCount} />
             {isLoading && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
-                <Loader2 className="h-3 w-3 animate-spin text-primary" />
+              <div className="text-muted-foreground flex animate-pulse items-center gap-2 text-xs">
+                <Loader2 className="text-primary h-3 w-3 animate-spin" />
                 <span>Syncing...</span>
               </div>
             )}
           </div>
 
-          <CardHeader className="pb-2 pt-4 bg-muted/5">
+          <CardHeader className="bg-muted/5 pt-4 pb-2">
             <NotificationTabs />
           </CardHeader>
 
           <CardContent className="p-0">
             {/* TOOLBAR */}
-            <div className="px-6 py-3 border-b border-border/40 bg-background/50 sticky top-0 z-10 backdrop-blur-sm">
+            <div className="border-border/40 bg-background/50 sticky top-0 z-10 border-b px-6 py-3 backdrop-blur-sm">
               <NotificationActions
                 isAllSelected={isAllSelected}
                 onSelectAll={handleSelectAll}
@@ -209,7 +209,7 @@ const NotificationCenterPage = () => {
             </div>
 
             {/* CONTENT LIST */}
-            <div className="min-h-[400px] relative bg-slate-50/50 dark:bg-slate-950/20">
+            <div className="relative min-h-[400px] bg-slate-50/50 dark:bg-slate-950/20">
               <NotificationContent
                 isLoading={isLoading}
                 isError={false}
@@ -222,9 +222,9 @@ const NotificationCenterPage = () => {
 
               {/* Loading Overlay */}
               {isProcessing && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-50 flex flex-col gap-2 items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <span className="text-xs font-bold text-primary uppercase tracking-widest">
+                <div className="bg-background/50 absolute inset-0 z-50 flex flex-col items-center justify-center gap-2 backdrop-blur-[1px]">
+                  <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                  <span className="text-primary text-xs font-bold tracking-widest uppercase">
                     Processing...
                   </span>
                 </div>

@@ -154,7 +154,7 @@ export const CategoryManagement = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <div>
             <CardTitle>Manajemen Kategori</CardTitle>
             <CardDescription>

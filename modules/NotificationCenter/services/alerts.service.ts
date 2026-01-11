@@ -1,8 +1,5 @@
 import { ApiResponse } from "@/common/types/api";
-import { EnergyTypeName } from "@/common/types/energy";
 import api from "@/lib/api";
-import { promises } from "dns";
-import { resourceLimits } from "worker_threads";
 
 export const STATUS_ALERT = {
   NEW: "NEW",

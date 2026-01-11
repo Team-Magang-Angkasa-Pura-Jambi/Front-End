@@ -17,7 +17,7 @@ const Label = React.forwardRef<
     className={cn(
       "flex items-center gap-2 select-none",
 
-      "text-[11px] uppercase tracking-wider font-bold leading-none",
+      "text-[11px] leading-none font-bold tracking-wider uppercase",
 
       "text-muted-foreground",
 
@@ -32,7 +32,7 @@ const Label = React.forwardRef<
 
     {/* 5. AUTOMATIC REQUIRED INDICATOR */}
     {required && (
-      <span className="text-destructive font-bold ml-0.5" title="Wajib diisi">
+      <span className="text-destructive ml-0.5 font-bold" title="Wajib diisi">
         *
       </span>
     )}

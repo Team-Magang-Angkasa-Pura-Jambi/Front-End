@@ -83,41 +83,41 @@ export const BudgetPreview = () => {
   });
 
   return (
-    <Card className="col-span-2 bg-muted/50 border-dashed transition-all">
+    <Card className="bg-muted/50 col-span-2 border-dashed transition-all">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Saran & Pratinjau Anggaran</CardTitle>
       </CardHeader>
       <CardContent>
         {!canFetchPreview && !isLoading && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Isi Total Budget, Periode Mulai, dan Periode Selesai untuk melihat
             pratinjau.
           </p>
         )}
         {isLoading && (
           <div className="flex items-center gap-2 py-2">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <span className="text-sm text-muted-foreground">
+            <Loader2 className="text-primary h-4 w-4 animate-spin" />
+            <span className="text-muted-foreground text-sm">
               Menghitung pratinjau...
             </span>
           </div>
         )}
         {isError && (
-          <p className="text-sm text-destructive">Gagal memuat pratinjau.</p>
+          <p className="text-destructive text-sm">Gagal memuat pratinjau.</p>
         )}
         {previewData && !isLoading && !isError && (
           <>
-            <p className="text-2xl font-bold text-primary">
+            <p className="text-primary text-2xl font-bold">
               {formatCurrency(
                 previewData.calculationDetails?.budgetPerMonth || 0
               )}{" "}
               / bulan
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Estimasi alokasi rata-rata per bulan berdasarkan data historis.
             </p>
             {previewData.calculationDetails?.suggestedBudgetForPeriod > 0 && (
-              <div className="mt-4 text-xs p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-md">
+              <div className="mt-4 rounded-md border border-blue-200 bg-blue-50 p-2 text-xs dark:border-blue-800/50 dark:bg-blue-900/20">
                 <p className="text-blue-800 dark:text-blue-300">
                   Saran Budget untuk Periode Ini:{" "}
                   <strong>
@@ -130,7 +130,7 @@ export const BudgetPreview = () => {
                   type="button"
                   variant="link"
                   size="sm"
-                  className="p-0 h-auto text-blue-600 hover:text-blue-700"
+                  className="h-auto p-0 text-blue-600 hover:text-blue-700"
                   onClick={() =>
                     setValue(
                       "total_budget",
@@ -151,7 +151,7 @@ export const BudgetPreview = () => {
               {previewData.meterAllocationPreview.map((meter) => (
                 <div
                   key={meter.meterId}
-                  className="text-xs text-muted-foreground flex justify-between"
+                  className="text-muted-foreground flex justify-between text-xs"
                 >
                   <span>{meter.meterName}</span>
                   <span className="font-medium">

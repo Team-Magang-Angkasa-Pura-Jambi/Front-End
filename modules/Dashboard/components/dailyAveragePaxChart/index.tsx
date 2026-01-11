@@ -44,23 +44,23 @@ export const DailyAveragePaxChart = () => {
   return (
     <Card
       ref={ref}
-      className="w-full h-full shadow-lg border-none ring-1 ring-slate-200 flex flex-col"
+      className="flex h-full w-full flex-col border-none shadow-lg ring-1 ring-slate-200"
     >
-      <CardHeader className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 border-b border-slate-50 pb-4">
+      <CardHeader className="flex flex-col items-start justify-between gap-4 border-b border-slate-50 pb-4 xl:flex-row xl:items-center">
         <div>
-          <CardTitle className="text-base font-bold flex items-center gap-2">
-            <Users className="w-4 h-4 text-orange-500" />
+          <CardTitle className="flex items-center gap-2 text-base font-bold">
+            <Users className="h-4 w-4 text-orange-500" />
             Rata-rata Kepadatan Penumpang
           </CardTitle>
-          <p className="text-sm text-muted-foreground italic mt-1">
+          <p className="text-muted-foreground mt-1 text-sm italic">
             Tren jumlah penumpang harian untuk validasi beban operasional.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2 w-full xl:w-auto">
+        <div className="flex w-full flex-wrap gap-2 xl:w-auto">
           <Select value={filters.month} onValueChange={filters.setMonth}>
             <SelectTrigger>
-              <CalendarDays className="w-3 h-3 mr-2 text-slate-500" />
+              <CalendarDays className="mr-2 h-3 w-3 text-slate-500" />
               <SelectValue placeholder="Bulan" />
             </SelectTrigger>
             <SelectContent>
@@ -78,7 +78,7 @@ export const DailyAveragePaxChart = () => {
 
           <Select value={filters.year} onValueChange={filters.setYear}>
             <SelectTrigger>
-              <Calendar className="w-3 h-3 mr-2 text-slate-500" />
+              <Calendar className="mr-2 h-3 w-3 text-slate-500" />
               <SelectValue placeholder="Tahun" />
             </SelectTrigger>
             <SelectContent>
@@ -101,19 +101,19 @@ export const DailyAveragePaxChart = () => {
             title="Download JPG"
           >
             {isExporting ? (
-              <span className="text-[10px] animate-pulse">...</span>
+              <span className="animate-pulse text-[10px]">...</span>
             ) : (
-              <Download className="w-4 h-4" />
+              <Download className="h-4 w-4" />
             )}
           </Button>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 min-h-[350px] pt-6 flex flex-col justify-between">
+      <CardContent className="flex min-h-[350px] flex-1 flex-col justify-between pt-6">
         {isLoading ? (
           /* State: Loading */
-          <div className="h-full w-full flex flex-col items-center justify-center gap-4">
-            <Skeleton className="h-[200px] w-full rounded-xl bg-background" />
+          <div className="flex h-full w-full flex-col items-center justify-center gap-4">
+            <Skeleton className="bg-background h-[200px] w-full rounded-xl" />
             <Skeleton className="h-4 w-1/2 rounded-full" />
           </div>
         ) : isError ? (
@@ -186,8 +186,8 @@ export const DailyAveragePaxChart = () => {
               </ResponsiveContainer>
             </div>
 
-            <div className="mt-4 p-4 bg-orange-50 rounded-xl border border-orange-100">
-              <p className="text-xs text-orange-800 leading-relaxed font-medium">
+            <div className="mt-4 rounded-xl border border-orange-100 bg-orange-50 p-4">
+              <p className="text-xs leading-relaxed font-medium text-orange-800">
                 <strong>Analisis Keputusan:</strong> Puncak penumpang umumnya
                 terjadi di <b>Sabtu & Minggu</b>. Jika di hari tersebut konsumsi
                 energi naik, itu wajar. Namun jika konsumsi naik tinggi di hari

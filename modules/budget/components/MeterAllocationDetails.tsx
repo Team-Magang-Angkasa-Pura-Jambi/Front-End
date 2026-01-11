@@ -29,24 +29,24 @@ export const MeterAllocationDetails = ({
 
   if (meterAllocations.length === 0) {
     return (
-      <div className="p-8 text-center bg-muted/30 border-t border-dashed text-muted-foreground text-sm">
+      <div className="bg-muted/30 text-muted-foreground border-t border-dashed p-8 text-center text-sm">
         Tidak ada detail alokasi per meter untuk budget ini.
       </div>
     );
   }
 
   return (
-    <div className="p-4 bg-muted/50 border-t border-dashed">
-      <h4 className="font-semibold mb-3 text-sm flex items-center gap-2">
+    <div className="bg-muted/50 border-t border-dashed p-4">
+      <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
         📊 Detail Alokasi per Meter
       </h4>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {meterAllocations.map((alloc) => (
           <Card
             key={alloc.allocation_id}
-            className="bg-background/80 shadow-sm hover:shadow-md transition-shadow"
+            className="bg-background/80 shadow-sm transition-shadow hover:shadow-md"
           >
-            <CardHeader className="pb-2 pt-4 flex flex-row items-center justify-between space-y-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pt-4 pb-2">
               <CardTitle className="text-sm font-bold">
                 {/* Gunakan Optional Chaining jaga-jaga jika meter terhapus */}
                 {alloc.meter?.meter_code || "Unknown Meter"}
@@ -61,20 +61,20 @@ export const MeterAllocationDetails = ({
                 )}
               />
             </CardHeader>
-            <CardContent className="text-xs space-y-2 pb-4">
-              <div className="flex justify-between items-center border-b pb-1">
+            <CardContent className="space-y-2 pb-4 text-xs">
+              <div className="flex items-center justify-between border-b pb-1">
                 <span className="text-muted-foreground">Alokasi</span>
                 <span className="font-medium">
                   {formatCurrency(alloc.allocatedBudget || 0)}
                 </span>
               </div>
-              <div className="flex justify-between items-center border-b pb-1">
+              <div className="flex items-center justify-between border-b pb-1">
                 <span className="text-muted-foreground">Realisasi</span>
                 <span className="font-medium">
                   {formatCurrency(alloc.totalRealization || 0)}
                 </span>
               </div>
-              <div className="flex justify-between items-center pt-1">
+              <div className="flex items-center justify-between pt-1">
                 <span className="text-muted-foreground">Sisa</span>
                 <span
                   className={cn(
@@ -88,8 +88,8 @@ export const MeterAllocationDetails = ({
                 </span>
               </div>
 
-              <div className="mt-2 pt-2 border-t">
-                <div className="flex justify-between items-center">
+              <div className="mt-2 border-t pt-2">
+                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Realisasi %</span>
                   <span
                     className={cn(
@@ -104,7 +104,7 @@ export const MeterAllocationDetails = ({
                   </span>
                 </div>
                 {/* Progress Bar Visual */}
-                <div className="h-1.5 w-full bg-secondary mt-1 rounded-full overflow-hidden">
+                <div className="bg-secondary mt-1 h-1.5 w-full overflow-hidden rounded-full">
                   <div
                     className={cn(
                       "h-full rounded-full",

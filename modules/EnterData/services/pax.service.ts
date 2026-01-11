@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 
 export interface PaxPayload {
-  data_date: string; 
+  data_date: string;
   total_pax: number;
 }
 

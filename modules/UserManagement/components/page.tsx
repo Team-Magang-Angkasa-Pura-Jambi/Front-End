@@ -145,11 +145,11 @@ export const Page = () => {
       <p className="text-muted-foreground">
         Kelola semua akun pengguna dan peran yang terdaftar di sistem.
       </p>
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start ">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
         {/* --- Tabel Pengguna --- */}
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <CardTitle>Daftar Pengguna</CardTitle>
               <Button size="sm" onClick={() => handleOpenForm(null)}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Tambah Pengguna

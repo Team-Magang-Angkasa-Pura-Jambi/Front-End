@@ -125,7 +125,7 @@ export const MeterForm = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="meter_code"
@@ -311,12 +311,12 @@ export const MeterForm = ({
           )}
 
           {isRolloverEligible && (
-            <div className="md:col-span-2 space-y-4">
+            <div className="space-y-4 md:col-span-2">
               <FormField
                 control={form.control}
                 name="has_rollover"
                 render={({ field }) => (
-                  <FormItem className="flex items-center justify-between border rounded-lg p-3">
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3">
                     <div>
                       <FormLabel>Aktifkan Rollover</FormLabel>
                       <FormDescription>

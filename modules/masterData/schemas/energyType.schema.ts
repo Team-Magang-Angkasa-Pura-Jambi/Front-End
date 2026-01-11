@@ -6,4 +6,4 @@ export const energyTypeSchema = z.object({
   is_active: z.boolean().default(true),
 });
 
-export type EnergyTypeFormValues = z.infer<typeof energyTypeSchema>
+export type EnergyTypeFormValues = z.infer<typeof energyTypeSchema>;

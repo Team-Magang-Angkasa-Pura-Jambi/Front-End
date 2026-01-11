@@ -27,10 +27,10 @@ export const HeaderLogo = () => {
       variants={containerVariants} // Assign variant parent
       initial="hidden"
       animate="visible"
-      className="flex w-full h-24 gap-2 items-center justify-center "
+      className="flex h-24 w-full items-center justify-center gap-2"
     >
       {/* --- LOGO 1 --- */}
-      <motion.div variants={itemVariants} className="relative flex-1 h-full">
+      <motion.div variants={itemVariants} className="relative h-full flex-1">
         <Image
           src="/image/logo.png"
           alt="Logo Utama"
@@ -42,7 +42,7 @@ export const HeaderLogo = () => {
       </motion.div>
 
       {/* --- LOGO 2 --- */}
-      <motion.div variants={itemVariants} className="relative flex-1 h-3/4">
+      <motion.div variants={itemVariants} className="relative h-3/4 flex-1">
         <Image
           src="/image/logo-angkasa-pura.jpeg"
           alt="Logo Partner"
@@ -56,12 +56,12 @@ export const HeaderLogo = () => {
       {/* Perbaikan: flex-2 diganti flex-[2] agar valid Tailwind */}
       <motion.div
         variants={itemVariants}
-        className="relative flex-2 flex flex-col justify-center items-end text-right"
+        className="relative flex flex-2 flex-col items-end justify-center text-right"
       >
-        <h1 className=" font-bold text-yellow-400 leading-tight text-sm">
+        <h1 className="text-sm leading-tight font-bold text-yellow-400">
           Sultan Thaha Jambi
         </h1>
-        <h2 className=" font-medium text-gray-500 tracking-wide text-sm">
+        <h2 className="text-sm font-medium tracking-wide text-gray-500">
           Airport
         </h2>
       </motion.div>

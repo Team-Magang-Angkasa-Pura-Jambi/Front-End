@@ -99,8 +99,8 @@ const MeterStatusCell = ({ status }: { status: string }) => {
     status === "Active"
       ? "default"
       : status === "Inactive"
-      ? "secondary"
-      : "destructive";
+        ? "secondary"
+        : "destructive";
 
   return <Badge variant={variant}>{status}</Badge>;
 };

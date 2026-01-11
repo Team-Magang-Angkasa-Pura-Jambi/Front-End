@@ -63,12 +63,12 @@ export const AnalysisChart = () => {
   return (
     <Card
       ref={ref}
-      className="col-span-12 lg:col-span-8 shadow-md border-none ring-1 ring-slate-200"
+      className="col-span-12 border-none shadow-md ring-1 ring-slate-200 lg:col-span-8"
     >
       <CardHeader>
         <div className="flex flex-col space-y-4">
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <Activity className="w-5 h-5 text-primary" />
+          <CardTitle className="flex items-center gap-2 text-lg font-bold">
+            <Activity className="text-primary h-5 w-5" />
             Analisis Konsumsi Energi
           </CardTitle>
 
@@ -135,7 +135,7 @@ export const AnalysisChart = () => {
               {isExporting ? (
                 <span className="text-[10px]">...</span>
               ) : (
-                <Download className="w-4 h-4" />
+                <Download className="h-4 w-4" />
               )}
             </Button>
           </div>
@@ -144,7 +144,7 @@ export const AnalysisChart = () => {
 
       <CardContent className="space-y-6">
         {isError || chartData.length === 0 ? (
-          <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-xl bg-background">
+          <div className="bg-background flex h-[300px] items-center justify-center rounded-xl border-2 border-dashed">
             <p className="text-muted-foreground text-sm">
               Data tidak tersedia untuk kombinasi filter ini.
             </p>
@@ -219,16 +219,16 @@ export const AnalysisChart = () => {
 
         {insights && (
           <div
-            className={`p-2 rounded-xl flex gap-3 items-start ${
+            className={`flex items-start gap-3 rounded-xl p-2 ${
               insights.type === "warning"
-                ? "bg-amber-50 border border-amber-100"
-                : "bg-emerald-50 border border-emerald-100"
+                ? "border border-amber-100 bg-amber-50"
+                : "border border-emerald-100 bg-emerald-50"
             }`}
           >
             {insights.type === "warning" ? (
-              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+              <AlertCircle className="mt-0.5 h-5 w-5 text-amber-600" />
             ) : (
-              <Lightbulb className="w-5 h-5 text-emerald-600 mt-0.5" />
+              <Lightbulb className="mt-0.5 h-5 w-5 text-emerald-600" />
             )}
             <div>
               <p

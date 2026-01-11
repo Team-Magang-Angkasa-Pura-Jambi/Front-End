@@ -33,7 +33,7 @@ export default function RootLayout({
         className={cn(
           geistSans.variable,
           geistMono.variable,
-          "antialiased min-h-screen",
+          "min-h-screen antialiased",
 
           "bg-background text-foreground",
 

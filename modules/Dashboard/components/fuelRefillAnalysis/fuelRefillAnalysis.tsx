@@ -59,28 +59,28 @@ export const FuelRefillAnalysis = () => {
   return (
     <Card
       ref={ref}
-      className="w-full h-full shadow-lg border-none ring-1 ring-slate-200 flex flex-col"
+      className="flex h-full w-full flex-col border-none shadow-lg ring-1 ring-slate-200"
     >
       {/* HEADER SECTION (Always Visible) */}
       <CardHeader>
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 xl:flex-row xl:items-center">
           {/* Title Section */}
           <div>
-            <CardTitle className="text-base font-bold flex items-center gap-2">
-              <Fuel className="w-4 h-4 text-blue-600" />
+            <CardTitle className="flex items-center gap-2 text-base font-bold">
+              <Fuel className="h-4 w-4 text-blue-600" />
               Manajemen Stok & Isi Ulang BBM
             </CardTitle>
-            <p className="text-sm text-muted-foreground italic mt-1">
+            <p className="text-muted-foreground mt-1 text-sm italic">
               Monitor volume pengisian, pemakaian, dan sisa stok.
             </p>
           </div>
 
           {/* Filters Section */}
-          <div className="flex gap-2 flex-wrap w-full xl:w-auto">
+          <div className="flex w-full flex-wrap gap-2 xl:w-auto">
             {/* Filter Meter */}
             <Select value={filters.meterId} onValueChange={filters.setMeterId}>
               <SelectTrigger>
-                <Gauge className="w-3 h-3 mr-2 text-slate-500" />
+                <Gauge className="mr-2 h-3 w-3 text-slate-500" />
                 <SelectValue placeholder="Pilih Meter" />
               </SelectTrigger>
               <SelectContent>
@@ -99,7 +99,7 @@ export const FuelRefillAnalysis = () => {
             {/* Filter Tahun */}
             <Select value={filters.year} onValueChange={filters.setYear}>
               <SelectTrigger>
-                <Calendar className="w-3 h-3 mr-2 text-slate-500" />
+                <Calendar className="mr-2 h-3 w-3 text-slate-500" />
                 <SelectValue placeholder="Tahun" />
               </SelectTrigger>
               <SelectContent>
@@ -120,9 +120,9 @@ export const FuelRefillAnalysis = () => {
               title="Download JPG"
             >
               {isExporting ? (
-                <span className="text-[10px] animate-pulse">...</span>
+                <span className="animate-pulse text-[10px]">...</span>
               ) : (
-                <Download className="w-4 h-4" />
+                <Download className="h-4 w-4" />
               )}
             </Button>
           </div>
@@ -130,12 +130,12 @@ export const FuelRefillAnalysis = () => {
       </CardHeader>
 
       {/* CONTENT SECTION */}
-      <CardContent className="flex-1 min-h-[400px] flex flex-col justify-between pt-2">
+      <CardContent className="flex min-h-[400px] flex-1 flex-col justify-between pt-2">
         {isLoading ? (
           /* STATE: LOADING */
-          <div className="h-full w-full flex flex-col items-center justify-center gap-4">
-            <Skeleton className="h-[250px] w-full rounded-xl bg-background" />
-            <div className="w-full h-24 bg-background rounded-xl animate-pulse" />
+          <div className="flex h-full w-full flex-col items-center justify-center gap-4">
+            <Skeleton className="bg-background h-[250px] w-full rounded-xl" />
+            <div className="bg-background h-24 w-full animate-pulse rounded-xl" />
           </div>
         ) : isError ? (
           /* STATE: ERROR */
@@ -247,10 +247,10 @@ export const FuelRefillAnalysis = () => {
             </div>
 
             {/* INSIGHT BOX */}
-            <div className="p-4 bg-background rounded-xl border border-slate-200 mt-4">
+            <div className="bg-background mt-4 rounded-xl border border-slate-200 p-4">
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-blue-100 rounded-full shrink-0">
-                  <RefreshCcw className="w-4 h-4 text-blue-600" />
+                <div className="shrink-0 rounded-full bg-blue-100 p-2">
+                  <RefreshCcw className="h-4 w-4 text-blue-600" />
                 </div>
 
                 <div className="flex-1">
@@ -258,15 +258,15 @@ export const FuelRefillAnalysis = () => {
                     Analisis Logistik & Stok
                   </p>
 
-                  <div className="text-xs text-slate-600 leading-relaxed mt-2 space-y-1">
-                    <div className="flex justify-between border-b border-slate-200 pb-1 mb-1">
+                  <div className="mt-2 space-y-1 text-xs leading-relaxed text-slate-600">
+                    <div className="mb-1 flex justify-between border-b border-slate-200 pb-1">
                       <span>Pengisian Terakhir:</span>
                       <span className="font-semibold">
                         {summary.lastRefill}
                       </span>
                     </div>
 
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-between">
                       <span>Posisi Stok ({latestStockInfo.month}):</span>
                       <span
                         className={`font-bold ${
@@ -281,16 +281,16 @@ export const FuelRefillAnalysis = () => {
 
                     {/* Stock Alert */}
                     {latestStockInfo.value < stockThresholds.minStockLimit && (
-                      <div className="flex items-center gap-1.5 text-red-600 font-medium mt-1">
-                        <AlertTriangle className="w-3 h-3" />
+                      <div className="mt-1 flex items-center gap-1.5 font-medium text-red-600">
+                        <AlertTriangle className="h-3 w-3" />
                         <span>Stok kritis! Di bawah 20% kapasitas tangki.</span>
                       </div>
                     )}
 
                     {/* Balance Status */}
                     {summary.status === "Critical" ? (
-                      <div className="flex items-start gap-1.5 text-amber-700 mt-2 bg-amber-50 p-2 rounded-md">
-                        <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
+                      <div className="mt-2 flex items-start gap-1.5 rounded-md bg-amber-50 p-2 text-amber-700">
+                        <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
                         <span>
                           <b>Defisit Stok:</b> Total pemakaian melebihi
                           pengisian sebesar{" "}
@@ -299,8 +299,8 @@ export const FuelRefillAnalysis = () => {
                         </span>
                       </div>
                     ) : (
-                      <div className="flex items-start gap-1.5 text-emerald-700 mt-2 bg-emerald-50 p-2 rounded-md">
-                        <CheckCircle2 className="w-3 h-3 mt-0.5 shrink-0" />
+                      <div className="mt-2 flex items-start gap-1.5 rounded-md bg-emerald-50 p-2 text-emerald-700">
+                        <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0" />
                         <span>
                           <b>Surplus Stok:</b> Supply chain aman. Total
                           pengisian mencukupi kebutuhan operasional.

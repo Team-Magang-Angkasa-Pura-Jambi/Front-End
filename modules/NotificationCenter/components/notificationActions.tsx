@@ -46,10 +46,10 @@ export const NotificationActions = ({
   onDeleteAll,
   isDisabled = false,
 }: NotificationActionsProps) => (
-  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+  <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-center">
     {/* Left Group: Selection */}
     <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2 bg-muted/30 px-3 py-2 rounded-md border border-border/50">
+      <div className="bg-muted/30 border-border/50 flex items-center gap-2 rounded-md border px-3 py-2">
         <Checkbox
           id="select-all"
           checked={isAllSelected}
@@ -59,14 +59,14 @@ export const NotificationActions = ({
         />
         <label
           htmlFor="select-all"
-          className="text-xs font-medium uppercase tracking-wider text-muted-foreground cursor-pointer select-none"
+          className="text-muted-foreground cursor-pointer text-xs font-medium tracking-wider uppercase select-none"
         >
           Select All
         </label>
       </div>
 
       {selectedCount > 0 && (
-        <span className="text-xs font-bold text-primary animate-in fade-in slide-in-from-left-2">
+        <span className="text-primary animate-in fade-in slide-in-from-left-2 text-xs font-bold">
           {selectedCount} Selected
         </span>
       )}
@@ -75,7 +75,7 @@ export const NotificationActions = ({
     <div className="flex-1" />
 
     {/* Right Group: Actions */}
-    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+    <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
       {/* Mark Actions */}
       <TooltipProvider>
         <Tooltip>
@@ -85,7 +85,7 @@ export const NotificationActions = ({
               size="sm"
               disabled={isDisabled || selectedCount === 0 || isMarkingSelected}
               onClick={onMarkSelectedRead}
-              className="h-8 text-xs gap-2"
+              className="h-8 gap-2 text-xs"
             >
               <MailOpen className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Mark Read</span>
@@ -100,13 +100,13 @@ export const NotificationActions = ({
         size="sm"
         disabled={isDisabled || unreadCount === 0 || isMarkingAll}
         onClick={onMarkAllRead}
-        className="h-8 text-xs gap-2 text-muted-foreground hover:text-primary"
+        className="text-muted-foreground hover:text-primary h-8 gap-2 text-xs"
       >
         <CheckCheck className="h-3.5 w-3.5" />
         Mark All Read
       </Button>
 
-      <Separator orientation="vertical" className="h-6 hidden sm:block mx-1" />
+      <Separator orientation="vertical" className="mx-1 hidden h-6 sm:block" />
 
       {/* Delete Actions */}
       <Button
@@ -114,7 +114,7 @@ export const NotificationActions = ({
         size="sm"
         disabled={isDisabled || selectedCount === 0 || isDeletingSelected}
         onClick={onDeleteSelected}
-        className="h-8 text-xs gap-2 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground border border-destructive/20"
+        className="bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground border-destructive/20 h-8 gap-2 border text-xs"
       >
         <Trash2 className="h-3.5 w-3.5" />
         Delete ({selectedCount})
@@ -129,7 +129,7 @@ export const NotificationActions = ({
               size="icon"
               disabled={isDisabled}
               onClick={onDeleteAll}
-              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
             >
               <ShieldAlert className="h-4 w-4" />
             </Button>

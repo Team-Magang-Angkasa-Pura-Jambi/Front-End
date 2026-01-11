@@ -34,17 +34,17 @@ export const NotificationContent = ({
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="flex items-start gap-4 p-4 border border-border/50 rounded-lg bg-card/40"
+              className="border-border/50 bg-card/40 flex items-start gap-4 rounded-lg border p-4"
             >
               {/* Checkbox Skeleton */}
-              <Skeleton className="h-4 w-4 mt-1 rounded-sm shrink-0" />
+              <Skeleton className="mt-1 h-4 w-4 shrink-0 rounded-sm" />
 
               {/* Icon Circle Skeleton */}
-              <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+              <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
 
               <div className="flex-1 space-y-2">
                 {/* Title & Badge */}
-                <div className="flex justify-between w-full gap-4">
+                <div className="flex w-full justify-between gap-4">
                   <Skeleton className="h-4 w-1/3" />
                   <Skeleton className="h-4 w-16" />
                 </div>
@@ -66,19 +66,19 @@ export const NotificationContent = ({
     // 2. ERROR STATE
     if (isError) {
       return (
-        <div className="flex flex-col items-center justify-center h-[400px] text-destructive p-8 border-2 border-dashed border-destructive/20 m-4 rounded-xl bg-destructive/[0.02]">
-          <div className="bg-destructive/10 p-4 rounded-full mb-4 ring-1 ring-destructive/30">
+        <div className="text-destructive border-destructive/20 bg-destructive/[0.02] m-4 flex h-[400px] flex-col items-center justify-center rounded-xl border-2 border-dashed p-8">
+          <div className="bg-destructive/10 ring-destructive/30 mb-4 rounded-full p-4 ring-1">
             <AlertTriangle className="h-10 w-10 animate-pulse" />
           </div>
-          <h3 className="text-lg font-bold uppercase tracking-widest">
+          <h3 className="text-lg font-bold tracking-widest uppercase">
             System Failure
           </h3>
-          <p className="mt-2 text-sm text-muted-foreground text-center max-w-xs">
+          <p className="text-muted-foreground mt-2 max-w-xs text-center text-sm">
             Gagal menyinkronkan data log notifikasi. Jalur komunikasi terputus.
           </p>
           <Button
             variant="outline"
-            className="mt-6 border-destructive/50 text-destructive hover:bg-destructive/10"
+            className="border-destructive/50 text-destructive hover:bg-destructive/10 mt-6"
             onClick={() => (onRetry ? onRetry() : window.location.reload())}
           >
             <RefreshCw className="mr-2 h-4 w-4" /> Re-establish Connection
@@ -90,28 +90,28 @@ export const NotificationContent = ({
     // 3. EMPTY STATE
     if (!notifications || notifications.length === 0) {
       return (
-        <div className="relative flex flex-col items-center justify-center h-[500px] text-center overflow-hidden select-none">
+        <div className="relative flex h-[500px] flex-col items-center justify-center overflow-hidden text-center select-none">
           {/* Background Grid Pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.05]" />
 
           <div className="relative z-10 flex flex-col items-center">
-            <div className="bg-muted p-6 rounded-full mb-6 ring-8 ring-muted/20 animate-in zoom-in-50 duration-500">
-              <Inbox className="h-12 w-12 text-muted-foreground" />
+            <div className="bg-muted ring-muted/20 animate-in zoom-in-50 mb-6 rounded-full p-6 ring-8 duration-500">
+              <Inbox className="text-muted-foreground h-12 w-12" />
             </div>
 
-            <h3 className="text-xl font-black tracking-tight text-foreground">
+            <h3 className="text-foreground text-xl font-black tracking-tight">
               SYSTEM IDLE
             </h3>
 
-            <div className="flex items-center gap-2 mt-3 px-4 py-1.5 bg-primary/5 border border-primary/20 rounded-full">
-              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs font-mono text-primary font-medium uppercase">
+            <div className="bg-primary/5 border-primary/20 mt-3 flex items-center gap-2 rounded-full border px-4 py-1.5">
+              <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
+              <span className="text-primary font-mono text-xs font-medium uppercase">
                 No logs in{" "}
                 {activeTab === "generals" ? "All Channels" : activeTab}
               </span>
             </div>
 
-            <p className="mt-4 text-sm text-muted-foreground/60 max-w-sm">
+            <p className="text-muted-foreground/60 mt-4 max-w-sm text-sm">
               Tidak ada aktivitas yang memerlukan perhatian operator saat ini.
             </p>
           </div>
@@ -126,7 +126,7 @@ export const NotificationContent = ({
   return (
     <TabsContent
       value={activeTab}
-      className="mt-0 focus-visible:outline-none w-full"
+      className="mt-0 w-full focus-visible:outline-none"
     >
       {renderContent()}
     </TabsContent>

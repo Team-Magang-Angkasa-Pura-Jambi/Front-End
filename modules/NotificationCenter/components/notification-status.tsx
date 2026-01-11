@@ -26,7 +26,7 @@ export const StatusIndicator = ({
           variant="destructive"
           pulse
           className={cn(
-            "bg-red-500/10 text-red-500 border-red-500/20 px-2 py-0.5 text-[9px] gap-1",
+            "gap-1 border-red-500/20 bg-red-500/10 px-2 py-0.5 text-[9px] text-red-500",
             className
           )}
         >
@@ -39,7 +39,7 @@ export const StatusIndicator = ({
         <Badge
           variant="info"
           className={cn(
-            "bg-blue-500/10 text-blue-500 border-blue-500/20 px-2 py-0.5 text-[9px] gap-1",
+            "gap-1 border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[9px] text-blue-500",
             className
           )}
         >
@@ -52,7 +52,7 @@ export const StatusIndicator = ({
         <Badge
           variant="success"
           className={cn(
-            "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2 py-0.5 text-[9px] gap-1",
+            "gap-1 border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] text-emerald-500",
             className
           )}
         >

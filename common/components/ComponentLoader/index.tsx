@@ -14,7 +14,7 @@ export const ComponentLoader = ({
 }: ComponentLoaderProps) => {
   return (
     <div
-      className={`relative overflow-hidden bg-white/50 border border-slate-100 p-8 rounded-2xl flex flex-col items-center justify-center min-h-[200px] shadow-sm ${className}`}
+      className={`relative flex min-h-[200px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white/50 p-8 shadow-sm ${className}`}
     >
       {/* Background Shimmer Effect */}
       <motion.div
@@ -29,9 +29,9 @@ export const ComponentLoader = ({
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="p-3 bg-blue-50 rounded-full text-blue-600"
+          className="rounded-full bg-blue-50 p-3 text-blue-600"
         >
-          <Loader2 className="w-6 h-6" />
+          <Loader2 className="h-6 w-6" />
         </motion.div>
 
         <div className="flex flex-col items-center gap-1">
@@ -41,11 +41,11 @@ export const ComponentLoader = ({
       </div>
 
       {/* Decorative Dots */}
-      <div className="flex gap-1 mt-4">
+      <div className="mt-4 flex gap-1">
         {[0, 1, 2].map((i) => (
           <motion.div
             key={i}
-            className="w-1.5 h-1.5 bg-blue-400 rounded-full"
+            className="h-1.5 w-1.5 rounded-full bg-blue-400"
             animate={{ y: [0, -6, 0] }}
             transition={{
               duration: 0.6,

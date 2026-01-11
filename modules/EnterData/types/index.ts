@@ -15,5 +15,3 @@ export interface CardInfo {
   unit?: string;
   energyTypeId?: number;
 }
-
-

@@ -86,7 +86,7 @@ export function BudgetForm({
       <ScrollArea className="max-h-[80vh] overflow-y-auto px-6 py-2">
         <div className="space-y-6 pb-6">
           <div className="space-y-3">
-            <FormLabel className="text-base font-bold text-primary">
+            <FormLabel className="text-primary text-base font-bold">
               Tipe Anggaran
             </FormLabel>
             <RadioGroup
@@ -97,25 +97,25 @@ export function BudgetForm({
                 if (value === "parent") setValue("allocations", []);
               }}
               value={budgetType}
-              className="flex items-center space-x-6 p-2 border rounded-lg bg-muted/20"
+              className="bg-muted/20 flex items-center space-x-6 rounded-lg border p-2"
               disabled={!!editingBudget}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="parent" id="parent" />
-                <Label htmlFor="parent" className="font-medium cursor-pointer">
+                <Label htmlFor="parent" className="cursor-pointer font-medium">
                   Induk (Tahunan)
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="child" id="child" />
-                <Label htmlFor="child" className="font-medium cursor-pointer">
+                <Label htmlFor="child" className="cursor-pointer font-medium">
                   Periode (Anak)
                 </Label>
               </div>
             </RadioGroup>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <FormField
               control={control}
               name="period_start"
@@ -252,7 +252,7 @@ export function BudgetForm({
                         prepareNextPeriodBudget?.availableBudgetForNextPeriod ||
                         undefined
                       }
-                      className="pr-24 h-11 text-lg font-medium"
+                      className="h-11 pr-24 text-lg font-medium"
                     />
                     {budgetType === "child" &&
                       (prepareNextPeriodBudget?.availableBudgetForNextPeriod ??
@@ -261,7 +261,7 @@ export function BudgetForm({
                           type="button"
                           variant="secondary"
                           size="sm"
-                          className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 text-xs"
+                          className="absolute top-1/2 right-1.5 h-8 -translate-y-1/2 text-xs"
                           onClick={() =>
                             setValue(
                               "total_budget",
@@ -269,14 +269,14 @@ export function BudgetForm({
                             )
                           }
                         >
-                          <Copy className="h-3 w-3 mr-1" />
+                          <Copy className="mr-1 h-3 w-3" />
                           Gunakan Sisa
                         </Button>
                       )}
                   </div>
                 </FormControl>
                 {budgetType === "child" && prepareNextPeriodBudget && (
-                  <FormDescription className="bg-blue-50 p-2 rounded border border-blue-100 text-blue-700">
+                  <FormDescription className="rounded border border-blue-100 bg-blue-50 p-2 text-blue-700">
                     Maksimum alokasi tersedia:{" "}
                     <span className="font-bold">
                       {formatCurrency(
@@ -316,7 +316,7 @@ export function BudgetForm({
             />
           )}
 
-          <div className="p-4 bg-muted/30 rounded-lg border border-dashed">
+          <div className="bg-muted/30 rounded-lg border border-dashed p-4">
             {budgetType === "parent" ? (
               <FormField
                 control={control}
@@ -353,13 +353,13 @@ export function BudgetForm({
               />
             ) : (
               <div className="space-y-1">
-                <Label className="text-muted-foreground text-xs uppercase tracking-wider">
+                <Label className="text-muted-foreground text-xs tracking-wider uppercase">
                   Tipe Energi Terpilih
                 </Label>
-                <div className="text-lg font-bold text-primary">
+                <div className="text-primary text-lg font-bold">
                   {selectedEnergyTypeName || "Belum dipilih"}
                 </div>
-                <p className="text-[10px] text-muted-foreground italic">
+                <p className="text-muted-foreground text-[10px] italic">
                   Diwarisi otomatis dari anggaran induk.
                 </p>
               </div>
@@ -367,7 +367,7 @@ export function BudgetForm({
           </div>
 
           {budgetType === "child" && (
-            <div className="space-y-4 pt-4 border-t">
+            <div className="space-y-4 border-t pt-4">
               <div className="flex items-center justify-between">
                 <FormLabel className="text-base">Alokasi per Meter</FormLabel>
                 <Button
@@ -394,7 +394,7 @@ export function BudgetForm({
                 {fields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="flex gap-2 items-start bg-background p-3 border rounded-xl shadow-sm"
+                    className="bg-background flex items-start gap-2 rounded-xl border p-3 shadow-sm"
                   >
                     <div className="flex-1">
                       <FormField
@@ -463,7 +463,7 @@ export function BudgetForm({
                 ))}
               </div>
 
-              <div className="mt-6 rounded-xl border-2 border-primary/10 overflow-hidden">
+              <div className="border-primary/10 mt-6 overflow-hidden rounded-xl border-2">
                 <BudgetPreview />
               </div>
             </div>
@@ -471,11 +471,11 @@ export function BudgetForm({
         </div>
       </ScrollArea>
 
-      <DialogFooter className="sticky bottom-0 bg-background px-6 py-4 border-t">
+      <DialogFooter className="bg-background sticky bottom-0 border-t px-6 py-4">
         <Button
           type="submit"
           size="lg"
-          className="w-full md:w-auto px-12"
+          className="w-full px-12 md:w-auto"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Memproses..." : "Simpan Anggaran"}

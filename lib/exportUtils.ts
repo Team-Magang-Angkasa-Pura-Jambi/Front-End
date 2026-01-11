@@ -5,7 +5,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
 import { saveAs } from "file-saver";
-import type { RecapSummary } from "@/modules/UsageSummary/type";
+import { RecapSummary } from "@/modules/UsageSummary/types/recap.type";
 
 interface ExportOptions {
   title: string;

@@ -104,45 +104,45 @@ const allLinks = [
 // KOMPONEN DEKORASI BARU (Tech Tattoos)
 const TechDecorations = () => {
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none">
       {/* 1. Grid Background (Base Texture) - Sudah ada sebelumnya, diperhalus */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.15] dark:opacity-[0.1]" />
 
       {/* 2. Top Right HUD Block (Status Indikator) */}
       <div className="absolute top-0 right-0 p-8 opacity-40">
         <div className="flex flex-col items-end gap-1">
-          <div className="h-1 w-16 bg-primary/40 rounded-full" />
+          <div className="bg-primary/40 h-1 w-16 rounded-full" />
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-mono text-primary/60 tracking-[0.2em] uppercase">
+            <span className="text-primary/60 font-mono text-[9px] tracking-[0.2em] uppercase">
               Sys.Online
             </span>
-            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            <div className="bg-primary h-1.5 w-1.5 animate-pulse rounded-full" />
           </div>
         </div>
         {/* Corner Bracket */}
-        <div className="absolute top-6 right-6 w-16 h-16 border-t-2 border-r-2 border-primary/20 rounded-tr-xl" />
+        <div className="border-primary/20 absolute top-6 right-6 h-16 w-16 rounded-tr-xl border-t-2 border-r-2" />
       </div>
 
       {/* 3. Bottom Left Coordinates (Aviation Style) */}
       <div className="absolute bottom-8 left-8 opacity-30">
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
-            <Crosshair className="w-3 h-3 text-primary/50" />
+          <div className="text-muted-foreground flex items-center gap-2 font-mono text-[10px]">
+            <Crosshair className="text-primary/50 h-3 w-3" />
             <span>COORD: 01.62.S // 103.50.E</span>
           </div>
-          <div className="h-[1px] w-32 bg-gradient-to-r from-primary/30 to-transparent" />
+          <div className="from-primary/30 h-[1px] w-32 bg-gradient-to-r to-transparent" />
         </div>
       </div>
 
       {/* 4. Center/Large Circle (Abstract Radar) - Sangat Tipis */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full border border-primary/5 opacity-50 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full border border-dashed border-primary/10 opacity-30 pointer-events-none animate-[spin_60s_linear_infinite]" />
+      <div className="border-primary/5 pointer-events-none absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full border opacity-50" />
+      <div className="border-primary/10 pointer-events-none absolute top-1/2 left-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 animate-[spin_60s_linear_infinite] rounded-full border border-dashed opacity-30" />
 
       {/* 5. Decorative "Data Lines" di sisi kanan bawah */}
-      <div className="absolute bottom-20 right-0 flex flex-col gap-2 opacity-20">
-        <div className="w-12 h-[2px] bg-foreground/20" />
-        <div className="w-8 h-[2px] bg-foreground/20" />
-        <div className="w-16 h-[2px] bg-foreground/20" />
+      <div className="absolute right-0 bottom-20 flex flex-col gap-2 opacity-20">
+        <div className="bg-foreground/20 h-[2px] w-12" />
+        <div className="bg-foreground/20 h-[2px] w-8" />
+        <div className="bg-foreground/20 h-[2px] w-16" />
       </div>
     </div>
   );
@@ -174,10 +174,10 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm"
+          className="bg-background/80 fixed inset-0 z-[999] flex flex-col items-center justify-center backdrop-blur-sm"
         >
-          <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-          <p className="mt-4 text-sm font-medium text-muted-foreground">
+          <Loader2 className="text-muted-foreground h-10 w-10 animate-spin" />
+          <p className="text-muted-foreground mt-4 text-sm font-medium">
             Memuat Sesi...
           </p>
         </motion.div>
@@ -188,12 +188,12 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       className={cn(
-        "flex h-screen w-full flex-col overflow-hidden bg-background md:flex-row"
+        "bg-background flex h-screen w-full flex-col overflow-hidden md:flex-row"
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-5 bg-card border-r border-border">
-          <div className="flex flex-1 flex-col overflow-y-auto overflow-hidden">
+        <SidebarBody className="bg-card border-border justify-between gap-5 border-r">
+          <div className="flex flex-1 flex-col overflow-hidden overflow-y-auto">
             <Logo />
             <motion.div
               className="mt-8 flex flex-col gap-1"
@@ -234,10 +234,10 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
                 onClick={handleLogout}
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 group transition-all duration-200"
+                  "text-muted-foreground hover:text-destructive hover:bg-destructive/10 group w-full justify-start transition-all duration-200"
                 )}
               >
-                <LogOut className="h-5 w-5 shrink-0 mr-2 text-muted-foreground group-hover:text-destructive transition-colors" />
+                <LogOut className="text-muted-foreground group-hover:text-destructive mr-2 h-5 w-5 shrink-0 transition-colors" />
                 <span className={cn("font-medium", !open && "hidden")}>
                   Logout
                 </span>
@@ -246,11 +246,11 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
 
             <motion.div
               className={cn(
-                "flex flex-col border-t border-border pt-4 text-[10px] text-muted-foreground transition-all duration-300",
-                !open ? "opacity-0 h-0 overflow-hidden" : "px-2 opacity-100"
+                "border-border text-muted-foreground flex flex-col border-t pt-4 text-[10px] transition-all duration-300",
+                !open ? "h-0 overflow-hidden opacity-0" : "px-2 opacity-100"
               )}
             >
-              <p className="font-bold text-foreground uppercase tracking-wider text-[9px]">
+              <p className="text-foreground text-[9px] font-bold tracking-wider uppercase">
                 Sultan Thaha Jambi
               </p>
               <p className="mt-0.5 font-medium">
@@ -258,7 +258,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
               </p>
               <p className="mt-2 opacity-70">
                 Developed by{" "}
-                <span className="font-semibold text-primary">
+                <span className="text-primary font-semibold">
                   Qulls Project
                 </span>
               </p>
@@ -268,7 +268,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
       </Sidebar>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
+      <main className="relative flex-1 overflow-y-auto p-4 md:p-8">
         {/* --- DEKORASI 'TECH TATTOOS' DISINI --- */}
         <TechDecorations />
 

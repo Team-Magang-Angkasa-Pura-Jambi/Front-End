@@ -31,15 +31,15 @@ function Calendar({
   const defaultClassNames = getDefaultClassNames();
 
   return (
-    <div className="relative group/calendar">
+    <div className="group/calendar relative">
       {/* DEKORASI BACKGROUND (Grid Pattern) */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:16px_16px] opacity-[0.05] pointer-events-none rounded-lg" />
+      <div className="pointer-events-none absolute inset-0 rounded-lg bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:16px_16px] opacity-[0.05]" />
 
       <DayPicker
         showOutsideDays={showOutsideDays}
         className={cn(
-          "p-4 bg-card/95 backdrop-blur-sm border border-border shadow-xl rounded-lg relative overflow-hidden",
-          "border-t-[3px] border-t-primary",
+          "bg-card/95 border-border relative overflow-hidden rounded-lg border p-4 shadow-xl backdrop-blur-sm",
+          "border-t-primary border-t-[3px]",
           className
         )}
         captionLayout={captionLayout}
@@ -106,8 +106,8 @@ function Calendar({
               orientation === "left"
                 ? ChevronLeftIcon
                 : orientation === "right"
-                ? ChevronRightIcon
-                : ChevronDownIcon;
+                  ? ChevronRightIcon
+                  : ChevronDownIcon;
             return <Icon className={cn("size-4", className)} {...props} />;
           },
           DayButton: CalendarDayButton,
@@ -148,21 +148,21 @@ function CalendarDayButton({
 
         (isSelected || isRangeStart || isRangeEnd) &&
           !isRangeMiddle &&
-          "bg-primary text-primary-foreground font-bold shadow-[0_0_10px_rgba(var(--primary),0.5)] hover:bg-primary hover:text-primary-foreground rounded-md z-10 scale-105",
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground z-10 scale-105 rounded-md font-bold shadow-[0_0_10px_rgba(var(--primary),0.5)]",
 
         isRangeMiddle &&
-          "bg-primary/10 text-primary rounded-none hover:bg-primary/20",
+          "bg-primary/10 text-primary hover:bg-primary/20 rounded-none",
 
         isToday &&
           !isSelected &&
-          "border border-primary/50 text-primary bg-primary/5 font-semibold",
+          "border-primary/50 text-primary bg-primary/5 border font-semibold",
 
         !isSelected &&
           !isRangeMiddle &&
-          "hover:bg-muted hover:border hover:border-primary/30 hover:text-foreground",
+          "hover:bg-muted hover:border-primary/30 hover:text-foreground hover:border",
 
         isRangeStart && "rounded-l-md rounded-r-none",
-        isRangeEnd && "rounded-r-md rounded-l-none",
+        isRangeEnd && "rounded-l-none rounded-r-md",
 
         defaultClassNames.day,
         className

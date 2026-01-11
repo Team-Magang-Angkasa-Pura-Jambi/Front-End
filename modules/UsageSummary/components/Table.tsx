@@ -76,7 +76,7 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border bg-card">
+      <div className="bg-card rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -84,7 +84,7 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="font-semibold text-foreground"
+                    className="text-foreground font-semibold"
                   >
                     {header.isPlaceholder
                       ? null
@@ -128,7 +128,7 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-32 text-center text-muted-foreground"
+                  className="text-muted-foreground h-32 text-center"
                 >
                   Data tidak ditemukan untuk periode ini.
                 </TableCell>
@@ -142,7 +142,7 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
                 {/* Penyesuaian Kolom Footer berdasarkan tipe energi */}
                 <TableCell
                   colSpan={columns.length - 3}
-                  className="font-bold text-right pr-6"
+                  className="pr-6 text-right font-bold"
                 >
                   Akumulasi Total
                 </TableCell>
@@ -157,10 +157,10 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
                   {meta?.totalPax ? formatInt(meta.totalPax) : "-"}
                 </TableCell>
 
-                <TableCell className="font-bold min-w-[200px]">
+                <TableCell className="min-w-[200px] font-bold">
                   <div className="flex flex-col gap-1">
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
                         DPP (Netto)
                       </span>
                       <span>
@@ -169,8 +169,8 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
                           : "-"}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center gap-2 border-t pt-1 mt-1 border-muted-foreground/20">
-                      <span className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground">
+                    <div className="border-muted-foreground/20 mt-1 flex items-center justify-between gap-2 border-t pt-1">
+                      <span className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
                         Total Bruto
                       </span>
                       <span className="text-primary">
@@ -187,7 +187,7 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
 
       {/* Pagination */}
       <div className="flex items-center justify-between px-2">
-        <div className="text-sm text-muted-foreground">
+        <div className="text-muted-foreground text-sm">
           Menampilkan {table.getRowModel().rows.length} baris data
         </div>
         <div className="flex items-center space-x-2">

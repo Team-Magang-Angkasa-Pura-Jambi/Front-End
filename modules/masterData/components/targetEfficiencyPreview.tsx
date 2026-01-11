@@ -41,14 +41,14 @@ const SuggestionCard = ({
     : "text-blue-800 dark:text-blue-300";
 
   return (
-    <div className={cn("mt-2 text-xs p-2 border rounded-md", bgColor)}>
+    <div className={cn("mt-2 rounded-md border p-2 text-xs", bgColor)}>
       <p className={cn("mb-1", textColor)}>{message}</p>
       <Button
         type="button"
         variant="link"
         size="sm"
         className={cn(
-          "p-0 h-auto font-semibold",
+          "h-auto p-0 font-semibold",
           isEfficiency ? "text-green-600" : "text-blue-600"
         )}
         onClick={() => onApply(value)}
@@ -144,7 +144,7 @@ export const TargetEfficiencyPreview = () => {
     );
 
   return (
-    <Card className="col-span-2 mt-4 border-dashed bg-muted/50 transition-all">
+    <Card className="bg-muted/50 col-span-2 mt-4 border-dashed transition-all">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">
           Pratinjau & Estimasi
@@ -153,7 +153,7 @@ export const TargetEfficiencyPreview = () => {
 
       <CardContent>
         {!canFetchPreview && !isLoading && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Lengkapi data meter, target, dan periode untuk melihat estimasi
             biaya.
           </p>
@@ -168,7 +168,7 @@ export const TargetEfficiencyPreview = () => {
 
         {isError && (
           <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-            <p className="font-semibold flex items-center gap-2">
+            <p className="flex items-center gap-2 font-semibold">
               <AlertTriangle className="h-4 w-4" /> Gagal memuat pratinjau
             </p>
             <p className="mt-1 text-xs opacity-90">
@@ -188,7 +188,7 @@ export const TargetEfficiencyPreview = () => {
               )}
 
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-muted-foreground text-sm font-medium">
                   Estimasi Total Biaya
                 </p>
                 <p
@@ -203,7 +203,7 @@ export const TargetEfficiencyPreview = () => {
                 </p>
 
                 {previewData?.budget ? (
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     Sisa Anggaran:{" "}
                     <span
                       className={cn(
@@ -215,7 +215,7 @@ export const TargetEfficiencyPreview = () => {
                     </span>
                   </p>
                 ) : (
-                  <p className="mt-1 text-xs text-muted-foreground italic">
+                  <p className="text-muted-foreground mt-1 text-xs italic">
                     Tidak ada data anggaran untuk periode ini.
                   </p>
                 )}
@@ -225,32 +225,32 @@ export const TargetEfficiencyPreview = () => {
             {/* --- Calculation Details (UPDATED PATHS) --- */}
             <div className="mt-4 grid grid-cols-2 gap-4 border-t pt-4 text-xs sm:grid-cols-2">
               <div>
-                <span className="block text-muted-foreground">
+                <span className="text-muted-foreground block">
                   Total Konsumsi
                 </span>
-                <span className="font-semibold text-foreground">
+                <span className="text-foreground font-semibold">
                   {formatUnit(inputTotalKwh)} {unitName}
                 </span>
               </div>
               <div>
-                <span className="block text-muted-foreground">Durasi</span>
-                <span className="font-semibold text-foreground">
+                <span className="text-muted-foreground block">Durasi</span>
+                <span className="text-foreground font-semibold">
                   {totalDays} Hari
                 </span>
               </div>
               <div>
-                <span className="block text-muted-foreground">
+                <span className="text-muted-foreground block">
                   Rata-rata Harian
                 </span>
-                <span className="font-semibold text-foreground">
+                <span className="text-foreground font-semibold">
                   {formatUnit(dailyTarget)} {unitName}/hari
                 </span>
               </div>
               <div>
-                <span className="block text-muted-foreground">
+                <span className="text-muted-foreground block">
                   Harga Rata-rata
                 </span>
-                <span className="font-semibold text-foreground">
+                <span className="text-foreground font-semibold">
                   {formatCurrency(previewData?.preview?.avgPricePerUnit ?? 0)} /{" "}
                   {unitName}
                 </span>
@@ -261,7 +261,7 @@ export const TargetEfficiencyPreview = () => {
             {(previewData?.suggestion?.standard ||
               previewData?.suggestion?.efficiency) && (
               <div className="mt-4 space-y-2 border-t pt-2">
-                <p className="text-xs font-semibold text-muted-foreground">
+                <p className="text-muted-foreground text-xs font-semibold">
                   Rekomendasi AI
                 </p>
 

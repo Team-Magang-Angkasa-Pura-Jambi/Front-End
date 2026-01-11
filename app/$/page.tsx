@@ -18,18 +18,18 @@ import { Home, Map, TreePine, ZapOff } from "lucide-react";
  */
 export default function NotFoundEnergyPage() {
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md transform-gpu animate-fade-in-down">
+    <div className="bg-background flex min-h-screen w-full items-center justify-center p-4">
+      <Card className="animate-fade-in-down w-full max-w-md transform-gpu">
         <CardHeader className="items-center text-center">
           {/* Visualisasi Tema: Ikon yang menceritakan kisah */}
-          <div className="mb-4 flex items-center justify-center space-x-4 text-primary">
+          <div className="text-primary mb-4 flex items-center justify-center space-x-4">
             <TreePine size={48} strokeWidth={1.5} />
             <div className="flex flex-col items-center">
               <ZapOff size={64} strokeWidth={1.5} />
               <Map
                 size={32}
                 strokeWidth={1.5}
-                className="-mt-2 text-muted-foreground"
+                className="text-muted-foreground -mt-2"
               />
             </div>
             <TreePine size={48} strokeWidth={1.5} />
@@ -43,7 +43,7 @@ export default function NotFoundEnergyPage() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="text-center text-muted-foreground">
+        <CardContent className="text-muted-foreground text-center">
           <p>
             Sepertinya Anda tersesat di hutan belantara digital. Sama seperti
             Sir Miles Axlerod, Anda sedang berpetualang mencari sumber energi
