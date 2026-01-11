@@ -52,7 +52,6 @@ export function PriceSchemeForm({
   initialData,
   onSubmit,
   readingTypes,
-  taxes,
   isLoading,
 }: PriceSchemeFormProps) {
   const form = useForm<schemaFormValues>({

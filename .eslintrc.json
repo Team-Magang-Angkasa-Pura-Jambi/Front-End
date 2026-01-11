@@ -2,12 +2,11 @@
   "extends": [
     "next/core-web-vitals",
     "plugin:@tanstack/query/recommended",
-    "plugin:tailwindcss/recommended", // Tambahkan ini
+    "plugin:tailwindcss/recommended",
     "prettier"
   ],
   "plugins": ["simple-import-sort", "tailwindcss"],
   "rules": {
-    // 1. BEST PRACTICE TYPESCRIPT
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {
@@ -17,19 +16,14 @@
     ],
     "@typescript-eslint/no-explicit-any": "warn",
 
-    // 2. SORTING IMPORTS
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
 
-    // 3. TAILWIND LINTING (KHUSUS TAILWIND V4)
-    // Karena v4 tidak selalu butuh tailwind.config.js, rule ini sering error palsu.
-    // Sebaiknya dimatikan agar tidak mengganggu.
     "tailwindcss/no-custom-classname": "off",
 
-    // Biarkan Prettier yang mengurus urutan class
     "tailwindcss/classnames-order": "off"
   },
-  // ... (bagian overrides sama seperti sebelumnya)
+
   "overrides": [
     {
       "files": ["*.ts", "*.tsx"],

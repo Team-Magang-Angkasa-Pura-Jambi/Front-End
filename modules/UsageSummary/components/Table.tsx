@@ -21,7 +21,7 @@ import {
 } from "@/common/components/ui/table";
 import { Button } from "@/common/components/ui/button";
 import { Skeleton } from "@/common/components/ui/skeleton";
-import { ENERGY_TYPES, EnergyTypeName } from "@/common/types/energy";
+import { EnergyTypeName } from "@/common/types/energy";
 import { RecapDataRow, RecapMeta } from "../types/recap.type";
 
 interface RecapTableProps<TData, TValue> {
@@ -37,7 +37,6 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
   data,
   isLoading,
   meta,
-  dataType,
 }: RecapTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 

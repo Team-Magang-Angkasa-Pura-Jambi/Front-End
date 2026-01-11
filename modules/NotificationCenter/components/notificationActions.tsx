@@ -2,7 +2,6 @@
 import { CheckCheck, MailOpen, Trash2, ShieldAlert } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
 import { Checkbox } from "@/common/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 import { Separator } from "@/common/components/ui/separator";
 import {
   Tooltip,

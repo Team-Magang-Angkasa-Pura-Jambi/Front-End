@@ -2,9 +2,6 @@
 
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod"; // Impor Zod
-
-// --- Service dan Tipe ---
 import {
   getUsersApi,
   createUserApi,
@@ -39,25 +36,6 @@ import { UserForm } from "./UserForm";
 import { DeleteUserDialog } from "./DeleteUserDialog";
 import { DataTable } from "../../../common/components/table/dataTable";
 import RolesPage from "./role";
-
-// PERBAIKAN: Definisikan skema Zod untuk create dan update
-const createUserSchema = z.object({
-  username: z.string().min(3, "Username minimal 3 karakter."),
-  password: z.string().min(6, "Password minimal 6 karakter."),
-  role_id: z.number(),
-  is_active: z.boolean().default(true),
-});
-
-const updateUserSchema = z.object({
-  username: z.string().min(3, "Username minimal 3 karakter."),
-  password: z
-    .string()
-    .min(6, "Password minimal 6 karakter.")
-    .optional()
-    .or(z.literal("")), // Opsional saat update
-  role_id: z.number(),
-  is_active: z.boolean(),
-});
 
 export const Page = () => {
   const queryClient = useQueryClient();
@@ -99,7 +77,7 @@ export const Page = () => {
     onError: (error) => toast.error(`Gagal memperbarui data: ${error.message}`),
   });
 
-  const { mutate: deleteUser, isPending: isDeleting } = useMutation({
+  const { mutate: deleteUser } = useMutation({
     mutationFn: (userId: number) => deleteUserApi(userId),
     onSuccess: () => {
       toast.success("Pengguna berhasil dihapus.");
@@ -185,9 +163,8 @@ export const Page = () => {
           <UserForm
             onSubmit={handleFormSubmit}
             isPending={isCreating || isUpdating}
-            defaultValues={selectedUser}
-            // PERBAIKAN: Kirim skema yang sesuai ke komponen Form
-            schema={selectedUser ? updateUserSchema : createUserSchema}
+            defaultValues={selectedUser || undefined} // Pass defaultValues directly
+            // The schema prop is not needed here as it's handled internally by UserForm
           />
         </DialogContent>
       </Dialog>
@@ -198,7 +175,6 @@ export const Page = () => {
           onClose={() => setIsDeleteOpen(false)}
           onConfirm={() => deleteUser(selectedUser.user_id)}
           username={selectedUser.username}
-          isPending={isDeleting}
         />
       )}
     </div>

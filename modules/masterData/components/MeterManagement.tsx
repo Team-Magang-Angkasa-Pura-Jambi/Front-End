@@ -153,11 +153,31 @@ export const MeterManagement = () => {
     AxiosError<ApiErrorResponse>,
     MeterFormValues
   >({
-    mutationFn: (meterData) => {
+    mutationFn: (meterData: MeterFormValues) => {
+      // Ensure tank_height_cm and tank_volume_liters are not null if present
+      const payload = {
+        ...meterData,
+        // Jika null, ubah jadi undefined. Jika ada angka, biarkan angka.
+        rollover_limit:
+          meterData.rollover_limit === null
+            ? undefined
+            : meterData.rollover_limit,
+
+        // Lakukan hal yang sama untuk field lain yang mungkin null
+        tank_height_cm:
+          meterData.tank_height_cm === null
+            ? undefined
+            : meterData.tank_height_cm,
+        tank_volume_liters:
+          meterData.tank_volume_liters === null
+            ? undefined
+            : meterData.tank_volume_liters,
+      };
+
       if (editingMeter?.meter_id) {
-        return updateMeterApi(editingMeter.meter_id, meterData);
+        return updateMeterApi(editingMeter.meter_id, payload);
       }
-      return createMeterApi(meterData);
+      return createMeterApi(payload);
     },
     onSuccess: () => {
       const action = editingMeter ? "diperbarui" : "disimpan";

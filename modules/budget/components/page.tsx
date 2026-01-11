@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState } from "react";
 import { PlusCircle, Search } from "lucide-react";
-import { RowData } from "@tanstack/react-table";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/common/components/ui/button";

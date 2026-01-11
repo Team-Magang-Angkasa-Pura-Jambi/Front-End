@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
-import { id } from "date-fns/locale";
+import { id } from "date-fns/locale"; // Make sure this is imported
 import {
   Card,
   CardHeader,
@@ -52,7 +52,6 @@ import {
 } from "@/services/users.service";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ✅ Skema validasi form
 const formSchema = z.object({
   username: z.string().min(3, "Username minimal 3 karakter"),
   password: z
@@ -70,7 +69,6 @@ export const ProfilePage = () => {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // ✅ Ambil data user
   const { data: userProfileData, isLoading } = useQuery({
     queryKey: ["user", user?.id],
     queryFn: () => getUserApi(user!.id),
@@ -78,15 +76,12 @@ export const ProfilePage = () => {
     refetchOnWindowFocus: false,
   });
 
-  // ✅ Ambil riwayat aktivitas user
   const { data: activitiesData, isLoading: isLoadingActivities } = useQuery({
     queryKey: ["userActivities", user?.id],
     queryFn: () => getUserActivitiesApi(user!.id),
     enabled: !!user?.id,
-    select: (data) => data.data.history,
   });
 
-  // ✅ Setup react-hook-form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     values: {
@@ -102,10 +97,9 @@ export const ProfilePage = () => {
       );
       return updateUserApi(user!.id, payload);
     },
-    onSuccess: (res) => {
-      toast.success("Profil berhasil diperbarui!");
+    onSuccess: (response) => {
+      toast.success(response.status.message);
 
-      // 🔁 Refetch otomatis dengan cara invalidasi cache query
       queryClient.invalidateQueries({ queryKey: ["user", user!.id] });
 
       setIsEditing(false);
@@ -118,14 +112,10 @@ export const ProfilePage = () => {
     },
   });
 
-  const userActivities = useMemo(() => {
-    if (!activitiesData) return [];
-    return activitiesData.map((a, i: number) => ({
-      id: `${a.type}-${i}`,
-      description: a.description,
-      createdAt: new Date(a.timestamp),
-    }));
-  }, [activitiesData]);
+  const userActivities = useMemo(
+    () => activitiesData?.data || [],
+    [activitiesData?.data]
+  );
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const hasUsernameChanged =
@@ -192,9 +182,13 @@ export const ProfilePage = () => {
                 <span>Bergabung</span>
                 <span>
                   {profile?.created_at ? (
-                    format(new Date(profile.created_at), "d MMMM yyyy", {
-                      locale: id,
-                    })
+                    format(
+                      new Date(profile.created_at.replace(" ", "T")), // Fix for Safari/SQL dates
+                      "d MMMM yyyy",
+                      {
+                        locale: id,
+                      }
+                    )
                   ) : (
                     <span className="text-muted-foreground">-</span>
                   )}
@@ -292,12 +286,17 @@ export const ProfilePage = () => {
                       <XCircle className="mr-2 h-4 w-4" /> Batal
                     </Button>
                     <Button type="submit" disabled={isPending}>
-                      {isPending ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="mr-2 h-4 w-4" />
-                      )}
-                      Simpan
+                      {/* 1. Bungkus Logika Ikon dalam span sendiri */}
+                      <span className="mr-2 inline-flex items-center">
+                        {isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Save className="h-4 w-4" />
+                        )}
+                      </span>
+
+                      {/* 2. PENTING: Bungkus teks "Simpan" dalam span juga */}
+                      <span>Simpan</span>
                     </Button>
                   </>
                 ) : (
@@ -325,10 +324,14 @@ export const ProfilePage = () => {
                     <li key={a.id} className="mb-4">
                       <p className="font-medium">{a.description}</p>
                       <p className="text-muted-foreground text-xs">
-                        {formatDistanceToNow(new Date(a.createdAt), {
-                          addSuffix: true,
-                          locale: id,
-                        })}
+                        {/* FIX: Use .replace to ensure ISO format compatibility */}
+                        {formatDistanceToNow(
+                          new Date(a.timestamp.replace(" ", "T")),
+                          {
+                            addSuffix: true,
+                            locale: id,
+                          }
+                        )}
                       </p>
                     </li>
                   ))}

@@ -2,8 +2,9 @@
 import React, { useState, createContext, useContext } from "react";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import Link, { LinkProps } from "next/link";
-import { cn } from "@/lib/utils"; // Pastikan path utils Anda benar
+import { cn } from "@/lib/utils";
 import { AnimatePresence, motion, HTMLMotionProps } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile"; // 👈 Pastikan path ini benar
 
 // --- Types ---
 interface Links {
@@ -22,6 +23,7 @@ interface SidebarContextProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   animate: boolean;
+  isMobile: boolean; // 👈 Menambahkan isMobile ke Context
 }
 
 // --- Context ---
@@ -50,12 +52,14 @@ export const SidebarProvider = ({
   animate?: boolean;
 }) => {
   const [openState, setOpenState] = useState(false);
-
   const open = openProp !== undefined ? openProp : openState;
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
 
+  // 1. Panggil Hook useIsMobile di sini
+  const isMobile = useIsMobile();
+
   return (
-    <SidebarContext.Provider value={{ open, setOpen, animate }}>
+    <SidebarContext.Provider value={{ open, setOpen, animate, isMobile }}>
       {children}
     </SidebarContext.Provider>
   );
@@ -72,12 +76,10 @@ export const Sidebar = (props: {
   return <SidebarProvider {...props}>{props.children}</SidebarProvider>;
 };
 
-// SidebarBody menerima props animasi, tapi memilahnya untuk child components
 export const SidebarBody = (props: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <>
       <DesktopSidebar {...props} />
-
       <MobileSidebar {...props} />
     </>
   );
@@ -155,7 +157,6 @@ export const MobileSidebar = ({
   );
 };
 
-// Menggunakan LinkProps dari next/link untuk type safety yang lebih baik
 export const SidebarLink = ({
   link,
   className,
@@ -164,11 +165,18 @@ export const SidebarLink = ({
 }: SidebarLinkProps &
   Omit<LinkProps, "href"> &
   React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-  const { open, animate } = useSidebar();
+  // 2. Ambil isMobile dari context
+  const { open, setOpen, animate, isMobile } = useSidebar();
 
   return (
     <Link
       href={link.href}
+      // 3. Tambahkan logic: Jika Mobile, tutup sidebar saat diklik
+      onClick={() => {
+        if (isMobile) {
+          setOpen(false);
+        }
+      }}
       className={cn(
         "group/sidebar relative flex items-center justify-start gap-3 overflow-hidden rounded-md px-3 py-2.5",
         "mb-1 transition-all duration-300 ease-in-out",

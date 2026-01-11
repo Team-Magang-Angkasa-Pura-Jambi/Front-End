@@ -17,7 +17,6 @@ import {
   Thermometer,
   Users,
   BrainCircuit,
-  Tags,
   Zap,
   Loader2,
 } from "lucide-react";

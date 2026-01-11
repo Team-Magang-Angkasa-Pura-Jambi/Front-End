@@ -1,9 +1,7 @@
-// src/modules/RecapData/lib/recapExport.ts
-
 import ExcelJS from "exceljs";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { saveAs } from "file-saver";
 import { RecapSummary } from "@/modules/UsageSummary/types/recap.type";
 
@@ -19,7 +17,12 @@ interface ColumnDefinition {
   dataKey: string;
 }
 
-// --- Formatter Centralized ---
+interface jsPDFWithPlugin extends jsPDF {
+  lastAutoTable?: {
+    finalY: number;
+  };
+}
+
 const currencyFormatter = new Intl.NumberFormat("id-ID", {
   style: "currency",
   currency: "IDR",
@@ -33,22 +36,25 @@ const numberFormatter = new Intl.NumberFormat("id-ID", {
 
 const formatPdfValue = (value: unknown, key: string): string => {
   if (value === null || value === undefined) return "-";
-  if (key === "date") return format(new Date(value as string), "d MMM yyyy");
+
+  if (key === "date") {
+    const date = new Date(value as string | number | Date);
+    return isValid(date) ? format(date, "d MMM yyyy") : "-";
+  }
 
   const num = Number(value);
   if (isNaN(num)) return String(value);
 
-  return key.includes("cost") || key === "cost"
-    ? currencyFormatter.format(num)
-    : numberFormatter.format(num);
+  if (key === "cost" || key.toLowerCase().includes("cost")) {
+    return currencyFormatter.format(num);
+  }
+
+  return numberFormatter.format(num);
 };
 
-// ====================================================================
-// EXCEL EXPORT
-// ====================================================================
 export const exportToExcel = async (
   columns: ColumnDefinition[],
-  data: unknown[],
+  data: [],
   options: ExportOptions,
   fileName: string,
   summary?: RecapSummary,
@@ -57,17 +63,19 @@ export const exportToExcel = async (
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(options.sheetName || "Data");
 
-  // Frozen panes untuk header
   worksheet.views = [{ state: "frozen", xSplit: 0, ySplit: 5 }];
 
-  // --- Styling Constants ---
   const PRIMARY_BLUE = "FF0D47A1";
   const WHITE = "FFFFFFFF";
 
-  // --- Title & Logo ---
   if (logoBase64) {
-    const logoId = workbook.addImage({ base64: logoBase64, extension: "png" });
-    worksheet.addImage(logoId, "A1:B2");
+    const ext = logoBase64.includes("image/jpeg") ? "jpeg" : "png";
+    const logoId = workbook.addImage({ base64: logoBase64, extension: ext });
+
+    worksheet.addImage(logoId, {
+      tl: { col: 0, row: 0 },
+      ext: { width: 100, height: 40 },
+    });
   }
 
   worksheet.mergeCells("C1:H2");
@@ -76,8 +84,17 @@ export const exportToExcel = async (
   titleCell.font = { size: 18, bold: true, color: { argb: PRIMARY_BLUE } };
   titleCell.alignment = { vertical: "middle", horizontal: "left" };
 
-  // --- Header Row ---
-  const headerRow = worksheet.addRow(columns.map((c) => c.header));
+  if (options.subtitle) {
+    worksheet.mergeCells("C3:H3");
+    const subCell = worksheet.getCell("C3");
+    subCell.value = options.subtitle;
+    subCell.font = { size: 11, italic: true };
+  }
+
+  const headerRowIndex = 5;
+  const headerRow = worksheet.getRow(headerRowIndex);
+  headerRow.values = columns.map((c) => c.header);
+
   headerRow.height = 25;
   headerRow.eachCell((cell) => {
     cell.fill = {
@@ -95,17 +112,23 @@ export const exportToExcel = async (
     };
   });
 
-  // --- Data Rows ---
   data.forEach((item) => {
     const rowValues = columns.map((col) => item[col.dataKey]);
     const dataRow = worksheet.addRow(rowValues);
-    dataRow.eachCell((cell, colIndex) => {
-      const key = columns[colIndex - 1].dataKey;
 
-      // Formatting Excel Cells
-      if (key === "date") cell.numFmt = "dd mmm yyyy";
-      else if (key.includes("cost")) cell.numFmt = '"Rp"#,##0';
-      else if (typeof cell.value === "number") cell.numFmt = "#,##0.00";
+    dataRow.eachCell((cell, colIndex) => {
+      const colDef = columns[colIndex - 1];
+      if (!colDef) return;
+
+      const key = colDef.dataKey;
+
+      if (key === "date") {
+        cell.numFmt = "dd mmm yyyy";
+      } else if (key.toLowerCase().includes("cost")) {
+        cell.numFmt = '"Rp"#,##0';
+      } else if (typeof cell.value === "number") {
+        cell.numFmt = "#,##0.00";
+      }
 
       cell.border = {
         top: { style: "thin" },
@@ -116,13 +139,14 @@ export const exportToExcel = async (
     });
   });
 
-  // --- Summary Section ---
   if (summary) {
-    worksheet.addRow([]); // Spacer
+    worksheet.addRow([]);
     const summaryStartRow = worksheet.rowCount + 1;
+
     worksheet.mergeCells(summaryStartRow, 1, summaryStartRow, 2);
-    worksheet.getCell(summaryStartRow, 1).value = "RINGKASAN EKSEKUTIF";
-    worksheet.getCell(summaryStartRow, 1).font = { bold: true, size: 12 };
+    const titleCell = worksheet.getCell(summaryStartRow, 1);
+    titleCell.value = "RINGKASAN EKSEKUTIF";
+    titleCell.font = { bold: true, size: 12 };
 
     const items = [
       { l: "Total Konsumsi", v: summary.totalConsumption, f: "#,##0.00" },
@@ -147,27 +171,24 @@ export const exportToExcel = async (
     });
   }
 
-  // --- Auto-fit Column Width ---
   worksheet.columns.forEach((column) => {
-    column.width = 18;
+    column.width = 20;
   });
 
   const buffer = await workbook.xlsx.writeBuffer();
   saveAs(new Blob([buffer]), `${fileName}.xlsx`);
 };
 
-// ====================================================================
-// PDF EXPORT
-// ====================================================================
 export const exportToPdf = (
   columns: ColumnDefinition[],
-  data: unknown[],
+  data: [],
   options: ExportOptions,
   fileName: string,
   summary?: RecapSummary,
   logoBase64?: string
 ) => {
-  const doc = new jsPDF("p", "pt", "a4");
+  const doc = new jsPDF("p", "pt", "a4") as jsPDFWithPlugin;
+
   const tableData = data.map((item) =>
     columns.map((col) => formatPdfValue(item[col.dataKey], col.dataKey))
   );
@@ -181,8 +202,9 @@ export const exportToPdf = (
     styles: { fontSize: 7, cellPadding: 4 },
     headStyles: { fillColor: [13, 71, 161], halign: "center" },
     didDrawPage: (data) => {
-      // Header Page
-      if (logoBase64) doc.addImage(logoBase64, "PNG", 450, 20, 100, 40);
+      if (logoBase64) {
+        doc.addImage(logoBase64, "PNG", 450, 20, 100, 40);
+      }
       doc.setFontSize(18).setTextColor(13, 71, 161).text(options.title, 40, 45);
       doc
         .setFontSize(10)
@@ -192,7 +214,8 @@ export const exportToPdf = (
   });
 
   if (summary) {
-    const finalY = (doc as unknown).lastAutoTable.finalY + 30;
+    const finalY = (doc.lastAutoTable?.finalY || 100) + 30;
+
     doc.setFontSize(11).setTextColor(0).text("Ringkasan Laporan:", 40, finalY);
 
     autoTable(doc, {

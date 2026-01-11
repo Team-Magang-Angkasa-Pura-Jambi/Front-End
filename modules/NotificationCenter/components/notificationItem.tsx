@@ -170,7 +170,7 @@ export const NotificationItem = React.forwardRef<
             <div className="bg-primary/5 border-primary/10 flex items-center gap-1.5 rounded-full border px-2 py-1">
               <User className="text-primary h-3 w-3" />
               <span className="text-muted-foreground text-[10px] font-medium tracking-tight uppercase">
-                Verified by{" "}
+                Verified by
                 <span className="text-foreground ml-0.5 font-bold">
                   {notification.acknowledged_by.username}
                 </span>

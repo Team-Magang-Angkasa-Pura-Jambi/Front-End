@@ -148,7 +148,13 @@ const NotificationCenterPage = () => {
   const handleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {
       const newSet = new Set(prev);
-      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+
       return newSet;
     });
   }, []);
