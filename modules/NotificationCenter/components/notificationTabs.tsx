@@ -4,10 +4,10 @@ import { TabsList, TabsTrigger } from "@/common/components/ui/tabs";
 
 export const NotificationTabs = () => (
   <TabsList className="grid w-full grid-cols-3">
-    <TabsTrigger value="all">
+    <TabsTrigger value="generals">
       <Bell className="mr-2 h-4 w-4" /> Semua
     </TabsTrigger>
-    <TabsTrigger value="meter">
+    <TabsTrigger value="meters">
       <Gauge className="mr-2 h-4 w-4" /> Alert Meter
     </TabsTrigger>
     <TabsTrigger value="system">

@@ -77,10 +77,10 @@ export const SidebarBody = (props: HTMLMotionProps<"div">) => {
   return (
     <>
       <DesktopSidebar {...props} />
-      {/* MobileSidebar adalah div biasa, jadi kita filter props animasi 
-         dengan casting ke HTMLAttributes agar TypeScript tidak error 
-      */}
-      <MobileSidebar {...(props as React.HTMLAttributes<HTMLDivElement>)} />
+
+      <MobileSidebar
+        {...(props as unknown as React.HTMLAttributes<HTMLDivElement>)}
+      />
     </>
   );
 };

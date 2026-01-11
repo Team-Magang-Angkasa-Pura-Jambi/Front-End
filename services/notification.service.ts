@@ -43,6 +43,7 @@ export interface Alert {
   description: string;
   link?: string;
   is_read: boolean;
+
   created_at: string;
 }
 
@@ -50,6 +51,9 @@ export interface Alert {
 export type NotificationOrAlert = (GeneralNotification | Alert) & {
   id: string;
   type: "notification" | "alert";
+  message: string;
+  status: string;
+  acknowledged_by: { username: string };
 };
 
 export const fetchTodaySummaryApi =
@@ -100,6 +104,8 @@ export const markAsReadApi = async (
   const response = await api.patch(
     `/notifications/${notificationId}/mark-as-read`
   );
+  // console.log(response);
+
   return response.data;
 };
 
@@ -126,7 +132,7 @@ export const markAllAsReadApi = async (
 };
 
 export const bulkDeleteNotificationsApi = async (
-  notificationIds: string[]
+  notificationIds: number[]
 ): Promise<ApiResponse<null>> => {
   const response = await api.post("/notifications/bulk-delete", {
     notificationIds,
@@ -135,7 +141,7 @@ export const bulkDeleteNotificationsApi = async (
 };
 
 export const bulkDeleteAlertsApi = async (params: {
-  alertIds: string[]; // Scope tidak lagi diperlukan
+  alertIds: string[];
 }): Promise<ApiResponse<null>> => {
   const { alertIds } = params;
   const response = await api.post("/alerts/bulk-delete", {
