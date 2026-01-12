@@ -16,7 +16,15 @@ const springConfig = {
   mass: 2,
 };
 
-export const Bubble = ({ size, style, delay }) => {
+export const Bubble = ({
+  size,
+  style,
+  delay,
+}: {
+  size: number;
+  style: React.CSSProperties;
+  delay: number;
+}) => {
   const [mouse] = useMouse();
 
   const { width, height } = useWindowSize();
@@ -64,7 +72,7 @@ export const Bubble = ({ size, style, delay }) => {
 
   return (
     <motion.div
-      className="absolute rounded-full bg-white/10 border border-white/20 backdrop-blur-sm transition-transform duration-300 ease-out"
+      className="absolute rounded-full border border-white/20 bg-white/10 backdrop-blur-sm transition-transform duration-300 ease-out"
       style={{
         width: size,
         height: size,

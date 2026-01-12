@@ -56,14 +56,14 @@ export const ModernEfficiencyDashboard = () => {
 
   return (
     // PERBAIKAN: Gunakan bg-card dan border-border
-    <Card className="col-span-12 shadow-md border-none ring-1 ring-border overflow-hidden bg-card">
-      <CardHeader className="flex flex-row items-center justify-between border-b border-border bg-muted/30">
-        <div className="space-y-1 w-full">
-          <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+    <Card className="ring-border bg-card col-span-12 overflow-hidden border-none shadow-md ring-1">
+      <CardHeader className="border-border bg-muted/30 flex flex-row items-center justify-between border-b">
+        <div className="w-full space-y-1">
+          <CardTitle className="text-foreground flex items-center gap-2 text-sm font-bold">
             Health Check: Indeks Efisiensi Harian
           </CardTitle>
           <div className="flex items-center gap-2">
-            <div className="flex-1 max-w-[200px]">
+            <div className="max-w-[200px] flex-1">
               {isLoadingMeters ? (
                 <Skeleton className="h-8 w-full rounded-md" />
               ) : (
@@ -73,7 +73,7 @@ export const ModernEfficiencyDashboard = () => {
                   disabled={isLoadingMeters}
                 >
                   {/* PERBAIKAN: bg-card agar adaptif */}
-                  <SelectTrigger className="text-xs bg-card border-border h-8">
+                  <SelectTrigger className="bg-card border-border h-8 text-xs">
                     <SelectValue placeholder="Pilih Meteran Listrik" />
                   </SelectTrigger>
                   <SelectContent>
@@ -85,7 +85,7 @@ export const ModernEfficiencyDashboard = () => {
                       >
                         <div className="flex items-center gap-2">
                           {/* Icon bisa tetap warnanya jika ingin spesifik, atau gunakan text-primary */}
-                          <Zap className="w-3 h-3 text-amber-500" />
+                          <Zap className="h-3 w-3 text-amber-500" />
                           <span>{meter.meter_code}</span>
                         </div>
                       </SelectItem>
@@ -100,7 +100,7 @@ export const ModernEfficiencyDashboard = () => {
                 <Skeleton className="h-8 w-full rounded-md" />
               ) : (
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="text-xs bg-card border-border h-8">
+                  <SelectTrigger className="bg-card border-border h-8 text-xs">
                     <SelectValue placeholder="Tahun" />
                   </SelectTrigger>
                   <SelectContent>
@@ -126,20 +126,20 @@ export const ModernEfficiencyDashboard = () => {
           <ComponentLoader />
         ) : (
           <>
-            <div className="w-full overflow-x-auto p-2 scrollbar-hide">
-              <div className="flex gap-4 min-w-max mx-auto px-2">
+            <div className="scrollbar-hide w-full overflow-x-auto p-2">
+              <div className="mx-auto flex min-w-max gap-4 px-2">
                 <TooltipProvider>
                   {groupedData.map((month) => (
                     <div key={month.monthName} className="flex flex-col gap-2">
                       {/* Label Bulan */}
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider h-4">
+                      <span className="text-muted-foreground h-4 text-[9px] font-bold tracking-wider uppercase">
                         {month.monthName}
                       </span>
 
-                      <div className="grid grid-rows-7 grid-flow-col gap-1.5">
+                      <div className="grid grid-flow-col grid-rows-7 gap-1.5">
                         {/* Spacer untuk offset hari pertama */}
                         {Array.from({ length: month.offset }).map((_, idx) => (
-                          <div key={`empty-${idx}`} className="w-2.5 h-2.5" />
+                          <div key={`empty-${idx}`} className="h-2.5 w-2.5" />
                         ))}
 
                         {/* Render Heatmap Cells */}
@@ -147,7 +147,7 @@ export const ModernEfficiencyDashboard = () => {
                           ? Array.from({ length: 30 }).map((_, i) => (
                               <Skeleton
                                 key={i}
-                                className="w-2.5 h-2.5 rounded-[2px] bg-muted"
+                                className="bg-muted h-2.5 w-2.5 rounded-[2px]"
                               />
                             ))
                           : month.days.map((day) => (
@@ -156,14 +156,14 @@ export const ModernEfficiencyDashboard = () => {
                                   <div
                                     className={cn(
                                       // BASE SHAPE
-                                      "w-2.5 h-2.5 rounded-[2px] transition-all cursor-pointer shadow-sm relative",
+                                      "relative h-2.5 w-2.5 cursor-pointer rounded-[2px] shadow-sm transition-all",
 
                                       // PERBAIKAN VISIBILITAS:
                                       // 1. Ring Inset: Memberikan garis tepi halus (10% opacity) agar kotak selalu terlihat
-                                      "ring-1 ring-inset ring-black/10 dark:ring-white/20",
+                                      "ring-1 ring-black/10 ring-inset dark:ring-white/20",
 
                                       // 2. Hover Effect: Pop-up & Ring warna Primary (Cyan)
-                                      "hover:ring-2 hover:ring-primary hover:scale-125 hover:z-10",
+                                      "hover:ring-primary hover:z-10 hover:scale-125 hover:ring-2",
 
                                       // 3. Warna dari data (pastikan logic di hook menghasilkan warna yang kontras, misal bg-emerald-500 bukan bg-emerald-50)
                                       day.color
@@ -182,7 +182,7 @@ export const ModernEfficiencyDashboard = () => {
                                       {day.status}
                                     </p>
                                     {day.confidence && (
-                                      <p className="text-[9px] text-slate-500 font-medium">
+                                      <p className="text-[9px] font-medium text-slate-500">
                                         AI Confidence: {day.confidence}
                                       </p>
                                     )}
@@ -197,8 +197,8 @@ export const ModernEfficiencyDashboard = () => {
               </div>
             </div>
 
-            <div className="pt-4 mt-2 border-t border-border">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="border-border mt-2 border-t pt-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {isLoadingHeatmap || !selectedMeterId ? (
                   <>
                     <Skeleton className="h-[72px] w-full rounded-xl" />
@@ -209,50 +209,50 @@ export const ModernEfficiencyDashboard = () => {
                 ) : (
                   <>
                     {/* Status Cards: Warna semantik tetap (Green/Red) tapi background disesuaikan opacity-nya */}
-                    <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-green-500/10 border border-green-500/20">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-green-500/20 bg-green-500/10 p-3">
+                      <div className="mb-1 flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                         <span className="font-black text-green-700 dark:text-green-300">
                           {statsSummary.HEMAT}
                         </span>
                       </div>
-                      <p className="text-[9px] uppercase font-bold text-green-600/70 dark:text-green-400/70 tracking-wider">
+                      <p className="text-[9px] font-bold tracking-wider text-green-600/70 uppercase dark:text-green-400/70">
                         Sangat Efisien
                       </p>
                     </div>
 
-                    <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-muted border border-border">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Activity className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-black text-foreground">
+                    <div className="bg-muted border-border flex flex-col items-center justify-center rounded-xl border p-3">
+                      <div className="mb-1 flex items-center gap-2">
+                        <Activity className="text-muted-foreground h-4 w-4" />
+                        <span className="text-foreground font-black">
                           {statsSummary.NORMAL}
                         </span>
                       </div>
-                      <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">
+                      <p className="text-muted-foreground text-[9px] font-bold tracking-wider uppercase">
                         Normal
                       </p>
                     </div>
 
-                    <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                      <div className="flex items-center gap-2 mb-1">
-                        <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-orange-500/20 bg-orange-500/10 p-3">
+                      <div className="mb-1 flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                         <span className="font-black text-orange-700 dark:text-orange-300">
                           {statsSummary.WARNING}
                         </span>
                       </div>
-                      <p className="text-[9px] uppercase font-bold text-orange-600/70 dark:text-orange-400/70 tracking-wider">
+                      <p className="text-[9px] font-bold tracking-wider text-orange-600/70 uppercase dark:text-orange-400/70">
                         Mendekati Limit
                       </p>
                     </div>
 
-                    <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-                      <div className="flex items-center gap-2 mb-1">
-                        <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 p-3">
+                      <div className="mb-1 flex items-center gap-2">
+                        <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                         <span className="font-black text-red-700 dark:text-red-300">
                           {statsSummary.BOROS}
                         </span>
                       </div>
-                      <p className="text-[9px] uppercase font-bold text-red-600/70 dark:text-red-400/70 tracking-wider">
+                      <p className="text-[9px] font-bold tracking-wider text-red-600/70 uppercase dark:text-red-400/70">
                         Over Budget
                       </p>
                     </div>
@@ -260,9 +260,9 @@ export const ModernEfficiencyDashboard = () => {
                 )}
               </div>
 
-              <div className="text-center mt-4 text-[10px] text-muted-foreground">
+              <div className="text-muted-foreground mt-4 text-center text-[10px]">
                 {isLoadingHeatmap ? (
-                  <Skeleton className="h-3 w-48 mx-auto" />
+                  <Skeleton className="mx-auto h-3 w-48" />
                 ) : (
                   <>
                     Menampilkan data untuk{" "}

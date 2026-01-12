@@ -58,7 +58,7 @@ function AlertDialogContent({
         data-slot="alert-dialog-content"
         className={cn(
           // Posisi & Animasi
-          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] duration-200",
+          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] duration-200",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
 
           // Style Industrial Alert:
@@ -84,7 +84,7 @@ function AlertDialogHeader({
       data-slot="alert-dialog-header"
       // Padding terpisah dan border bawah
       className={cn(
-        "flex flex-col gap-2 text-center sm:text-left px-6 py-6 border-b border-slate-100 dark:border-slate-800",
+        "flex flex-col gap-2 border-b border-slate-100 px-6 py-6 text-center sm:text-left dark:border-slate-800",
         className
       )}
       {...props}
@@ -101,7 +101,7 @@ function AlertDialogFooter({
       data-slot="alert-dialog-footer"
       // Background footer abu-abu muda untuk memisahkan tombol aksi
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end px-6 py-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-b-lg",
+        "flex flex-col-reverse gap-2 rounded-b-lg bg-slate-50/50 px-6 py-4 sm:flex-row sm:justify-end dark:bg-slate-900/30",
         className
       )}
       {...props}
@@ -114,10 +114,10 @@ function AlertDialogTitle({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Title>) {
   return (
-    <div className="flex items-center gap-3 justify-center sm:justify-start">
+    <div className="flex items-center justify-center gap-3 sm:justify-start">
       {/* Icon Segitiga Peringatan */}
-      <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-full shrink-0">
-        <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+      <div className="shrink-0 rounded-full bg-red-100 p-2 dark:bg-red-900/20">
+        <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
       </div>
       <AlertDialogPrimitive.Title
         data-slot="alert-dialog-title"
@@ -140,7 +140,7 @@ function AlertDialogDescription({
       data-slot="alert-dialog-description"
       // Margin top ditambahkan karena ada icon di title
       className={cn(
-        "text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-2 ml-0 sm:ml-[3.25rem]",
+        "mt-2 ml-0 text-sm leading-relaxed text-slate-500 sm:ml-[3.25rem] dark:text-slate-400",
         className
       )}
       {...props}

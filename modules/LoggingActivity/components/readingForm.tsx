@@ -39,7 +39,7 @@ import {
 } from "../services/reading.service";
 
 interface ReadingFormProps {
-  initialData: ReadingHistory;
+  initialData: ReadingHistory | null;
   onSuccess?: () => void;
 }
 
@@ -49,9 +49,11 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
-      meter_id: initialData.meter.meter_id,
-      reading_date: new Date(initialData.reading_date),
-      details: initialData.details.map((d) => ({
+      meter_id: initialData?.meter.meter_id,
+      reading_date: initialData?.reading_date
+        ? new Date(initialData.reading_date)
+        : new Date(),
+      details: initialData?.details.map((d) => ({
         reading_type_id: d.reading_type.reading_type_id,
         value: d.value,
       })),
@@ -68,8 +70,11 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
     AxiosError<ApiErrorResponse>,
     ReadingPayload
   >({
-    mutationFn: (payload) =>
-      updateReadingSessionApi(initialData.session_id, payload),
+    mutationFn: (payload) => {
+      if (!initialData?.session_id)
+        throw new Error("Session ID is missing for update.");
+      return updateReadingSessionApi(initialData.session_id, payload);
+    },
     onSuccess: () => {
       toast.success("Data berhasil diperbarui!");
       queryClient.invalidateQueries({ queryKey: ["readingHistory"] });
@@ -98,31 +103,33 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-4 items-start">
+        <div className="grid items-start gap-4 md:grid-cols-2">
           <FormItem>
-            <FormLabel className="text-xs font-bold uppercase tracking-tight text-muted-foreground">
+            <FormLabel className="text-muted-foreground text-xs font-bold tracking-tight uppercase">
               Meteran
             </FormLabel>
             <Input
-              value={initialData.meter.meter_code}
+              value={initialData?.meter.meter_code}
               disabled
               className="bg-muted/50 h-10" // Menyamakan tinggi (h-10)
             />
-            <p className="text-[10px] text-muted-foreground mt-1 leading-tight">
+            <p className="text-muted-foreground mt-1 text-[10px] leading-tight">
               ID Meteran tidak dapat diubah saat update.
             </p>
           </FormItem>
 
           <div className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-tight text-muted-foreground ml-1">
+            <span className="text-muted-foreground ml-1 text-xs font-bold tracking-tight uppercase">
               Waktu Data
             </span>
-            <div className="flex items-center gap-3 p-2 border rounded-md bg-secondary/20 border-secondary/40 h-10">
-              <CalendarIcon className="h-4 w-4 text-primary shrink-0" />
-              <div className="flex flex-col min-w-0">
-                <p className="text-[11px] font-bold text-foreground truncate leading-tight">
+            <div className="bg-secondary/20 border-secondary/40 flex h-10 items-center gap-3 rounded-md border p-2">
+              <CalendarIcon className="text-primary h-4 w-4 shrink-0" />
+              <div className="flex min-w-0 flex-col">
+                <p className="text-foreground truncate text-[11px] leading-tight font-bold">
                   {format(
-                    new Date(initialData.reading_date),
+                    initialData?.reading_date
+                      ? new Date(initialData.reading_date)
+                      : new Date(),
                     "EEEE, dd MMM yyyy",
                     {
                       locale: id,
@@ -141,12 +148,12 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
           <FormLabel>Detail Pembacaan</FormLabel>
           {fields.map((field, index) => {
             const label =
-              initialData.details[index]?.reading_type?.type_name || "Nilai";
+              initialData?.details[index]?.reading_type?.type_name || "Nilai";
 
             return (
               <div
                 key={field.id}
-                className="grid grid-cols-12 gap-4 items-center bg-background p-3 rounded-lg border"
+                className="bg-background grid grid-cols-12 items-center gap-4 rounded-lg border p-3"
               >
                 <div className="col-span-5">
                   <span className="text-sm font-medium">{label}</span>

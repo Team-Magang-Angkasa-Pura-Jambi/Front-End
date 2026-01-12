@@ -21,7 +21,7 @@ const Form = FormProvider;
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > = {
   name: TName;
 };
@@ -32,7 +32,7 @@ const FormFieldContext = React.createContext<FormFieldContextValue>(
 
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   ...props
 }: ControllerProps<TFieldValues, TName>) => {
@@ -101,7 +101,7 @@ function FormLabel({
       data-error={!!error}
       className={cn(
         // Style Khas Energi: Warna Slate, Font Medium
-        "text-slate-600 dark:text-slate-300 font-semibold text-xs uppercase tracking-wide",
+        "text-xs font-semibold tracking-wide text-slate-600 uppercase dark:text-slate-300",
         // Saat Error: Warna merah industrial
         "data-[error=true]:text-red-600 dark:data-[error=true]:text-red-400",
         className
@@ -140,7 +140,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn("text-slate-500 text-[11px] leading-tight", className)}
+      className={cn("text-[11px] leading-tight text-slate-500", className)}
       {...props}
     />
   );
@@ -160,9 +160,9 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
       id={formMessageId}
       // Style Khas Energi: Pesan Error seperti "System Alert" di dashboard
       className={cn(
-        "flex items-center gap-2 mt-1.5 p-2 rounded-md",
-        "bg-red-50 border border-red-100 dark:bg-red-900/20 dark:border-red-900/30",
-        "text-red-600 dark:text-red-400 text-[11px] font-medium",
+        "mt-1.5 flex items-center gap-2 rounded-md p-2",
+        "border border-red-100 bg-red-50 dark:border-red-900/30 dark:bg-red-900/20",
+        "text-[11px] font-medium text-red-600 dark:text-red-400",
         className
       )}
       {...props}

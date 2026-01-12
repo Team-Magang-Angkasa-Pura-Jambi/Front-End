@@ -37,13 +37,13 @@ function PopoverContent({
 
           // 2. INDUSTRIAL THEME COLORS
           "bg-popover text-popover-foreground",
-          "border border-border",
+          "border-border border",
 
           // 3. SIGNATURE ACCENT (Top Border Tebal - Cyan/Primary)
-          "border-t-[3px] border-t-primary",
+          "border-t-primary border-t-[3px]",
 
           // 4. SHADOW (Deep Shadow dengan sedikit glow primary)
-          "shadow-xl shadow-primary/5",
+          "shadow-primary/5 shadow-xl",
 
           // 5. Overflow hidden untuk menampung background pattern
           "overflow-hidden",
@@ -53,7 +53,7 @@ function PopoverContent({
         {...props}
       >
         {/* --- DEKORASI BACKGROUND (Grid Halus) --- */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:16px_16px] opacity-[0.05] pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:16px_16px] opacity-[0.05]" />
 
         {/* --- KONTEN UTAMA (Relative Z-10 agar di atas grid) --- */}
         <div className="relative z-10">{children}</div>

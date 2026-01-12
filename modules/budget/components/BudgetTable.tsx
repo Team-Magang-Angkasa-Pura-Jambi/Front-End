@@ -95,7 +95,7 @@ export function BudgetTable<TData, TValue>({
                   <TableRow
                     data-state={row.getIsSelected() && "selected"}
                     className={cn(
-                      row.getIsExpanded() && "border-b-0 bg-muted/30"
+                      row.getIsExpanded() && "bg-muted/30 border-b-0"
                     )}
                   >
                     {row.getVisibleCells().map((cell) => (

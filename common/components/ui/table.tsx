@@ -10,7 +10,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
       // PERBAIKAN:
       // 1. bg-card: Agar putih di Light, Slate-900 di Dark.
       // 2. border-border: Mengikuti warna garis tema global.
-      className="relative w-full overflow-x-auto rounded-md border border-border shadow-sm bg-card"
+      className="border-border bg-card relative w-full overflow-x-auto rounded-md border shadow-sm"
     >
       <table
         data-slot="table"
@@ -26,7 +26,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
     <thead
       data-slot="table-header"
       // PERBAIKAN: Gunakan bg-muted/30 untuk pemisah header yang halus
-      className={cn("bg-muted/30 border-b border-border", className)}
+      className={cn("bg-muted/30 border-border border-b", className)}
       {...props}
     />
   );
@@ -47,7 +47,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "bg-muted/50 border-t border-border font-medium [&>tr]:last:border-b-0",
+        "bg-muted/50 border-border border-t font-medium [&>tr]:last:border-b-0",
         className
       )}
       {...props}
@@ -60,7 +60,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b border-border transition-colors",
+        "border-border border-b transition-colors",
 
         // PERBAIKAN HOVER EFFECT (Energy Glow Adaptif):
         // Menggunakan primary/5 agar warnanya mengikuti tema (Cyan/Emerald)
@@ -86,7 +86,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
 
         // TYPOGRAPHY TEKNIKAL:
         // text-muted-foreground: Warna abu-abu yang pas di light/dark
-        "text-[11px] uppercase tracking-wider font-bold text-muted-foreground",
+        "text-muted-foreground text-[11px] font-bold tracking-wider uppercase",
 
         "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
@@ -102,7 +102,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
       data-slot="table-cell"
       className={cn(
         // text-foreground: Warna teks utama (Charcoal/Putih Tulang)
-        "p-4 align-middle text-foreground font-medium",
+        "text-foreground p-4 align-middle font-medium",
         "tabular-nums", // Angka sejajar
         "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className

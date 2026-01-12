@@ -15,5 +15,5 @@ export interface HistoryFilters {
   date: import("react-day-picker").DateRange | undefined;
   sortBy: "reading_date" | "created_at";
   sortOrder: "asc" | "desc";
-  meterId: number;
+  meterId?: number;
 }

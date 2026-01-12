@@ -14,12 +14,12 @@ const Card = React.forwardRef<
 
       // 2. Styling Colors (Support Dark Mode)
       // Light: Putih, Dark: Slate Sangat Gelap (bukan hitam total agar depth terlihat)
-      "bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-50",
+      "bg-white text-slate-950 dark:bg-slate-950 dark:text-slate-50",
       "border-slate-200 dark:border-slate-800",
 
       // 3. Hover Effect
       // Light: Shadow halus. Dark: Border menyala biru redup (Tech feel)
-      "hover:shadow-md hover:border-slate-300/80 dark:hover:border-blue-500/30",
+      "hover:border-slate-300/80 hover:shadow-md dark:hover:border-blue-500/30",
 
       className
     )}
@@ -33,15 +33,15 @@ const Card = React.forwardRef<
 
       {/* B. Ambient Glow (Pojok Kanan Atas) */}
       {/* Dark mode: Glow sedikit lebih terang (opacity 10%) agar terlihat di background gelap */}
-      <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-3xl transition-all duration-500 group-hover:bg-blue-500/10 dark:group-hover:bg-blue-500/20" />
+      <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-blue-500/5 blur-3xl transition-all duration-500 group-hover:bg-blue-500/10 dark:bg-blue-500/10 dark:group-hover:bg-blue-500/20" />
 
       {/* C. Aksen Garis Pudar (Bawah ke Atas) */}
       {/* Menyesuaikan gradient fade agar menyatu dengan warna background masing-masing mode */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/80 dark:from-slate-950/80 to-transparent" />
+      <div className="absolute right-0 bottom-0 left-0 h-24 bg-gradient-to-t from-white/80 to-transparent dark:from-slate-950/80" />
     </div>
 
     {/* --- KONTEN UTAMA --- */}
-    <div className="relative z-10 flex flex-col flex-1">{props.children}</div>
+    <div className="relative z-10 flex flex-1 flex-col">{props.children}</div>
   </div>
 ));
 Card.displayName = "Card";
@@ -65,7 +65,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
+      "text-lg leading-none font-semibold tracking-tight",
       "text-slate-900 dark:text-slate-100", // Pastikan judul kontras
       className
     )}

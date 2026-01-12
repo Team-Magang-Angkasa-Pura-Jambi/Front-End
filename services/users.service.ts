@@ -1,3 +1,4 @@
+import { ApiResponse } from "@/common/types/api";
 import api from "@/lib/api";
 import {
   CreateUserPayload,
@@ -11,6 +12,13 @@ interface UserApiResponse {
 }
 interface SingleUserApiResponse {
   data: User;
+}
+
+export interface userHistory {
+  id: number;
+  type: string;
+  timestamp: string;
+  description: string;
 }
 
 /**
@@ -27,7 +35,9 @@ export const getUserApi = async (
   return response.data;
 };
 
-export const getUserActivitiesApi = async (id: number) => {
+export const getUserActivitiesApi = async (
+  id: number
+): Promise<ApiResponse<userHistory[]>> => {
   const response = await api.get(`/users/${id}/activities`);
   return response.data;
 };
@@ -51,7 +61,7 @@ export const createUserApi = async (
 export const updateUserApi = async (
   userId: number,
   userData: UpdateUserPayload
-): Promise<SingleUserApiResponse> => {
+): Promise<ApiResponse<SingleUserApiResponse>> => {
   const response = await api.patch(`/users/${userId}`, userData);
   return response.data;
 };

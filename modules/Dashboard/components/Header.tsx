@@ -36,10 +36,10 @@ export const Header = () => {
     else setGreeting("Good Evening");
   }, []);
 
-  if (!mounted) return <Skeleton className="w-full h-24 rounded-xl" />;
+  if (!mounted) return <Skeleton className="h-24 w-full rounded-xl" />;
 
   return (
-    <Card className="w-full p-4 mb-6 shadow-sm border-slate-200 /50 /50 backdrop-blur-sm">
+    <Card className="/50 /50 mb-6 w-full border-slate-200 p-4 shadow-sm backdrop-blur-sm">
       <div className="flex items-center justify-between">
         {/* Left Side: User Profile */}
         <div className="flex items-center gap-4">
@@ -49,15 +49,15 @@ export const Header = () => {
               height={50}
               src="https://assets.aceternity.com/manu.png"
               alt="User Avatar"
-              className="w-10 h-10 rounded-full"
+              className="h-10 w-10 rounded-full"
             />
           </div>
 
           <div className="flex flex-col">
-            <h1 className="text-lg font-bold leading-tight text-slate-900 dark:text-slate-100">
+            <h1 className="text-lg leading-tight font-bold text-slate-900 dark:text-slate-100">
               {greeting}, {user?.username || "Guest"}! 👋
             </h1>
-            <p className="text-xs font-medium text-muted-foreground">
+            <p className="text-muted-foreground text-xs font-medium">
               {dateString}
             </p>
           </div>
@@ -65,7 +65,7 @@ export const Header = () => {
 
         {/* Right Side: Actions */}
         <div className="flex items-center gap-3 md:gap-4">
-          <div className="h-8 w-[1px] bg-background dark:bg-background hidden md:block mx-2"></div>
+          <div className="bg-background dark:bg-background mx-2 hidden h-8 w-[1px] md:block"></div>
           <NotificationPopover />
           <ThemeToggle />
         </div>

@@ -52,7 +52,6 @@ export function PriceSchemeForm({
   initialData,
   onSubmit,
   readingTypes,
-  taxes,
   isLoading,
 }: PriceSchemeFormProps) {
   const form = useForm<schemaFormValues>({
@@ -223,12 +222,12 @@ export function PriceSchemeForm({
         <hr className="my-4 border-dashed" />
 
         <div>
-          <h3 className="text-md font-medium mb-3">Detail Tarif</h3>
+          <h3 className="text-md mb-3 font-medium">Detail Tarif</h3>
           <div className="space-y-4">
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="grid grid-cols-12 gap-x-2 gap-y-4 items-start p-3 border rounded-md"
+                className="grid grid-cols-12 items-start gap-x-2 gap-y-4 rounded-md border p-3"
               >
                 <div className="col-span-12 sm:col-span-5">
                   <FormField
@@ -283,7 +282,7 @@ export function PriceSchemeForm({
                     )}
                   />
                 </div>
-                <div className="col-span-12 sm:col-span-1 flex items-center justify-end">
+                <div className="col-span-12 flex items-center justify-end sm:col-span-1">
                   {fields.length > 1 && (
                     <Button
                       variant="ghost"
@@ -291,7 +290,7 @@ export function PriceSchemeForm({
                       type="button"
                       onClick={() => remove(index)}
                     >
-                      <XCircleIcon className="h-5 w-5 text-destructive" />
+                      <XCircleIcon className="text-destructive h-5 w-5" />
                     </Button>
                   )}
                 </div>

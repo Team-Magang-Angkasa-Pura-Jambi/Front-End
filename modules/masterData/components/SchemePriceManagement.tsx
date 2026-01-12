@@ -76,7 +76,7 @@ const RatesCell = ({
           <span className="text-muted-foreground">
             {getReadingTypeName(rate.reading_type_id)}:
           </span>
-          <span className="font-mono whitespace-nowrap font-medium">
+          <span className="font-mono font-medium whitespace-nowrap">
             {new Intl.NumberFormat("id-ID", {
               style: "currency",
               currency: "IDR",

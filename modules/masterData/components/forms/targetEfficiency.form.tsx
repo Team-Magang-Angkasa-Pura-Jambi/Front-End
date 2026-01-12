@@ -86,7 +86,7 @@ export function TargetEfficiencyForm({
   return (
     <Form {...form}>
       {/* Container utama dengan tinggi maksimal dan overflow */}
-      <ScrollArea className="max-h-[70vh] px-4 md:px-0 pr-4">
+      <ScrollArea className="max-h-[70vh] px-4 pr-4 md:px-0">
         <form
           id="target-efficiency-form"
           onSubmit={form.handleSubmit(onSubmit)}
@@ -130,7 +130,7 @@ export function TargetEfficiencyForm({
           />
 
           {selectedMeterId && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-top-2">
+            <div className="animate-in fade-in slide-in-from-top-2 space-y-6">
               {/* Nama KPI */}
               <FormField
                 control={form.control}
@@ -172,7 +172,7 @@ export function TargetEfficiencyForm({
               />
 
               {/* Grid Periode - Stack di Mobile, Grid di Desktop */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="period_start"
@@ -262,7 +262,7 @@ export function TargetEfficiencyForm({
       </ScrollArea>
 
       {/* Footer tetap di bawah (Sticky/Fixed) diluar ScrollArea */}
-      <AlertDialogFooter className="border-t pt-4 mt-2">
+      <AlertDialogFooter className="mt-2 border-t pt-4">
         <Button
           type="submit"
           form="target-efficiency-form"

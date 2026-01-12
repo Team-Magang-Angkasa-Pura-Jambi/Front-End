@@ -1,6 +1,5 @@
 import { MonthlyBudgetAllocation } from "@/modules/budget/services/analytics.service";
 import { EnergyType } from "./energy";
-import { MeterType } from "./meters";
 
 export interface AnnualBudgetAllocation {
   allocation_id: number;

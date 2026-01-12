@@ -1,3 +1,4 @@
+import { ApiResponse } from "@/common/types/api";
 import api from "@/lib/api";
 
 // Tipe untuk data harian yang diterima dari API analisis
@@ -45,6 +46,32 @@ export type BudgetSummaryByEnergy = {
     remainingBudget: number;
     realizationPercentage: number | null;
   } | null;
+};
+
+export interface NewDataCountNotification {
+  summary_id: number;
+  summary_date: Date;
+  total_consumption: number;
+  total_cost: number;
+  meter_code: string;
+  type_name: "Electricity" | "Water" | "Fuel";
+  unit_of_measurement: string;
+  classification: string | null;
+}
+
+export interface TodaySummaryResponse {
+  meta: {
+    date: Date;
+    pax: number | null;
+  };
+  sumaries: NewDataCountNotification[];
+}
+
+export const getTodaySummaryApi = async (): Promise<
+  ApiResponse<TodaySummaryResponse>
+> => {
+  const response = await api.get("/analytics/today-summary");
+  return response.data;
 };
 
 export const getClassificationSummaryApi = async (

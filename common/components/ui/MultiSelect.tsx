@@ -30,7 +30,6 @@ export function MultiSelect({
   options,
   selected,
   onChange,
-  className,
   placeholder,
 }: MultiSelectProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -72,7 +71,7 @@ export function MultiSelect({
       onKeyDown={handleKeyDown}
       className="overflow-visible bg-transparent"
     >
-      <div className="group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+      <div className="group border-input ring-offset-background focus-within:ring-ring rounded-md border px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-offset-2">
         <div className="flex flex-wrap gap-1">
           {selected.map((optionValue) => {
             const option = options.find((o) => o.value === optionValue);
@@ -80,7 +79,7 @@ export function MultiSelect({
               <Badge key={optionValue} variant="secondary">
                 {option?.label}
                 <button
-                  className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="ring-offset-background focus:ring-ring ml-1 rounded-full outline-none focus:ring-2 focus:ring-offset-2"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       handleUnselect(optionValue);
@@ -92,7 +91,7 @@ export function MultiSelect({
                   }}
                   onClick={() => handleUnselect(optionValue)}
                 >
-                  <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                  <X className="text-muted-foreground hover:text-foreground h-3 w-3" />
                 </button>
               </Badge>
             );
@@ -105,16 +104,16 @@ export function MultiSelect({
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
             placeholder={placeholder}
-            className="ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+            className="placeholder:text-muted-foreground ml-2 flex-1 bg-transparent outline-none"
           />
         </div>
       </div>
       <div className="relative mt-2">
         <CommandList>
           {open && selectables.length > 0 ? (
-            <div className="absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+            <div className="bg-popover text-popover-foreground animate-in absolute top-0 z-10 w-full rounded-md border shadow-md outline-none">
               {/* PERUBAHAN: Menggunakan grid untuk layout yang lebih modern */}
-              <CommandGroup className="h-full overflow-auto p-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
+              <CommandGroup className="grid h-full grid-cols-1 gap-1 overflow-auto p-2 sm:grid-cols-2 md:grid-cols-3">
                 {selectables.map((option) => {
                   return (
                     <CommandItem
@@ -127,7 +126,7 @@ export function MultiSelect({
                         setInputValue("");
                         onChange([...selected, option.value]);
                       }}
-                      className={"cursor-pointer w-full"}
+                      className={"w-full cursor-pointer"}
                     >
                       {option.label}
                     </CommandItem>

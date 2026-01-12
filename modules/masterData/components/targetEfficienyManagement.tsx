@@ -37,8 +37,7 @@ import { DataTable } from "@/common/components/table/dataTable";
 import { TargetEfficiencyForm } from "./forms/targetEfficiency.form";
 
 import { ApiErrorResponse } from "@/common/types/api";
-import { MeterType } from "@/common/types/meters";
-import { EnergyType } from "@/common/types/energy";
+
 import { TargetEfficiencyFormValues } from "../schemas/targetEfficiency.schema";
 import {
   createEfficiencyTargetApi,

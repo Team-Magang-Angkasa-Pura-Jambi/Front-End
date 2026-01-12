@@ -64,18 +64,21 @@ export const ToggleConsumptionCostChart = () => {
 
   return (
     <Card className="w-full shadow-md">
-      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <CardHeader className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <CardTitle className="text-lg font-bold">
             Analisis Perbandingan Harian
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Hari Kerja vs Hari Libur
           </p>
         </div>
 
         {/* Tombol Toggle */}
-        <Tabs value={view} onValueChange={(val) => setView(val as any)}>
+        <Tabs
+          value={view as string}
+          onValueChange={(val) => setView(val as "consumption" | "cost")}
+        >
           <TabsList className="grid w-[240px] grid-cols-2">
             <TabsTrigger value="consumption">Konsumsi</TabsTrigger>
             <TabsTrigger value="cost">Biaya (Rp)</TabsTrigger>
@@ -96,7 +99,7 @@ export const ToggleConsumptionCostChart = () => {
                 tickFormatter={(val) => (isCost ? `Rp${val / 1000}k` : val)}
               />
               <Tooltip
-                formatter={(value: number, name: string, props: any) => [
+                formatter={(value: number, name: string, props) => [
                   formatValue(value) + (isCost ? "" : ` ${props.payload.unit}`),
                   name === "weekday" ? "Hari Kerja" : "Hari Libur",
                 ]}
@@ -120,7 +123,7 @@ export const ToggleConsumptionCostChart = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
+        <div className="mt-4 rounded-lg bg-blue-50 p-3 text-xs text-blue-700">
           <strong>Mode {isCost ? "Biaya" : "Konsumsi"}:</strong> Menampilkan
           data berdasarkan
           {isCost

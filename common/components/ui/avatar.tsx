@@ -61,7 +61,7 @@ function AvatarFallback({
         "bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900",
 
         // Typography: Slate Tua & Bold (Seperti stempel inisial)
-        "text-slate-600 dark:text-slate-300 font-bold text-xs tracking-wider",
+        "text-xs font-bold tracking-wider text-slate-600 dark:text-slate-300",
 
         className
       )}

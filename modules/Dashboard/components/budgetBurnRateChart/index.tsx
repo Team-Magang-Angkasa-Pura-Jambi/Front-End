@@ -56,25 +56,25 @@ export const BudgetBurnRateChart = () => {
   return (
     <Card
       ref={ref}
-      className="w-full shadow-lg border-none ring-1 ring-slate-200 flex flex-col"
+      className="flex w-full flex-col border-none shadow-lg ring-1 ring-slate-200"
     >
       {/* HEADER: Selalu tampil agar user bisa ganti filter walau loading/error */}
-      <CardHeader className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 border-b border-slate-50 pb-4">
+      <CardHeader className="flex flex-col items-start justify-between gap-4 border-b border-slate-50 pb-4 xl:flex-row xl:items-center">
         <div>
-          <CardTitle className="text-base font-bold flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-emerald-600" />
+          <CardTitle className="flex items-center gap-2 text-base font-bold">
+            <DollarSign className="h-4 w-4 text-emerald-600" />
             Budget Burn Rate (Penyerapan Anggaran)
           </CardTitle>
-          <p className="text-sm text-muted-foreground italic mt-1">
+          <p className="text-muted-foreground mt-1 text-sm italic">
             Akumulasi pengeluaran harian vs Target Ideal & Efisiensi.
           </p>
         </div>
 
-        <div className="flex gap-2 flex-wrap w-full xl:w-auto">
+        <div className="flex w-full flex-wrap gap-2 xl:w-auto">
           {/* Filter Bulan */}
           <Select value={filters.month} onValueChange={filters.setMonth}>
             <SelectTrigger className="w-[140px]">
-              <CalendarDays className="w-3 h-3 mr-2 text-slate-500" />
+              <CalendarDays className="mr-2 h-3 w-3 text-slate-500" />
               <SelectValue placeholder="Bulan" />
             </SelectTrigger>
             <SelectContent>
@@ -93,7 +93,7 @@ export const BudgetBurnRateChart = () => {
           {/* Filter Tahun */}
           <Select value={filters.year} onValueChange={filters.setYear}>
             <SelectTrigger className="w-[100px]">
-              <Calendar className="w-3 h-3 mr-2 text-slate-500" />
+              <Calendar className="mr-2 h-3 w-3 text-slate-500" />
               <SelectValue placeholder="Tahun" />
             </SelectTrigger>
             <SelectContent>
@@ -117,19 +117,19 @@ export const BudgetBurnRateChart = () => {
             title="Download JPG"
           >
             {isExporting ? (
-              <span className="text-[10px] animate-pulse">...</span>
+              <span className="animate-pulse text-[10px]">...</span>
             ) : (
-              <Download className="w-4 h-4" />
+              <Download className="h-4 w-4" />
             )}
           </Button>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 min-h-[400px] flex flex-col justify-between pt-6">
+      <CardContent className="flex min-h-[400px] flex-1 flex-col justify-between pt-6">
         {isLoading ? (
           /* STATE: LOADING */
-          <div className="h-full w-full flex flex-col items-center justify-center gap-4">
-            <Skeleton className="h-[280px] w-full rounded-xl bg-background" />
+          <div className="flex h-full w-full flex-col items-center justify-center gap-4">
+            <Skeleton className="bg-background h-[280px] w-full rounded-xl" />
             <Skeleton className="h-16 w-full rounded-xl" />
           </div>
         ) : isError ? (
@@ -239,23 +239,23 @@ export const BudgetBurnRateChart = () => {
             {/* INSIGHT CARD */}
             {insight && (
               <div
-                className={`mt-4 p-4 rounded-xl border flex gap-3 items-start ${
+                className={`mt-4 flex items-start gap-3 rounded-xl border p-4 ${
                   insight.type === "warning"
-                    ? "bg-red-50 border-red-200"
-                    : "bg-emerald-50 border-emerald-200"
+                    ? "border-red-200 bg-red-50"
+                    : "border-emerald-200 bg-emerald-50"
                 }`}
               >
                 <div
-                  className={`p-1.5 rounded-full shrink-0 ${
+                  className={`shrink-0 rounded-full p-1.5 ${
                     insight.type === "warning"
-                      ? " text-red-600"
-                      : " text-emerald-600"
+                      ? "text-red-600"
+                      : "text-emerald-600"
                   }`}
                 >
                   {insight.type === "warning" ? (
-                    <AlertTriangle className="w-4 h-4" />
+                    <AlertTriangle className="h-4 w-4" />
                   ) : (
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="h-4 w-4" />
                   )}
                 </div>
                 <div>
@@ -269,7 +269,7 @@ export const BudgetBurnRateChart = () => {
                     {insight.title}
                   </p>
                   <p
-                    className={`text-xs mt-1 leading-relaxed ${
+                    className={`mt-1 text-xs leading-relaxed ${
                       insight.type === "warning"
                         ? "text-red-800"
                         : "text-emerald-800"

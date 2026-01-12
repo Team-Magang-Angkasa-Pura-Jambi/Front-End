@@ -2,14 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/common/components/ui/button";
-import {
-  ChevronDown,
-  ChevronRight,
-  CornerDownRight,
-  Droplets,
-  Fuel,
-  Zap,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Droplets, Fuel, Zap } from "lucide-react";
 import { format } from "date-fns-tz";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -22,15 +15,15 @@ const EnergyTypeCell = ({ typeName }: { typeName: string }) => {
 
   switch (typeName) {
     case "Electricity":
-      icon = <Zap className="h-4 w-4 mr-2 text-yellow-500" />;
+      icon = <Zap className="mr-2 h-4 w-4 text-yellow-500" />;
       text = "Listrik";
       break;
     case "Water":
-      icon = <Droplets className="h-4 w-4 mr-2 text-blue-500" />;
+      icon = <Droplets className="mr-2 h-4 w-4 text-blue-500" />;
       text = "Air";
       break;
     case "Fuel":
-      icon = <Fuel className="h-4 w-4 mr-2 text-gray-500" />;
+      icon = <Fuel className="mr-2 h-4 w-4 text-gray-500" />;
       text = "BBM";
       break;
     default:
@@ -90,7 +83,7 @@ export const getColumns = (
     accessorKey: "total_budget",
     header: "Total Budget",
     cell: ({ row }) => (
-      <div className="font-semibold text-primary">
+      <div className="text-primary font-semibold">
         {formatCurrency(Number(row.getValue("total_budget")))}
       </div>
     ),

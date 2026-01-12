@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -31,13 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/common/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/common/components/ui/dropdown-menu";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,6 +55,7 @@ import { categorySchema, categoryType } from "../schemas/category.schema";
 import { DataTable } from "@/common/components/table/dataTable";
 import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
 
+// Definisi kolom dipisah agar lebih bersih, namun tetap butuh closure untuk handler
 const createCategoryColumns = (
   onEdit: (item: CategoryType) => void,
   onDelete: (item: CategoryType) => void
@@ -111,9 +106,8 @@ export const CategoryManagement = () => {
         `Kategori berhasil ${editingCategory ? "diperbarui" : "ditambahkan"}.`
       );
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      setIsDialogOpen(false);
-      setEditingCategory(null);
-      form.reset();
+
+      handleDialogChange(false);
     },
     onError: (error) => {
       toast.error("Gagal menyimpan kategori.", {
@@ -136,32 +130,50 @@ export const CategoryManagement = () => {
     },
   });
 
-  const handleOpenDialog = (category: CategoryType | null = null) => {
-    setEditingCategory(category);
-    form.reset(category ? { name: category.name } : { name: "" });
-    setIsDialogOpen(true);
-  };
+  const handleOpenDialog = useCallback(
+    (category: CategoryType | null = null) => {
+      setEditingCategory(category);
+      form.reset(category ? { name: category.name } : { name: "" });
+      setIsDialogOpen(true);
+    },
+    [form]
+  );
+
+  const handleDialogChange = useCallback(
+    (open: boolean) => {
+      setIsDialogOpen(open);
+      if (!open) {
+        setEditingCategory(null);
+        form.reset({ name: "" });
+      }
+    },
+    [form]
+  );
+
+  const handleDeleteRequest = useCallback((item: CategoryType) => {
+    setCategoryToDelete(item);
+  }, []);
 
   const onSubmit = (values: z.infer<typeof categorySchema>) => {
     mutation.mutate(values);
   };
 
   const columns = useMemo(
-    () => createCategoryColumns(handleOpenDialog, setCategoryToDelete),
-    []
+    () => createCategoryColumns(handleOpenDialog, handleDeleteRequest),
+    [handleOpenDialog, handleDeleteRequest]
   );
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <div>
             <CardTitle>Manajemen Kategori</CardTitle>
             <CardDescription>
               Kelola kategori untuk pengelompokan meteran.
             </CardDescription>
           </div>
-          <Button onClick={() => handleOpenDialog()}>
+          <Button onClick={() => handleOpenDialog(null)}>
             <PlusCircle className="mr-2 h-4 w-4" /> Tambah Kategori
           </Button>
         </div>
@@ -176,7 +188,8 @@ export const CategoryManagement = () => {
         />
       </CardContent>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* Dialog Form (Create/Edit) */}
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -211,27 +224,35 @@ export const CategoryManagement = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Alert Dialog (Delete Confirmation) */}
       <AlertDialog
         open={!!categoryToDelete}
-        onOpenChange={() => setCategoryToDelete(null)}
+        onOpenChange={(open) => !open && setCategoryToDelete(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
             <AlertDialogDescription>
               Aksi ini akan menghapus kategori{" "}
-              <span className="font-bold">{categoryToDelete?.name}</span>. Data
-              yang terhapus tidak dapat dikembalikan.
+              <span className="text-foreground font-bold">
+                {categoryToDelete?.name}
+              </span>
+              . Data yang terhapus tidak dapat dikembalikan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Batal
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() =>
-                deleteMutation.mutate(categoryToDelete!.category_id)
-              }
+              onClick={(e) => {
+                e.preventDefault();
+                if (categoryToDelete) {
+                  deleteMutation.mutate(categoryToDelete.category_id);
+                }
+              }}
               disabled={deleteMutation.isPending}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus"}
             </AlertDialogAction>

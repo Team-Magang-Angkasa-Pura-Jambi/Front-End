@@ -40,7 +40,7 @@ export function DataTable<TData, TValue>({
   const TableSkeleton = () =>
     Array.from({ length: 10 }).map((_, i) => (
       <TableRow key={i}>
-        {columns.map((col, j) => (
+        {columns.map((_col, j) => (
           <TableCell key={j}>
             <Skeleton className="h-6 w-full" />
           </TableCell>
@@ -92,7 +92,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
+                  className="text-muted-foreground h-24 text-center"
                 >
                   Tidak ada data yang ditemukan.
                 </TableCell>

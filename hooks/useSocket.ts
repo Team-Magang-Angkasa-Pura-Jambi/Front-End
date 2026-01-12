@@ -19,7 +19,7 @@ export const useSocketListeners = () => {
       socket.emit("join_room", userId);
       console.log(`Socket client bergabung ke room: ${userId}`);
     }
-  }, [user, socket.connected]); // Dijalankan saat user atau status koneksi berubah
+  }, [user]); // Dijalankan saat user atau status koneksi berubah
 
   useEffect(() => {
     // Listener untuk notifikasi umum dari backend

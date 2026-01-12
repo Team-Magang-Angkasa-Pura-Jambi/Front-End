@@ -54,13 +54,13 @@ export const ModernBudgetAnalysis = () => {
   }
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className="flex h-full flex-col space-y-4">
       <Card className="shadow-sm">
-        <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+        <CardContent className="flex flex-col items-start justify-between gap-4 p-4 sm:flex-row sm:items-center">
+          <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
             <Select value={year} onValueChange={setYear}>
               <SelectTrigger className="w-[130px] font-medium">
-                <Calendar className="w-4 h-4 mr-2 text-slate-500" />
+                <Calendar className="mr-2 h-4 w-4 text-slate-500" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -88,7 +88,7 @@ export const ModernBudgetAnalysis = () => {
           <div className="flex items-center">
             <Badge
               variant="outline"
-              className="bg-emerald-50 text-emerald-700 border-emerald-200 py-1.5 px-3 text-xs font-semibold shadow-sm"
+              className="border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm"
             >
               Target Efisiensi: -10%
             </Badge>
@@ -96,18 +96,18 @@ export const ModernBudgetAnalysis = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+      <div className="grid shrink-0 grid-cols-1 gap-4 md:grid-cols-3">
         <KpiStats totals={data?.totals} isLoading={isLoading} />
       </div>
 
       <Card
         ref={ref}
-        className="flex-1 flex flex-col overflow-hidden shadow-md border-slate-200"
+        className="flex flex-1 flex-col overflow-hidden border-slate-200 shadow-md"
       >
-        <CardHeader className="px-6 py-4 border-b bg-background/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
-          <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-800">
-            <div className="p-1.5 bg-blue-100 rounded-md">
-              <Coins className="w-4 h-4 text-blue-600" />
+        <CardHeader className="bg-background/50 flex shrink-0 flex-col items-start justify-between gap-4 border-b px-6 py-4 sm:flex-row sm:items-center">
+          <CardTitle className="flex items-center gap-2 text-base font-bold text-slate-800">
+            <div className="rounded-md bg-blue-100 p-1.5">
+              <Coins className="h-4 w-4 text-blue-600" />
             </div>
             Analisis Penggunaan & Efisiensi
           </CardTitle>
@@ -117,7 +117,7 @@ export const ModernBudgetAnalysis = () => {
             onValueChange={setActiveTab}
             className="w-full sm:w-auto"
           >
-            <TabsList className="grid w-full sm:w-[240px] grid-cols-2">
+            <TabsList className="grid w-full grid-cols-2 sm:w-[240px]">
               <TabsTrigger value="burn">Aliran Saldo</TabsTrigger>
               <TabsTrigger value="saved">Penghematan</TabsTrigger>
             </TabsList>
@@ -132,19 +132,19 @@ export const ModernBudgetAnalysis = () => {
             {isExporting ? (
               <span className="text-[10px]">...</span>
             ) : (
-              <Download className="w-4 h-4" />
+              <Download className="h-4 w-4" />
             )}
           </Button>
         </CardHeader>
 
-        <CardContent className="p-6 flex-1 min-h-[350px] relative">
-          <div className="w-full h-full">
+        <CardContent className="relative min-h-[350px] flex-1 p-6">
+          <div className="h-full w-full">
             {isLoading || !data ? (
-              <div className="w-full h-full flex flex-col gap-4">
-                <Skeleton className="w-full h-[80%] rounded-xl" />
-                <div className="flex gap-4 h-[20%]">
-                  <Skeleton className="w-1/2 h-full rounded-xl" />
-                  <Skeleton className="w-1/2 h-full rounded-xl" />
+              <div className="flex h-full w-full flex-col gap-4">
+                <Skeleton className="h-[80%] w-full rounded-xl" />
+                <div className="flex h-[20%] gap-4">
+                  <Skeleton className="h-full w-1/2 rounded-xl" />
+                  <Skeleton className="h-full w-1/2 rounded-xl" />
                 </div>
               </div>
             ) : (

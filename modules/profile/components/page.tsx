@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
-import { id } from "date-fns/locale";
+import { id } from "date-fns/locale"; // Make sure this is imported
 import {
   Card,
   CardHeader,
@@ -52,7 +52,6 @@ import {
 } from "@/services/users.service";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ✅ Skema validasi form
 const formSchema = z.object({
   username: z.string().min(3, "Username minimal 3 karakter"),
   password: z
@@ -64,13 +63,12 @@ const formSchema = z.object({
 });
 
 export const ProfilePage = () => {
-  const { user, setUser } = useAuthStore();
+  const { user } = useAuthStore();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // ✅ Ambil data user
   const { data: userProfileData, isLoading } = useQuery({
     queryKey: ["user", user?.id],
     queryFn: () => getUserApi(user!.id),
@@ -78,15 +76,12 @@ export const ProfilePage = () => {
     refetchOnWindowFocus: false,
   });
 
-  // ✅ Ambil riwayat aktivitas user
   const { data: activitiesData, isLoading: isLoadingActivities } = useQuery({
     queryKey: ["userActivities", user?.id],
     queryFn: () => getUserActivitiesApi(user!.id),
     enabled: !!user?.id,
-    select: (data) => data.data.history,
   });
 
-  // ✅ Setup react-hook-form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     values: {
@@ -95,7 +90,6 @@ export const ProfilePage = () => {
     },
   });
 
-  // ✅ Mutasi update user
   const { mutate: updateUser, isPending: isPending } = useMutation({
     mutationFn: (values: z.infer<typeof formSchema>) => {
       const payload = Object.fromEntries(
@@ -103,31 +97,25 @@ export const ProfilePage = () => {
       );
       return updateUserApi(user!.id, payload);
     },
-    onSuccess: (res) => {
-      toast.success("Profil berhasil diperbarui!");
+    onSuccess: (response) => {
+      toast.success(response.status.message);
 
-      // 🔁 Refetch otomatis dengan cara invalidasi cache query
       queryClient.invalidateQueries({ queryKey: ["user", user!.id] });
 
       setIsEditing(false);
       form.reset({ ...form.getValues(), password: "" });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(
-        error.response?.data?.message ||
-          "Terjadi kesalahan saat memperbarui profil."
+        error.message || "Terjadi kesalahan saat memperbarui profil."
       );
     },
   });
 
-  const userActivities = useMemo(() => {
-    if (!activitiesData) return [];
-    return activitiesData.map((a: any, i: number) => ({
-      id: `${a.type}-${i}`,
-      description: a.description,
-      createdAt: new Date(a.timestamp),
-    }));
-  }, [activitiesData]);
+  const userActivities = useMemo(
+    () => activitiesData?.data || [],
+    [activitiesData?.data]
+  );
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const hasUsernameChanged =
@@ -163,9 +151,9 @@ export const ProfilePage = () => {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* ✅ Kartu Profil */}
         <aside className="lg:col-span-1">
-          <Card className="shadow-lg hover:shadow-xl transition">
-            <CardHeader className="bg-gradient-to-b from-muted/50 to-muted/20 text-center">
-              <Avatar className="h-24 w-24 mx-auto">
+          <Card className="shadow-lg transition hover:shadow-xl">
+            <CardHeader className="from-muted/50 to-muted/20 bg-gradient-to-b text-center">
+              <Avatar className="mx-auto h-24 w-24">
                 <AvatarImage src={profile?.photo_profile_url ?? ""} />
                 <AvatarFallback>
                   {profile?.username
@@ -179,15 +167,11 @@ export const ProfilePage = () => {
                 {profile?.username}
               </CardTitle>
               <CardDescription className="flex items-center justify-center gap-1">
-                <ShieldCheck className="h-4 w-4 text-primary" />
+                <ShieldCheck className="text-primary h-4 w-4" />
                 {profile?.role?.role_name || "User"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 p-6">
-              <div className="flex justify-between">
-                <span>Email</span>
-                <span>{profile?.email || "-"}</span>
-              </div>
               <div className="flex justify-between">
                 <span>Status</span>
                 <Badge variant={profile?.is_active ? "default" : "destructive"}>
@@ -197,9 +181,17 @@ export const ProfilePage = () => {
               <div className="flex justify-between">
                 <span>Bergabung</span>
                 <span>
-                  {format(new Date(profile?.created_at), "d MMMM yyyy", {
-                    locale: id,
-                  })}
+                  {profile?.created_at ? (
+                    format(
+                      new Date(profile.created_at.replace(" ", "T")), // Fix for Safari/SQL dates
+                      "d MMMM yyyy",
+                      {
+                        locale: id,
+                      }
+                    )
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
                 </span>
               </div>
             </CardContent>
@@ -239,11 +231,11 @@ export const ProfilePage = () => {
                       </div>
 
                       {/* Password Baru */}
-                      <div className="grid gap-2 sm:grid-cols-3 sm:items-center relative">
+                      <div className="relative grid gap-2 sm:grid-cols-3 sm:items-center">
                         <Label htmlFor="password" className="sm:text-right">
                           Password Baru
                         </Label>
-                        <div className="sm:col-span-2 relative">
+                        <div className="relative sm:col-span-2">
                           <Input
                             id="password"
                             type={showPassword ? "text" : "password"}
@@ -252,7 +244,7 @@ export const ProfilePage = () => {
                           />
                           <button
                             type="button"
-                            className="absolute right-3 top-2.5 text-muted-foreground"
+                            className="text-muted-foreground absolute top-2.5 right-3"
                             onClick={() => setShowPassword((p) => !p)}
                           >
                             {showPassword ? (
@@ -264,7 +256,7 @@ export const ProfilePage = () => {
                         </div>
                       </div>
                       {form.formState.errors.password && (
-                        <p className="text-sm text-destructive sm:col-span-2 text-right">
+                        <p className="text-destructive text-right text-sm sm:col-span-2">
                           {form.formState.errors.password.message}
                         </p>
                       )}
@@ -283,7 +275,7 @@ export const ProfilePage = () => {
                 </AnimatePresence>
               </CardContent>
 
-              <CardFooter className="justify-end gap-2 my-2">
+              <CardFooter className="my-2 justify-end gap-2">
                 {isEditing ? (
                   <>
                     <Button
@@ -294,12 +286,17 @@ export const ProfilePage = () => {
                       <XCircle className="mr-2 h-4 w-4" /> Batal
                     </Button>
                     <Button type="submit" disabled={isPending}>
-                      {isPending ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="mr-2 h-4 w-4" />
-                      )}
-                      Simpan
+                      {/* 1. Bungkus Logika Ikon dalam span sendiri */}
+                      <span className="mr-2 inline-flex items-center">
+                        {isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Save className="h-4 w-4" />
+                        )}
+                      </span>
+
+                      {/* 2. PENTING: Bungkus teks "Simpan" dalam span juga */}
+                      <span>Simpan</span>
                     </Button>
                   </>
                 ) : (
@@ -318,7 +315,7 @@ export const ProfilePage = () => {
             </CardHeader>
             <CardContent className="max-h-96 overflow-y-auto">
               {isLoadingActivities ? (
-                <div className="flex justify-center items-center h-24">
+                <div className="flex h-24 items-center justify-center">
                   <Loader2 className="animate-spin" />
                 </div>
               ) : userActivities.length > 0 ? (
@@ -326,17 +323,21 @@ export const ProfilePage = () => {
                   {userActivities.map((a) => (
                     <li key={a.id} className="mb-4">
                       <p className="font-medium">{a.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(a.createdAt), {
-                          addSuffix: true,
-                          locale: id,
-                        })}
+                      <p className="text-muted-foreground text-xs">
+                        {/* FIX: Use .replace to ensure ISO format compatibility */}
+                        {formatDistanceToNow(
+                          new Date(a.timestamp.replace(" ", "T")),
+                          {
+                            addSuffix: true,
+                            locale: id,
+                          }
+                        )}
                       </p>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-center text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-center text-sm">
                   Tidak ada aktivitas terbaru.
                 </p>
               )}
@@ -364,7 +365,7 @@ export const ProfilePage = () => {
               onClick={() => updateUser(form.getValues())}
               disabled={isPending}
             >
-              {isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Ya, Simpan
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -17,7 +17,6 @@ import {
   Thermometer,
   Users,
   BrainCircuit,
-  Tags,
   Zap,
   Loader2,
 } from "lucide-react";
@@ -74,7 +73,7 @@ const SortableHeader = ({
   <Button
     variant="ghost"
     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    className="text-left p-0 h-auto hover:bg-transparent"
+    className="h-auto p-0 text-left hover:bg-transparent"
   >
     {title}
     <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -161,7 +160,7 @@ const PredictionCell = ({
       disabled={isPending || !meterId}
       className="w-full"
     >
-      <span className="mr-2 h-4 w-4 flex items-center justify-center">
+      <span className="mr-2 flex h-4 w-4 items-center justify-center">
         {isPending ? (
           <Loader2 key="loading" className="animate-spin" />
         ) : (
@@ -219,7 +218,7 @@ const ClassificationActionCell = ({
       disabled={isPending || !meterId}
       className="w-full"
     >
-      <span className="mr-2 h-4 w-4 flex items-center justify-center">
+      <span className="mr-2 flex h-4 w-4 items-center justify-center">
         {isPending ? (
           <Loader2 key="loading" className="animate-spin" />
         ) : (
@@ -248,7 +247,7 @@ export const createColumns = (
 
         return (
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="text-muted-foreground h-4 w-4" />
             <span>
               {format(new Date(`${dateOnlyString}T00:00:00`), "dd MMM yyyy", {
                 locale: id,
@@ -272,7 +271,7 @@ export const createColumns = (
           ),
           cell: ({ row }) => (
             <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-muted-foreground" />
+              <Target className="text-muted-foreground h-4 w-4" />
               <span>{formatNumber(row.getValue("target"))}</span>
             </div>
           ),
@@ -284,7 +283,7 @@ export const createColumns = (
           ),
           cell: ({ row }) => (
             <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-muted-foreground" />
+              <Zap className="text-muted-foreground h-4 w-4" />
               <span>{formatNumber(row.getValue("wbp"))}</span>
             </div>
           ),
@@ -296,7 +295,7 @@ export const createColumns = (
           ),
           cell: ({ row }) => (
             <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-muted-foreground" />
+              <Zap className="text-muted-foreground h-4 w-4" />
               <span>{formatNumber(row.getValue("lwbp"))}</span>
             </div>
           ),
@@ -316,7 +315,7 @@ export const createColumns = (
           ),
           cell: ({ row }) => (
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="text-muted-foreground h-4 w-4" />
               <span>{formatNumber(row.getValue("pax"))}</span>
             </div>
           ),
@@ -328,12 +327,12 @@ export const createColumns = (
           ),
           cell: ({ row }) => {
             const avgTemp = row.getValue("avg_temp") as number;
-            const maxTemp = row.original.max_temp;
+            const maxTemp = row.original.max_temp || 0;
             const isHotMaxTemp = maxTemp > 30;
             const isHotAvgTemp = avgTemp > 30;
 
             return (
-              <div className="flex flex-col gap-2 ">
+              <div className="flex flex-col gap-2">
                 <Badge variant={isHotAvgTemp ? "destructive" : "secondary"}>
                   <div className="flex items-center gap-1.5">
                     {isHotAvgTemp ? (
@@ -366,9 +365,9 @@ export const createColumns = (
           cell: ({ row }) => (
             <div className="flex items-center gap-2">
               {row.getValue("is_workday") ? (
-                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                <Briefcase className="text-muted-foreground h-4 w-4" />
               ) : (
-                <Home className="h-4 w-4 text-muted-foreground" />
+                <Home className="text-muted-foreground h-4 w-4" />
               )}
               <span>{row.getValue("is_workday") ? "Hari Kerja" : "Libur"}</span>
             </div>
@@ -403,10 +402,10 @@ export const createColumns = (
               <div className="flex flex-col items-center justify-center gap-1.5 text-center">
                 <ClassificationBadge classification={classification} />
                 <div
-                  className={`flex items-center gap-1 text-xs font-mono ${styleMap[classification]}`}
+                  className={`flex items-center gap-1 font-mono text-xs ${styleMap[classification]}`}
                 >
                   {iconMap[classification]}
-                  <span className="font-semibold">{`${score.toFixed(
+                  <span className="font-semibold">{`${score?.toFixed(
                     1
                   )}%`}</span>
                 </div>
@@ -446,7 +445,7 @@ export const createColumns = (
             const unit = dataType === "Water" ? "m³" : "L";
             return (
               <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-muted-foreground" />
+                <Target className="text-muted-foreground h-4 w-4" />
                 <span>
                   {formatNumber(amount)} {unit}
                 </span>
@@ -465,7 +464,7 @@ export const createColumns = (
             const Icon = dataType === "Water" ? Droplets : Fuel;
             return (
               <div className="flex items-center gap-2">
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <Icon className="text-muted-foreground h-4 w-4" />
                 <span>
                   {formatNumber(amount)} {unit}
                 </span>
@@ -483,7 +482,7 @@ export const createColumns = (
       header: ({ column }) => <SortableHeader column={column} title="Biaya" />,
       cell: ({ row }) => (
         <div className="flex items-center gap-2 font-medium">
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <DollarSign className="text-muted-foreground h-4 w-4" />
           <span>{formatCurrency(row.getValue("cost"))}</span>
         </div>
       ),

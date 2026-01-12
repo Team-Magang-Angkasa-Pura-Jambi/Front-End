@@ -30,4 +30,3 @@ export const getLastReadingApi = async (
   );
   return response.data;
 };
-

@@ -28,7 +28,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <Card className="flex h-full flex-col justify-between overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-muted-foreground text-sm font-medium">
           {label}
         </CardTitle>
         <div className={cn("rounded-full p-2 text-white", iconBgColor)}>
@@ -37,7 +37,7 @@ export const StatCard: React.FC<StatCardProps> = ({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">{unit}</p>
+        <p className="text-muted-foreground text-xs">{unit}</p>
       </CardContent>
     </Card>
   );

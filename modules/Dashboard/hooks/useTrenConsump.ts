@@ -93,9 +93,18 @@ export const useTrenConsump = () => {
   } = useQuery({
     queryKey: ["analysisData", typeEnergy, selectedPeriod, selectedMeterId],
     queryFn: () =>
-      getTrentConsumptionApi(typeEnergy, year, month, Number(selectedMeterId)),
+      getTrentConsumptionApi(
+        typeEnergy,
+        year!,
+        month!,
+        Number(selectedMeterId)
+      ),
 
-    enabled: !!selectedMeterId && !!year && !!month && !!typeEnergy,
+    enabled:
+      !!selectedMeterId &&
+      year !== undefined &&
+      month !== undefined &&
+      !!typeEnergy,
   });
 
   const chartData = useMemo(() => {
@@ -131,7 +140,6 @@ export const useTrenConsump = () => {
   const insights = useMemo(() => {
     if (chartData.length === 0) return null;
 
-    // 1. Hitung Agregat Data (Total Bulan Ini)
     let totalActual = 0;
     let totalTarget = 0;
     let totalPrediction = 0;
@@ -147,7 +155,6 @@ export const useTrenConsump = () => {
     const dataCount = chartData.length;
     const lastData = chartData[dataCount - 1];
 
-    // 2. Skenario A: Data Kosong / Awal Bulan
     if (totalActual === 0) {
       return {
         type: "success",
@@ -155,8 +162,6 @@ export const useTrenConsump = () => {
       };
     }
 
-    // 3. Skenario B: Peringatan Kritis (Over Budget Akumulatif)
-    // Jika total pemakaian melebihi total target
     if (totalActual > totalTarget) {
       const overPercentage = ((totalActual - totalTarget) / totalTarget) * 100;
       return {
@@ -167,8 +172,6 @@ export const useTrenConsump = () => {
       };
     }
 
-    // 4. Skenario C: Deteksi Anomali Harian (Hari Terakhir vs Prediksi AI)
-    // Jika hari ini pemakaian jauh lebih tinggi dari prediksi AI (> 20%)
     const deviation = lastData.pemakaian - lastData.prediksi;
     const deviationPercent =
       lastData.prediksi > 0 ? (deviation / lastData.prediksi) * 100 : 0;
@@ -182,8 +185,6 @@ export const useTrenConsump = () => {
       };
     }
 
-    // 5. Skenario D: Frekuensi Pemborosan Tinggi
-    // Jika lebih dari 50% hari dalam bulan ini melebihi target harian
     if (daysOverTarget > dataCount / 2) {
       return {
         type: "warning",
@@ -191,8 +192,6 @@ export const useTrenConsump = () => {
       };
     }
 
-    // 6. Skenario E: Efisiensi (Success)
-    // Jika semua kondisi di atas aman
     const efficiency =
       totalTarget > 0
         ? (((totalTarget - totalActual) / totalTarget) * 100).toFixed(1)

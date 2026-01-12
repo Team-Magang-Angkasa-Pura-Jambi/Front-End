@@ -47,7 +47,7 @@ export const PaxEditForm: React.FC<PaxEditFormProps> = ({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
-      total_pax: initialData.pax,
+      total_pax: initialData?.totalPax,
     },
   });
 
@@ -78,10 +78,10 @@ export const PaxEditForm: React.FC<PaxEditFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="p-4 border rounded-md bg-muted/50 flex items-center gap-3">
-          <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+        <div className="bg-muted/50 flex items-center gap-3 rounded-md border p-4">
+          <CalendarIcon className="text-muted-foreground h-5 w-5" />
           <p className="font-semibold">
-            {format(new Date(initialData.date), "EEEE, dd MMMM yyyy", {
+            {format(new Date(initialData?.date), "EEEE, dd MMMM yyyy", {
               locale: id,
             })}
           </p>
@@ -94,7 +94,7 @@ export const PaxEditForm: React.FC<PaxEditFormProps> = ({
               <FormLabel>Jumlah Pax</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Users className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                   <Input
                     type="number"
                     placeholder="0"

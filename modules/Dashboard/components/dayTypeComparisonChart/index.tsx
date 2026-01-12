@@ -69,23 +69,23 @@ export const UnifiedEnergyComparisonChart = () => {
   return (
     <Card
       ref={ref}
-      className="w-full shadow-lg border-none ring-1 ring-slate-200"
+      className="w-full border-none shadow-lg ring-1 ring-slate-200"
     >
-      <CardHeader className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 border-b border-slate-50 pb-4">
+      <CardHeader className="flex flex-col items-start justify-between gap-4 border-b border-slate-50 pb-4 xl:flex-row xl:items-center">
         <div>
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <Zap className="w-4 h-4 text-blue-500" />
+          <CardTitle className="flex items-center gap-2 text-lg font-bold">
+            <Zap className="h-4 w-4 text-blue-500" />
             Analisis Konsumsi & Biaya: Workday vs Holiday
           </CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm">
             Perbandingan efisiensi operasional bulanan.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2 w-full xl:w-auto">
+        <div className="flex w-full flex-wrap gap-2 xl:w-auto">
           <Select value={month} onValueChange={setMonth}>
             <SelectTrigger className="w-[130px]">
-              <CalendarDays className="w-3 h-3 mr-2 text-slate-500" />
+              <CalendarDays className="mr-2 h-3 w-3 text-slate-500" />
               <SelectValue placeholder="Bulan" />
             </SelectTrigger>
             <SelectContent>
@@ -99,7 +99,7 @@ export const UnifiedEnergyComparisonChart = () => {
 
           <Select value={year} onValueChange={setYear}>
             <SelectTrigger className="w-[100px]">
-              <Calendar className="w-3 h-3 mr-2 text-slate-500" />
+              <Calendar className="mr-2 h-3 w-3 text-slate-500" />
               <SelectValue placeholder="Tahun" />
             </SelectTrigger>
             <SelectContent>
@@ -113,7 +113,7 @@ export const UnifiedEnergyComparisonChart = () => {
             value={view}
             onValueChange={(val) => setView(val as "consumption" | "cost")}
           >
-            <TabsList className="grid w-[160px] grid-cols-2 h-9">
+            <TabsList className="grid h-9 w-[160px] grid-cols-2">
               <TabsTrigger value="consumption" className="text-xs">
                 Volume
               </TabsTrigger>
@@ -131,25 +131,25 @@ export const UnifiedEnergyComparisonChart = () => {
             title="Download JPG"
           >
             {isExporting ? (
-              <span className="text-[10px] animate-pulse">...</span>
+              <span className="animate-pulse text-[10px]">...</span>
             ) : (
-              <Download className="w-4 h-4" />
+              <Download className="h-4 w-4" />
             )}
           </Button>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-6 min-h-[400px]">
+      <CardContent className="min-h-[400px] pt-6">
         {isLoading ? (
           <div className="space-y-6">
-            <div className="h-[300px] w-full flex flex-col items-center justify-center space-y-4">
-              <Skeleton className="h-[280px] w-full rounded-xl bg-background" />
+            <div className="flex h-[300px] w-full flex-col items-center justify-center space-y-4">
+              <Skeleton className="bg-background h-[280px] w-full rounded-xl" />
               <div className="flex gap-4">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-24" />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-24 w-full rounded-xl" />
               ))}
@@ -243,7 +243,7 @@ export const UnifiedEnergyComparisonChart = () => {
               </ResponsiveContainer>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
               {data.map((item) => {
                 const valWeekday = item.weekdayValue;
                 const valHoliday = item.holidayValue;
@@ -257,19 +257,19 @@ export const UnifiedEnergyComparisonChart = () => {
                 return (
                   <div
                     key={item.category}
-                    className="p-4 rounded-xl  border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group"
+                    className="group flex flex-col justify-between rounded-xl border border-slate-100 p-4 shadow-sm transition-shadow hover:shadow-md"
                   >
-                    <div className="flex items-center gap-2 mb-3 text-slate-500 group-hover:text-slate-800 transition-colors">
+                    <div className="mb-3 flex items-center gap-2 text-slate-500 transition-colors group-hover:text-slate-800">
                       {item.category === "Electricity" && (
-                        <Zap className="w-4 h-4 text-amber-500" />
+                        <Zap className="h-4 w-4 text-amber-500" />
                       )}
                       {item.category === "Water" && (
-                        <Droplets className="w-4 h-4 text-blue-500" />
+                        <Droplets className="h-4 w-4 text-blue-500" />
                       )}
                       {item.category === "Fuel" && (
-                        <Fuel className="w-4 h-4 text-red-500" />
+                        <Fuel className="h-4 w-4 text-red-500" />
                       )}
-                      <span className="text-xs font-bold uppercase tracking-wider">
+                      <span className="text-xs font-bold tracking-wider uppercase">
                         {item.category}
                       </span>
                     </div>
@@ -294,13 +294,13 @@ export const UnifiedEnergyComparisonChart = () => {
                       </Badge>
                     </div>
 
-                    <p className="text-[11px] text-slate-500 mt-3 border-t pt-3 flex items-start gap-1.5 leading-snug">
-                      <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5 opacity-70" />
+                    <p className="mt-3 flex items-start gap-1.5 border-t pt-3 text-[11px] leading-snug text-slate-500">
+                      <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 opacity-70" />
                       {isHigher ? (
                         <span>
                           Konsumsi meningkat saat libur.
                           {!isCost && (
-                            <span className="font-semibold ml-1 block">
+                            <span className="ml-1 block font-semibold">
                               (Satuan: {item.unit})
                             </span>
                           )}
@@ -309,7 +309,7 @@ export const UnifiedEnergyComparisonChart = () => {
                         <span>
                           Efisiensi tercapai saat libur.
                           {!isCost && (
-                            <span className="font-semibold ml-1 block">
+                            <span className="ml-1 block font-semibold">
                               (Satuan: {item.unit})
                             </span>
                           )}

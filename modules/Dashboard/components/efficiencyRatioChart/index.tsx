@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import {
   ComposedChart,
   Line,
@@ -66,7 +65,7 @@ export const EfficiencyRatioChart = () => {
     return <ComponentLoader />;
   }
   if (isError) {
-    return <ErrorFetchData message={error.message} />;
+    return <ErrorFetchData message={error?.message} />;
   }
 
   if (!chartData) {
@@ -76,23 +75,23 @@ export const EfficiencyRatioChart = () => {
   return (
     <Card
       ref={ref}
-      className="w-full shadow-lg border-none ring-1 ring-slate-200"
+      className="w-full border-none shadow-lg ring-1 ring-slate-200"
     >
-      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-50 pb-4">
+      <CardHeader className="flex flex-col items-start justify-between gap-4 border-b border-slate-50 pb-4 md:flex-row md:items-center">
         <div>
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <Zap className="w-4 h-4 text-orange-500" />
+          <CardTitle className="flex items-center gap-2 text-lg font-bold">
+            <Zap className="h-4 w-4 text-orange-500" />
             Profil Efisiensi Mingguan
           </CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm">
             Rata-rata penggunaan energi berdasarkan hari (Senin - Minggu).
           </p>
         </div>
 
         <div className="flex gap-2">
           <Select value={month} onValueChange={setMonth}>
-            <SelectTrigger className="w-[130px] h-9">
-              <CalendarDays className="w-3 h-3 mr-2 text-slate-500" />
+            <SelectTrigger className="h-9 w-[130px]">
+              <CalendarDays className="mr-2 h-3 w-3 text-slate-500" />
               <SelectValue placeholder="Bulan" />
             </SelectTrigger>
             <SelectContent>
@@ -105,8 +104,8 @@ export const EfficiencyRatioChart = () => {
           </Select>
 
           <Select value={year} onValueChange={setYear}>
-            <SelectTrigger className="w-[100px] h-9">
-              <Calendar className="w-3 h-3 mr-2 text-slate-500" />
+            <SelectTrigger className="h-9 w-[100px]">
+              <Calendar className="mr-2 h-3 w-3 text-slate-500" />
               <SelectValue placeholder="Tahun" />
             </SelectTrigger>
             <SelectContent>
@@ -125,7 +124,7 @@ export const EfficiencyRatioChart = () => {
             {isExporting ? (
               <span className="text-[10px]">...</span>
             ) : (
-              <Download className="w-4 h-4" />
+              <Download className="h-4 w-4" />
             )}
           </Button>
         </div>
@@ -134,8 +133,8 @@ export const EfficiencyRatioChart = () => {
       <CardContent className="pt-6">
         <div className="h-[400px] w-full">
           {isLoading ? (
-            <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
-              <Skeleton className="h-[300px] w-full rounded-xl bg-background" />
+            <div className="flex h-full w-full flex-col items-center justify-center space-y-4">
+              <Skeleton className="bg-background h-[300px] w-full rounded-xl" />
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -238,16 +237,16 @@ export const EfficiencyRatioChart = () => {
           )}
         </div>
 
-        <div className="mt-6 flex flex-col md:flex-row gap-4">
-          <div className="flex-1 p-4 rounded-xl bg-orange-50/50 border border-orange-100 flex gap-3">
-            <div className="p-2 h-fit  rounded-lg shadow-sm">
-              <Plane className="w-4 h-4 text-orange-600" />
+        <div className="mt-6 flex flex-col gap-4 md:flex-row">
+          <div className="flex flex-1 gap-3 rounded-xl border border-orange-100 bg-orange-50/50 p-4">
+            <div className="h-fit rounded-lg p-2 shadow-sm">
+              <Plane className="h-4 w-4 text-orange-600" />
             </div>
             <div>
               <h4 className="text-sm font-bold text-slate-800">
                 Efisiensi Terminal
               </h4>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+              <p className="mt-1 text-xs leading-relaxed text-slate-600">
                 Grafik garis (Oranye) menunjukkan kWh per penumpang. Jika garis{" "}
                 <strong>naik tajam</strong> di hari sepi (Selasa/Rabu), berarti
                 AC Terminal berlebih (Overcooling).
@@ -255,15 +254,15 @@ export const EfficiencyRatioChart = () => {
             </div>
           </div>
 
-          <div className="flex-1 p-4 rounded-xl bg-background border border-slate-100 flex gap-3">
-            <div className="p-2 h-fit  rounded-lg shadow-sm">
-              <Building2 className="w-4 h-4 text-slate-600" />
+          <div className="bg-background flex flex-1 gap-3 rounded-xl border border-slate-100 p-4">
+            <div className="h-fit rounded-lg p-2 shadow-sm">
+              <Building2 className="h-4 w-4 text-slate-600" />
             </div>
             <div>
               <h4 className="text-sm font-bold text-slate-800">
                 Pola Beban Kantor
               </h4>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+              <p className="mt-1 text-xs leading-relaxed text-slate-600">
                 Grafik batang (Abu-abu) adalah beban murni kantor. Pastikan
                 batang <strong>Sabtu & Minggu rendah</strong> (mendekati 0 atau
                 beban standby). Jika tinggi, ada pemborosan di hari libur.

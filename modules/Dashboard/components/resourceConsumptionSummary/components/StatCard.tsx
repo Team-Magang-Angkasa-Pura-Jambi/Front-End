@@ -50,21 +50,21 @@ export const StatCard = ({
   }
 
   return (
-    <Card className="h-full border-l-4 border-l-transparent hover:border-l-blue-500/50 transition-all">
+    <Card className="h-full border-l-4 border-l-transparent transition-all hover:border-l-blue-500/50">
       {/* Menggunakan CardContent dengan flex layout.
         pt-6 ditambahkan karena kita tidak memakai CardHeader, 
         sehingga padding atas perlu disamakan dengan padding lainnya.
       */}
-      <CardContent className="p-6 flex items-center justify-between h-full relative z-10">
+      <CardContent className="relative z-10 flex h-full items-center justify-between p-6">
         {/* BAGIAN KIRI: Teks & Angka */}
         <div>
-          <p className="text-muted-foreground text-sm font-medium mb-1">
+          <p className="text-muted-foreground mb-1 text-sm font-medium">
             {label}
           </p>
 
           <div className="flex items-baseline gap-1">
-            <h3 className="text-2xl font-bold text-foreground">{value}</h3>
-            <span className="text-sm font-medium text-muted-foreground">
+            <h3 className="text-foreground text-2xl font-bold">{value}</h3>
+            <span className="text-muted-foreground text-sm font-medium">
               {unit}
             </span>
           </div>
@@ -72,11 +72,11 @@ export const StatCard = ({
           {/* Bagian Persentase */}
           {percentageChange !== undefined && (
             <div
-              className={`flex items-center gap-1 text-xs font-bold mt-2 ${percentageColor}`}
+              className={`mt-2 flex items-center gap-1 text-xs font-bold ${percentageColor}`}
             >
-              {PercentageIcon && <PercentageIcon className="w-3 h-3" />}
+              {PercentageIcon && <PercentageIcon className="h-3 w-3" />}
               <span>{percentageText}</span>
-              <span className="text-muted-foreground font-normal ml-1">
+              <span className="text-muted-foreground ml-1 font-normal">
                 vs bulan lalu
               </span>
             </div>
@@ -84,8 +84,8 @@ export const StatCard = ({
         </div>
 
         {/* BAGIAN KANAN: Icon dengan Background */}
-        <div className={`p-3 rounded-xl shadow-sm ${iconBgColor}`}>
-          <IconComponent className="w-6 h-6 text-white" />
+        <div className={`rounded-xl p-3 shadow-sm ${iconBgColor}`}>
+          <IconComponent className="h-6 w-6 text-white" />
         </div>
       </CardContent>
     </Card>

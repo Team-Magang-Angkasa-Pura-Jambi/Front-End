@@ -6,7 +6,6 @@ import { Button } from "@/common/components/ui/button";
 import { Input } from "@/common/components/ui/input";
 import { useState } from "react";
 import { useLogin } from "@/modules/Auth/hooks/useLogin";
-import Image from "next/image";
 import { HeaderLogo } from "./logo";
 
 const containerVariants: Variants = {
@@ -15,18 +14,6 @@ const containerVariants: Variants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.15,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: "easeInOut",
     },
   },
 };
@@ -65,13 +52,13 @@ export const LeftSide = () => {
   };
   return (
     <motion.div
-      className="w-full md:w-[40%] p-3 sm:p-12  py-0 flex flex-col z-10 "
+      className="z-10 flex w-full flex-col p-3 py-0 sm:p-12 md:w-[40%]"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       <motion.div
-        className=" text-center md:text-left z-20"
+        className="z-20 text-center md:text-left"
         initial="hidden"
         animate="visible"
         variants={{
@@ -94,27 +81,27 @@ export const LeftSide = () => {
         </motion.h1>
         {/* SENTINEL */}
         <motion.h2
-          className="text-5xl font-extrabold text-blue-400 mt-1 drop-shadow-lg"
+          className="mt-1 text-5xl font-extrabold text-blue-400 drop-shadow-lg"
           variants={textVariants}
         >
           SENTINEL
         </motion.h2>
         {/* Deskripsi */}
-        <motion.p className="text-blue-300  max-w-sm" variants={textVariants}>
+        <motion.p className="max-w-sm text-blue-300" variants={textVariants}>
           Please log in to access your dashboard.
         </motion.p>
       </motion.div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <motion.fieldset
-          className="relative border border-gray-300 rounded-lg group focus-within:border-blue-600"
+          className="group relative rounded-lg border border-gray-300 focus-within:border-blue-600"
           variants={itemVariants}
         >
           <legend className="ml-3 px-1 text-sm font-medium text-gray-600 transition-colors group-focus-within:text-blue-600">
             Username
           </legend>
           <div className="relative">
-            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600" />
+            <User className="text-muted-foreground absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 group-focus-within:text-blue-600" />
             <Input
               required
               type="text"
@@ -122,20 +109,20 @@ export const LeftSide = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
-              className="pl-10 pr-4 py-2 w-full text-black border-none bg-transparent h-auto focus-visible:ring-0 focus-visible:ring-offset-0 "
+              className="h-auto w-full border-none bg-transparent py-2 pr-4 pl-10 text-black focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
         </motion.fieldset>
 
         <motion.fieldset
-          className="relative border border-gray-300 rounded-lg group focus-within:border-blue-600"
+          className="group relative rounded-lg border border-gray-300 focus-within:border-blue-600"
           variants={itemVariants}
         >
           <legend className="ml-3 px-1 text-sm font-medium text-gray-600 transition-colors group-focus-within:text-blue-600">
             Password
           </legend>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-600" />
+            <Lock className="text-muted-foreground absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 group-focus-within:text-blue-600" />
             <Input
               required
               type="password"
@@ -143,7 +130,7 @@ export const LeftSide = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="pl-10 pr-4 py-2 w-full border-none text-black bg-transparent h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-auto w-full border-none bg-transparent py-2 pr-4 pl-10 text-black focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
         </motion.fieldset>

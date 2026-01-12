@@ -15,7 +15,11 @@ import { CHART_COLORS } from "../../../constants";
 import { Badge } from "@/common/components/ui/badge";
 import { TrendingDown } from "lucide-react";
 
-export const WaterfallChart = ({ data }: { data }) => (
+export const WaterfallChart = ({
+  data,
+}: {
+  data: { name: string; value: number; type: string }[];
+}) => (
   <ResponsiveContainer width="100%" height="100%">
     <BarChart data={data} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -67,10 +71,10 @@ export const SavedChart = ({
   data: { name: string; amount: number }[];
   totalSaved: number;
 }) => (
-  <div className="flex flex-col h-full w-full">
-    <div className="flex justify-between items-end mb-4 px-2 shrink-0">
+  <div className="flex h-full w-full flex-col">
+    <div className="mb-4 flex shrink-0 items-end justify-between px-2">
       <div>
-        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+        <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
           Saved YTD
         </p>
         <h4 className="text-2xl font-black text-emerald-600">
@@ -78,10 +82,10 @@ export const SavedChart = ({
         </h4>
       </div>
       <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
-        <TrendingDown className="w-3 h-3 mr-1" /> Efisiensi Positif
+        <TrendingDown className="mr-1 h-3 w-3" /> Efisiensi Positif
       </Badge>
     </div>
-    <div className="flex-1 w-full min-h-0">
+    <div className="min-h-0 w-full flex-1">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
@@ -134,7 +138,7 @@ export const SavedChart = ({
         </LineChart>
       </ResponsiveContainer>
     </div>
-    <div className="mt-2 p-3 bg-background rounded-lg border border-slate-100 text-[11px] text-slate-600 shrink-0">
+    <div className="bg-background mt-2 shrink-0 rounded-lg border border-slate-100 p-3 text-[11px] text-slate-600">
       💡 Insight: Penghematan terbesar didorong oleh optimasi penggunaan.
     </div>
   </div>

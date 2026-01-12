@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { statConfig } from "../components/resourceConsumptionSummary/constants";
 import { Plane, Zap } from "lucide-react";
 
-export const useResourceConsumptionSummary = (year, month) => {
+export const useResourceConsumptionSummary = (year: string, month: string) => {
   const {
     data: cardData,
     isLoading,

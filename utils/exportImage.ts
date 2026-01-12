@@ -21,8 +21,8 @@ export const downloadElementAsJpg = async (
     fileName = `sentinel-export-${new Date().toISOString().split("T")[0]}.jpg`,
     quality = 0.95,
     backgroundColor = "#ffffff",
-    scale = 3, // Default 3x untuk ketajaman maksimal (High DPI)
-    excludeClasses = ["hide-on-export", "no-print"], // Default class yang diabaikan
+    scale = 3,
+    excludeClasses = ["hide-on-export", "no-print"],
   } = options;
 
   if (!ref.current) {
@@ -31,11 +31,10 @@ export const downloadElementAsJpg = async (
   }
 
   try {
-    // 1. Filter Function: Mengabaikan elemen dengan class tertentu
     const filter = (node: HTMLElement) => {
       const exclusionList = excludeClasses;
+
       if (node.classList) {
-        // Jika elemen memiliki class yang ada di exclusionList, return false (jangan render)
         return !exclusionList.some((classname) =>
           node.classList.contains(classname)
         );
@@ -43,23 +42,21 @@ export const downloadElementAsJpg = async (
       return true;
     };
 
-    // 2. Generate Data URL
     const dataUrl = await toJpeg(ref.current, {
       quality,
       backgroundColor,
       cacheBust: true,
       pixelRatio: scale,
-      filter: filter, // Terapkan filter
+      filter: filter,
       style: {
-        // Styling khusus saat render gambar agar lebih rapi
         borderRadius: "0px",
         boxShadow: "none",
-        fontSmooth: "antialiased",
-        webkitFontSmoothing: "antialiased",
+
+        ["WebkitFontSmoothing" as string]: "antialiased",
+        ["MozOsxFontSmoothing" as string]: "grayscale",
       },
     });
 
-    // 3. Trigger Download secara Modern
     const link = document.createElement("a");
     link.download = fileName.endsWith(".jpg") ? fileName : `${fileName}.jpg`;
     link.href = dataUrl;
@@ -68,7 +65,7 @@ export const downloadElementAsJpg = async (
     link.click();
     document.body.removeChild(link);
 
-    return true; // Berhasil
+    return true;
   } catch (err) {
     console.error("❌ Failed to export image:", err);
     throw new Error("Gagal memproses gambar. Silakan coba lagi.");

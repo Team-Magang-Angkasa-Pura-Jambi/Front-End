@@ -63,16 +63,16 @@ export const DataTable = <TData, TValue>({
   const TableSkeleton = () =>
     Array.from({ length: 5 }).map((_, i) => (
       <TableRow key={i}>
-        {columns.map((col, j) => (
+        {columns.map((_col, j) => (
           <TableCell key={j}>
-            <Skeleton className="h-6 w-full bg-muted/50" />
+            <Skeleton className="bg-muted/50 h-6 w-full" />
           </TableCell>
         ))}
       </TableRow>
     ));
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="w-full space-y-4">
       {/* Filter Input */}
       {filterColumnId && (
         <div className="flex items-center">
@@ -88,7 +88,7 @@ export const DataTable = <TData, TValue>({
                 ?.setFilterValue(event.target.value)
             }
             // Style Input agar sesuai tema Card
-            className="max-w-sm bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+            className="bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary max-w-sm"
           />
         </div>
       )}
@@ -138,7 +138,7 @@ export const DataTable = <TData, TValue>({
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="h-24 text-center text-muted-foreground"
+                className="text-muted-foreground h-24 text-center"
               >
                 Tidak ada data.
               </TableCell>
@@ -149,18 +149,18 @@ export const DataTable = <TData, TValue>({
 
       {/* Pagination Control */}
       <div className="flex items-center justify-between px-2">
-        <div className="flex-1 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex-1 text-sm">
           {table.getFilteredRowModel().rows.length} baris data.
         </div>
         <div className="flex items-center space-x-4 lg:space-x-6">
-          <div className="flex items-center justify-center text-sm font-medium text-foreground">
+          <div className="text-foreground flex items-center justify-center text-sm font-medium">
             Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
             {table.getPageCount()}
           </div>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
-              className="h-8 w-8 p-0 bg-card border-border hover:bg-accent hover:text-accent-foreground"
+              className="bg-card border-border hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
@@ -169,7 +169,7 @@ export const DataTable = <TData, TValue>({
             </Button>
             <Button
               variant="outline"
-              className="h-8 w-8 p-0 bg-card border-border hover:bg-accent hover:text-accent-foreground"
+              className="bg-card border-border hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >

@@ -24,8 +24,8 @@ export const MonthlyUsageDetails = ({
   if (isLoading) {
     return (
       <div className="p-4 text-center">
-        <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
+        <Loader2 className="text-muted-foreground mx-auto h-6 w-6 animate-spin" />
+        <p className="text-muted-foreground text-sm">
           Memuat detail bulanan...
         </p>
       </div>
@@ -34,17 +34,17 @@ export const MonthlyUsageDetails = ({
 
   if (isError || !monthlyData) {
     return (
-      <div className="p-4 text-center text-destructive">
+      <div className="text-destructive p-4 text-center">
         Gagal memuat detail pemakaian bulanan.
       </div>
     );
   }
 
   return (
-    <div className="p-4 bg-muted/50">
+    <div className="bg-muted/50 p-4">
       <MeterAllocationDetails annualBudget={annualBudget} />
 
-      <h4 className="font-semibold mb-2 mt-6">
+      <h4 className="mt-6 mb-2 font-semibold">
         Detail Pemakaian Anggaran Tahun {year}
       </h4>
       <Table>
