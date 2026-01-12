@@ -2,14 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/common/components/ui/button";
-import {
-  ChevronDown,
-  ChevronRight,
-  CornerDownRight,
-  Droplets,
-  Fuel,
-  Zap,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Droplets, Fuel, Zap } from "lucide-react";
 import { format } from "date-fns-tz";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatCurrency";

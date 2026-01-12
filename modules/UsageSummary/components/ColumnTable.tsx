@@ -327,7 +327,7 @@ export const createColumns = (
           ),
           cell: ({ row }) => {
             const avgTemp = row.getValue("avg_temp") as number;
-            const maxTemp = row.original.max_temp;
+            const maxTemp = row.original.max_temp || 0;
             const isHotMaxTemp = maxTemp > 30;
             const isHotAvgTemp = avgTemp > 30;
 
@@ -405,7 +405,7 @@ export const createColumns = (
                   className={`flex items-center gap-1 font-mono text-xs ${styleMap[classification]}`}
                 >
                   {iconMap[classification]}
-                  <span className="font-semibold">{`${score.toFixed(
+                  <span className="font-semibold">{`${score?.toFixed(
                     1
                   )}%`}</span>
                 </div>

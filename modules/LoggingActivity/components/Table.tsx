@@ -40,7 +40,7 @@ export function DataTable<TData, TValue>({
   const TableSkeleton = () =>
     Array.from({ length: 10 }).map((_, i) => (
       <TableRow key={i}>
-        {columns.map((col, j) => (
+        {columns.map((_col, j) => (
           <TableCell key={j}>
             <Skeleton className="h-6 w-full" />
           </TableCell>

@@ -16,6 +16,7 @@ export type PrepareNextPeriodBudget = {
   parentTotalBudget: number;
   totalAllocatedToChildren: number;
   availableBudgetForNextPeriod: number;
+  prepareNextPeriodBudget: number;
 };
 
 export type BudgetPreviewPayload = {

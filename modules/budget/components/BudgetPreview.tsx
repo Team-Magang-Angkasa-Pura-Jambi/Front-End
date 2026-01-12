@@ -13,6 +13,7 @@ import { Copy, Loader2 } from "lucide-react";
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
 import { useDebounce } from "@uidotdev/usehooks";
 import { getBudgetPreviewApi } from "../services/analytics.service";
+import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 
 export const BudgetPreview = () => {
   const {
@@ -108,22 +109,28 @@ export const BudgetPreview = () => {
         {previewData && !isLoading && !isError && (
           <>
             <p className="text-primary text-2xl font-bold">
-              {formatCurrency(
-                previewData.calculationDetails?.budgetPerMonth || 0
-              )}{" "}
+              {
+                formatCurrencySmart(
+                  previewData.calculationDetails?.budgetPerMonth || 0
+                ).full
+              }
               / bulan
             </p>
             <p className="text-muted-foreground text-xs">
               Estimasi alokasi rata-rata per bulan berdasarkan data historis.
             </p>
-            {previewData.calculationDetails?.suggestedBudgetForPeriod > 0 && (
+            {(previewData.calculationDetails?.suggestedBudgetForPeriod || 0) >
+              0 && (
               <div className="mt-4 rounded-md border border-blue-200 bg-blue-50 p-2 text-xs dark:border-blue-800/50 dark:bg-blue-900/20">
                 <p className="text-blue-800 dark:text-blue-300">
                   Saran Budget untuk Periode Ini:{" "}
                   <strong>
-                    {formatCurrency(
-                      previewData.calculationDetails.suggestedBudgetForPeriod
-                    )}
+                    {
+                      formatCurrencySmart(
+                        previewData.calculationDetails
+                          ?.suggestedBudgetForPeriod || 0
+                      ).full
+                    }
                   </strong>
                 </p>
                 <Button
@@ -135,7 +142,7 @@ export const BudgetPreview = () => {
                     setValue(
                       "total_budget",
                       Number(
-                        previewData.calculationDetails.suggestedBudgetForPeriod.toFixed(
+                        previewData.calculationDetails?.suggestedBudgetForPeriod.toFixed(
                           0
                         )
                       )

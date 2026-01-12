@@ -1,7 +1,7 @@
 import { ENERGY_TYPES } from "@/common/types/energy";
 import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { yearlyHeatmapApi } from "../service/visualizations.service";
 
 export type DayData = {

@@ -6,7 +6,6 @@ import { Button } from "@/common/components/ui/button";
 import { Input } from "@/common/components/ui/input";
 import { useState } from "react";
 import { useLogin } from "@/modules/Auth/hooks/useLogin";
-import Image from "next/image";
 import { HeaderLogo } from "./logo";
 
 const containerVariants: Variants = {
@@ -15,18 +14,6 @@ const containerVariants: Variants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.15,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: "easeInOut",
     },
   },
 };

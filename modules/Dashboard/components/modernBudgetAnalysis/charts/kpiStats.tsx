@@ -6,7 +6,12 @@ export const KpiStats = ({
   totals,
   isLoading,
 }: {
-  totals;
+  totals: {
+    initial: number;
+    totalUsed: number;
+    totalSaved: number;
+    remaining: number;
+  };
   isLoading: boolean;
 }) => {
   if (isLoading || !totals) {

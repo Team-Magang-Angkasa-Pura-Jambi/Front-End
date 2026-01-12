@@ -3,8 +3,8 @@ import React, { useState, createContext, useContext } from "react";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import Link, { LinkProps } from "next/link";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion, HTMLMotionProps } from "framer-motion";
-import { useIsMobile } from "@/hooks/use-mobile"; // 👈 Pastikan path ini benar
+import { AnimatePresence, motion } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // --- Types ---
 interface Links {
@@ -23,8 +23,15 @@ interface SidebarContextProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   animate: boolean;
-  isMobile: boolean; // 👈 Menambahkan isMobile ke Context
+  isMobile: boolean;
 }
+
+// PERBAIKAN DI SINI:
+// Kita membuat tipe custom yang memaksa 'children' menjadi ReactNode
+// Ini menghilangkan error "MotionValue is not assignable to ReactNode"
+type SidebarGenericProps = React.ComponentProps<typeof motion.div> & {
+  children?: React.ReactNode;
+};
 
 // --- Context ---
 const SidebarContext = createContext<SidebarContextProps | undefined>(
@@ -55,7 +62,6 @@ export const SidebarProvider = ({
   const open = openProp !== undefined ? openProp : openState;
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
 
-  // 1. Panggil Hook useIsMobile di sini
   const isMobile = useIsMobile();
 
   return (
@@ -76,7 +82,8 @@ export const Sidebar = (props: {
   return <SidebarProvider {...props}>{props.children}</SidebarProvider>;
 };
 
-export const SidebarBody = (props: React.HTMLAttributes<HTMLDivElement>) => {
+// Gunakan SidebarGenericProps di sini
+export const SidebarBody = (props: SidebarGenericProps) => {
   return (
     <>
       <DesktopSidebar {...props} />
@@ -85,43 +92,48 @@ export const SidebarBody = (props: React.HTMLAttributes<HTMLDivElement>) => {
   );
 };
 
+// Gunakan SidebarGenericProps di sini
 export const DesktopSidebar = ({
   className,
   children,
   ...props
-}: HTMLMotionProps<"div"> & { children?: React.ReactNode }) => {
+}: SidebarGenericProps) => {
   const { open, setOpen, animate } = useSidebar();
   return (
-    <motion.div
-      className={cn(
-        "hidden h-full shrink-0 border-r border-slate-200 bg-white px-4 py-4 md:flex md:flex-col dark:border-slate-800 dark:bg-slate-950",
-        className
-      )}
-      animate={{
-        width: animate ? (open ? "300px" : "80px") : "300px",
-      }}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      {...props}
-    >
-      {!open && (
-        <div className="absolute top-2 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.6)]" />
-      )}
-      {children}
-    </motion.div>
+    <AnimatePresence>
+      <motion.div
+        className={cn(
+          "hidden h-full shrink-0 border-r border-slate-200 bg-white px-4 py-4 md:flex md:flex-col dark:border-slate-800 dark:bg-slate-950",
+          className
+        )}
+        animate={{
+          width: animate ? (open ? "300px" : "80px") : "300px",
+        }}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        {...props}
+      >
+        {!open && (
+          <div className="absolute top-2 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.6)]" />
+        )}
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
+// Gunakan SidebarGenericProps di sini
 export const MobileSidebar = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => {
+}: SidebarGenericProps) => {
   const { open, setOpen } = useSidebar();
   return (
-    <div
+    <motion.div
       className={cn(
-        "flex h-14 w-full flex-row items-center justify-between border-b border-slate-200 bg-white px-4 py-4 md:hidden dark:border-slate-800 dark:bg-slate-950"
+        "flex h-14 w-full flex-row items-center justify-between border-b border-slate-200 bg-white px-4 py-4 md:hidden dark:border-slate-800 dark:bg-slate-950",
+        className
       )}
       {...props}
     >
@@ -139,8 +151,7 @@ export const MobileSidebar = ({
             exit={{ x: "-100%", opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className={cn(
-              "fixed inset-0 z-[100] flex h-full w-full flex-col justify-between bg-white/95 p-10 backdrop-blur-sm dark:bg-slate-950/95",
-              className
+              "fixed inset-0 z-[100] flex h-full w-full flex-col justify-between bg-white/95 p-10 backdrop-blur-sm dark:bg-slate-950/95"
             )}
           >
             <div
@@ -153,7 +164,7 @@ export const MobileSidebar = ({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };
 
@@ -165,13 +176,11 @@ export const SidebarLink = ({
 }: SidebarLinkProps &
   Omit<LinkProps, "href"> &
   React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
-  // 2. Ambil isMobile dari context
   const { open, setOpen, animate, isMobile } = useSidebar();
 
   return (
     <Link
       href={link.href}
-      // 3. Tambahkan logic: Jika Mobile, tutup sidebar saat diklik
       onClick={() => {
         if (isMobile) {
           setOpen(false);

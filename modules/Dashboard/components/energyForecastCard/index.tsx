@@ -1,6 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React from "react";
 import { Card, CardHeader, CardTitle } from "@/common/components/ui/card";
 import { Badge } from "@/common/components/ui/badge";
 import {
@@ -10,7 +9,7 @@ import {
   TabsContent,
 } from "@/common/components/ui/tabs";
 import { Skeleton } from "@/common/components/ui/skeleton";
-import { Zap, Fuel, Droplets, Droplet, AlertCircle } from "lucide-react";
+import { Zap, Fuel, Droplets, Droplet } from "lucide-react";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { ErrorFetchData } from "@/common/components/ErrorFetchData";
 import { useMultiEnergyForecast } from "../../hooks/useMultiEnergyForecast";

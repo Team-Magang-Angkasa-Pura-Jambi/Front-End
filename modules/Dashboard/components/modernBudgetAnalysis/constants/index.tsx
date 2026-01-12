@@ -1,6 +1,7 @@
+import { EnergyTypeName } from "@/common/types/energy";
 import { Droplets, Fuel, Zap } from "lucide-react";
 
-export const getEnergyIcon = (energyType) => {
+export const getEnergyIcon = (energyType: EnergyTypeName) => {
   switch (energyType) {
     case "Water":
       return <Droplets className="mr-2 h-4 w-4 text-blue-500" />;

@@ -24,7 +24,7 @@ export const PaxSummaryCard: React.FC<PaxSummaryCardProps> = ({
   isLoading,
 }) => {
   const totalPax = useMemo(() => {
-    return data.reduce((sum, session) => sum + (session.paxData.pax || 0), 0);
+    return data.reduce((sum, session) => sum + (session?.paxData?.pax || 0), 0);
   }, [data]);
 
   return (

@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import {
   ComposedChart,
   Line,
@@ -37,7 +36,6 @@ import {
   BarChart3,
 } from "lucide-react";
 import { ENERGY_TYPES, EnergyTypeName } from "@/common/types/energy";
-import { getYearlyAnalysisApi } from "../../service/visualizations.service";
 import { ErrorFetchData } from "@/common/components/ErrorFetchData";
 import { EmptyData } from "@/common/components/EmptyData";
 import { ComponentLoader } from "@/common/components/ComponentLoader";
@@ -55,7 +53,7 @@ export const AnalysisYearlyChart = () => {
   const { ref, download, isExporting } = useDownloadImage<HTMLDivElement>();
 
   const { chartData, data, error, isError, isLoading, summary, volumeUnit } =
-    useAnalysisYearly(energyType, year);
+    useAnalysisYearly(energyType, Number(year));
 
   const handleDownloadClick = () => {
     download(`Analysis-Yearly-${energyType}-${year}.jpg`);

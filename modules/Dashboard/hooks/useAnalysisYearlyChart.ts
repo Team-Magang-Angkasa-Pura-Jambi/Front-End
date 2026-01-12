@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { getYearlyAnalysisApi } from "../service/visualizations.service";
 import { useMemo } from "react";
+import { EnergyTypeName } from "@/common/types/energy";
 
-export const useAnalysisYearly = (energyType, year) => {
+export const useAnalysisYearly = (energyType: EnergyTypeName, year: number) => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["yearlyAnalysis", energyType, year],
-    queryFn: () => getYearlyAnalysisApi(energyType, parseInt(year)),
+    queryFn: () => getYearlyAnalysisApi(energyType, year),
   });
 
   const chartData = useMemo(() => data?.data.chartData || [], [data?.data]);

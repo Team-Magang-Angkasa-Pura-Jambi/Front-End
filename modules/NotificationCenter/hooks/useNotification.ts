@@ -8,6 +8,7 @@ import {
   readNotificationApi,
 } from "../services/notification.service";
 import { bulkDeleteNotificationsApi } from "@/services/notification.service";
+import { AxiosError } from "axios";
 
 export const useNotification = () => {
   const queryClient = useQueryClient();
@@ -29,7 +30,7 @@ export const useNotification = () => {
     queryClient.invalidateQueries({ queryKey: QUERY_KEY });
   };
 
-  const handleMutationError = (error) => {
+  const handleMutationError = (error: AxiosError<{ message: string }>) => {
     const msg = error?.response?.data?.message || "Terjadi kesalahan sistem";
     toast.error(msg);
   };

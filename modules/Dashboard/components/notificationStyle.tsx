@@ -3,13 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  IconBell,
-  IconLoader,
-  IconInfoCircle,
-  IconAlertTriangle,
-  IconCircleCheck,
-} from "@tabler/icons-react";
+import { IconInfoCircle } from "@tabler/icons-react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { fetchLatestAlertApi } from "@/services/notification.service";
@@ -57,9 +51,11 @@ export const NotificationStyle = () => {
     );
   }
 
-  const { Icon, color } = getNotificationStyle(notification.title);
+  const { Icon, color } = getNotificationStyle(
+    notification.title as Notification["title"]
+  );
 
-  const styles = colorClasses[color];
+  const styles = colorClasses[color as keyof typeof colorClasses];
 
   return (
     <div className="bg-card flex flex-col justify-between gap-4 overflow-hidden rounded-2xl p-6 shadow-sm md:flex-row md:items-center">

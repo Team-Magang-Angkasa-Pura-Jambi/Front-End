@@ -15,7 +15,11 @@ import { CHART_COLORS } from "../../../constants";
 import { Badge } from "@/common/components/ui/badge";
 import { TrendingDown } from "lucide-react";
 
-export const WaterfallChart = ({ data }: { data }) => (
+export const WaterfallChart = ({
+  data,
+}: {
+  data: { name: string; value: number; type: string }[];
+}) => (
   <ResponsiveContainer width="100%" height="100%">
     <BarChart data={data} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />

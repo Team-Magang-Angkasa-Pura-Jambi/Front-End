@@ -62,9 +62,9 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
         if (key === "type") {
           return {
             ...prev,
-            type: value,
+            type: value as EnergyTypeName,
             meterId: undefined,
-          } as HistoryFilters;
+          };
         }
 
         return {
@@ -121,7 +121,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
               onValueChange={(value) =>
                 handleFilterChange(
                   "meterId",
-                  value === "all-meters" ? null : Number(value)
+                  value === "all-meters" ? undefined : Number(value)
                 )
               }
             >
@@ -142,7 +142,9 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                         value={String(meter.meter_id)}
                         className={cn(
                           "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
-                          statusStyles[meter.status]
+                          statusStyles[
+                            meter.status as keyof typeof statusStyles
+                          ]
                         )}
                       >
                         {meter.meter_code}

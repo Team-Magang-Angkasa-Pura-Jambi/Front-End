@@ -9,7 +9,7 @@ import { DialogType } from "../types";
 
 export const Page = () => {
   const [openDialog, setOpenDialog] = useState<DialogType>(null);
-  const [formData, setFormData] = useState({});
+  const [formData] = useState({});
 
   const isPending = false;
 

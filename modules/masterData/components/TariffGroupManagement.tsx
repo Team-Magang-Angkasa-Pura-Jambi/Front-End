@@ -57,7 +57,7 @@ export const createTariffGroupColumns = (
     header: "Daya (VA)",
     cell: ({ row }) => (
       <span className="font-mono">
-        {new Intl.NumberFormat("id-ID").format(row.original.daya_va)} VA
+        {new Intl.NumberFormat("id-ID").format(row.original.daya_va || 0)} VA
       </span>
     ),
   },

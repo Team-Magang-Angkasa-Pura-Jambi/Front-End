@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import {
   ComposedChart,
   Line,
@@ -66,7 +65,7 @@ export const EfficiencyRatioChart = () => {
     return <ComponentLoader />;
   }
   if (isError) {
-    return <ErrorFetchData message={error.message} />;
+    return <ErrorFetchData message={error?.message} />;
   }
 
   if (!chartData) {

@@ -25,7 +25,12 @@ export interface RecapDataRow {
   classification: ClassificationStatus;
   confidence_score?: number | null;
   prediction?: number | null;
-  remaining_stock?: number | null; // Untuk tipe energi FUEL
+  remaining_stock?: number | null;
+  meter?: {
+    meter_id: number;
+    meter_code: string;
+    location?: string;
+  };
 }
 
 // 3. Gabungkan RecapMeta dan RecapSummary karena strukturnya identik

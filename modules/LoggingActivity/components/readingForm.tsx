@@ -39,7 +39,7 @@ import {
 } from "../services/reading.service";
 
 interface ReadingFormProps {
-  initialData: ReadingHistory;
+  initialData: ReadingHistory | null;
   onSuccess?: () => void;
 }
 
@@ -49,9 +49,11 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
-      meter_id: initialData.meter.meter_id,
-      reading_date: new Date(initialData.reading_date),
-      details: initialData.details.map((d) => ({
+      meter_id: initialData?.meter.meter_id,
+      reading_date: initialData?.reading_date
+        ? new Date(initialData.reading_date)
+        : new Date(),
+      details: initialData?.details.map((d) => ({
         reading_type_id: d.reading_type.reading_type_id,
         value: d.value,
       })),
@@ -68,8 +70,11 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
     AxiosError<ApiErrorResponse>,
     ReadingPayload
   >({
-    mutationFn: (payload) =>
-      updateReadingSessionApi(initialData.session_id, payload),
+    mutationFn: (payload) => {
+      if (!initialData?.session_id)
+        throw new Error("Session ID is missing for update.");
+      return updateReadingSessionApi(initialData.session_id, payload);
+    },
     onSuccess: () => {
       toast.success("Data berhasil diperbarui!");
       queryClient.invalidateQueries({ queryKey: ["readingHistory"] });
@@ -104,7 +109,7 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
               Meteran
             </FormLabel>
             <Input
-              value={initialData.meter.meter_code}
+              value={initialData?.meter.meter_code}
               disabled
               className="bg-muted/50 h-10" // Menyamakan tinggi (h-10)
             />
@@ -122,7 +127,9 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
               <div className="flex min-w-0 flex-col">
                 <p className="text-foreground truncate text-[11px] leading-tight font-bold">
                   {format(
-                    new Date(initialData.reading_date),
+                    initialData?.reading_date
+                      ? new Date(initialData.reading_date)
+                      : new Date(),
                     "EEEE, dd MMM yyyy",
                     {
                       locale: id,
@@ -141,7 +148,7 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
           <FormLabel>Detail Pembacaan</FormLabel>
           {fields.map((field, index) => {
             const label =
-              initialData.details[index]?.reading_type?.type_name || "Nilai";
+              initialData?.details[index]?.reading_type?.type_name || "Nilai";
 
             return (
               <div

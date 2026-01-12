@@ -47,7 +47,7 @@ export const PaxEditForm: React.FC<PaxEditFormProps> = ({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
-      total_pax: initialData.pax,
+      total_pax: initialData?.totalPax,
     },
   });
 
@@ -81,7 +81,7 @@ export const PaxEditForm: React.FC<PaxEditFormProps> = ({
         <div className="bg-muted/50 flex items-center gap-3 rounded-md border p-4">
           <CalendarIcon className="text-muted-foreground h-5 w-5" />
           <p className="font-semibold">
-            {format(new Date(initialData.date), "EEEE, dd MMMM yyyy", {
+            {format(new Date(initialData?.date), "EEEE, dd MMMM yyyy", {
               locale: id,
             })}
           </p>

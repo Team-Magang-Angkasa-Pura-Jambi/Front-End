@@ -95,7 +95,7 @@ export const createColumns = (
     {
       id: "actions",
       header: "",
-      cell: ({ row, table }) => {
+      cell: ({ row }) => {
         const item = row.original;
 
         const isLatest = row.index === 0;

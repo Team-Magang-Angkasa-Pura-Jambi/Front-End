@@ -1,11 +1,10 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { formatCurrencySmart } from "@/utils/formatCurrencySmart"; // Helper currency
+import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { getBudgetBurnRateApi } from "../service/visualizations.service";
 import { MONTH_CONFIG } from "../constants";
 
 export const useBudgetBurnRateChart = () => {
-  // --- 1. STATE MANAGEMENT ---
   const [year, setYear] = useState<string>(() =>
     new Date().getFullYear().toString()
   );
@@ -14,7 +13,6 @@ export const useBudgetBurnRateChart = () => {
     (new Date().getMonth() + 1).toString()
   );
 
-  // --- 2. OPTIONS GENERATOR ---
   const yearOptions = useMemo(() => {
     const currentYear = new Date().getFullYear();
     return [
@@ -30,7 +28,6 @@ export const useBudgetBurnRateChart = () => {
     ];
   }, []);
 
-  // --- 3. DATA FETCHING ---
   const {
     data: apiResponse,
     isLoading,
@@ -39,21 +36,17 @@ export const useBudgetBurnRateChart = () => {
   } = useQuery({
     queryKey: ["budget-burn-rate", year, month],
     queryFn: () => getBudgetBurnRateApi(parseInt(year), parseInt(month)),
-    // Menjaga data lama tetap tampil saat loading data baru (UX lebih halus)
+
     placeholderData: (previousData) => previousData,
   });
 
   const chartData = useMemo(() => apiResponse?.data || [], [apiResponse?.data]);
 
-  // --- 4. SMART INSIGHT LOGIC ---
   const insight = useMemo(() => {
     if (!chartData.length) return null;
 
-    // Cari data terakhir yang memiliki nilai aktual (progress terakhir)
-    // Kita copy array dulu dengan [...chartData] agar tidak memutasi state asli saat reverse
-    const lastEntry = [...chartData].reverse().find((d) => d.actual > 0);
+    const lastEntry = [...chartData].reverse().find((d) => (d.actual ?? 0) > 0);
 
-    // Jika belum ada data aktual sama sekali
     if (!lastEntry) {
       return {
         type: "neutral",
@@ -61,23 +54,23 @@ export const useBudgetBurnRateChart = () => {
       };
     }
 
-    const { actual, idea, efficent, dayDate } = lastEntry; // Typo 'efficent' dari API tetap dijaga, tapi logic diperbaiki
+    const actual = lastEntry.actual ?? 0;
+    const idea = lastEntry.idea ?? 0;
+    const efficent = lastEntry.efficent ?? 0;
+    const dayDate = lastEntry.dayDate;
 
-    const diff = actual - idea; // Selisih Aktual vs Ideal (Linear)
+    const diff = actual - idea;
     const isOverBudget = diff > 0;
 
-    // Hitung persentase penyimpangan
     const percentage =
       idea > 0 ? ((Math.abs(diff) / idea) * 100).toFixed(1) : "0";
 
-    // Format tanggal untuk pesan (misal: "15 Jan")
     const dateStr = new Date(dayDate).toLocaleDateString("id-ID", {
       day: "numeric",
       month: "short",
     });
     const diffCurrency = formatCurrencySmart(Math.abs(diff)).val;
 
-    // A. Kondisi Boros (Melebihi Ideal)
     if (isOverBudget) {
       return {
         type: "warning",
@@ -87,8 +80,6 @@ export const useBudgetBurnRateChart = () => {
       };
     }
 
-    // B. Kondisi Sangat Efisien (Di bawah target efisiensi)
-    // Asumsi: 'efficent' adalah batas bawah penghematan
     if (actual <= efficent) {
       return {
         type: "success",
@@ -98,7 +89,6 @@ export const useBudgetBurnRateChart = () => {
       };
     }
 
-    // C. Kondisi Aman (On Track: Antara Efisien dan Ideal)
     return {
       type: "success",
       title: "On Track",
@@ -107,7 +97,6 @@ export const useBudgetBurnRateChart = () => {
     };
   }, [chartData]);
 
-  // --- 5. RETURN OBJECT ---
   return {
     filters: {
       year,
@@ -117,7 +106,7 @@ export const useBudgetBurnRateChart = () => {
     },
     options: {
       years: yearOptions,
-      months: MONTH_CONFIG, // Menggunakan config global
+      months: MONTH_CONFIG,
     },
     data: {
       chartData,

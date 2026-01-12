@@ -44,7 +44,6 @@ import {
   SelectValue,
 } from "@/common/components/ui/select";
 
-import { useAuthStore } from "@/stores/authStore";
 import { ScrollArea } from "@/common/components/ui/scroll-area";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
@@ -78,7 +77,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "details",
   });

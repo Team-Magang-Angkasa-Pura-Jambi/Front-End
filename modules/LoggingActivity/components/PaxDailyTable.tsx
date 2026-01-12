@@ -24,9 +24,10 @@ import {
 import { ReadingHistory } from "../services/reading.service";
 
 export interface DailyPaxData {
-  date: string;
-  pax: number;
+  totalPax: number;
+  firstSessionId: number;
   paxId: number;
+  date: string;
 }
 
 interface PaxDailyTableProps {
@@ -38,9 +39,8 @@ interface PaxDailyTableProps {
 export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
   data,
   onEdit,
-  onDelete,
 }) => {
-  const dailyPaxData = useMemo<DailyPaxData[]>(() => {
+  const dailyPaxData = useMemo(() => {
     const paxByDate: {
       [key: string]: {
         totalPax: number;
@@ -59,9 +59,12 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
         };
       }
 
-      if (session.paxData.pax !== null && session.paxData.pax_id !== null) {
-        paxByDate[dateStr].totalPax = session.paxData.pax;
-        paxByDate[dateStr].paxId = session.paxData.pax_id;
+      if (session.paxData?.pax !== null && session.paxData?.pax_id !== null) {
+        // Pastikan paxData ada sebelum melakukan assignment
+        if (session.paxData) {
+          paxByDate[dateStr].totalPax = session.paxData.pax;
+          paxByDate[dateStr].paxId = session.paxData.pax_id;
+        }
       }
     });
 
@@ -120,7 +123,14 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => onEdit(paxData)}
+                        onClick={() =>
+                          onEdit({
+                            totalPax: paxData.pax,
+                            firstSessionId: paxData.session_id,
+                            paxId: paxData.paxId!,
+                            date: paxData.date,
+                          })
+                        }
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -128,7 +138,14 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
                         variant="destructive"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => onDelete(paxData)}
+                        onClick={() =>
+                          onEdit({
+                            totalPax: paxData.pax,
+                            firstSessionId: paxData.session_id,
+                            paxId: paxData.paxId!,
+                            date: paxData.date,
+                          })
+                        }
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

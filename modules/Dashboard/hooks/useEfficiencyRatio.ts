@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { is } from "date-fns/locale";
 import { getEfficiencyRatioApi } from "../service/visualizations.service";
 import { useMemo } from "react";
 
 // --- FETCH DATA ---
 
-export const useEfficiencyRatio = (year, month) => {
+export const useEfficiencyRatio = (year: string, month: string) => {
   const {
     data: apiResponse,
     isLoading,

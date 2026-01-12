@@ -12,6 +12,7 @@ import {
   CardAction,
   CardFooter,
 } from "@/common/components/ui/card";
+import { SummaryData } from "@/services/summary.service";
 
 const formatTemp = (value: number | undefined | null) => {
   if (value === null || value === undefined) return "-";
@@ -67,7 +68,7 @@ const StatItem = ({
   );
 };
 
-export const TemperatureStatCard = ({ data }) => {
+export const TemperatureStatCard = ({ data }: { data: SummaryData }) => {
   const { averageTemperature, averageMaxTemperature, todayTemperature } = data;
 
   const [activePanel, setActivePanel] = useState(0);

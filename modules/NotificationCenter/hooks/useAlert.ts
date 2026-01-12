@@ -8,6 +8,7 @@ import {
 } from "../services/alerts.service";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 type AlertCategory = "meters" | "system";
 
@@ -41,7 +42,7 @@ export const useAlert = (category: AlertCategory = "meters") => {
     queryClient.invalidateQueries({ queryKey: currentConfig.key });
   };
 
-  const handleMutationError = (error) => {
+  const handleMutationError = (error: AxiosError<{ message: string }>) => {
     const msg = error?.response?.data?.message || "Terjadi kesalahan sistem";
     toast.error(msg);
   };

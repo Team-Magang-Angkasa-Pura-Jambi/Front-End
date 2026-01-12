@@ -5,20 +5,10 @@ import { DollarSign, Landmark, TrendingDown, TrendingUp } from "lucide-react";
 import { BudgetSummaryCard } from "./BudgetSummaryCard";
 import { Skeleton } from "@/common/components/ui/skeleton";
 import { formatCurrency } from "@/utils/formatCurrency";
-
-interface BudgetSummaryItem {
-  energyTypeName: string;
-  currentPeriod: {
-    totalBudget: number;
-    totalRealization: number;
-    remainingBudget: number;
-    realizationPercentage: number;
-    periodStart: string | Date;
-  };
-}
+import { BudgetSummaryByEnergy } from "@/services/analysis.service";
 
 interface BudgetSummaryCarouselProps {
-  data: BudgetSummaryItem[];
+  data: BudgetSummaryByEnergy[];
   isLoading: boolean;
   selectedEnergyType: string;
 }
@@ -127,10 +117,12 @@ export const BudgetSummaryCarousel = ({
           {/* Card 4: Persentase */}
           <BudgetSummaryCard
             title={`Persentase ${currentItem.energyTypeName}`}
-            value={`${(budget.realizationPercentage || 0).toFixed(2)}%`}
+            value={`${(budget.realizationPercentage ?? 0).toFixed(2)}%`}
             description="Dari total alokasi budget"
             icon={
-              budget.realizationPercentage > 100 ? TrendingDown : TrendingUp
+              (budget.realizationPercentage ?? 0) > 100
+                ? TrendingDown
+                : TrendingUp
             }
           />
         </motion.div>

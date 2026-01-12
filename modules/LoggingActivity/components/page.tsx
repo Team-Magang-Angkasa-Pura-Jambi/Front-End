@@ -56,7 +56,7 @@ export const Page = () => {
   );
 
   const [filters, setFilters] = useState<HistoryFilters>({
-    type: "Electricity" as unknown as EnergyTypeName,
+    type: "Electricity",
     date: {
       from: firstDayOfMonth,
       to: firstDayOfNextMonth,
@@ -88,7 +88,6 @@ export const Page = () => {
     queryFn: () =>
       getReadingSessionsApi({
         energyTypeName: type as unknown as EnergyTypeName,
-
         startDate: date?.from
           ? new Date(
               Date.UTC(
@@ -98,15 +97,19 @@ export const Page = () => {
               )
             ).toISOString()
           : new Date().toISOString(),
-        endDate: date?.from
-          ? new Date(
-              Date.UTC(
-                date.to.getFullYear(),
-                date.to.getMonth(),
-                date.to.getDate()
-              )
-            ).toISOString()
-          : new Date().toISOString(),
+
+        // Perbaikan di sini: Cek keberadaan date.to
+        endDate:
+          date?.from && date?.to
+            ? new Date(
+                Date.UTC(
+                  date.to.getFullYear(),
+                  date.to.getMonth(),
+                  date.to.getDate()
+                )
+              ).toISOString()
+            : new Date().toISOString(),
+
         meterId,
         sortBy,
         sortOrder,
@@ -321,7 +324,9 @@ export const Page = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteSession(itemToDelete.session_id)}
+              onClick={() =>
+                itemToDelete && deleteSession(itemToDelete.session_id)
+              }
               disabled={isDeleting}
             >
               {isDeleting ? "Menghapus..." : "Ya, Hapus"}
@@ -342,7 +347,7 @@ export const Page = () => {
               tanggal{" "}
               <span className="font-bold">
                 {paxToDelete
-                  ? format(new Date(paxToDelete.date), "dd MMMM yyyy", {
+                  ? format(new Date(paxToDelete?.date), "dd MMMM yyyy", {
                       locale: id,
                     })
                   : ""}

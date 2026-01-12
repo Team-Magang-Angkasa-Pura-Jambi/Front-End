@@ -25,7 +25,7 @@ export const useAnnualBudgetLogic = () => {
 
   const handleApiError = (err: unknown, defaultMsg: string) => {
     const error = err as AxiosError<{ message: string }>;
-    const message = error.response?.data?.message || defaultMsg;
+    const message = error.response?.data.message || defaultMsg;
     toast.error(message);
   };
 
@@ -71,7 +71,7 @@ export const useAnnualBudgetLogic = () => {
     const data = childBudgetsRes?.data || [];
     if (selectedEnergyType === "all") return data;
     return data.filter(
-      (b: AnnualBudget) => b.energy_type.type_name === selectedEnergyType
+      (b: AnnualBudget) => b.energy_type?.type_name === selectedEnergyType
     );
   }, [childBudgetsRes, selectedEnergyType]);
 
@@ -95,7 +95,8 @@ export const useAnnualBudgetLogic = () => {
         ),
       };
 
-      if ("budgetType" in payload) delete payload.budgetType;
+      if ("budgetType" in payload)
+        delete (payload as Partial<AnnualBudgetFormValues>).budgetType;
 
       return isEditing && id
         ? annualBudgetApi.update(id, payload)

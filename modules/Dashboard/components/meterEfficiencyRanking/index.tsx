@@ -10,9 +10,7 @@ import { Badge } from "@/common/components/ui/badge";
 import {
   Activity,
   ArrowUpRight,
-  TrendingUp,
   Download,
-  AlertCircle,
   CheckCircle2,
   AlertTriangle,
   Zap,

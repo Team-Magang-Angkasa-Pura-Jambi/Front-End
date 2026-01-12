@@ -53,7 +53,10 @@ export const Page = () => {
     refetchOnReconnect: false,
   });
 
-  const columns = useMemo(() => createColumns(type, meterId), [meterId, type]);
+  const columns = useMemo(
+    () => createColumns(type, Number(meterId)),
+    [meterId, type]
+  );
 
   const renderContent = () => {
     if (isLoading) {

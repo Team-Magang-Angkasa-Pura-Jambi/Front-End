@@ -1,10 +1,8 @@
-// src/app/notification-center/_components/notification-item.tsx
-
 "use client";
 
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
-import { id as localeId } from "date-fns/locale"; // Rename agar tidak rancu dengan id properti
+import { id as localeId } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { Clock, Info, AlertTriangle, ChevronRight, User } from "lucide-react";
 
@@ -14,7 +12,7 @@ import { AlertStatus, StatusIndicator } from "./notification-status";
 import { NotificationUI } from "../types";
 
 interface NotificationItemProps {
-  notification: NotificationUI; // Gunakan tipe yang sudah dinormalisasi
+  notification: NotificationUI;
   isSelected: boolean;
   onSelect: (id: string) => void;
   onClick: (notification: NotificationUI) => void;
@@ -23,10 +21,9 @@ interface NotificationItemProps {
 const itemVariants = {
   hidden: { x: -10, opacity: 0 },
   visible: { x: 0, opacity: 1 },
-  exit: { x: -10, opacity: 0, transition: { duration: 0.2 } }, // Animasi saat dihapus
+  exit: { x: -10, opacity: 0, transition: { duration: 0.2 } },
 };
 
-// Style Styles (Tetap sama, logic visual Sentinel)
 const cardStyles = {
   [AlertStatus.NEW]:
     "bg-destructive/[0.03] border-destructive/20 hover:bg-destructive/[0.06]",
@@ -48,10 +45,9 @@ export const NotificationItem = React.forwardRef<
   HTMLLIElement,
   NotificationItemProps
 >(({ notification, isSelected, onSelect, onClick }, ref) => {
-  // Logic Status
   const isUnread = !notification.is_read;
   const isAlert = notification.type === "alert";
-  const status = (notification.status as AlertStatus) || "INFO"; // Fallback aman
+  const status = (notification.status as AlertStatus) || "INFO";
 
   return (
     <motion.li
@@ -60,18 +56,21 @@ export const NotificationItem = React.forwardRef<
       initial="hidden"
       animate="visible"
       exit="exit"
-      layout="position" // Penting untuk animasi list yang halus saat delete
+      layout="position"
       onClick={() => onClick(notification)}
       className={cn(
+        // Base styles
         "group relative flex cursor-pointer items-start gap-4 overflow-hidden rounded-md border p-4 transition-all duration-200 select-none",
 
-        // Logic Background: Jika Read & Bukan Handled -> Putih/Netral. Sisanya pakai warna status.
+        // Logic: Jika sudah dibaca (isRead) dan sudah dihandle (HANDLED),
+        // gunakan style kartu berdasarkan status. Jika belum, gunakan style default/card.
         !isUnread && status !== AlertStatus.HANDLED
           ? "bg-card border-border/40 hover:bg-accent/5"
-          : cardStyles[status] || cardStyles.DEFAULT,
+          : cardStyles[status as keyof typeof cardStyles] || cardStyles.DEFAULT,
 
-        // Highlight saat checkbox dipilih
-        isSelected && "ring-primary border-primary/50 bg-primary/[0.02] ring-1"
+        // Selection styles
+        isSelected &&
+          "ring-primary border-primary/50 bg-primary/[0.02] shadow-sm ring-1"
       )}
     >
       {/* UNREAD INDICATOR STRIP */}
@@ -94,7 +93,8 @@ export const NotificationItem = React.forwardRef<
             "shadow-sm transition-colors",
             !isUnread && status !== AlertStatus.HANDLED
               ? "border-muted-foreground/30"
-              : checkboxStyles[status] || checkboxStyles.DEFAULT
+              : checkboxStyles[status as keyof typeof cardStyles] ||
+                  checkboxStyles.DEFAULT
           )}
         />
       </div>
@@ -132,7 +132,7 @@ export const NotificationItem = React.forwardRef<
             </p>
 
             {/* Tampilkan Badge Status jika bukan INFO biasa */}
-            {status !== "INFO" && (
+            {status !== ("INFO" as string) && (
               <StatusIndicator
                 status={status}
                 className="shrink-0 origin-left scale-90"

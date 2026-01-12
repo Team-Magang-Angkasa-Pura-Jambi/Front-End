@@ -78,7 +78,7 @@ export const FormReadingWater = ({
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "details",
   });

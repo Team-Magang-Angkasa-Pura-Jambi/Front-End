@@ -16,7 +16,15 @@ const springConfig = {
   mass: 2,
 };
 
-export const Bubble = ({ size, style, delay }) => {
+export const Bubble = ({
+  size,
+  style,
+  delay,
+}: {
+  size: number;
+  style: React.CSSProperties;
+  delay: number;
+}) => {
   const [mouse] = useMouse();
 
   const { width, height } = useWindowSize();
