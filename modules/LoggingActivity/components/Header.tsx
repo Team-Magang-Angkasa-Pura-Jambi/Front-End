@@ -7,28 +7,28 @@ import { formatInTimeZone } from "date-fns-tz";
 import { useQuery } from "@tanstack/react-query";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/common/components/ui/button";
+import { Calendar } from "@/common/components/ui/calendar";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
+} from "@/common/components/ui/card";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/common/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/common/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/common/components/ui/tabs";
 import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { CalendarIcon } from "lucide-react";
 import { HistoryFilters } from "../types";
@@ -89,7 +89,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
   const statusStyles = {
     Active: "",
     UnderMaintenance: "bg-amber-500 text-white",
-    Inactive: "bg-slate-500 text-white",
+    Inactive: "bg-background0 text-white",
     Deleted: "bg-red-500 text-white",
   };
   return (

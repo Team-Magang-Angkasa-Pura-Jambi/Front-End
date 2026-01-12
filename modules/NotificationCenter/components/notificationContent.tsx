@@ -1,10 +1,10 @@
 // src/app/notification-center/_components/notification-content.tsx
 import { Inbox, Loader2, ServerCrash } from "lucide-react";
-import { TabsContent } from "@/components/ui/tabs";
+import { TabsContent } from "@/common/components/ui/tabs";
 import { AlertNotification } from "@/services/notification.service";
 import { TabType } from "../types";
 import { NotificationList } from "./notificationList";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/common/components/ui/skeleton";
 
 interface NotificationContentProps {
   isLoading: boolean;

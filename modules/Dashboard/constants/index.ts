@@ -1,3 +1,9 @@
+import {
+  IconAlertTriangle,
+  IconBell,
+  IconCircleCheck,
+} from "@tabler/icons-react";
+
 export const CHART_COLORS = {
   initial: "#3b82f6",
   remaining: "#10b981",
@@ -43,7 +49,7 @@ export const getStatusConfig = (status: string) => {
       };
     default:
       return {
-        color: "bg-slate-300",
+        color: "bg-background",
         label: "Unknown",
         text: "text-slate-700",
       };
@@ -63,3 +69,27 @@ export const yearlyDummyData = [
   { month: "Nov", consumption: 430, cost: 645000, budget: 800000 },
   { month: "Des", consumption: 410, cost: 615000, budget: 800000 },
 ];
+
+export const getNotificationStyle = (title: string) => {
+  const lowerCaseTitle = title?.toLowerCase();
+  if (
+    lowerCaseTitle?.includes("risiko") ||
+    lowerCaseTitle?.includes("anomali")
+  ) {
+    return { Icon: IconAlertTriangle, color: "red" };
+  }
+  if (
+    lowerCaseTitle?.includes("sukses") ||
+    lowerCaseTitle?.includes("selesai")
+  ) {
+    return { Icon: IconCircleCheck, color: "green" };
+  }
+
+  return { Icon: IconBell, color: "yellow" };
+};
+
+export const colorClasses = {
+  red: { bg: "bg-red-100", text: "text-red-600" },
+  yellow: { bg: "bg-yellow-100", text: "text-yellow-600" },
+  green: { bg: "bg-green-100", text: "text-green-600" },
+};

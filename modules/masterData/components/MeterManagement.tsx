@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,8 +31,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+} from "@/common/components/ui/alert-dialog";
+import { Badge } from "@/common/components/ui/badge";
 
 import { MeterForm } from "./forms/meter.form";
 
@@ -45,8 +45,8 @@ import {
   getMetersApi,
   updateMeterApi,
 } from "../services/meter.service";
-import { DataTableRowActions } from "@/components/table/dataTableRowActions";
-import { DataTable } from "@/components/table/dataTable";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
+import { DataTable } from "@/common/components/table/dataTable";
 
 const MeterDescriptionCell = ({ row }: { row: Row<MeterType> }) => {
   const {
@@ -124,11 +124,7 @@ export const createMeterColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <DataTableRowActions
-        row={row}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+      <DataTableRowActions row={row} onEdit={onEdit} onDelete={onDelete} />
     ),
   },
 ];

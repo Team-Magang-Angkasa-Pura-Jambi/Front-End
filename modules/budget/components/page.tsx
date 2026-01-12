@@ -5,14 +5,14 @@ import { PlusCircle, Search } from "lucide-react";
 import { RowData } from "@tanstack/react-table";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/common/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +22,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/common/components/ui/alert-dialog";
 
 import { BudgetSummaryCarousel } from "./BudgetSummaryCarousel";
 import { BudgetTable } from "./BudgetTable";

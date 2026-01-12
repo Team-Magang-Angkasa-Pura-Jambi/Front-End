@@ -11,17 +11,17 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
+import { Button } from "@/common/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { DialogFooter } from "@/components/ui/dialog";
+} from "@/common/components/ui/select";
+import { DialogFooter } from "@/common/components/ui/dialog";
 
 import { taxFormValue, taxSchema } from "../../schemas/taxes.schema";
 import { Taxes } from "@/common/types/taxes";

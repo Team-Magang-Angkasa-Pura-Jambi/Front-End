@@ -1,4 +1,3 @@
-// hooks/useBudgetAnalytics.ts
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getBudgetTrackingApi } from "../service/visualizations.service";
@@ -13,6 +12,7 @@ export const useBudgetAnalytics = (
     data: apiResponse,
     isLoading,
     isError,
+    error,
   } = useQuery({
     queryKey: ["budgetTracking"],
     queryFn: getBudgetTrackingApi,
@@ -25,9 +25,11 @@ export const useBudgetAnalytics = (
     const found = apiResponse.data.find(
       (item) => item.year === year && item.energyType === energyType
     );
-    const rawData = found || { initial: 0, used: [], saved: [] };
 
-    // Helper konversi ke Jutaan
+    if (!found) return null;
+
+    const rawData = found;
+
     const toMillions = (val: number) => val / 1_000_000;
 
     const initial = toMillions(rawData.initial);
@@ -38,20 +40,18 @@ export const useBudgetAnalytics = (
     const totalSaved = saved.reduce((a, b) => a + b, 0);
     const remaining = initial - totalUsed;
 
-    // Data siap pakai untuk Chart Waterfall
     const waterfallData = [
       { name: "Initial", value: initial, type: "initial" },
       ...used.map((val, i) => ({
-        name: MONTH_CONFIG[i].shortCut || `Bulan ${MONTH_CONFIG[i].value}`,
+        name: MONTH_CONFIG[i]?.shortCut || `Bulan ${i + 1}`,
         value: val,
         type: "expense",
       })),
       { name: "Sisa", value: Math.max(0, remaining), type: "remaining" },
     ];
 
-    // Data siap pakai untuk Chart Saved
     const savedData = saved.map((val, i) => ({
-      name: MONTH_CONFIG[i].shortCut || `Bulan ${MONTH_CONFIG[i].value}}`,
+      name: MONTH_CONFIG[i]?.shortCut || `Bulan ${i + 1}`,
       amount: val,
     }));
 
@@ -61,5 +61,10 @@ export const useBudgetAnalytics = (
     };
   }, [apiResponse, year, energyType]);
 
-  return { isLoading, isError, data: analytics };
+  return {
+    isLoading,
+    isError,
+    error,
+    data: analytics,
+  };
 };

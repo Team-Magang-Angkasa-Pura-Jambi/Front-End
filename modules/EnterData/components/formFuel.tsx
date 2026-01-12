@@ -18,14 +18,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/common/components/ui/button";
+import { Input } from "@/common/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+} from "@/common/components/ui/popover";
+import { Calendar } from "@/common/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -34,7 +34,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/common/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -42,12 +42,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-
-
+} from "@/common/components/ui/select";
 
 import { useAuthStore } from "@/stores/authStore";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/common/components/ui/scroll-area";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
 import { formSchema, FormValues } from "../schemas/reading.schema";
@@ -57,7 +55,10 @@ import {
   submitReadingApi,
 } from "../services";
 import { EnergyTypeName } from "@/common/types/energy";
-import { EnergyTypesApiResponse, getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
+import {
+  EnergyTypesApiResponse,
+  getEnergyTypesApi,
+} from "@/modules/masterData/services/energyType.service";
 
 interface FormReadingProps {
   onSuccess?: () => void;

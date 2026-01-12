@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { cn } from "@/lib/utils";
 import { AnnualBudget } from "@/common/types/budget";

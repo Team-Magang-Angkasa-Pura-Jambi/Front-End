@@ -1,48 +1,40 @@
 "use client";
 import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardHeader, CardTitle } from "@/common/components/ui/card";
+import { Badge } from "@/common/components/ui/badge";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/common/components/ui/tabs";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { Zap, Fuel, Droplets, Droplet, AlertCircle } from "lucide-react";
-import { EnergyOutlookApi } from "../../service/visualizations.service";
-
-const formatCurrency = (val: number) => {
-  if (val >= 1_000_000_000) return `Rp ${(val / 1_000_000_000).toFixed(1)}M`;
-  if (val >= 1_000_000) return `Rp ${(val / 1_000_000).toFixed(0)}Jt`;
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-  }).format(val);
-};
+import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
+import { ErrorFetchData } from "@/common/components/ErrorFetchData";
+import { useMultiEnergyForecast } from "../../hooks/useMultiEnergyForecast";
+import { EmptyData } from "@/common/components/EmptyData";
 
 export const MultiEnergyForecastCard = () => {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["energyOutlook"],
-    queryFn: EnergyOutlookApi,
-  });
+  const { isError, outlookData, error, isLoading } = useMultiEnergyForecast();
 
-  const outlookData = data?.data || [];
+  if (isError) {
+    return <ErrorFetchData message={error?.message} />;
+  }
 
-  const electricForecast = useMemo(() => outlookData, [outlookData]);
-
-  if (isError)
-    return (
-      <Card className="col-span-12 md:col-span-4 border-red-200 bg-red-50 text-center">
-        <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-2" />
-        <p className="text-sm font-bold text-red-800">Gagal Memuat Prediksi</p>
-      </Card>
-    );
+  if (!isLoading && !outlookData) {
+    return <EmptyData />;
+  }
 
   return (
     <Card className="col-span-12  md:col-span-4 shadow-md border-none ring-1  ring-slate-200 overflow-hidden">
-      <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+      <CardHeader className=" border-b border-slate-100">
         <div className="flex justify-between items-center">
           <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
             Prediksi Biaya Akhir Bulan
           </CardTitle>
-          <Badge variant="outline" className="bg-white text-[10px]">
+          <Badge variant="outline" className=" text-[10px]">
             {new Date().toLocaleString("id-ID", {
               month: "long",
               year: "numeric",
@@ -66,27 +58,26 @@ export const MultiEnergyForecastCard = () => {
           </TabsList>
         </div>
 
-        {/* --- TAB LISTRIK (REAL DATA) --- */}
         <TabsContent value="electricity" className="px-3 pt-2 space-y-4">
           <div className="space-y-3 min-h-[200px]">
             {isLoading
               ? [1, 2].map((i) => (
                   <Skeleton key={i} className="h-20 w-full rounded-xl" />
                 ))
-              : electricForecast.map((m, i) => (
+              : outlookData?.map((m, i) => (
                   <div
                     key={i}
-                    className="p-3 rounded-xl border border-slate-100 bg-white hover:shadow-sm transition-shadow"
+                    className="p-3 rounded-xl border border-slate-100 hover:shadow-sm transition-shadow"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-sm font-bold text-slate-700">
+                        <p className="text-sm font-bold text-slate-500">
                           {m.meter_code}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-black text-slate-900">
-                          {formatCurrency(m.est)}
+                          {formatCurrencySmart(m.est).full}
                         </p>
                         {m.over > 100 ? (
                           <p className="text-[10px] text-red-500 font-bold">
@@ -99,7 +90,6 @@ export const MultiEnergyForecastCard = () => {
                         )}
                       </div>
                     </div>
-                    {/* Progress bar dinamis berdasarkan nilai 'over' */}
                     <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all duration-1000 ${
@@ -113,11 +103,8 @@ export const MultiEnergyForecastCard = () => {
           </div>
         </TabsContent>
 
-        {/* --- TAB AIR & BBM (KEEP DUMMY OR REUSE LOGIC) --- */}
-        {/* --- TAB AIR --- */}
         <TabsContent value="water" className="p-3 space-y-4">
           <div className="relative overflow-hidden rounded-2xl border border-dashed border-blue-200 bg-blue-50/30 p-8 text-center">
-            {/* Efek dekoratif di background */}
             <div className="absolute -right-4 -top-4 text-blue-100/50">
               <Droplets className="w-24 h-24" />
             </div>
@@ -140,7 +127,6 @@ export const MultiEnergyForecastCard = () => {
           </div>
         </TabsContent>
 
-        {/* --- TAB BBM --- */}
         <TabsContent value="fuel" className="p-6 pt-2">
           <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/50 p-8 text-center">
             <div className="relative z-10">

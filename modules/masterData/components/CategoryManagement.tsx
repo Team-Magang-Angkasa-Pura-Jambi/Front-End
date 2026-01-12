@@ -15,14 +15,14 @@ import {
   CreateCategoryPayload,
 } from "@/services/category.service";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/common/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -30,14 +30,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/common/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,7 +47,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/common/components/ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -55,11 +55,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
 import { categorySchema, categoryType } from "../schemas/category.schema";
-import { DataTable } from "@/components/table/dataTable";
-import { DataTableRowActions } from "@/components/table/dataTableRowActions";
+import { DataTable } from "@/common/components/table/dataTable";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
 
 const createCategoryColumns = (
   onEdit: (item: CategoryType) => void,
@@ -69,11 +69,7 @@ const createCategoryColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <DataTableRowActions
-        row={row}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+      <DataTableRowActions row={row} onEdit={onEdit} onDelete={onDelete} />
     ),
   },
 ];

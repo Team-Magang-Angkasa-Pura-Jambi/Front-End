@@ -1,10 +1,14 @@
 "use client";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarBody,
+  SidebarLink,
+} from "@/common/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "./components/logo";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   BarChart3,
   BookText,
@@ -16,24 +20,26 @@ import {
   LogOut,
   Users,
   Wallet,
+  Crosshair, // Icon baru untuk dekorasi
 } from "lucide-react";
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import React, { useMemo, useState } from "react";
 
+// ... (Variants code TETAP SAMA) ...
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08 },
+    transition: { staggerChildren: 0.05 },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, x: -20 },
+  hidden: { opacity: 0, x: -10 },
   visible: {
     opacity: 1,
     x: 0,
-    transition: { type: "spring", stiffness: 400, damping: 25 },
+    transition: { type: "tween", ease: "easeOut", duration: 0.3 },
   },
 };
 
@@ -43,56 +49,104 @@ enum Role {
   SuperAdmin = "SuperAdmin",
 }
 
+// ... (allLinks TETAP SAMA) ...
 const allLinks = [
   {
     label: "Dasbor",
     href: "/",
-    icon: <LayoutDashboard className="h-5 w-5 shrink-0 text-sky-500" />,
+    icon: <LayoutDashboard className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
     label: "Input Data",
     href: "/enter-data",
-    icon: <FilePenLine className="h-5 w-5 shrink-0 text-green-500" />,
+    icon: <FilePenLine className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Technician, Role.Admin, Role.SuperAdmin],
   },
   {
     label: "Riwayat Konsumsi",
     href: "/recap-data",
-    icon: <BarChart3 className="h-5 w-5 shrink-0 text-violet-500" />,
+    icon: <BarChart3 className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
     label: "Riwayat Pencatatan",
     href: "/recap-reading",
-    icon: <BookText className="h-5 w-5 shrink-0 text-orange-500" />,
+    icon: <BookText className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.Admin, Role.SuperAdmin, Role.Technician],
   },
   {
     label: "Data Master",
     href: "/data-master",
-    icon: <Database className="h-5 w-5 shrink-0 text-rose-500" />,
+    icon: <Database className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin, Role.Admin],
   },
   {
     label: "Akun Saya",
     href: "/profile",
-    icon: <CircleUserRound className="h-5 w-5 shrink-0 text-blue-500" />,
+    icon: <CircleUserRound className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin, Role.Admin, Role.Technician],
   },
   {
     label: "Manajemen Pengguna",
     href: "/user-management",
-    icon: <Users className="h-5 w-5 shrink-0 text-teal-500" />,
+    icon: <Users className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin],
   },
   {
     label: "Anggaran",
     href: "/budget",
-    icon: <Wallet className="h-5 w-5 shrink-0 text-emerald-500" />,
+    icon: <Wallet className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin, Role.Admin],
   },
 ];
+
+// KOMPONEN DEKORASI BARU (Tech Tattoos)
+const TechDecorations = () => {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+      {/* 1. Grid Background (Base Texture) - Sudah ada sebelumnya, diperhalus */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.15] dark:opacity-[0.1]" />
+
+      {/* 2. Top Right HUD Block (Status Indikator) */}
+      <div className="absolute top-0 right-0 p-8 opacity-40">
+        <div className="flex flex-col items-end gap-1">
+          <div className="h-1 w-16 bg-primary/40 rounded-full" />
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-mono text-primary/60 tracking-[0.2em] uppercase">
+              Sys.Online
+            </span>
+            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+          </div>
+        </div>
+        {/* Corner Bracket */}
+        <div className="absolute top-6 right-6 w-16 h-16 border-t-2 border-r-2 border-primary/20 rounded-tr-xl" />
+      </div>
+
+      {/* 3. Bottom Left Coordinates (Aviation Style) */}
+      <div className="absolute bottom-8 left-8 opacity-30">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
+            <Crosshair className="w-3 h-3 text-primary/50" />
+            <span>COORD: 01.62.S // 103.50.E</span>
+          </div>
+          <div className="h-[1px] w-32 bg-gradient-to-r from-primary/30 to-transparent" />
+        </div>
+      </div>
+
+      {/* 4. Center/Large Circle (Abstract Radar) - Sangat Tipis */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full border border-primary/5 opacity-50 pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full border border-dashed border-primary/10 opacity-30 pointer-events-none animate-[spin_60s_linear_infinite]" />
+
+      {/* 5. Decorative "Data Lines" di sisi kanan bawah */}
+      <div className="absolute bottom-20 right-0 flex flex-col gap-2 opacity-20">
+        <div className="w-12 h-[2px] bg-foreground/20" />
+        <div className="w-8 h-[2px] bg-foreground/20" />
+        <div className="w-16 h-[2px] bg-foreground/20" />
+      </div>
+    </div>
+  );
+};
 
 export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
   const [open, setOpen] = useState(false);
@@ -122,8 +176,8 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
           transition={{ duration: 0.3 }}
           className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm"
         >
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="mt-4 text-lg font-medium text-muted-foreground">
+          <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+          <p className="mt-4 text-sm font-medium text-muted-foreground">
             Memuat Sesi...
           </p>
         </motion.div>
@@ -134,15 +188,15 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       className={cn(
-        "flex h-screen w-full flex-col overflow-hidden rounded-md border bg-background md:flex-row"
+        "flex h-screen w-full flex-col overflow-hidden bg-background md:flex-row"
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10">
+        <SidebarBody className="justify-between gap-5 bg-card border-r border-border">
           <div className="flex flex-1 flex-col overflow-y-auto overflow-hidden">
             <Logo />
             <motion.div
-              className="mt-8 flex flex-col gap-2"
+              className="mt-8 flex flex-col gap-1"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -162,7 +216,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
                     <SidebarLink
                       key={link.href}
                       link={link}
-                      isActive={pathname === link.href}
+                      isActive={isActive}
                     />
                   </motion.div>
                 );
@@ -170,7 +224,6 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
             </motion.div>
           </div>
 
-          {/* Section Bawah: Logout & Copyright */}
           <div className="flex flex-col gap-4">
             <motion.div
               variants={itemVariants}
@@ -180,31 +233,32 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
               <Button
                 onClick={handleLogout}
                 variant="ghost"
-                className="w-full justify-start"
+                className={cn(
+                  "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 group transition-all duration-200"
+                )}
               >
-                <LogOut className="h-5 w-5 shrink-0 mr-2 text-red-500" />
+                <LogOut className="h-5 w-5 shrink-0 mr-2 text-muted-foreground group-hover:text-destructive transition-colors" />
                 <span className={cn("font-medium", !open && "hidden")}>
                   Logout
                 </span>
               </Button>
             </motion.div>
 
-            {/* FOOTER COPYRIGHT DENGAN SULTAN THAHA JAMBI */}
             <motion.div
               className={cn(
-                "flex flex-col border-t border-border/50 pt-4 text-[10px] text-muted-foreground transition-all duration-300",
+                "flex flex-col border-t border-border pt-4 text-[10px] text-muted-foreground transition-all duration-300",
                 !open ? "opacity-0 h-0 overflow-hidden" : "px-2 opacity-100"
               )}
             >
-              <p className="font-semibold text-foreground/80 uppercase tracking-wider">
+              <p className="font-bold text-foreground uppercase tracking-wider text-[9px]">
                 Sultan Thaha Jambi
               </p>
-              <p className="mt-0.5">
+              <p className="mt-0.5 font-medium">
                 © {new Date().getFullYear()} Angkasa Pura Indonesia
               </p>
-              <p className="mt-1.5 opacity-70">
+              <p className="mt-2 opacity-70">
                 Developed by{" "}
-                <span className="font-medium text-primary/80">
+                <span className="font-semibold text-primary">
                   Qulls Project
                 </span>
               </p>
@@ -212,7 +266,15 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
           </div>
         </SidebarBody>
       </Sidebar>
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
+        {/* --- DEKORASI 'TECH TATTOOS' DISINI --- */}
+        <TechDecorations />
+
+        {/* Konten Utama (z-10 agar di atas dekorasi) */}
+        <div className="relative z-10">{children}</div>
+      </main>
     </div>
   );
 };

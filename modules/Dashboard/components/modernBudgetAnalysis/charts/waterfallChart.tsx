@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { CHART_COLORS } from "../../../constants";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/common/components/ui/badge";
 import { TrendingDown } from "lucide-react";
 
 export const WaterfallChart = ({ data }: { data }) => (
@@ -30,8 +30,11 @@ export const WaterfallChart = ({ data }: { data }) => (
         axisLine={false}
         tickLine={false}
         fontSize={11}
-        tickFormatter={(v) => `Rp${v}j`}
+        tickFormatter={(v) =>
+          `Rp ${formatCurrencySmart(v).val} ${formatCurrencySmart(v).unit} `
+        }
         tick={{ fill: "#64748b" }}
+        // format={(val) => formatCurrencySmart(val).full}
       />
       <Tooltip
         cursor={{ fill: "transparent" }}
@@ -82,7 +85,7 @@ export const SavedChart = ({
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
-          margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+          // margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -101,6 +104,9 @@ export const SavedChart = ({
             tickLine={false}
             fontSize={11}
             tick={{ fill: "#64748b" }}
+            tickFormatter={(v) =>
+              `Rp ${formatCurrencySmart(v).val} ${formatCurrencySmart(v).unit} `
+            }
           />
           <Tooltip
             contentStyle={{
@@ -128,7 +134,7 @@ export const SavedChart = ({
         </LineChart>
       </ResponsiveContainer>
     </div>
-    <div className="mt-2 p-3 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 shrink-0">
+    <div className="mt-2 p-3 bg-background rounded-lg border border-slate-100 text-[11px] text-slate-600 shrink-0">
       💡 Insight: Penghematan terbesar didorong oleh optimasi penggunaan.
     </div>
   </div>

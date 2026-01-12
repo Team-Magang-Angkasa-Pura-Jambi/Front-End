@@ -18,9 +18,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/common/components/ui/table";
+import { Button } from "@/common/components/ui/button";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { ENERGY_TYPES, EnergyTypeName } from "@/common/types/energy";
 import { RecapDataRow, RecapMeta } from "../types/recap.type";
 

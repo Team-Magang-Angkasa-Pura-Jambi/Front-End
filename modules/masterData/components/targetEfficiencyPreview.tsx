@@ -4,9 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { AlertTriangle, CheckCircle2, Copy } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
+import { Skeleton } from "@/common/components/ui/skeleton";
+import { Button } from "@/common/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { getEfficiencyTargetPreviewApi } from "../services/targetEfficiency.service";

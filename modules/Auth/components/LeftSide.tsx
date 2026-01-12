@@ -2,8 +2,8 @@
 
 import { Loader2, Lock, User } from "lucide-react";
 import { AnimatePresence, motion, Variants } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/common/components/ui/button";
+import { Input } from "@/common/components/ui/input";
 import { useState } from "react";
 import { useLogin } from "@/modules/Auth/hooks/useLogin";
 import Image from "next/image";

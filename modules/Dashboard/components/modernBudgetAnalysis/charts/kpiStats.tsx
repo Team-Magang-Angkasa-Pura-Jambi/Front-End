@@ -1,5 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/common/components/ui/card";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 
 export const KpiStats = ({
@@ -20,7 +20,7 @@ export const KpiStats = ({
       label: "Anggaran Awal",
       val: totals.initial,
       color: "text-slate-800",
-      bg: "bg-white",
+      bg: "",
     },
     {
       label: "Terpakai (YTD)",

@@ -8,15 +8,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/common/components/ui/select";
 import {
   TargetEfficiencyFormValues,
   targetEfficiencySchema,
@@ -25,22 +25,22 @@ import { Resolver, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { getMetersApi } from "../../services/meter.service";
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from "@/common/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/popover";
+import { Button } from "@/common/components/ui/button";
 import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/common/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { AlertDialogFooter } from "@/components/ui/alert-dialog";
+import { AlertDialogFooter } from "@/common/components/ui/alert-dialog";
 import { TargetEfficiencyPreview } from "../targetEfficiencyPreview";
 import { MeterType } from "@/common/types/meters";
 import { EfficiencyTarget } from "@/common/types/efficiencyTarget";
-import { ScrollArea } from "@/components/ui/scroll-area"; // Pastikan sudah install ScrollArea
+import { ScrollArea } from "@/common/components/ui/scroll-area"; // Pastikan sudah install ScrollArea
 
 interface TargetEfficiencyFormProps {
   initialData?: EfficiencyTarget | null;

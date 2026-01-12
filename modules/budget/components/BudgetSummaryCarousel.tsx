@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { DollarSign, Landmark, TrendingDown, TrendingUp } from "lucide-react";
 
 import { BudgetSummaryCard } from "./BudgetSummaryCard";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 interface BudgetSummaryItem {

@@ -73,7 +73,7 @@ export const useModernEfficiency = (
       WARNING: "bg-orange-400",
       NORMAL: "bg-green-400",
       HEMAT: "bg-green-600",
-      UNKNOWN: "bg-slate-200",
+      UNKNOWN: "bg-background",
     };
 
     const dataMap = new Map(

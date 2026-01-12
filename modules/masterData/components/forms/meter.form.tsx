@@ -5,16 +5,16 @@ import { Resolver, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Switch } from "@/common/components/ui/switch";
+import { Input } from "@/common/components/ui/input";
+import { Button } from "@/common/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/common/components/ui/select";
 import {
   Form,
   FormControl,
@@ -23,8 +23,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { DialogFooter } from "@/components/ui/dialog";
+} from "@/common/components/ui/form";
+import { DialogFooter } from "@/common/components/ui/dialog";
 import { categoryApi } from "@/services/category.service";
 import { STATUS_METER } from "../../types/meter.type";
 import { MeterFormValues, meterSchema } from "../../schemas/meter.schema";

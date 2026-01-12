@@ -19,7 +19,7 @@ import {
   fetchSystemAlertsApi,
 } from "@/services/notification.service";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/common/components/ui/card";
 import { TabType } from "../types";
 import { NotificationHeader } from "./notificationTypes";
 import { NotificationTabs } from "./notificationTabs";
@@ -27,7 +27,7 @@ import { NotificationActions } from "./notificationActions";
 import { NotificationContent } from "./notificationContent";
 import { DeleteConfirmationDialog } from "./deleteConfirmationDialog";
 
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs } from "@/common/components/ui/tabs";
 const NotificationCenterPage = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>("all");

@@ -2,15 +2,15 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+} from "@/common/components/ui/dropdown-menu";
+import { Badge } from "@/common/components/ui/badge";
 import { User } from "@/types/users.types";
 
 // Mendefinisikan tipe untuk properti tambahan pada kolom
@@ -58,7 +58,6 @@ export const createColumns = (
       new Date(row.getValue("created_at")).toLocaleDateString("id-ID"),
   },
 
-  
   {
     id: "actions",
     cell: ({ row }) => {

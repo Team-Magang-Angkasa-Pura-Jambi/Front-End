@@ -15,8 +15,8 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/common/components/ui/button";
+import { Input } from "@/common/components/ui/input";
 
 import {
   Form,
@@ -25,7 +25,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/common/components/ui/form";
 
 import {
   formSchema,
@@ -146,7 +146,7 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
             return (
               <div
                 key={field.id}
-                className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-3 rounded-lg border"
+                className="grid grid-cols-12 gap-4 items-center bg-background p-3 rounded-lg border"
               >
                 <div className="col-span-5">
                   <span className="text-sm font-medium">{label}</span>

@@ -5,14 +5,14 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/common/components/ui/dropdown-menu";
 import { ReadingHistory } from "../services/reading.service";
 
 const formatNumber = (value: unknown): string => {

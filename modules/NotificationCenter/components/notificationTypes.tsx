@@ -1,6 +1,10 @@
 // src/app/notification-center/_components/notification-header.tsx
 import { Bell } from "lucide-react";
-import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 
 interface NotificationHeaderProps {
   unreadCount: number;

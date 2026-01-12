@@ -5,8 +5,8 @@ import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
 import { CalendarIcon, PlusCircle, XCircle, Copy } from "lucide-react";
 import { format } from "date-fns-tz";
 
-import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/common/components/ui/button";
+import { DialogFooter } from "@/common/components/ui/dialog";
 import {
   FormControl,
   FormDescription,
@@ -14,24 +14,24 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+} from "@/common/components/ui/popover";
+import { Calendar } from "@/common/components/ui/calendar";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Label } from "@/components/ui/label";
+} from "@/common/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/common/components/ui/radio-group";
+import { ScrollArea } from "@/common/components/ui/scroll-area";
+import { Label } from "@/common/components/ui/label";
 
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatCurrency";

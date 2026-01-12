@@ -17,9 +17,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
+import { Button } from "@/common/components/ui/button";
 import { DailyPaxData } from "./PaxDailyTable";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";

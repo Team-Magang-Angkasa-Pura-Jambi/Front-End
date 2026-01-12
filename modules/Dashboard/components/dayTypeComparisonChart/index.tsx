@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useQueries } from "@tanstack/react-query";
+import React from "react";
 import {
   BarChart,
   Bar,
@@ -12,95 +11,67 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/common/components/ui/tabs";
+import { Badge } from "@/common/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Zap, Droplets, Fuel, Calendar, CalendarDays } from "lucide-react";
+} from "@/common/components/ui/select";
+import { Skeleton } from "@/common/components/ui/skeleton";
+import {
+  Zap,
+  Droplets,
+  Fuel,
+  Calendar,
+  CalendarDays,
+  Download,
+  AlertTriangle,
+} from "lucide-react";
 
-import { ENERGY_TYPES } from "@/common/types/energy";
-import { getUnifiedComparisonApi } from "../../service/visualizations.service";
 import { MONTH_CONFIG } from "../../constants";
+import { ErrorFetchData } from "@/common/components/ErrorFetchData";
+import { EmptyData } from "@/common/components/EmptyData";
+import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
+import { useDownloadImage } from "../../hooks/useDownloadImage";
+import { Button } from "@/common/components/ui/button";
+import { useUnifiedEnergyComparison } from "../../hooks/useUnifiedEnergyComparison";
 
 export const UnifiedEnergyComparisonChart = () => {
-  const [view, setView] = useState<"consumption" | "cost">("consumption");
-  const isCost = view === "cost";
+  const { ref, download, isExporting } = useDownloadImage<HTMLDivElement>();
 
-  const currentDate = new Date();
-  const [year, setYear] = useState<string>(
-    currentDate.getFullYear().toString()
-  );
-
-  const [month, setMonth] = useState<string>(
-    (currentDate.getMonth() + 1).toString()
-  );
-
-  const results = useQueries({
-    queries: [
-      {
-        queryKey: ["comparison", ENERGY_TYPES.ELECTRICITY, year, month],
-        queryFn: () =>
-          getUnifiedComparisonApi(
-            ENERGY_TYPES.ELECTRICITY,
-            parseInt(year),
-            parseInt(month)
-          ),
-      },
-      {
-        queryKey: ["comparison", ENERGY_TYPES.WATER, year, month],
-        queryFn: () =>
-          getUnifiedComparisonApi(
-            ENERGY_TYPES.WATER,
-            parseInt(year),
-            parseInt(month)
-          ),
-      },
-      {
-        queryKey: ["comparison", ENERGY_TYPES.FUEL, year, month],
-        queryFn: () =>
-          getUnifiedComparisonApi(
-            ENERGY_TYPES.FUEL,
-            parseInt(year),
-            parseInt(month)
-          ),
-      },
-    ],
-  });
-
-  const isLoading = results.some((r) => r.isLoading);
-
-  const allEnergyData = useMemo(() => {
-    return results
-      .map((r) => r.data?.data)
-      .filter((d) => !!d)
-      .map((d) => ({
-        category: d.category,
-        unit: d.unit,
-        weekday_cons: d.weekday_cons,
-        holiday_cons: d.holiday_cons,
-        weekday_cost: d.weekday_cost,
-        holiday_cost: d.holiday_cost,
-      }));
-  }, [results]);
-
-  const formatValue = (val: number, unit: string) => {
-    if (isCost) {
-      if (val >= 1_000_000) return `Rp ${(val / 1_000_000).toFixed(1)}jt`;
-      return `Rp ${val.toLocaleString("id-ID")}`;
-    }
-    return `${val.toLocaleString("id-ID")} ${unit}`;
+  const handleDownloadClick = () => {
+    download(`Unified-Energy-Comparison-${isCost ? "cost" : "consump"}.jpg`);
   };
 
+  const {
+    view,
+    setView,
+    year,
+    setYear,
+    month,
+    setMonth,
+    data,
+    isLoading,
+    isError,
+    error,
+    isCost,
+  } = useUnifiedEnergyComparison();
+
   return (
-    <Card className="w-full shadow-lg border-none ring-1 ring-slate-200">
-      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-50 pb-4">
+    <Card
+      ref={ref}
+      className="w-full shadow-lg border-none ring-1 ring-slate-200"
+    >
+      <CardHeader className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 border-b border-slate-50 pb-4">
         <div>
           <CardTitle className="text-lg font-bold flex items-center gap-2">
             <Zap className="w-4 h-4 text-blue-500" />
@@ -111,9 +82,9 @@ export const UnifiedEnergyComparisonChart = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 w-full xl:w-auto">
           <Select value={month} onValueChange={setMonth}>
-            <SelectTrigger>
+            <SelectTrigger className="w-[130px]">
               <CalendarDays className="w-3 h-3 mr-2 text-slate-500" />
               <SelectValue placeholder="Bulan" />
             </SelectTrigger>
@@ -127,7 +98,7 @@ export const UnifiedEnergyComparisonChart = () => {
           </Select>
 
           <Select value={year} onValueChange={setYear}>
-            <SelectTrigger>
+            <SelectTrigger className="w-[100px]">
               <Calendar className="w-3 h-3 mr-2 text-slate-500" />
               <SelectValue placeholder="Tahun" />
             </SelectTrigger>
@@ -142,7 +113,7 @@ export const UnifiedEnergyComparisonChart = () => {
             value={view}
             onValueChange={(val) => setView(val as "consumption" | "cost")}
           >
-            <TabsList className="grid w-[180px] grid-cols-2 h-9">
+            <TabsList className="grid w-[160px] grid-cols-2 h-9">
               <TabsTrigger value="consumption" className="text-xs">
                 Volume
               </TabsTrigger>
@@ -151,141 +122,205 @@ export const UnifiedEnergyComparisonChart = () => {
               </TabsTrigger>
             </TabsList>
           </Tabs>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleDownloadClick}
+            disabled={isExporting || isLoading}
+            title="Download JPG"
+          >
+            {isExporting ? (
+              <span className="text-[10px] animate-pulse">...</span>
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+          </Button>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-6">
-        <div className="h-[350px] w-full min-h-[300px]">
-          {isLoading ? (
-            <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
-              <Skeleton className="h-[280px] w-full rounded-xl bg-slate-100" />
+      <CardContent className="pt-6 min-h-[400px]">
+        {isLoading ? (
+          <div className="space-y-6">
+            <div className="h-[300px] w-full flex flex-col items-center justify-center space-y-4">
+              <Skeleton className="h-[280px] w-full rounded-xl bg-background" />
               <div className="flex gap-4">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
               </div>
             </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={allEnergyData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                barGap={12}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="#f1f5f9"
-                />
-                <XAxis
-                  dataKey="category"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#64748b", fontSize: 12, fontWeight: 600 }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#64748b", fontSize: 12 }}
-                  tickFormatter={(val) => {
-                    if (isCost) return `${val / 1000000}jt`;
-                    return val >= 1000 ? `${val / 1000}k` : val;
-                  }}
-                />
-                <Tooltip
-                  cursor={{ fill: "#f8fafc" }}
-                  contentStyle={{
-                    borderRadius: "12px",
-                    border: "none",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                  }}
-                  formatter={(value: number, name: string, props) => [
-                    formatValue(value, props.payload.unit),
-                    name === (isCost ? "weekday_cost" : "weekday_cons")
-                      ? "Hari Kerja"
-                      : "Hari Libur",
-                  ]}
-                />
-                <Legend
-                  iconType="circle"
-                  wrapperStyle={{ paddingTop: "20px" }}
-                />
-
-                <Bar
-                  dataKey={isCost ? "weekday_cost" : "weekday_cons"}
-                  name="Rata-rata Hari Kerja"
-                  fill="#3b82f6"
-                  radius={[6, 6, 0, 0]}
-                  barSize={50}
-                />
-                <Bar
-                  dataKey={isCost ? "holiday_cost" : "holiday_cons"}
-                  name="Rata-rata Hari Libur"
-                  fill="#f43f5e"
-                  radius={[6, 6, 0, 0]}
-                  barSize={50}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {!isLoading && (
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            {allEnergyData.map((item) => {
-              const valWeekday = isCost ? item.weekday_cost : item.weekday_cons;
-              const valHoliday = isCost ? item.holiday_cost : item.holiday_cons;
-
-              const diff =
-                valWeekday === 0
-                  ? 0
-                  : ((valHoliday - valWeekday) / valWeekday) * 100;
-              const isHigher = diff > 0;
-
-              return (
-                <div
-                  key={item.category}
-                  className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col justify-between"
-                >
-                  <div className="flex items-center gap-2 mb-3 text-slate-600">
-                    {item.category === "Electricity" && (
-                      <Zap className="w-3 h-3" />
-                    )}
-                    {item.category === "Water" && (
-                      <Droplets className="w-3 h-3" />
-                    )}
-                    {item.category === "Fuel" && <Fuel className="w-3 h-3" />}
-                    <span className="text-xs font-bold uppercase tracking-wider">
-                      {item.category}
-                    </span>
-                  </div>
-
-                  <div className="flex items-baseline justify-between">
-                    <span
-                      className={`text-xl font-black ${
-                        isHigher ? "text-red-600" : "text-green-600"
-                      }`}
-                    >
-                      {Math.abs(diff).toFixed(1)}%
-                    </span>
-                    <Badge
-                      className={
-                        isHigher
-                          ? "bg-red-100 text-red-700 hover:bg-red-100"
-                          : "bg-green-100 text-green-700 hover:bg-green-100"
-                      }
-                    >
-                      {isHigher ? "Naik saat Libur" : "Turun saat Libur"}
-                    </Badge>
-                  </div>
-                  <p className="text-[10px] text-slate-400 mt-2 italic leading-tight">
-                    {isHigher
-                      ? `Perlu pengecekan beban ekstra saat peak season/libur.`
-                      : `Efisiensi tercapai dengan penurunan beban operasional.`}
-                  </p>
-                </div>
-              );
-            })}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              ))}
+            </div>
           </div>
+        ) : isError ? (
+          <ErrorFetchData message={error?.message} />
+        ) : !data || data.length === 0 ? (
+          <EmptyData
+            title="Tidak Ada Data Perbandingan"
+            description="Belum ada data konsumsi yang tercatat untuk periode ini."
+          />
+        ) : (
+          <>
+            <div className="h-[350px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={data}
+                  margin={{ top: 20, right: 10, left: 0, bottom: 5 }}
+                  barGap={8}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#f1f5f9"
+                  />
+                  <XAxis
+                    dataKey="category"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#64748b", fontSize: 12, fontWeight: 600 }}
+                    dy={10}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#64748b", fontSize: 11 }}
+                    width={45}
+                    tickFormatter={(val) =>
+                      `${formatCurrencySmart(val).val} ${
+                        isCost ? formatCurrencySmart(val).unit : data[0]?.unit
+                      }`
+                    }
+                  />
+
+                  <Tooltip
+                    cursor={{ fill: "#f8fafc" }}
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "none",
+                      boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                      fontSize: "12px",
+                    }}
+                    formatter={(value: number, name: string, entry) => {
+                      // 1. Tentukan Label (Hari Kerja/Libur)
+                      const label =
+                        name === "weekdayValue" ? "Hari Kerja" : "Hari Libur";
+
+                      // 2. Format Nilai
+                      if (isCost) {
+                        // Jika Biaya: "Rp 1.500.000"
+                        return [formatCurrencySmart(value).full, label];
+                      } else {
+                        // Jika Volume: "1.500 kWh"
+                        // Ambil unit dari payload data bar tersebut
+                        const unit = entry.payload.unit || "";
+                        const formattedNumber = formatCurrencySmart(value).val; // Angka saja (1.500)
+                        return [`${formattedNumber} ${unit}`, label];
+                      }
+                    }}
+                  />
+                  <Legend
+                    iconType="circle"
+                    wrapperStyle={{ paddingTop: "20px" }}
+                  />
+                  <Bar
+                    dataKey="weekdayValue"
+                    name="Rata-rata Hari Kerja"
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
+                  />
+                  <Bar
+                    dataKey="holidayValue"
+                    name="Rata-rata Hari Libur"
+                    fill="#f43f5e"
+                    radius={[4, 4, 0, 0]}
+                    barSize={40}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+              {data.map((item) => {
+                const valWeekday = item.weekdayValue;
+                const valHoliday = item.holidayValue;
+
+                const diff =
+                  valWeekday === 0
+                    ? 0
+                    : ((valHoliday - valWeekday) / valWeekday) * 100;
+                const isHigher = diff > 0;
+
+                return (
+                  <div
+                    key={item.category}
+                    className="p-4 rounded-xl  border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group"
+                  >
+                    <div className="flex items-center gap-2 mb-3 text-slate-500 group-hover:text-slate-800 transition-colors">
+                      {item.category === "Electricity" && (
+                        <Zap className="w-4 h-4 text-amber-500" />
+                      )}
+                      {item.category === "Water" && (
+                        <Droplets className="w-4 h-4 text-blue-500" />
+                      )}
+                      {item.category === "Fuel" && (
+                        <Fuel className="w-4 h-4 text-red-500" />
+                      )}
+                      <span className="text-xs font-bold uppercase tracking-wider">
+                        {item.category}
+                      </span>
+                    </div>
+
+                    <div className="flex items-baseline justify-between">
+                      <span
+                        className={`text-2xl font-black ${
+                          isHigher ? "text-red-600" : "text-emerald-600"
+                        }`}
+                      >
+                        {Math.abs(diff).toFixed(1)}%
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className={
+                          isHigher
+                            ? "bg-red-50 text-red-700 hover:bg-red-100"
+                            : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                        }
+                      >
+                        {isHigher ? "Naik" : "Turun"}
+                      </Badge>
+                    </div>
+
+                    <p className="text-[11px] text-slate-500 mt-3 border-t pt-3 flex items-start gap-1.5 leading-snug">
+                      <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5 opacity-70" />
+                      {isHigher ? (
+                        <span>
+                          Konsumsi meningkat saat libur.
+                          {!isCost && (
+                            <span className="font-semibold ml-1 block">
+                              (Satuan: {item.unit})
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        <span>
+                          Efisiensi tercapai saat libur.
+                          {!isCost && (
+                            <span className="font-semibold ml-1 block">
+                              (Satuan: {item.unit})
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

@@ -2,7 +2,7 @@ import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@/components/ui/input-otp";
+} from "@/common/components/ui/input-otp";
 
 interface InputDataProps {
   digits: number;

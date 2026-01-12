@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   ChevronDown,
   ChevronRight,
@@ -14,7 +14,7 @@ import { format } from "date-fns-tz";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { AnnualBudget } from "@/common/types/budget";
-import { DataTableRowActions } from "@/components/table/dataTableRowActions";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
 
 const EnergyTypeCell = ({ typeName }: { typeName: string }) => {
   let icon;

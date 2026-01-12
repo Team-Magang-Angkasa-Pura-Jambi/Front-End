@@ -1,6 +1,6 @@
 // src/app/notification-center/_components/notification-tabs.tsx
 import { Bell, Gauge, ShieldAlert } from "lucide-react";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabsList, TabsTrigger } from "@/common/components/ui/tabs";
 
 export const NotificationTabs = () => (
   <TabsList className="grid w-full grid-cols-3">

@@ -12,15 +12,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/table";
+import { Button } from "@/common/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
+} from "@/common/components/ui/card";
 import { ReadingHistory } from "../services/reading.service";
 
 export interface DailyPaxData {
@@ -74,8 +74,6 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
       }))
       .filter((item) => item.paxId !== null);
   }, [data]);
-
-  console.log(dailyPaxData);
 
   if (dailyPaxData.length === 0) {
     return null;
