@@ -1,4 +1,4 @@
-import { User } from "@/types/users.types";
+import { User } from "@/common/types/user";
 import { FormUserValues } from "./schemas/user.schema";
 
 export interface UserFormProps {

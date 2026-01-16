@@ -1,4 +1,5 @@
 import { ApiResponse } from "@/common/types/api";
+import { User } from "@/common/types/user";
 import api from "@/lib/api";
 import { CreateUserPayload, UpdateUserPayload } from "@/types/users.types";
 
