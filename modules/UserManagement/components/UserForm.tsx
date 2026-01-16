@@ -21,11 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/common/components/ui/select";
-import { UserFormProps } from "../types";
 import { formSchema, FormUserValues } from "../schemas/user.schema";
+import { User } from "@/common/types/user";
 
 export interface UserFormProps {
-  onSubmit: (values: userFormValues) => void;
+  onSubmit: (values: FormUserValues) => void;
   isPending: boolean;
   defaultValues?: User;
 }

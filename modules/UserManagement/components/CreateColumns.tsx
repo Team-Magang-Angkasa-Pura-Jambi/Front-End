@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/common/components/ui/dropdown-menu";
 import { Badge } from "@/common/components/ui/badge";
-import { User } from "@/types/users.types";
+import { User } from "@/common/types/user";
 
 type UserColumnDef = ColumnDef<User> & {
   onEdit?: (user: User) => void;
