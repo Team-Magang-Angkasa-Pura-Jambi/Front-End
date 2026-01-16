@@ -32,6 +32,7 @@ import { UserForm } from "./UserForm";
 import { DeleteUserDialog } from "./DeleteUserDialog";
 import { DataTable } from "../../../common/components/table/dataTable";
 import RolesPage from "./role";
+import { User } from "@/common/types/user";
 
 export const Page = () => {
   const queryClient = useQueryClient();
