@@ -74,7 +74,7 @@ export const SavedChart = ({
   <div className="flex h-full w-full flex-col">
     <div className="mb-4 flex shrink-0 items-end justify-between px-2">
       <div>
-        <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
           Saved YTD
         </p>
         <h4 className="text-2xl font-black text-emerald-600">

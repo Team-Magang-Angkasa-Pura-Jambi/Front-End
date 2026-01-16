@@ -19,7 +19,7 @@ export const GlobalLoader = () => {
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-md">
       <div className="relative flex items-center justify-center">
         <motion.div
-          className="absolute h-32 w-32 rounded-full border-t-2 border-r-2 border-blue-500"
+          className="absolute h-32 w-32 rounded-full border-r-2 border-t-2 border-blue-500"
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
         />

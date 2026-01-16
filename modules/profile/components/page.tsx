@@ -244,7 +244,7 @@ export const ProfilePage = () => {
                           />
                           <button
                             type="button"
-                            className="text-muted-foreground absolute top-2.5 right-3"
+                            className="text-muted-foreground absolute right-3 top-2.5"
                             onClick={() => setShowPassword((p) => !p)}
                           >
                             {showPassword ? (

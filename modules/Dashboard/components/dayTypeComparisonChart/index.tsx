@@ -269,7 +269,7 @@ export const UnifiedEnergyComparisonChart = () => {
                       {item.category === "Fuel" && (
                         <Fuel className="h-4 w-4 text-red-500" />
                       )}
-                      <span className="text-xs font-bold tracking-wider uppercase">
+                      <span className="text-xs font-bold uppercase tracking-wider">
                         {item.category}
                       </span>
                     </div>

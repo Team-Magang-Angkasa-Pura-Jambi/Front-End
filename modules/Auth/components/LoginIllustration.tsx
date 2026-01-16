@@ -193,7 +193,7 @@ export const LoginIllustration = () => {
           custom={1}
           variants={iconVariants}
           animate="float"
-          className="absolute top-[20%] left-[55%]"
+          className="absolute left-[55%] top-[20%]"
           style={{ willChange: "transform" }}
         >
           <motion.div
@@ -222,7 +222,7 @@ export const LoginIllustration = () => {
           custom={2}
           variants={iconVariants}
           animate="float"
-          className="absolute top-[50%] left-[60%]"
+          className="absolute left-[60%] top-[50%]"
           style={{ willChange: "transform" }}
         >
           <motion.div

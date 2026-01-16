@@ -45,7 +45,7 @@ export const EmptyData: React.FC<EmptyDataProps> = ({
             className={`text-slate-400 ${compact ? "h-5 w-5" : "h-7 w-7"}`}
           />
           {/* Decorative Dot */}
-          <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
+          <span className="absolute right-0 top-0 -mr-1 -mt-1 flex h-3 w-3">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-slate-400 opacity-75"></span>
             <span className="relative inline-flex h-3 w-3 rounded-full bg-slate-500"></span>
           </span>

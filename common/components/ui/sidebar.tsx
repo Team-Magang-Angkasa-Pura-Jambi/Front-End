@@ -114,7 +114,7 @@ export const DesktopSidebar = ({
         {...props}
       >
         {!open && (
-          <div className="absolute top-2 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.6)]" />
+          <div className="absolute left-1/2 top-2 h-1 w-1 -translate-x-1/2 rounded-full bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.6)]" />
         )}
         {children}
       </motion.div>
@@ -155,7 +155,7 @@ export const MobileSidebar = ({
             )}
           >
             <div
-              className="absolute top-10 right-10 z-50 cursor-pointer text-slate-800 transition-colors hover:text-red-500 dark:text-slate-200"
+              className="absolute right-10 top-10 z-50 cursor-pointer text-slate-800 transition-colors hover:text-red-500 dark:text-slate-200"
               onClick={() => setOpen(!open)}
             >
               <IconX />
@@ -199,7 +199,7 @@ export const SidebarLink = ({
       {isActive && (
         <motion.div
           layoutId="active-pill"
-          className="absolute top-0 bottom-0 left-0 w-1 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+          className="absolute bottom-0 left-0 top-0 w-1 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "100%" }}
           transition={{ duration: 0.2 }}
@@ -222,7 +222,7 @@ export const SidebarLink = ({
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
-        className="!m-0 overflow-hidden !p-0 text-sm whitespace-pre transition duration-150 group-hover/sidebar:translate-x-1"
+        className="!m-0 overflow-hidden whitespace-pre !p-0 text-sm transition duration-150 group-hover/sidebar:translate-x-1"
       >
         {link.label}
       </motion.span>

@@ -132,7 +132,7 @@ export const ModernEfficiencyDashboard = () => {
                   {groupedData.map((month) => (
                     <div key={month.monthName} className="flex flex-col gap-2">
                       {/* Label Bulan */}
-                      <span className="text-muted-foreground h-4 text-[9px] font-bold tracking-wider uppercase">
+                      <span className="text-muted-foreground h-4 text-[9px] font-bold uppercase tracking-wider">
                         {month.monthName}
                       </span>
 
@@ -160,7 +160,7 @@ export const ModernEfficiencyDashboard = () => {
 
                                       // PERBAIKAN VISIBILITAS:
                                       // 1. Ring Inset: Memberikan garis tepi halus (10% opacity) agar kotak selalu terlihat
-                                      "ring-1 ring-black/10 ring-inset dark:ring-white/20",
+                                      "ring-1 ring-inset ring-black/10 dark:ring-white/20",
 
                                       // 2. Hover Effect: Pop-up & Ring warna Primary (Cyan)
                                       "hover:ring-primary hover:z-10 hover:scale-125 hover:ring-2",
@@ -175,7 +175,7 @@ export const ModernEfficiencyDashboard = () => {
                                 {/* Hapus className manual (bg-popover dll) agar style 'Tech HUD' gelap otomatis terpakai */}
                                 <TooltipContent side="top">
                                   <div className="flex flex-col gap-0.5">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase">
+                                    <p className="text-[10px] font-bold uppercase text-slate-400">
                                       {day.dateDisplay}
                                     </p>
                                     <p className="text-xs font-bold text-slate-50">
@@ -216,7 +216,7 @@ export const ModernEfficiencyDashboard = () => {
                           {statsSummary.HEMAT}
                         </span>
                       </div>
-                      <p className="text-[9px] font-bold tracking-wider text-green-600/70 uppercase dark:text-green-400/70">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-green-600/70 dark:text-green-400/70">
                         Sangat Efisien
                       </p>
                     </div>
@@ -228,7 +228,7 @@ export const ModernEfficiencyDashboard = () => {
                           {statsSummary.NORMAL}
                         </span>
                       </div>
-                      <p className="text-muted-foreground text-[9px] font-bold tracking-wider uppercase">
+                      <p className="text-muted-foreground text-[9px] font-bold uppercase tracking-wider">
                         Normal
                       </p>
                     </div>
@@ -240,7 +240,7 @@ export const ModernEfficiencyDashboard = () => {
                           {statsSummary.WARNING}
                         </span>
                       </div>
-                      <p className="text-[9px] font-bold tracking-wider text-orange-600/70 uppercase dark:text-orange-400/70">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-orange-600/70 dark:text-orange-400/70">
                         Mendekati Limit
                       </p>
                     </div>
@@ -252,7 +252,7 @@ export const ModernEfficiencyDashboard = () => {
                           {statsSummary.BOROS}
                         </span>
                       </div>
-                      <p className="text-[9px] font-bold tracking-wider text-red-600/70 uppercase dark:text-red-400/70">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-red-600/70 dark:text-red-400/70">
                         Over Budget
                       </p>
                     </div>

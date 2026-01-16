@@ -159,7 +159,7 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
                 <TableCell className="min-w-[200px] font-bold">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
+                      <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
                         DPP (Netto)
                       </span>
                       <span>
@@ -169,7 +169,7 @@ export function RecapTable<TData extends RecapDataRow, TValue>({
                       </span>
                     </div>
                     <div className="border-muted-foreground/20 mt-1 flex items-center justify-between gap-2 border-t pt-1">
-                      <span className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
+                      <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
                         Total Bruto
                       </span>
                       <span className="text-primary">

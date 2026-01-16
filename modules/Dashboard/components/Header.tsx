@@ -54,7 +54,7 @@ export const Header = () => {
           </div>
 
           <div className="flex flex-col">
-            <h1 className="text-lg leading-tight font-bold text-slate-900 dark:text-slate-100">
+            <h1 className="text-lg font-bold leading-tight text-slate-900 dark:text-slate-100">
               {greeting}, {user?.username || "Guest"}! 👋
             </h1>
             <p className="text-muted-foreground text-xs font-medium">

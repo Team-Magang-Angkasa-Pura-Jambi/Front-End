@@ -60,7 +60,7 @@ export const NotificationItem = React.forwardRef<
       onClick={() => onClick(notification)}
       className={cn(
         // Base styles
-        "group relative flex cursor-pointer items-start gap-4 overflow-hidden rounded-md border p-4 transition-all duration-200 select-none",
+        "group relative flex cursor-pointer select-none items-start gap-4 overflow-hidden rounded-md border p-4 transition-all duration-200",
 
         // Logic: Jika sudah dibaca (isRead) dan sudah dihandle (HANDLED),
         // gunakan style kartu berdasarkan status. Jika belum, gunakan style default/card.
@@ -77,7 +77,7 @@ export const NotificationItem = React.forwardRef<
       {isUnread && (
         <div
           className={cn(
-            "absolute top-0 bottom-0 left-0 w-[3px] shadow-[0_0_8px_rgba(var(--primary),0.6)]",
+            "absolute bottom-0 left-0 top-0 w-[3px] shadow-[0_0_8px_rgba(var(--primary),0.6)]",
             status === AlertStatus.NEW ? "bg-destructive" : "bg-primary"
           )}
         />
@@ -102,7 +102,7 @@ export const NotificationItem = React.forwardRef<
       {/* ICON TYPE */}
       <div
         className={cn(
-          "mt-0.5 shrink-0 rounded-full p-2 shadow-sm ring-1 ring-black/5 ring-inset",
+          "mt-0.5 shrink-0 rounded-full p-2 shadow-sm ring-1 ring-inset ring-black/5",
           isAlert
             ? "bg-red-500/10 text-red-600"
             : "bg-blue-500/10 text-blue-600"
@@ -169,7 +169,7 @@ export const NotificationItem = React.forwardRef<
           <div className="mt-1 flex items-center gap-2 pt-2">
             <div className="bg-primary/5 border-primary/10 flex items-center gap-1.5 rounded-full border px-2 py-1">
               <User className="text-primary h-3 w-3" />
-              <span className="text-muted-foreground text-[10px] font-medium tracking-tight uppercase">
+              <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-tight">
                 Verified by
                 <span className="text-foreground ml-0.5 font-bold">
                   {notification.acknowledged_by.username}

@@ -94,7 +94,7 @@ export const PaxEditForm: React.FC<PaxEditFormProps> = ({
               <FormLabel>Jumlah Pax</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Users className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                  <Users className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                   <Input
                     type="number"
                     placeholder="0"

@@ -30,7 +30,7 @@ export const MultiEnergyForecastCard = () => {
     <Card className="col-span-12 overflow-hidden border-none shadow-md ring-1 ring-slate-200 md:col-span-4">
       <CardHeader className="border-b border-slate-100">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+          <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
             Prediksi Biaya Akhir Bulan
           </CardTitle>
           <Badge variant="outline" className="text-[10px]">
@@ -104,7 +104,7 @@ export const MultiEnergyForecastCard = () => {
 
         <TabsContent value="water" className="space-y-4 p-3">
           <div className="relative overflow-hidden rounded-2xl border border-dashed border-blue-200 bg-blue-50/30 p-8 text-center">
-            <div className="absolute -top-4 -right-4 text-blue-100/50">
+            <div className="absolute -right-4 -top-4 text-blue-100/50">
               <Droplets className="h-24 w-24" />
             </div>
 
@@ -119,7 +119,7 @@ export const MultiEnergyForecastCard = () => {
                 Algoritma sedang mempelajari pola aliran air. Estimasi akan
                 tersedia dalam 7 hari kedepan.
               </p>
-              <Badge className="mt-4 bg-blue-500 text-[9px] tracking-tighter uppercase hover:bg-blue-500">
+              <Badge className="mt-4 bg-blue-500 text-[9px] uppercase tracking-tighter hover:bg-blue-500">
                 In Development
               </Badge>
             </div>
@@ -146,7 +146,7 @@ export const MultiEnergyForecastCard = () => {
                   Progress Integrasi: 65%
                 </p>
               </div>
-              <p className="mt-4 text-[10px] text-slate-400 italic">
+              <p className="mt-4 text-[10px] italic text-slate-400">
                 &quot;Menghubungkan sensor level tangki...&quot;
               </p>
             </div>

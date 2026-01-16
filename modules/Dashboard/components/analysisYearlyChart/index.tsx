@@ -270,7 +270,7 @@ export const AnalysisYearlyChart = () => {
         </div>
         {!isLoading && summary && (
           <div className="bg-background mt-4 flex flex-col items-center justify-between gap-6 rounded-xl border border-slate-100 p-5 transition-all hover:shadow-sm xl:flex-row">
-            <div className="flex w-full items-start gap-4 border-b border-slate-200 pb-4 xl:border-r xl:border-b-0 xl:pr-6 xl:pb-0">
+            <div className="flex w-full items-start gap-4 border-b border-slate-200 pb-4 xl:border-b-0 xl:border-r xl:pb-0 xl:pr-6">
               <div
                 className={`shrink-0 rounded-full p-2.5 ${
                   summary.isDeficit
@@ -313,7 +313,7 @@ export const AnalysisYearlyChart = () => {
 
             <div className="grid w-full grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-2">
               <div className="flex flex-col border-r border-slate-100 px-2 last:border-0">
-                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   <TrendingUp className="h-3 w-3 text-slate-400" />
                   Puncak
                 </p>
@@ -326,7 +326,7 @@ export const AnalysisYearlyChart = () => {
               </div>
 
               <div className="flex flex-col border-r border-slate-100 px-2 last:border-0">
-                <p className="mb-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   {summary.isDeficit ? "Total Defisit" : "Total Hemat"}
                 </p>
                 <p
@@ -349,7 +349,7 @@ export const AnalysisYearlyChart = () => {
               </div>
 
               <div className="flex flex-col border-r border-slate-100 px-2 last:border-0">
-                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   <BarChart3 className="h-3 w-3 text-slate-400" />
                   Rata-rata
                 </p>
@@ -362,7 +362,7 @@ export const AnalysisYearlyChart = () => {
               </div>
 
               <div className="flex flex-col px-2">
-                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   <PieChart className="h-3 w-3 text-slate-400" />
                   Serapan
                 </p>

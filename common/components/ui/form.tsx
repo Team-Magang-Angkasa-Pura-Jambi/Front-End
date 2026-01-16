@@ -101,7 +101,7 @@ function FormLabel({
       data-error={!!error}
       className={cn(
         // Style Khas Energi: Warna Slate, Font Medium
-        "text-xs font-semibold tracking-wide text-slate-600 uppercase dark:text-slate-300",
+        "text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300",
         // Saat Error: Warna merah industrial
         "data-[error=true]:text-red-600 dark:data-[error=true]:text-red-400",
         className

@@ -38,7 +38,7 @@ function SelectTrigger({
       data-size={size}
       className={cn(
         // Base Layout
-        "border-input bg-background flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm shadow-sm transition-all duration-200 outline-none",
+        "border-input bg-background flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm shadow-sm outline-none transition-all duration-200",
 
         // Height variants
         size === "default" && "h-10",
@@ -127,7 +127,7 @@ function SelectLabel({
     <SelectPrimitive.Label
       data-slot="select-label"
       className={cn(
-        "text-muted-foreground/70 px-2 py-1.5 text-xs font-semibold tracking-wider uppercase",
+        "text-muted-foreground/70 px-2 py-1.5 text-xs font-semibold uppercase tracking-wider",
         className
       )}
       {...props}
@@ -145,7 +145,7 @@ function SelectItem({
       data-slot="select-item"
       className={cn(
         // Base Item Styling
-        "relative flex w-full cursor-pointer items-center rounded-sm py-1.5 pr-8 pl-2 text-sm transition-colors outline-none select-none",
+        "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none transition-colors",
 
         // Hover/Focus State
         "focus:bg-accent focus:text-accent-foreground",

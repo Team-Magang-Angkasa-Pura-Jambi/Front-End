@@ -96,7 +96,7 @@ export const NotificationPopover = () => {
 
           {/* Badge Counter */}
           {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+            <span className="absolute right-1.5 top-1.5 flex h-2.5 w-2.5">
               <span className="bg-destructive absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"></span>
               <span className="bg-destructive border-background relative inline-flex h-2.5 w-2.5 rounded-full border"></span>
             </span>
@@ -129,11 +129,11 @@ export const NotificationPopover = () => {
           </div>
 
           {unreadCount > 0 ? (
-            <span className="text-primary bg-primary/10 border-primary/20 rounded-sm border px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
+            <span className="text-primary bg-primary/10 border-primary/20 rounded-sm border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
               {unreadCount} New
             </span>
           ) : (
-            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase opacity-70">
+            <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider opacity-70">
               All Clear
             </span>
           )}
@@ -176,10 +176,10 @@ export const NotificationPopover = () => {
                     key={item.id}
                     onClick={() => handleItemClick(item)}
                     className={cn(
-                      "group border-border/50 relative cursor-pointer border-b p-4 transition-all duration-200 last:border-0",
+                      "border-border/50 group relative cursor-pointer border-b p-4 transition-all duration-200 last:border-0",
                       "hover:bg-muted/40",
                       !item.is_read
-                        ? "bg-primary/[0.03] before:bg-primary before:absolute before:top-0 before:bottom-0 before:left-0 before:w-[3px]"
+                        ? "bg-primary/[0.03] before:bg-primary before:absolute before:bottom-0 before:left-0 before:top-0 before:w-[3px]"
                         : "opacity-80 hover:opacity-100"
                     )}
                   >
@@ -217,7 +217,7 @@ export const NotificationPopover = () => {
                             {item.title}
                           </p>
 
-                          <span className="text-muted-foreground/70 shrink-0 font-mono text-[10px] whitespace-nowrap tabular-nums">
+                          <span className="text-muted-foreground/70 shrink-0 whitespace-nowrap font-mono text-[10px] tabular-nums">
                             {formatDistanceToNow(new Date(item.date), {
                               addSuffix: false,
                               locale: localeId,
@@ -260,7 +260,7 @@ export const NotificationPopover = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-muted-foreground hover:text-primary hover:bg-primary/5 h-8 w-full text-xs font-medium tracking-wider uppercase transition-colors"
+              className="text-muted-foreground hover:text-primary hover:bg-primary/5 h-8 w-full text-xs font-medium uppercase tracking-wider transition-colors"
             >
               Open Notification Center
             </Button>

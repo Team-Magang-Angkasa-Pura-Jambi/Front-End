@@ -24,7 +24,7 @@ export default function NotFoundEnergyPage() {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.05]" />
 
       {/* --- FLOATING TECH ELEMENTS --- */}
-      <div className="text-muted-foreground/40 absolute top-10 left-10 hidden font-mono text-[10px] select-none md:block">
+      <div className="text-muted-foreground/40 absolute left-10 top-10 hidden select-none font-mono text-[10px] md:block">
         ERR_CODE: 0x404_NOT_FOUND <br />
         SYS_STATUS: CRITICAL_HALT <br />
         LOC: SECTOR_NULL
@@ -40,7 +40,7 @@ export default function NotFoundEnergyPage() {
       >
         <CardHeader className="items-center pb-2 text-center">
           {/* Status Badge */}
-          <div className="bg-destructive/10 border-destructive/20 text-destructive mb-6 flex animate-pulse items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold tracking-widest uppercase">
+          <div className="bg-destructive/10 border-destructive/20 text-destructive mb-6 flex animate-pulse items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-widest">
             <Radio className="h-3 w-3" />
             Signal Lost
           </div>
@@ -49,7 +49,7 @@ export default function NotFoundEnergyPage() {
           <div className="group relative mb-6">
             <div className="bg-destructive/20 absolute inset-0 rounded-full opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-50" />
             <div className="relative">
-              <ZapOff className="text-destructive absolute -top-4 -right-4 h-8 w-8 animate-bounce" />
+              <ZapOff className="text-destructive absolute -right-4 -top-4 h-8 w-8 animate-bounce" />
               <Image
                 src="/image/sir-miles-axelrod.png"
                 alt="Sir Miles Axlerod Lost"
@@ -60,7 +60,7 @@ export default function NotFoundEnergyPage() {
             </div>
           </div>
 
-          <CardTitle className="text-foreground text-3xl font-black tracking-tight uppercase md:text-4xl">
+          <CardTitle className="text-foreground text-3xl font-black uppercase tracking-tight md:text-4xl">
             Energy <span className="text-destructive">Depleted</span>
           </CardTitle>
           <CardDescription className="text-muted-foreground pt-2 text-lg font-medium">

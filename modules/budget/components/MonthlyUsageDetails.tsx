@@ -44,7 +44,7 @@ export const MonthlyUsageDetails = ({
     <div className="bg-muted/50 p-4">
       <MeterAllocationDetails annualBudget={annualBudget} />
 
-      <h4 className="mt-6 mb-2 font-semibold">
+      <h4 className="mb-2 mt-6 font-semibold">
         Detail Pemakaian Anggaran Tahun {year}
       </h4>
       <Table>

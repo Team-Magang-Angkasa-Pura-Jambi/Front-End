@@ -58,7 +58,7 @@ function AlertDialogContent({
         data-slot="alert-dialog-content"
         className={cn(
           // Posisi & Animasi
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] duration-200",
+          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] duration-200",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
 
           // Style Industrial Alert:
@@ -140,7 +140,7 @@ function AlertDialogDescription({
       data-slot="alert-dialog-description"
       // Margin top ditambahkan karena ada icon di title
       className={cn(
-        "mt-2 ml-0 text-sm leading-relaxed text-slate-500 sm:ml-[3.25rem] dark:text-slate-400",
+        "ml-0 mt-2 text-sm leading-relaxed text-slate-500 sm:ml-[3.25rem] dark:text-slate-400",
         className
       )}
       {...props}

@@ -115,7 +115,7 @@ export const Page = () => {
             variants={itemVariants}
             className="py-10 text-center opacity-40"
           >
-            <p className="font-mono text-[10px] tracking-widest uppercase italic">
+            <p className="font-mono text-[10px] uppercase italic tracking-widest">
               Airport Operational Intelligence Dashboard
             </p>
           </motion.footer>

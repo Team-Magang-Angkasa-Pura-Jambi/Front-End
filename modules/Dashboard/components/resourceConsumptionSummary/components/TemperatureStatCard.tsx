@@ -93,7 +93,7 @@ export const TemperatureStatCard = ({ data }: { data: SummaryData }) => {
       {/* 1. HEADER: Judul & Icon */}
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-muted-foreground text-sm font-bold tracking-wide uppercase">
+          <CardTitle className="text-muted-foreground text-sm font-bold uppercase tracking-wide">
             Suhu & Cuaca
           </CardTitle>
           <CardAction>
@@ -158,7 +158,7 @@ export const TemperatureStatCard = ({ data }: { data: SummaryData }) => {
       </CardContent>
 
       {/* 3. FOOTER: Indikator Slide (Dots) */}
-      <CardFooter className="justify-center pt-0 pb-4">
+      <CardFooter className="justify-center pb-4 pt-0">
         <div className="flex gap-2">
           {panels.map((_, index) => (
             <button

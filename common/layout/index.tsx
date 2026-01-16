@@ -104,23 +104,23 @@ const allLinks = [
 // KOMPONEN DEKORASI BARU (Tech Tattoos)
 const TechDecorations = () => {
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none">
+    <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden">
       {/* 1. Grid Background (Base Texture) - Sudah ada sebelumnya, diperhalus */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.15] dark:opacity-[0.1]" />
 
       {/* 2. Top Right HUD Block (Status Indikator) */}
-      <div className="absolute top-0 right-0 p-8 opacity-40">
+      <div className="absolute right-0 top-0 p-8 opacity-40">
         <div className="flex flex-col items-end gap-1">
           <div className="bg-primary/40 h-1 w-16 rounded-full" />
           <div className="flex items-center gap-2">
-            <span className="text-primary/60 font-mono text-[9px] tracking-[0.2em] uppercase">
+            <span className="text-primary/60 font-mono text-[9px] uppercase tracking-[0.2em]">
               Sys.Online
             </span>
             <div className="bg-primary h-1.5 w-1.5 animate-pulse rounded-full" />
           </div>
         </div>
         {/* Corner Bracket */}
-        <div className="border-primary/20 absolute top-6 right-6 h-16 w-16 rounded-tr-xl border-t-2 border-r-2" />
+        <div className="border-primary/20 absolute right-6 top-6 h-16 w-16 rounded-tr-xl border-r-2 border-t-2" />
       </div>
 
       {/* 3. Bottom Left Coordinates (Aviation Style) */}
@@ -135,11 +135,11 @@ const TechDecorations = () => {
       </div>
 
       {/* 4. Center/Large Circle (Abstract Radar) - Sangat Tipis */}
-      <div className="border-primary/5 pointer-events-none absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full border opacity-50" />
-      <div className="border-primary/10 pointer-events-none absolute top-1/2 left-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 animate-[spin_60s_linear_infinite] rounded-full border border-dashed opacity-30" />
+      <div className="border-primary/5 pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full border opacity-50" />
+      <div className="border-primary/10 pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 animate-[spin_60s_linear_infinite] rounded-full border border-dashed opacity-30" />
 
       {/* 5. Decorative "Data Lines" di sisi kanan bawah */}
-      <div className="absolute right-0 bottom-20 flex flex-col gap-2 opacity-20">
+      <div className="absolute bottom-20 right-0 flex flex-col gap-2 opacity-20">
         <div className="bg-foreground/20 h-[2px] w-12" />
         <div className="bg-foreground/20 h-[2px] w-8" />
         <div className="bg-foreground/20 h-[2px] w-16" />
@@ -250,7 +250,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
                 !open ? "h-0 overflow-hidden opacity-0" : "px-2 opacity-100"
               )}
             >
-              <p className="text-foreground text-[9px] font-bold tracking-wider uppercase">
+              <p className="text-foreground text-[9px] font-bold uppercase tracking-wider">
                 Sultan Thaha Jambi
               </p>
               <p className="mt-0.5 font-medium">

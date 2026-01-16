@@ -305,7 +305,7 @@ export function BudgetForm({
                           type="button"
                           variant="secondary"
                           size="sm"
-                          className="absolute top-1/2 right-1.5 h-8 -translate-y-1/2 bg-blue-50 text-xs font-medium text-blue-700 hover:bg-blue-100"
+                          className="absolute right-1.5 top-1/2 h-8 -translate-y-1/2 bg-blue-50 text-xs font-medium text-blue-700 hover:bg-blue-100"
                           onClick={() =>
                             setValue("total_budget", availableBudget)
                           }
@@ -354,7 +354,7 @@ export function BudgetForm({
                           {...field}
                           className="h-11"
                         />
-                        <div className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm">
+                        <div className="text-muted-foreground pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm">
                           {(parseFloat(String(field.value || 0)) * 100).toFixed(
                             1
                           )}
@@ -412,7 +412,7 @@ export function BudgetForm({
             ) : (
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <Label className="text-muted-foreground text-xs tracking-wider uppercase">
+                  <Label className="text-muted-foreground text-xs uppercase tracking-wider">
                     Tipe Energi (Otomatis)
                   </Label>
                   <div className="text-primary text-lg font-bold">
@@ -527,7 +527,7 @@ export function BudgetForm({
                                   className="h-10 pr-6 text-right"
                                   {...field}
                                 />
-                                <span className="text-muted-foreground absolute top-1/2 right-2 -translate-y-1/2 text-xs font-medium">
+                                <span className="text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium">
                                   %
                                 </span>
                               </div>

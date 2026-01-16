@@ -105,7 +105,7 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid items-start gap-4 md:grid-cols-2">
           <FormItem>
-            <FormLabel className="text-muted-foreground text-xs font-bold tracking-tight uppercase">
+            <FormLabel className="text-muted-foreground text-xs font-bold uppercase tracking-tight">
               Meteran
             </FormLabel>
             <Input
@@ -119,13 +119,13 @@ export function ReadingForm({ initialData, onSuccess }: ReadingFormProps) {
           </FormItem>
 
           <div className="space-y-2">
-            <span className="text-muted-foreground ml-1 text-xs font-bold tracking-tight uppercase">
+            <span className="text-muted-foreground ml-1 text-xs font-bold uppercase tracking-tight">
               Waktu Data
             </span>
             <div className="bg-secondary/20 border-secondary/40 flex h-10 items-center gap-3 rounded-md border p-2">
               <CalendarIcon className="text-primary h-4 w-4 shrink-0" />
               <div className="flex min-w-0 flex-col">
-                <p className="text-foreground truncate text-[11px] leading-tight font-bold">
+                <p className="text-foreground truncate text-[11px] font-bold leading-tight">
                   {format(
                     initialData?.reading_date
                       ? new Date(initialData.reading_date)

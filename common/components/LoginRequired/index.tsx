@@ -20,7 +20,7 @@ export const LoginRequired = () => {
         {/* Icon */}
         <div className="relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
           <LockKeyhole className="h-8 w-8 text-slate-600" />
-          <span className="absolute top-0 right-0 flex h-4 w-4">
+          <span className="absolute right-0 top-0 flex h-4 w-4">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
             <span className="relative inline-flex h-4 w-4 rounded-full bg-amber-500"></span>
           </span>

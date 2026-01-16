@@ -173,7 +173,7 @@ export default function AnnualBudgetPage() {
       >
         <div className="mb-4 flex items-center gap-2">
           <div className="bg-primary h-2 w-2 rounded-full" />
-          <h2 className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+          <h2 className="text-muted-foreground text-sm font-semibold uppercase tracking-wider">
             Insight Anggaran
           </h2>
         </div>

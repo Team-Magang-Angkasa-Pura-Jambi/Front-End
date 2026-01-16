@@ -70,7 +70,7 @@ export const NotificationContent = ({
           <div className="bg-destructive/10 ring-destructive/30 mb-4 rounded-full p-4 ring-1">
             <AlertTriangle className="h-10 w-10 animate-pulse" />
           </div>
-          <h3 className="text-lg font-bold tracking-widest uppercase">
+          <h3 className="text-lg font-bold uppercase tracking-widest">
             System Failure
           </h3>
           <p className="text-muted-foreground mt-2 max-w-xs text-center text-sm">
@@ -90,7 +90,7 @@ export const NotificationContent = ({
     // 3. EMPTY STATE
     if (!notifications || notifications.length === 0) {
       return (
-        <div className="relative flex h-[500px] flex-col items-center justify-center overflow-hidden text-center select-none">
+        <div className="relative flex h-[500px] select-none flex-col items-center justify-center overflow-hidden text-center">
           {/* Background Grid Pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.05]" />
 

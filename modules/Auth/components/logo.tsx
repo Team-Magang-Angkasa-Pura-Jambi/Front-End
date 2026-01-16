@@ -56,9 +56,9 @@ export const HeaderLogo = () => {
       {/* Perbaikan: flex-2 diganti flex-[2] agar valid Tailwind */}
       <motion.div
         variants={itemVariants}
-        className="relative flex flex-2 flex-col items-end justify-center text-right"
+        className="flex-2 relative flex flex-col items-end justify-center text-right"
       >
-        <h1 className="text-sm leading-tight font-bold text-yellow-400">
+        <h1 className="text-sm font-bold leading-tight text-yellow-400">
           Sultan Thaha Jambi
         </h1>
         <h2 className="text-sm font-medium tracking-wide text-gray-500">

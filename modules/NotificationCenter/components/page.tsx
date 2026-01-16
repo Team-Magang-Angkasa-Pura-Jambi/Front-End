@@ -189,7 +189,7 @@ const NotificationCenterPage = () => {
             )}
           </div>
 
-          <CardHeader className="bg-muted/5 pt-4 pb-2">
+          <CardHeader className="bg-muted/5 pb-2 pt-4">
             <NotificationTabs />
           </CardHeader>
 
@@ -230,7 +230,7 @@ const NotificationCenterPage = () => {
               {isProcessing && (
                 <div className="bg-background/50 absolute inset-0 z-50 flex flex-col items-center justify-center gap-2 backdrop-blur-[1px]">
                   <Loader2 className="text-primary h-8 w-8 animate-spin" />
-                  <span className="text-primary text-xs font-bold tracking-widest uppercase">
+                  <span className="text-primary text-xs font-bold uppercase tracking-widest">
                     Processing...
                   </span>
                 </div>

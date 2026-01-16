@@ -50,7 +50,7 @@ export const KpiStats = ({
       >
         <CardContent className="p-4">
           <p
-            className={`text-[8px] font-bold tracking-wider uppercase ${
+            className={`text-[8px] font-bold uppercase tracking-wider ${
               i === 2 ? "text-emerald-100" : "text-slate-400"
             }`}
           >

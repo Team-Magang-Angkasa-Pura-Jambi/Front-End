@@ -64,7 +64,7 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           // Layout & Animasi Standar
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 p-6 duration-200 sm:max-w-lg",
+          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 p-6 duration-200 sm:max-w-lg",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
 
           // --- INDUSTRIAL THEME STYLING ---
@@ -88,13 +88,13 @@ function DialogContent({
         {/* --- DEKORASI VISUAL (HUD ELEMENTS) --- */}
 
         {/* 1. Ambient Glow (Cahaya di tengah atas, mengikuti warna Primary) */}
-        <div className="bg-primary/40 pointer-events-none absolute top-0 left-1/2 h-1 w-40 -translate-x-1/2 blur-xl" />
+        <div className="bg-primary/40 pointer-events-none absolute left-1/2 top-0 h-1 w-40 -translate-x-1/2 blur-xl" />
 
         {/* 2. Tech Corner (Siku Kiri Atas) */}
-        <div className="border-primary/20 pointer-events-none absolute top-0 left-0 h-6 w-6 rounded-tl-md border-t-[3px] border-l-[3px]" />
+        <div className="border-primary/20 pointer-events-none absolute left-0 top-0 h-6 w-6 rounded-tl-md border-l-[3px] border-t-[3px]" />
 
         {/* 3. Tech Corner (Siku Kanan Atas) */}
-        <div className="border-primary/20 pointer-events-none absolute top-0 right-0 h-6 w-6 rounded-tr-md border-t-[3px] border-r-[3px]" />
+        <div className="border-primary/20 pointer-events-none absolute right-0 top-0 h-6 w-6 rounded-tr-md border-r-[3px] border-t-[3px]" />
 
         {/* 4. Background Grid Pattern (Sangat halus, menggunakan warna border) */}
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:24px_24px] opacity-[0.03]" />
@@ -108,7 +108,7 @@ function DialogContent({
           <DialogPrimitive.Close
             data-slot="dialog-close"
             className={cn(
-              "absolute top-4 right-4 z-20 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none",
+              "absolute right-4 top-4 z-20 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none",
               // Close button styling
               "text-muted-foreground hover:text-destructive",
               "focus:ring-primary ring-offset-background focus:ring-2 focus:ring-offset-2"
@@ -161,7 +161,7 @@ function DialogTitle({
       <DialogPrimitive.Title
         data-slot="dialog-title"
         className={cn(
-          "text-foreground text-lg leading-none font-bold tracking-tight",
+          "text-foreground text-lg font-bold leading-none tracking-tight",
           className
         )}
         {...props}
