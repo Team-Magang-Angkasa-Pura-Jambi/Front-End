@@ -203,7 +203,11 @@ export const UnifiedEnergyComparisonChart = () => {
                       boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                       fontSize: "12px",
                     }}
-                    formatter={(value: number, name: string, entry) => {
+                    formatter={(
+                      value: number | undefined,
+                      name: string | undefined,
+                      entry
+                    ) => {
                       // 1. Tentukan Label (Hari Kerja/Libur)
                       const label =
                         name === "weekdayValue" ? "Hari Kerja" : "Hari Libur";
@@ -211,12 +215,14 @@ export const UnifiedEnergyComparisonChart = () => {
                       // 2. Format Nilai
                       if (isCost) {
                         // Jika Biaya: "Rp 1.500.000"
-                        return [formatCurrencySmart(value).full, label];
+                        return [formatCurrencySmart(value ?? 0).full, label];
                       } else {
                         // Jika Volume: "1.500 kWh"
                         // Ambil unit dari payload data bar tersebut
                         const unit = entry.payload.unit || "";
-                        const formattedNumber = formatCurrencySmart(value).val; // Angka saja (1.500)
+                        const formattedNumber = formatCurrencySmart(
+                          value ?? 0
+                        ).val; // Angka saja (1.500)
                         return [`${formattedNumber} ${unit}`, label];
                       }
                     }}
@@ -269,7 +275,7 @@ export const UnifiedEnergyComparisonChart = () => {
                       {item.category === "Fuel" && (
                         <Fuel className="h-4 w-4 text-red-500" />
                       )}
-                      <span className="text-xs font-bold uppercase tracking-wider">
+                      <span className="text-xs font-bold tracking-wider uppercase">
                         {item.category}
                       </span>
                     </div>

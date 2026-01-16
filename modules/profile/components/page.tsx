@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { z } from "zod";
+import React, { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -45,22 +44,14 @@ import {
   EyeOff,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import {
-  getUserApi,
-  getUserActivitiesApi,
-  updateUserApi,
-} from "@/services/users.service";
-import { motion, AnimatePresence } from "framer-motion";
 
-const formSchema = z.object({
-  username: z.string().min(3, "Username minimal 3 karakter"),
-  password: z
-    .string()
-    .optional()
-    .refine((val) => !val || val.length >= 6, {
-      message: "Password minimal 6 karakter",
-    }),
-});
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  getUserActivitiesApi,
+  getUserApi,
+  updateUserApi,
+} from "../services/users.service";
+import { ProfileFormValues, profileSchema } from "../schemas/profile.schema";
 
 export const ProfilePage = () => {
   const { user } = useAuthStore();
@@ -74,7 +65,6 @@ export const ProfilePage = () => {
     queryFn: () => getUserApi(user!.id),
     enabled: !!user?.id,
     refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 5,
   });
 
   const { data: activitiesData, isLoading: isLoadingActivities } = useQuery({
@@ -83,16 +73,16 @@ export const ProfilePage = () => {
     enabled: !!user?.id,
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
     values: {
       username: userProfileData?.data?.username || "",
       password: "",
     },
   });
 
-  const { mutate: updateUser, isPending: isPending } = useMutation({
-    mutationFn: (values: z.infer<typeof formSchema>) => {
+  const { mutate: updateUser, isPending } = useMutation({
+    mutationFn: (values: ProfileFormValues) => {
       const payload = Object.fromEntries(
         Object.entries(values).filter(([_, v]) => v !== "")
       );
@@ -103,10 +93,8 @@ export const ProfilePage = () => {
 
       queryClient.invalidateQueries({ queryKey: ["user", user!.id] });
 
-      if (confirmDialog.onSuccessCallback) {
-        confirmDialog.onSuccessCallback();
-      }
-      setConfirmDialog({ open: false });
+      setIsEditing(false);
+      form.reset({ ...form.getValues(), password: "" });
     },
     onError: (error) => {
       toast.error(
@@ -120,7 +108,7 @@ export const ProfilePage = () => {
     [activitiesData?.data]
   );
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: ProfileFormValues) => {
     const hasUsernameChanged =
       values.username !== userProfileData?.data?.username;
     const hasPasswordChanged = values.password?.trim() !== "";
@@ -129,33 +117,25 @@ export const ProfilePage = () => {
       toast.info("Tidak ada perubahan yang perlu disimpan.");
       return;
     }
-    setConfirmDialog({ open: true, values, onSuccessCallback });
+    setIsConfirmDialogOpen(true);
   };
 
-  const confirmUpdate = () => {
-    if (confirmDialog.values) {
-      updateUser(confirmDialog.values);
-    }
-  };
-
-  if (isProfileLoading) {
+  if (isLoading) {
     return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary/50" />
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
-  const userData = userProfile?.data;
+  const profile = userProfileData?.data;
 
   return (
-    <div className="container mx-auto max-w-6xl p-4 sm:p-6 space-y-8 animate-in fade-in duration-500">
-      <header className="flex flex-col gap-2 pb-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Profil Pengguna
-        </h1>
+    <div className="container mx-auto max-w-7xl space-y-8 p-4 sm:p-6 lg:p-8">
+      <header>
+        <h1 className="text-3xl font-bold">Profil Pengguna</h1>
         <p className="text-muted-foreground">
-          Kelola informasi pribadi dan keamanan akun Anda.
+          Kelola username dan password akun Anda.
         </p>
       </header>
 
@@ -255,7 +235,7 @@ export const ProfilePage = () => {
                           />
                           <button
                             type="button"
-                            className="text-muted-foreground absolute right-3 top-2.5"
+                            className="text-muted-foreground absolute top-2.5 right-3"
                             onClick={() => setShowPassword((p) => !p)}
                           >
                             {showPassword ? (
@@ -357,27 +337,24 @@ export const ProfilePage = () => {
         </main>
       </div>
 
-      {/* Dialog Konfirmasi Global */}
+      {/* ✅ Dialog Konfirmasi */}
       <AlertDialog
-        open={confirmDialog.open}
-        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+        open={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Konfirmasi Perubahan</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menyimpan perubahan pada profil ini?
-              Tindakan ini akan memperbarui data Anda di sistem.
+              Apakah Anda yakin ingin menyimpan perubahan username atau
+              password?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isUpdatePending}>
-              Batal
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Batal</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmUpdate}
-              disabled={isUpdatePending}
-              className="bg-primary hover:bg-primary/90"
+              onClick={() => updateUser(form.getValues())}
+              disabled={isPending}
             >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Ya, Simpan

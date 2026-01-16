@@ -1,7 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { ActivityHistoryItem, UserWithActivityResponse } from "../types/activity.type";
+import { ActivityHistoryItem } from "../types/activity.type";
 
 export const ActivityLog = ({
   activities,
@@ -13,25 +18,25 @@ export const ActivityLog = ({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold">
           Riwayat Aktivitas
         </CardTitle>
       </CardHeader>
-      <CardContent className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+      <CardContent className="custom-scrollbar max-h-[400px] overflow-y-auto pr-2">
         {isLoading ? (
-          <div className="flex justify-center items-center h-32">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <div className="flex h-32 items-center justify-center">
+            <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
           </div>
         ) : activities.length > 0 ? (
-          <ol className="relative border-l border-muted ml-3 mt-2 space-y-6">
+          <ol className="border-muted relative mt-2 ml-3 space-y-6 border-l">
             {activities.map((activity, idx) => (
-              <li key={`${activity.type}-${idx}`} className="ml-6 relative">
-                <span className="absolute flex items-center justify-center w-2.5 h-2.5 bg-primary/80 rounded-full -left-[29px] ring-4 ring-background mt-1.5" />
+              <li key={`${activity.type}-${idx}`} className="relative ml-6">
+                <span className="bg-primary/80 ring-background absolute -left-[29px] mt-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full ring-4" />
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium text-foreground leading-snug">
+                  <p className="text-foreground text-sm leading-snug font-medium">
                     {activity.description}
                   </p>
-                  <time className="text-xs text-muted-foreground">
+                  <time className="text-muted-foreground text-xs">
                     {formatDistanceToNow(new Date(activity.timestamp))}
                   </time>
                 </div>
@@ -39,7 +44,7 @@ export const ActivityLog = ({
             ))}
           </ol>
         ) : (
-          <div className="text-center py-12 text-muted-foreground text-sm bg-muted/10 rounded-md border border-dashed">
+          <div className="text-muted-foreground bg-muted/10 rounded-md border border-dashed py-12 text-center text-sm">
             Tidak ada aktivitas terbaru.
           </div>
         )}

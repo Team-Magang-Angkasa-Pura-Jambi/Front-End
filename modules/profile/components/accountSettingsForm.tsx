@@ -9,11 +9,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/common/components/ui/card";
 import { AnimatePresence, motion } from "motion/react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Label } from "@/common/components/ui/label";
+import { Input } from "@/common/components/ui/input";
+import { Button } from "@/common/components/ui/button";
 import { Eye, EyeOff, Loader2, Pencil, Save, XCircle } from "lucide-react";
 import { User } from "@/common/types/user";
 
@@ -76,7 +76,7 @@ export const AccountSettingsForm = ({
                     className="max-w-md"
                   />
                   {form.formState.errors.username && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-destructive text-xs">
                       {form.formState.errors.username.message}
                     </p>
                   )}
@@ -95,18 +95,18 @@ export const AccountSettingsForm = ({
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                      className="absolute top-0 right-0 h-full px-3 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        <EyeOff className="text-muted-foreground h-4 w-4" />
                       ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <Eye className="text-muted-foreground h-4 w-4" />
                       )}
                     </Button>
                   </div>
                   {form.formState.errors.password && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-destructive text-xs">
                       {form.formState.errors.password.message}
                     </p>
                   )}
@@ -121,10 +121,10 @@ export const AccountSettingsForm = ({
                 className="py-1"
               >
                 <div className="space-y-1">
-                  <span className="text-sm font-medium text-muted-foreground">
+                  <span className="text-muted-foreground text-sm font-medium">
                     Username
                   </span>
-                  <p className="text-lg font-medium text-foreground">
+                  <p className="text-foreground text-lg font-medium">
                     {user?.username}
                   </p>
                 </div>
@@ -133,7 +133,7 @@ export const AccountSettingsForm = ({
           </AnimatePresence>
         </CardContent>
 
-        <CardFooter className="flex justify-end gap-3 border-t bg-muted/5 px-6 py-4">
+        <CardFooter className="bg-muted/5 flex justify-end gap-3 border-t px-6 py-4">
           {isEditing ? (
             <>
               <Button

@@ -195,7 +195,9 @@ export const BudgetBurnRateChart = () => {
                       fontSize: "12px",
                     }}
                     // Tooltip Gunakan Full agar detail terlihat
-                    formatter={(val: number) => formatCurrencySmart(val).full}
+                    formatter={(val: number | undefined) =>
+                      `${formatCurrencySmart(val ?? 0).full}`
+                    }
                   />
 
                   {/* Budget Limit (Garis Putus-putus) */}

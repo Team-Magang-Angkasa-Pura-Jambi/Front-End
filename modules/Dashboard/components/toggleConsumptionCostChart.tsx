@@ -99,8 +99,13 @@ export const ToggleConsumptionCostChart = () => {
                 tickFormatter={(val) => (isCost ? `Rp${val / 1000}k` : val)}
               />
               <Tooltip
-                formatter={(value: number, name: string, props) => [
-                  formatValue(value) + (isCost ? "" : ` ${props.payload.unit}`),
+                formatter={(
+                  value: number | undefined,
+                  name: string | undefined,
+                  props
+                ) => [
+                  formatValue(value ?? 0) +
+                    (isCost ? "" : ` ${props.payload.unit}`),
                   name === "weekday" ? "Hari Kerja" : "Hari Libur",
                 ]}
               />

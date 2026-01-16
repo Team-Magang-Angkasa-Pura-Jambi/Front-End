@@ -47,8 +47,8 @@ export const WaterfallChart = ({
           border: "none",
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
         }}
-        formatter={(value: number) => [
-          formatCurrencySmart(value).full,
+        formatter={(value: number | undefined) => [
+          formatCurrencySmart(value ?? 0).full,
           "Nilai",
         ]}
       />
@@ -74,7 +74,7 @@ export const SavedChart = ({
   <div className="flex h-full w-full flex-col">
     <div className="mb-4 flex shrink-0 items-end justify-between px-2">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
           Saved YTD
         </p>
         <h4 className="text-2xl font-black text-emerald-600">
@@ -118,8 +118,8 @@ export const SavedChart = ({
               border: "none",
               boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
             }}
-            formatter={(value: number) => [
-              formatCurrencySmart(value).full,
+            formatter={(value: number | undefined) => [
+              formatCurrencySmart(value ?? 0).full,
               "Hemat",
             ]}
           />

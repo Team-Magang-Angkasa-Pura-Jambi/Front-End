@@ -1,7 +1,7 @@
 import { User } from "@/common/types/user";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/common/components/ui/avatar";
+import { Badge } from "@/common/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/common/components/ui/card";
 import { format } from "date-fns";
 import { ShieldCheck } from "lucide-react";
 export const ProfileSidebar = ({ user }: { user: User }) => {

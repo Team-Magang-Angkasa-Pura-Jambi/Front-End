@@ -181,8 +181,8 @@ export const FuelRefillAnalysis = () => {
                       border: "none",
                       boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                     }}
-                    formatter={(val: number) => [
-                      `${val.toLocaleString("id-ID")} Liter`,
+                    formatter={(val: number | undefined) => [
+                      `${(val ?? 0).toLocaleString("id-ID")} Liter`,
                     ]}
                   />
                   <Legend

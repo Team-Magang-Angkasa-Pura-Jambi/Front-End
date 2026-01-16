@@ -168,8 +168,8 @@ export const DailyAveragePaxChart = () => {
                       border: "none",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                     }}
-                    formatter={(val: number) => [
-                      `${val.toLocaleString("id-ID")} Orang`,
+                    formatter={(val: number | undefined) => [
+                      `${(val ?? 0).toLocaleString("id-ID")} Orang`,
                       "Rata-rata Pax",
                     ]}
                   />
@@ -187,7 +187,7 @@ export const DailyAveragePaxChart = () => {
             </div>
 
             <div className="mt-4 rounded-xl border border-orange-100 bg-orange-50 p-4">
-              <p className="text-xs font-medium leading-relaxed text-orange-800">
+              <p className="text-xs leading-relaxed font-medium text-orange-800">
                 <strong>Analisis Keputusan:</strong> Puncak penumpang umumnya
                 terjadi di <b>Sabtu & Minggu</b>. Jika di hari tersebut konsumsi
                 energi naik, itu wajar. Namun jika konsumsi naik tinggi di hari
