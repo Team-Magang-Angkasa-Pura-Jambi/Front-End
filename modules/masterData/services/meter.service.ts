@@ -1,6 +1,5 @@
 import api from "@/lib/api";
 import { MeterType } from "@/common/types/meters";
-import { EnergyTypeName } from "@/common/types/energy";
 import { statusMeter } from "../types/meter.type";
 
 interface MetersApiResponse {
@@ -24,7 +23,7 @@ export interface MeterPayload {
 }
 
 export const getMetersApi = async (
-  typeName?: EnergyTypeName
+  typeName?: string
 ): Promise<MetersApiResponse> => {
   const response = await api.get<MetersApiResponse>("/meters", {
     params: {
@@ -50,9 +49,12 @@ export const createMeterApi = async (
 
 export const updateMeterApi = async (
   id: number,
-  data: MeterPayload
+  data: Partial<MeterPayload>
 ): Promise<MeterDetailApiResponse> => {
-  const response = await api.put<MeterDetailApiResponse>(`/meters/${id}`, data);
+  const response = await api.patch<MeterDetailApiResponse>(
+    `/meters/${id}`,
+    data
+  );
   return response.data;
 };
 

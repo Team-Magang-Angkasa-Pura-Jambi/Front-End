@@ -5,15 +5,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/common/components/ui/select";
 import { Resolver, SubmitHandler, useForm } from "react-hook-form";
 import {
   readingTypeFormValues,
@@ -21,10 +21,10 @@ import {
 } from "../../schemas/readingType.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { getEnergyTypesApi } from "@/services/energyType.service";
-import { DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/common/components/ui/dialog";
+import { Button } from "@/common/components/ui/button";
 import { ReadingType } from "@/common/types/readingTypes";
+import { getEnergyTypesApi } from "../../services/energyType.service";
 
 interface ReadingTypeFormProps {
   initialData?: ReadingType | null;

@@ -11,8 +11,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,11 +30,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/DataTable";
-
-import { DataTableRowActions } from "./dataTableRowActions";
+} from "@/common/components/ui/alert-dialog";
+import { Badge } from "@/common/components/ui/badge";
+import { DataTable } from "@/common/components/table/dataTable";
 
 import { ApiErrorResponse } from "@/common/types/api";
 import { TariffGroup } from "@/common/types/tariffGroup";
@@ -46,6 +44,7 @@ import {
 } from "../services/tariffGroup.service";
 import { tarifFormValues } from "../schemas/tariffGroup.schema";
 import { TariffGroupForm } from "./forms/tarffGroup.forms";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
 
 export const createTariffGroupColumns = (
   onEdit: (item: TariffGroup) => void,
@@ -58,7 +57,7 @@ export const createTariffGroupColumns = (
     header: "Daya (VA)",
     cell: ({ row }) => (
       <span className="font-mono">
-        {new Intl.NumberFormat("id-ID").format(row.original.daya_va)} VA
+        {new Intl.NumberFormat("id-ID").format(row.original.daya_va || 0)} VA
       </span>
     ),
   },
@@ -73,7 +72,7 @@ export const createTariffGroupColumns = (
     accessorKey: "description",
     header: "Deskripsi",
     cell: ({ row }) => (
-      <span className="text-muted-foreground text-sm truncate max-w-[200px] block">
+      <span className="text-muted-foreground block max-w-[200px] truncate text-sm">
         {row.original.description || "-"}
       </span>
     ),
@@ -81,11 +80,7 @@ export const createTariffGroupColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <DataTableRowActions
-        row={row.original}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+      <DataTableRowActions row={row} onEdit={onEdit} onDelete={onDelete} />
     ),
   },
 ];

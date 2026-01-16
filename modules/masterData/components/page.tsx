@@ -4,7 +4,12 @@ import { Settings } from "lucide-react";
 import React from "react";
 import { motion } from "framer-motion";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/common/components/ui/tabs";
 import { masterDataGroups } from "../constants/data";
 
 const fadeInUp = {
@@ -22,15 +27,15 @@ const fadeInDown = {
 
 export default function MasterDataPage() {
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
+    <div className="container mx-auto px-4 py-8 md:px-6">
       <motion.div
         className="mb-8"
         initial="initial"
         animate="animate"
         variants={fadeInDown}
       >
-        <h1 className="text-3xl font-bold tracking-tight flex items-center">
-          <Settings className="mr-3 h-8 w-8 text-primary" /> Manajemen Data
+        <h1 className="flex items-center text-3xl font-bold tracking-tight">
+          <Settings className="text-primary mr-3 h-8 w-8" /> Manajemen Data
           Master
         </h1>
         <p className="text-muted-foreground mt-2">
@@ -40,7 +45,7 @@ export default function MasterDataPage() {
       </motion.div>
 
       <Tabs defaultValue="asset-energy" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
+        <TabsList className="mb-4 grid w-full grid-cols-2">
           {masterDataGroups.map((group) => (
             <TabsTrigger key={group.groupKey} value={group.groupKey}>
               <group.groupIcon className="mr-2 h-4 w-4" />
@@ -58,7 +63,7 @@ export default function MasterDataPage() {
               className="w-full"
             >
               <Tabs defaultValue={group.items[0].key} className="w-full">
-                <div className="w-full overflow-x-auto pb-2 no-scrollbar">
+                <div className="no-scrollbar w-full overflow-x-auto pb-2">
                   <TabsList className="w-full justify-start">
                     {group.items.map((item) => (
                       <TabsTrigger key={item.key} value={item.key}>
@@ -76,7 +81,7 @@ export default function MasterDataPage() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: 0.1 }}
                     >
-                      <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                      <div className="bg-card text-card-foreground rounded-lg border shadow-sm">
                         {item.component}
                       </div>
                     </motion.div>

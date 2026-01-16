@@ -5,14 +5,14 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/common/components/ui/dropdown-menu";
 import { ReadingHistory } from "../services/reading.service";
 
 const formatNumber = (value: unknown): string => {
@@ -36,7 +36,7 @@ const SortableHeader = ({
   <Button
     variant="ghost"
     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    className="text-left p-0 h-auto hover:bg-transparent"
+    className="h-auto p-0 text-left hover:bg-transparent"
   >
     {title}
     <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -76,13 +76,13 @@ export const createColumns = (
         if (!details || details.length === 0) return "-";
 
         return (
-          <div className="flex flex-col text-xs gap-1">
+          <div className="flex flex-col gap-1 text-xs">
             {details.map((detail) => (
               <div key={detail.detail_id} className="flex justify-start gap-3">
-                <span className="font-semibold text-muted-foreground">
+                <span className="text-muted-foreground font-semibold">
                   {detail.reading_type.type_name}:
                 </span>
-                <span className="font-mono text-right">
+                <span className="text-right font-mono">
                   {formatNumber(detail.value)}
                 </span>
               </div>
@@ -95,7 +95,7 @@ export const createColumns = (
     {
       id: "actions",
       header: "",
-      cell: ({ row, table }) => {
+      cell: ({ row }) => {
         const item = row.original;
 
         const isLatest = row.index === 0;
@@ -120,7 +120,7 @@ export const createColumns = (
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => onDelete(item)}
-                  className="text-red-600 cursor-pointer"
+                  className="cursor-pointer text-red-600"
                 >
                   Hapus
                 </DropdownMenuItem>

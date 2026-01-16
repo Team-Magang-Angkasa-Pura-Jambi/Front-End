@@ -1,13 +1,19 @@
 import { useFormContext, useWatch } from "react-hook-form";
-import { useDebounce } from "./useDebounce";
 import { useQuery } from "@tanstack/react-query";
-import { budgetApi } from "@/services/budget.service";
 import { format } from "date-fns-tz";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
-import { AnnualBudgetFormValues } from "../types";
+import { Button } from "@/common/components/ui/button";
+import { Copy, Loader2 } from "lucide-react";
+import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
+import { useDebounce } from "@uidotdev/usehooks";
+import { getBudgetPreviewApi } from "../services/analytics.service";
+import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 
 export const BudgetPreview = () => {
   const {
@@ -16,7 +22,6 @@ export const BudgetPreview = () => {
     setValue,
   } = useFormContext<AnnualBudgetFormValues>();
 
-  // 1. Awasi field untuk mendapatkan nilai secara instan
   const watchedFields = useWatch({
     control,
     name: [
@@ -28,7 +33,6 @@ export const BudgetPreview = () => {
     ],
   });
 
-  // 2. Terapkan debounce pada nilai yang diawasi (delay 500ms)
   const debouncedFields = useDebounce(watchedFields, 500);
   const [
     total_budget,
@@ -38,16 +42,15 @@ export const BudgetPreview = () => {
     parent_budget_id,
   ] = debouncedFields;
 
-  // Cek apakah ada error pada field yang relevan
   const hasErrors =
     errors.total_budget || errors.period_start || errors.period_end;
 
   const canFetchPreview =
     !hasErrors &&
     (total_budget > 0 || parent_budget_id) &&
-    period_start instanceof Date && period_end instanceof Date;
+    period_start instanceof Date &&
+    period_end instanceof Date;
 
-  // 3. Gunakan nilai yang sudah di-debounce untuk query
   const {
     data: previewData,
     isLoading,
@@ -61,70 +64,85 @@ export const BudgetPreview = () => {
       period_end,
     ],
     queryFn: () =>
-      budgetApi.getPreview({
+      getBudgetPreviewApi({
         parent_budget_id,
         total_budget: Number(total_budget) || 0,
-        period_start: period_start ? format(period_start, "yyyy-MM-dd", { timeZone: "UTC" }) : "",
-        period_end: period_end ? format(period_end, "yyyy-MM-dd", { timeZone: "UTC" }) : "",
+        period_start: period_start
+          ? format(period_start, "yyyy-MM-dd", { timeZone: "UTC" })
+          : "",
+        period_end: period_end
+          ? format(period_end, "yyyy-MM-dd", { timeZone: "UTC" })
+          : "",
         allocations: allocations?.map((alloc) => ({
           meter_id: alloc.meter_id,
           weight: alloc.weight,
-        })), // Format ke YYYY-MM-DD
+        })),
       }),
     enabled: !!canFetchPreview,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   return (
-    <Card className="col-span-2 bg-muted/50 border-dashed transition-all">
+    <Card className="bg-muted/50 col-span-2 border-dashed transition-all">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Saran & Pratinjau Anggaran</CardTitle>
       </CardHeader>
       <CardContent>
         {!canFetchPreview && !isLoading && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Isi Total Budget, Periode Mulai, dan Periode Selesai untuk melihat
             pratinjau.
           </p>
         )}
         {isLoading && (
-          <p className="text-sm text-muted-foreground">
-            Menghitung pratinjau...
-          </p>
+          <div className="flex items-center gap-2 py-2">
+            <Loader2 className="text-primary h-4 w-4 animate-spin" />
+            <span className="text-muted-foreground text-sm">
+              Menghitung pratinjau...
+            </span>
+          </div>
         )}
         {isError && (
-          <p className="text-sm text-destructive">Gagal memuat pratinjau.</p>
+          <p className="text-destructive text-sm">Gagal memuat pratinjau.</p>
         )}
         {previewData && !isLoading && !isError && (
           <>
-            <p className="text-2xl font-bold text-primary">
-              {formatCurrency(
-                previewData.calculationDetails?.budgetPerMonth || 0
-              )}{" "}
+            <p className="text-primary text-2xl font-bold">
+              {
+                formatCurrencySmart(
+                  previewData.calculationDetails?.budgetPerMonth || 0
+                ).full
+              }
               / bulan
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Estimasi alokasi rata-rata per bulan berdasarkan data historis.
             </p>
-            {previewData.calculationDetails?.suggestedBudgetForPeriod > 0 && (
-              <div className="mt-4 text-xs p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-md">
+            {(previewData.calculationDetails?.suggestedBudgetForPeriod || 0) >
+              0 && (
+              <div className="mt-4 rounded-md border border-blue-200 bg-blue-50 p-2 text-xs dark:border-blue-800/50 dark:bg-blue-900/20">
                 <p className="text-blue-800 dark:text-blue-300">
                   Saran Budget untuk Periode Ini:{" "}
                   <strong>
-                    {formatCurrency(
-                      previewData.calculationDetails.suggestedBudgetForPeriod
-                    )}
+                    {
+                      formatCurrencySmart(
+                        previewData.calculationDetails
+                          ?.suggestedBudgetForPeriod || 0
+                      ).full
+                    }
                   </strong>
                 </p>
                 <Button
                   type="button"
                   variant="link"
                   size="sm"
-                  className="p-0 h-auto text-blue-600 hover:text-blue-700"
+                  className="h-auto p-0 text-blue-600 hover:text-blue-700"
                   onClick={() =>
                     setValue(
                       "total_budget",
                       Number(
-                        previewData.calculationDetails.suggestedBudgetForPeriod.toFixed(
+                        previewData.calculationDetails?.suggestedBudgetForPeriod.toFixed(
                           0
                         )
                       )
@@ -140,7 +158,7 @@ export const BudgetPreview = () => {
               {previewData.meterAllocationPreview.map((meter) => (
                 <div
                   key={meter.meterId}
-                  className="text-xs text-muted-foreground flex justify-between"
+                  className="text-muted-foreground flex justify-between text-xs"
                 >
                   <span>{meter.meterName}</span>
                   <span className="font-medium">

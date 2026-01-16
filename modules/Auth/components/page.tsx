@@ -7,10 +7,10 @@ import { RightSide } from "./RightSide";
 
 export const Page = () => {
   return (
-    <div className="min-h-screen bg-[#d6d3d1] flex items-center justify-center p-4">
-      <div className="w-full p-3 md:min-h-[650px] md:h-full relatve max-w-6xl flex flex-col md:flex-row rounded-2xl shadow-2xl overflow-hidden bg-white relative">  
+    <div className="flex min-h-screen items-center justify-center bg-[#d6d3d1] p-4">
+      <div className="relatve relative flex w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-2xl md:h-full md:min-h-[650px] md:flex-row">
         <svg
-          className="absolute  rotate-[125deg] z-10 top-[280px] -left-[410px] "
+          className="absolute -left-[410px] top-[280px] z-10 rotate-[125deg]"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 1440 320"
         >
@@ -25,7 +25,7 @@ export const Page = () => {
 
         <RightSide />
 
-        <div className="hidden md:block z-20">
+        <div className="z-20 hidden md:block">
           <Bubble size={80} delay={0.2} style={{ top: "15%", left: "78%" }} />
           <Bubble size={40} delay={1.5} style={{ top: "30%", left: "54%" }} />
           <Bubble size={25} delay={0.8} style={{ top: "50%", left: "76%" }} />

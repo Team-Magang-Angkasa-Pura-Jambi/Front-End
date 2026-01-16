@@ -1,26 +1,11 @@
+import { ApiResponse } from "@/common/types/api";
 import api from "@/lib/api";
 
 // Tipe untuk data harian yang diterima dari API analisis
-export interface DailyRecord {
-  date: string;
-  actual_consumption: number | null;
-  prediction: number | null;
-  classification: "HEMAT" | "NORMAL" | "BOROS" | null;
-  efficiency_target: number | null;
-  totalDaysWithClassification: number | null;
-}
 
 // Tipe untuk data per meter
-export interface MeterAnalysisData {
-  meterId: number;
-  meterName: string;
-  data: DailyRecord[];
-}
 
 // Tipe untuk respons API analisis secara keseluruhan
-interface AnalysisApiResponse {
-  data: MeterAnalysisData[];
-}
 
 // Tipe untuk respons API ringkasan klasifikasi
 interface ClassificationSummaryResponse {
@@ -63,15 +48,29 @@ export type BudgetSummaryByEnergy = {
   } | null;
 };
 
-export const analysisApi = async (
-  type: "Electricity" | "Water" | "Fuel",
-  mount: string,
-  meterId: number[]
-): Promise<AnalysisApiResponse> => {
-  const meterIdParams = meterId.map((id) => `meterId=${id}`).join("&");
-  const response = await api.get(
-    `/analytics?energyType=${type}&month=${mount}&${meterIdParams}`
-  );
+export interface NewDataCountNotification {
+  summary_id: number;
+  summary_date: Date;
+  total_consumption: number;
+  total_cost: number;
+  meter_code: string;
+  type_name: "Electricity" | "Water" | "Fuel";
+  unit_of_measurement: string;
+  classification: string | null;
+}
+
+export interface TodaySummaryResponse {
+  meta: {
+    date: Date;
+    pax: number | null;
+  };
+  sumaries: NewDataCountNotification[];
+}
+
+export const getTodaySummaryApi = async (): Promise<
+  ApiResponse<TodaySummaryResponse>
+> => {
+  const response = await api.get("/analytics/today-summary");
   return response.data;
 };
 
@@ -96,27 +95,14 @@ export const getFuelStockAnalysisApi = async (
   const response = await api.get(`/analytics/fuel-stock?month=${monthQuery}`);
   return response.data;
 };
+export const getBudgetSummaryApi = async (
+  selectedYear: number
+): Promise<BudgetSummaryByEnergy[]> => {
+  const response = await api.get("/analytics/budget-summary", {
+    params: {
+      year: selectedYear, // 🔥 Ini akan otomatis diubah jadi URL: .../budget-summary?year=2026
+    },
+  });
 
-export const getBudgetSummaryApi = async (): Promise<
-  BudgetSummaryByEnergy[]
-> => {
-  const response = await api.get("/analytics/budget-summary");
   return response.data.data;
 };
-
-export type prepareNextPeriodBudget = {
-  parentBudgetId: number;
-  parentTotalBudget: number;
-  totalAllocatedToChildren: number;
-  availableBudgetForNextPeriod: number;
-};
-export const getprepareNextPeriodBudgetApi = async (
-  parentBudgetId: number
-): Promise<prepareNextPeriodBudget> => {
-  const response = await api.get(`/analytics/prepare-budget/${parentBudgetId}`);
-  return response.data.data;
-};
-
-
-
-

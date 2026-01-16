@@ -2,8 +2,6 @@
 
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
-
 import {
   getUsersApi,
   createUserApi,
@@ -12,9 +10,15 @@ import {
 } from "@/modules/profile/services/users.service";
 import { CreateUserPayload, UpdateUserPayload } from "@/types/users.types";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// --- Komponen UI ---
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import { createColumns } from "./CreateColumns";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import {
   Dialog,
@@ -22,31 +26,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import { toast } from "sonner";
 import { UserForm } from "./UserForm";
 import { DeleteUserDialog } from "./DeleteUserDialog";
-import { DataTable } from "../../../components/DataTable";
+import { DataTable } from "../../../common/components/table/dataTable";
 import RolesPage from "./role";
-import { User } from "@/common/types/user";
-
-const createUserSchema = z.object({
-  username: z.string().min(3, "Username minimal 3 karakter."),
-  password: z.string().min(6, "Password minimal 6 karakter."),
-  role_id: z.number(),
-  is_active: z.boolean().default(true),
-});
-
-const updateUserSchema = z.object({
-  username: z.string().min(3, "Username minimal 3 karakter."),
-  password: z
-    .string()
-    .min(6, "Password minimal 6 karakter.")
-    .optional()
-    .or(z.literal("")),
-  role_id: z.number(),
-  is_active: z.boolean(),
-});
 
 export const Page = () => {
   const queryClient = useQueryClient();
@@ -83,7 +68,7 @@ export const Page = () => {
     onError: (error) => toast.error(`Gagal memperbarui data: ${error.message}`),
   });
 
-  const { mutate: deleteUser, isPending: isDeleting } = useMutation({
+  const { mutate: deleteUser } = useMutation({
     mutationFn: (userId: number) => deleteUserApi(userId),
     onSuccess: () => {
       toast.success("Pengguna berhasil dihapus.");
@@ -126,11 +111,11 @@ export const Page = () => {
       <p className="text-muted-foreground">
         Kelola semua akun pengguna dan peran yang terdaftar di sistem.
       </p>
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start ">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
         {/* --- Tabel Pengguna --- */}
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <CardTitle>Daftar Pengguna</CardTitle>
               <Button size="sm" onClick={() => handleOpenForm(null)}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Tambah Pengguna
@@ -166,7 +151,8 @@ export const Page = () => {
           <UserForm
             onSubmit={handleFormSubmit}
             isPending={isCreating || isUpdating}
-            defaultValues={selectedUser}
+            defaultValues={selectedUser || undefined} // Pass defaultValues directly
+            // The schema prop is not needed here as it's handled internally by UserForm
           />
         </DialogContent>
       </Dialog>

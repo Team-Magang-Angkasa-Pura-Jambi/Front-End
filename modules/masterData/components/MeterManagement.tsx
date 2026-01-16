@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,12 +31,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/DataTable";
+} from "@/common/components/ui/alert-dialog";
+import { Badge } from "@/common/components/ui/badge";
 
 import { MeterForm } from "./forms/meter.form";
-import { DataTableRowActions } from "./dataTableRowActions";
 
 import { MeterType } from "@/common/types/meters";
 import { ApiErrorResponse } from "@/common/types/api";
@@ -47,6 +45,8 @@ import {
   getMetersApi,
   updateMeterApi,
 } from "../services/meter.service";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
+import { DataTable } from "@/common/components/table/dataTable";
 
 const MeterDescriptionCell = ({ row }: { row: Row<MeterType> }) => {
   const {
@@ -99,8 +99,8 @@ const MeterStatusCell = ({ status }: { status: string }) => {
     status === "Active"
       ? "default"
       : status === "Inactive"
-      ? "secondary"
-      : "destructive";
+        ? "secondary"
+        : "destructive";
 
   return <Badge variant={variant}>{status}</Badge>;
 };
@@ -124,11 +124,7 @@ export const createMeterColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <DataTableRowActions
-        row={row.original}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+      <DataTableRowActions row={row} onEdit={onEdit} onDelete={onDelete} />
     ),
   },
 ];
@@ -157,11 +153,31 @@ export const MeterManagement = () => {
     AxiosError<ApiErrorResponse>,
     MeterFormValues
   >({
-    mutationFn: (meterData) => {
+    mutationFn: (meterData: MeterFormValues) => {
+      // Ensure tank_height_cm and tank_volume_liters are not null if present
+      const payload = {
+        ...meterData,
+        // Jika null, ubah jadi undefined. Jika ada angka, biarkan angka.
+        rollover_limit:
+          meterData.rollover_limit === null
+            ? undefined
+            : meterData.rollover_limit,
+
+        // Lakukan hal yang sama untuk field lain yang mungkin null
+        tank_height_cm:
+          meterData.tank_height_cm === null
+            ? undefined
+            : meterData.tank_height_cm,
+        tank_volume_liters:
+          meterData.tank_volume_liters === null
+            ? undefined
+            : meterData.tank_volume_liters,
+      };
+
       if (editingMeter?.meter_id) {
-        return updateMeterApi(editingMeter.meter_id, meterData);
+        return updateMeterApi(editingMeter.meter_id, payload);
       }
-      return createMeterApi(meterData);
+      return createMeterApi(payload);
     },
     onSuccess: () => {
       const action = editingMeter ? "diperbarui" : "disimpan";

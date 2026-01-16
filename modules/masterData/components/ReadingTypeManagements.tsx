@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,10 +31,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { DataTable } from "@/components/DataTable";
+} from "@/common/components/ui/alert-dialog";
+import { DataTable } from "@/common/components/table/dataTable";
 
-import { DataTableRowActions } from "./dataTableRowActions";
 import { ReadingTypeForm } from "./forms/readingType.form";
 
 import { ReadingType } from "@/common/types/readingTypes";
@@ -47,6 +46,7 @@ import {
   updateReadingTypeApi,
   deleteReadingTypeApi,
 } from "../services/readingsType.service";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
 
 export const createReadingTypeColumns = (
   onEdit: (item: ReadingType) => void,
@@ -58,11 +58,7 @@ export const createReadingTypeColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <DataTableRowActions
-        row={row.original}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+      <DataTableRowActions row={row} onEdit={onEdit} onDelete={onDelete} />
     ),
   },
 ];

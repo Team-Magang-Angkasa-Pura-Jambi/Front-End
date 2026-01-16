@@ -1,4 +1,8 @@
-import { meterCategory, meterTarif, statusMeter } from "@/modules/masterData/types/meter.type";
+import {
+  meterCategory,
+  meterTarif,
+  statusMeter,
+} from "@/modules/masterData/types/meter.type";
 import { EnergyType } from "./energy";
 
 export interface meters {

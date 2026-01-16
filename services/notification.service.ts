@@ -1,30 +1,9 @@
+import { ApiResponse } from "@/common/types/api";
 import api from "@/lib/api";
 
 // Tipe data untuk ringkasan harian per meter dari API
-export interface NewDataCountNotification {
-  summary_id: number;
-  summary_date: string;
-  total_consumption: string;
-  total_cost: string;
-  meter_id: number;
-  meter: {
-    meter_code: string;
-    energy_type: {
-      type_name: "Electricity" | "Water" | "Fuel";
-      unit_of_measurement: string;
-    };
-  };
-  classification: string | null;
-}
 
 // Tipe data untuk respons API ringkasan harian
-interface TodaySummaryApiResponse {
-  status: {
-    code: number;
-    message: string;
-  };
-  data: NewDataCountNotification[];
-}
 
 // Tipe data untuk notifikasi dari API /notifications
 export interface GeneralNotification {
@@ -36,13 +15,13 @@ export interface GeneralNotification {
   created_at: string;
 }
 
-// Tipe data untuk alert dari API /alerts/*
 export interface Alert {
   alert_id: string;
   title: string;
   description: string;
   link?: string;
   is_read: boolean;
+
   created_at: string;
 }
 
@@ -50,26 +29,10 @@ export interface Alert {
 export type NotificationOrAlert = (GeneralNotification | Alert) & {
   id: string;
   type: "notification" | "alert";
+  message: string;
+  status: string;
+  acknowledged_by: { username: string };
 };
-
-// Helper type untuk respons API generik
-interface ApiResponse<T> {
-  status: {
-    code: number;
-    message: string;
-  };
-  data: T;
-}
-
-/**
- * Mengambil notifikasi data baru (misal: +200 data) untuk toast.
- * Diubah menjadi pengambil data ringkasan harian.
- */
-export const fetchTodaySummaryApi =
-  async (): Promise<TodaySummaryApiResponse> => {
-    const response = await api.get("/analytics/today-summary");
-    return response.data;
-  };
 
 export const fetchAllNotificationsApi = async (): Promise<
   ApiResponse<GeneralNotification[]>
@@ -78,30 +41,20 @@ export const fetchAllNotificationsApi = async (): Promise<
   return response.data;
 };
 
-/**
- * Mengambil alert yang hanya terkait dengan meter.
- */
 export const fetchMeterAlertsApi = async (): Promise<ApiResponse<Alert[]>> => {
   const response = await api.get("/alerts/meters");
   return response.data;
 };
 
-/**
- * Mengambil alert yang hanya terkait dengan sistem (tidak ada meter_id).
- */
 export const fetchSystemAlertsApi = async (): Promise<ApiResponse<Alert[]>> => {
   const response = await api.get("/alerts/system");
   return response.data;
 };
 
-/**
- * Mengambil satu notifikasi alert terbaru dari gabungan meter dan sistem.
- * Digunakan untuk NotificationCard di Dashboard.
- */
 export const fetchLatestAlertApi = async (
   scope?: "system" | "meters"
-): Promise<ApiResponse<Alert | null>> => {
-  const response = await api.get<ApiResponse<Alert[]>>("/alerts/latest", {
+): Promise<ApiResponse<Alert[]>> => {
+  const response = await api.get("/alerts/latest", {
     params: { scope },
   });
 
@@ -117,22 +70,17 @@ export const fetchLatestAlertApi = async (
   return { ...apiResponse, data: null };
 };
 
-/**
- * Menandai satu notifikasi sebagai sudah dibaca.
- */
 export const markAsReadApi = async (
   notificationId: string
 ): Promise<ApiResponse<null>> => {
   const response = await api.patch(
     `/notifications/${notificationId}/mark-as-read`
   );
+  // console.log(response);
+
   return response.data;
 };
 
-/**
- * Menandai satu alert sebagai sudah dibaca.
- * Diasumsikan endpointnya berbeda. Sesuaikan jika perlu.
- */
 export const markAlertAsReadApi = async (
   alertId: string
 ): Promise<ApiResponse<null>> => {
@@ -140,10 +88,6 @@ export const markAlertAsReadApi = async (
   return response.data;
 };
 
-/**
- * Menandai semua notifikasi sebagai sudah dibaca.
- * Scope ditambahkan untuk membedakan antara notifikasi dan alert.
- */
 export const markAllAsReadApi = async (
   scope: "all" | "meters" | "system"
 ): Promise<ApiResponse<null>> => {
@@ -159,11 +103,8 @@ export const markAllAsReadApi = async (
   return response.data;
 };
 
-/**
- * Menghapus notifikasi umum yang dipilih secara massal.
- */
 export const bulkDeleteNotificationsApi = async (
-  notificationIds: string[]
+  notificationIds: number[]
 ): Promise<ApiResponse<null>> => {
   const response = await api.post("/notifications/bulk-delete", {
     notificationIds,
@@ -171,11 +112,8 @@ export const bulkDeleteNotificationsApi = async (
   return response.data;
 };
 
-/**
- * Menghapus alert (meter/system) yang dipilih secara massal.
- */
 export const bulkDeleteAlertsApi = async (params: {
-  alertIds: string[]; // Scope tidak lagi diperlukan
+  alertIds: string[];
 }): Promise<ApiResponse<null>> => {
   const { alertIds } = params;
   const response = await api.post("/alerts/bulk-delete", {
@@ -184,9 +122,6 @@ export const bulkDeleteAlertsApi = async (params: {
   return response.data;
 };
 
-/**
- * Menghapus semua notifikasi atau alert milik pengguna.
- */
 export const deleteAllApi = async (
   scope?: "all" | "meters" | "system"
 ): Promise<ApiResponse<null>> => {

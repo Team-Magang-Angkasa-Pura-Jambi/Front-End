@@ -5,16 +5,16 @@ import { Resolver, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Switch } from "@/common/components/ui/switch";
+import { Input } from "@/common/components/ui/input";
+import { Button } from "@/common/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/common/components/ui/select";
 import {
   Form,
   FormControl,
@@ -23,15 +23,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { DialogFooter } from "@/components/ui/dialog";
-import { getEnergyTypesApi } from "@/services/energyType.service";
+} from "@/common/components/ui/form";
+import { DialogFooter } from "@/common/components/ui/dialog";
 import { categoryApi } from "@/services/category.service";
 import { STATUS_METER } from "../../types/meter.type";
 import { MeterFormValues, meterSchema } from "../../schemas/meter.schema";
 import { ENERGY_TYPES } from "@/common/types/energy";
 import { MeterType } from "@/common/types/meters";
 import { getTariffGroupsApi } from "../../services/tariffGroup.service";
+import { getEnergyTypesApi } from "../../services/energyType.service";
 
 interface MeterFormProps {
   initialData?: MeterType | null;
@@ -125,7 +125,7 @@ export const MeterForm = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="meter_code"
@@ -311,12 +311,12 @@ export const MeterForm = ({
           )}
 
           {isRolloverEligible && (
-            <div className="md:col-span-2 space-y-4">
+            <div className="space-y-4 md:col-span-2">
               <FormField
                 control={form.control}
                 name="has_rollover"
                 render={({ field }) => (
-                  <FormItem className="flex items-center justify-between border rounded-lg p-3">
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3">
                     <div>
                       <FormLabel>Aktifkan Rollover</FormLabel>
                       <FormDescription>

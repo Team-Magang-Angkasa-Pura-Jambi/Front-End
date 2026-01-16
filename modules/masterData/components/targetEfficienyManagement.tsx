@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,15 +31,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { DataTable } from "@/components/DataTable";
+} from "@/common/components/ui/alert-dialog";
+import { DataTable } from "@/common/components/table/dataTable";
 
 import { TargetEfficiencyForm } from "./forms/targetEfficiency.form";
-import { DataTableRowActions } from "./dataTableRowActions";
 
 import { ApiErrorResponse } from "@/common/types/api";
-import { MeterType } from "@/common/types/meters";
-import { EnergyType } from "@/common/types/energy";
+
 import { TargetEfficiencyFormValues } from "../schemas/targetEfficiency.schema";
 import {
   createEfficiencyTargetApi,
@@ -48,6 +46,7 @@ import {
   updateEfficiencyTargetApi,
 } from "../services/targetEfficiency.service";
 import { EfficiencyTarget } from "@/common/types/efficiencyTarget";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
 
 const TargetValueCell = ({ row }: { row: Row<EfficiencyTarget> }) => {
   const unit = row.original.meter?.energy_type?.unit_of_measurement || "%";
@@ -112,11 +111,7 @@ export const createTargetEfficiencyColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <DataTableRowActions
-        row={row.original}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+      <DataTableRowActions row={row} onEdit={onEdit} onDelete={onDelete} />
     ),
   },
 ];

@@ -2,16 +2,16 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { User } from "@/common/types/user";
+} from "@/common/components/ui/dropdown-menu";
+import { Badge } from "@/common/components/ui/badge";
+import { User } from "@/types/users.types";
 
 type UserColumnDef = ColumnDef<User> & {
   onEdit?: (user: User) => void;

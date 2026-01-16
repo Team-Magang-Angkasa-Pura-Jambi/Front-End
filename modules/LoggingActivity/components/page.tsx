@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
+} from "@/common/components/ui/card";
 import { Loader2, AlertTriangle, BookLock } from "lucide-react";
 import {
   AlertDialog,
@@ -21,7 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/common/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 import { createColumns } from "./ColumnTable";
@@ -56,7 +56,7 @@ export const Page = () => {
   );
 
   const [filters, setFilters] = useState<HistoryFilters>({
-    type: "Electricity" as unknown as EnergyTypeName,
+    type: "Electricity",
     date: {
       from: firstDayOfMonth,
       to: firstDayOfNextMonth,
@@ -77,7 +77,6 @@ export const Page = () => {
   const [paxToDelete, setPaxToDelete] = useState<DailyPaxData | null>(null);
 
   const { type, date, sortBy, sortOrder, meterId } = filters;
-  console.log(date!.from!.toISOString());
 
   const {
     data: queryData,
@@ -89,7 +88,6 @@ export const Page = () => {
     queryFn: () =>
       getReadingSessionsApi({
         energyTypeName: type as unknown as EnergyTypeName,
-
         startDate: date?.from
           ? new Date(
               Date.UTC(
@@ -99,15 +97,19 @@ export const Page = () => {
               )
             ).toISOString()
           : new Date().toISOString(),
-        endDate: date?.from
-          ? new Date(
-              Date.UTC(
-                date.to.getFullYear(),
-                date.to.getMonth(),
-                date.to.getDate()
-              )
-            ).toISOString()
-          : new Date().toISOString(),
+
+        // Perbaikan di sini: Cek keberadaan date.to
+        endDate:
+          date?.from && date?.to
+            ? new Date(
+                Date.UTC(
+                  date.to.getFullYear(),
+                  date.to.getMonth(),
+                  date.to.getDate()
+                )
+              ).toISOString()
+            : new Date().toISOString(),
+
         meterId,
         sortBy,
         sortOrder,
@@ -187,11 +189,11 @@ export const Page = () => {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <Card className="flex flex-col items-center justify-center text-center h-96">
+        <Card className="flex h-96 flex-col items-center justify-center text-center">
           <CardContent className="p-6">
-            <Loader2 className="mx-auto h-12 w-12 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground mx-auto h-12 w-12 animate-spin" />
             <h3 className="mt-4 text-lg font-semibold">Memuat Riwayat...</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm">
               Mohon tunggu sebentar.
             </p>
           </CardContent>
@@ -201,13 +203,13 @@ export const Page = () => {
 
     if (isError) {
       return (
-        <Card className="flex flex-col items-center justify-center text-center h-96 bg-destructive/10 border-destructive">
+        <Card className="bg-destructive/10 border-destructive flex h-96 flex-col items-center justify-center text-center">
           <CardContent className="p-6">
-            <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
-            <h3 className="mt-4 text-lg font-semibold text-destructive">
+            <AlertTriangle className="text-destructive mx-auto h-12 w-12" />
+            <h3 className="text-destructive mt-4 text-lg font-semibold">
               Gagal Mengambil Data
             </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm">
               Terjadi kesalahan pada server. Coba muat ulang halaman.
             </p>
           </CardContent>
@@ -217,13 +219,13 @@ export const Page = () => {
 
     if (historyData?.length === 0) {
       return (
-        <Card className="flex flex-col items-center justify-center text-center h-96">
+        <Card className="flex h-96 flex-col items-center justify-center text-center">
           <CardContent className="p-6">
-            <BookLock className="mx-auto h-12 w-12 text-muted-foreground" />
+            <BookLock className="text-muted-foreground mx-auto h-12 w-12" />
             <h3 className="mt-4 text-lg font-semibold">
               Riwayat Tidak Ditemukan
             </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm">
               Tidak ada data pencatatan yang cocok dengan filter yang Anda
               pilih.
             </p>
@@ -233,7 +235,7 @@ export const Page = () => {
     }
 
     return (
-      <div className="space-y-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 space-y-6 md:grid-cols-2">
         {filters.type === ENERGY_TYPES.ELECTRICITY && (
           <PaxDailyTable
             data={historyData}
@@ -243,7 +245,7 @@ export const Page = () => {
         )}
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Tabel Riwayat Pencatatan</CardTitle>
                 <CardDescription>
@@ -322,7 +324,9 @@ export const Page = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteSession(itemToDelete.session_id)}
+              onClick={() =>
+                itemToDelete && deleteSession(itemToDelete.session_id)
+              }
               disabled={isDeleting}
             >
               {isDeleting ? "Menghapus..." : "Ya, Hapus"}
@@ -343,7 +347,7 @@ export const Page = () => {
               tanggal{" "}
               <span className="font-bold">
                 {paxToDelete
-                  ? format(new Date(paxToDelete.date), "dd MMMM yyyy", {
+                  ? format(new Date(paxToDelete?.date), "dd MMMM yyyy", {
                       locale: id,
                     })
                   : ""}

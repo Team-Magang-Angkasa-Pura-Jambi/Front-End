@@ -1,4 +1,4 @@
-import { User } from "@/common/types/user";
+import { ApiResponse } from "@/common/types/api";
 import api from "@/lib/api";
 import { CreateUserPayload, UpdateUserPayload } from "@/types/users.types";
 
@@ -9,6 +9,16 @@ interface SingleUserApiResponse {
   data: User;
 }
 
+export interface userHistory {
+  id: number;
+  type: string;
+  timestamp: string;
+  description: string;
+}
+
+/**
+ * Mengambil semua pengguna dari API.
+ */
 export const getUsersApi = async (): Promise<UserApiResponse> => {
   const response = await api.get("/users");
   return response.data;
@@ -20,7 +30,9 @@ export const getUserApi = async (
   return response.data;
 };
 
-export const getUserActivitiesApi = async (id: number) => {
+export const getUserActivitiesApi = async (
+  id: number
+): Promise<ApiResponse<userHistory[]>> => {
   const response = await api.get(`/users/${id}/activities`);
   return response.data;
 };
@@ -35,7 +47,7 @@ export const createUserApi = async (
 export const updateUserApi = async (
   userId: number,
   userData: UpdateUserPayload
-): Promise<SingleUserApiResponse> => {
+): Promise<ApiResponse<SingleUserApiResponse>> => {
   const response = await api.patch(`/users/${userId}`, userData);
   return response.data;
 };

@@ -1,4 +1,4 @@
-import React, { useEffect,  } from "react";
+import React, { useEffect } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Variants } from "framer-motion";
 export const LoginIllustration = () => {
@@ -33,7 +33,6 @@ export const LoginIllustration = () => {
     duration: number;
     delay: number;
   }
-  
 
   const [particles, setParticles] = React.useState<Particle[]>([]);
   useEffect(() => {
@@ -125,10 +124,10 @@ export const LoginIllustration = () => {
   const smoothY = useSpring(iconParallaxY, springConfig);
 
   return (
-    <div className="w-full h-full relative bg-gray-950 overflow-hidden flex items-center justify-center p-8">
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gray-950 p-8">
       {/* --- BACKGROUND WAVE (SVG) --- */}
       <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
+        className="pointer-events-none absolute inset-0 h-full w-full"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
@@ -157,7 +156,7 @@ export const LoginIllustration = () => {
       {particles.map((p) => (
         <motion.div
           key={p.id}
-          className="absolute rounded-full bg-white pointer-events-none"
+          className="pointer-events-none absolute rounded-full bg-white"
           initial={{
             x: p.initialX,
             y: p.initialY,
@@ -186,7 +185,7 @@ export const LoginIllustration = () => {
 
       {/* --- FLOATING ICONS CONTAINER (PARALLAX) --- */}
       <motion.div
-        className="z-10 w-full h-full relative"
+        className="relative z-10 h-full w-full"
         style={{ x: smoothX, y: smoothY }}
       >
         {/* 1. Icon Listrik (Yellow) */}
@@ -194,13 +193,13 @@ export const LoginIllustration = () => {
           custom={1}
           variants={iconVariants}
           animate="float"
-          className="absolute top-[20%] left-[55%]"
+          className="absolute left-[55%] top-[20%]"
           style={{ willChange: "transform" }}
         >
           <motion.div
             variants={glowVariants}
             animate="pulse"
-            className="p-4 bg-yellow-400/15 border border-yellow-400/40 rounded-full shadow-lg backdrop-blur-sm"
+            className="rounded-full border border-yellow-400/40 bg-yellow-400/15 p-4 shadow-lg backdrop-blur-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -223,13 +222,13 @@ export const LoginIllustration = () => {
           custom={2}
           variants={iconVariants}
           animate="float"
-          className="absolute top-[50%] left-[60%]"
+          className="absolute left-[60%] top-[50%]"
           style={{ willChange: "transform" }}
         >
           <motion.div
             variants={rippleVariants}
             animate="ripple"
-            className="p-5 bg-blue-400/15 border border-blue-400/40 rounded-full shadow-lg backdrop-blur-sm"
+            className="rounded-full border border-blue-400/40 bg-blue-400/15 p-5 shadow-lg backdrop-blur-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -258,7 +257,7 @@ export const LoginIllustration = () => {
           <motion.div
             variants={shakeVariants}
             animate="shake"
-            className="p-4 bg-orange-400/15 border border-orange-400/40 rounded-full shadow-lg backdrop-blur-sm"
+            className="rounded-full border border-orange-400/40 bg-orange-400/15 p-4 shadow-lg backdrop-blur-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

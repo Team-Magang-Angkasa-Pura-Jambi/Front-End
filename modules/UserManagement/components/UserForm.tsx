@@ -4,7 +4,7 @@ import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { getRolesApi } from "@/services/role.service";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,18 +12,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { User } from "@/common/types/user";
-import { userFormSchema, userFormValues } from "../schemas/user.schema";
-import { useMemo } from "react";
+} from "@/common/components/ui/select";
+import { UserFormProps } from "../types";
+import { formSchema, FormUserValues } from "../schemas/user.schema";
 
 export interface UserFormProps {
   onSubmit: (values: userFormValues) => void;
@@ -46,15 +45,15 @@ export const UserForm: React.FC<UserFormProps> = ({
     staleTime: 1000 * 60 * 5,
   });
 
-  const form = useForm<userFormValues>({
-    resolver: zodResolver(userFormSchema) as Resolver<userFormValues>,
+  const form = useForm<FormUserValues>({
+    resolver: zodResolver(formSchema) as Resolver<FormUserValues>,
     defaultValues: {
       username: defaultValues?.username || "",
       role_id: defaultValues?.role?.role_id || undefined,
     },
   });
 
-  const roles = useMemo(() => rolesData?.data || [], [rolesData?.data]);
+  const roles = rolesData?.data || [];
 
   return (
     <Form {...form}>
@@ -111,8 +110,8 @@ export const UserForm: React.FC<UserFormProps> = ({
                         isLoadingRoles
                           ? "Memuat peran..."
                           : isError
-                          ? "Gagal memuat peran"
-                          : "Pilih peran pengguna"
+                            ? "Gagal memuat peran"
+                            : "Pilih peran pengguna"
                       }
                     />
                   </SelectTrigger>

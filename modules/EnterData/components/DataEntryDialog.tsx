@@ -4,7 +4,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 
 export interface DialogDetails {
   title: string;

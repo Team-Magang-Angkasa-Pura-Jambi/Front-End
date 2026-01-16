@@ -18,14 +18,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/common/components/ui/button";
+import { Input } from "@/common/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+} from "@/common/components/ui/popover";
+import { Calendar } from "@/common/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -34,7 +34,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/common/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -42,12 +42,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-
-import {
-  getEnergyTypesApi,
-  EnergyTypesApiResponse,
-} from "@/services/energyType.service";
+} from "@/common/components/ui/select";
 
 import { useAuthStore } from "@/stores/authStore";
 import { AxiosError } from "axios";
@@ -58,6 +53,7 @@ import {
   ReadingPayload,
   submitReadingApi,
 } from "../services";
+import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 
 interface FormReadingProps {
   onSuccess?: () => void;
@@ -82,16 +78,15 @@ export const FormReadingWater = ({
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "details",
   });
 
-  const { data: energyTypeData, isLoading: isLoadingData } =
-    useQuery<EnergyTypesApiResponse>({
-      queryKey: ["energyData", type_name],
-      queryFn: () => getEnergyTypesApi(type_name),
-    });
+  const { data: energyTypeData, isLoading: isLoadingData } = useQuery({
+    queryKey: ["energyData", type_name],
+    queryFn: () => getEnergyTypesApi(type_name),
+  });
 
   const meters = useMemo(
     () => energyTypeData?.data[0]?.meters || [],
@@ -178,7 +173,7 @@ export const FormReadingWater = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
             name="meter_id"
@@ -227,6 +222,7 @@ export const FormReadingWater = ({
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        key={field.value?.toString()}
                         variant={"outline"}
                         className={`w-full justify-start text-left font-normal ${
                           !field.value && "text-muted-foreground"
@@ -235,7 +231,7 @@ export const FormReadingWater = ({
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {field.value ? (
-                          format(field.value, "PPP")
+                          format(field.value, "d MMMM yyyy") // Sesuaikan format
                         ) : (
                           <span>Pilih tanggal</span>
                         )}
@@ -247,24 +243,7 @@ export const FormReadingWater = ({
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      // disabled={(date) => {
-                      //   var _a, _b, _c;
-                      //   const lastDate =
-                      //     (_c =
-                      //       (_b =
-                      //         (_a = lastReadingsQueries[0]) === null ||
-                      //         _a === void 0
-                      //           ? void 0
-                      //           : _a.data) === null || _b === void 0
-                      //         ? void 0
-                      //         : _b.data) === null || _c === void 0
-                      //       ? void 0
-                      //       : _c.session;
-                      //   return (
-                      //     date > new Date() ||
-                      //     (lastDate ? date <= new Date(lastDate) : false)
-                      //   );
-                      // }}
+                      defaultMonth={field.value || new Date()}
                       initialFocus
                     />
                   </PopoverContent>
@@ -289,7 +268,7 @@ export const FormReadingWater = ({
             return (
               <div
                 key={field.id}
-                className="grid grid-cols-12 gap-4 items-start"
+                className="grid grid-cols-12 items-start gap-4"
               >
                 <div className="col-span-6">
                   <FormField
@@ -312,8 +291,8 @@ export const FormReadingWater = ({
                                   !selectedMeterId
                                     ? "Pilih meteran"
                                     : isLoadingData
-                                    ? "Memuat..."
-                                    : "Pilih Jenis"
+                                      ? "Memuat..."
+                                      : "Pilih Jenis"
                                 }
                               />
                             </SelectTrigger>
@@ -380,7 +359,7 @@ export const FormReadingWater = ({
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-primary"
+                              className="text-muted-foreground hover:text-primary absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
                               onClick={() =>
                                 form.setValue(
                                   `details.${index}.value`,
@@ -405,7 +384,7 @@ export const FormReadingWater = ({
                     )}
                   />
                 </div>
-                <div className="col-span-1 flex items-end h-[58px]">
+                <div className="col-span-1 flex h-[58px] items-end">
                   {fields.length > 1 && (
                     <Button
                       variant="ghost"
@@ -413,7 +392,7 @@ export const FormReadingWater = ({
                       type="button"
                       onClick={() => remove(index)}
                     >
-                      <XCircleIcon className="h-5 w-5 text-destructive" />
+                      <XCircleIcon className="text-destructive h-5 w-5" />
                     </Button>
                   )}
                 </div>

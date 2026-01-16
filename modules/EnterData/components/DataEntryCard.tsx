@@ -6,8 +6,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 
 interface DataEntryCardProops {
   icon: React.ReactNode;
@@ -27,10 +27,10 @@ export const DataEntryCard = ({
   >
     <Card
       onClick={onClick}
-      className="flex h-full cursor-pointer flex-col justify-between overflow-hidden transition-all hover:border-primary/80 hover:shadow-lg"
+      className="hover:border-primary/80 flex h-full cursor-pointer flex-col justify-between overflow-hidden transition-all hover:shadow-lg"
     >
       <CardHeader className="flex-row items-start gap-4 space-y-0">
-        <div className="rounded-lg border bg-background p-3">{icon}</div>
+        <div className="bg-background rounded-lg border p-3">{icon}</div>
         <div>
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>

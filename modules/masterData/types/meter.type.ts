@@ -1,9 +1,3 @@
-import { EnergyType } from "../types";
-
-
-
-
-
 export type meterCategory = {
   category_id: number;
   name: string;

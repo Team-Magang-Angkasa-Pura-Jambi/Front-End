@@ -11,17 +11,8 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { format } from "date-fns-tz";
-import { MoreHorizontal, ChevronDown, ChevronRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@/common/components/ui/button";
 import {
   Table,
   TableBody,
@@ -29,39 +20,25 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AnnualBudget } from "../types";
-import { formatCurrency, cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from "@/common/components/ui/table";
+import { Skeleton } from "@/common/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
-const MeterAllocationDetails = ({
-  annualBudget,
-}: {
-  annualBudget: AnnualBudget;
-}) => {
-  // ... (kode yang sama)
-};
-
-const MonthlyUsageDetails = ({
-  annualBudget,
-}: {
-  annualBudget: AnnualBudget;
-}) => {
-  // ... (kode yang sama)
-};
-
-interface DataTableProps<TData, TValue> {
+interface BudgetTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading: boolean;
+  getRowCanExpand?: (row: Row<TData>) => boolean;
+  renderSubComponent?: (props: { row: Row<TData> }) => React.ReactElement;
 }
 
 export function BudgetTable<TData, TValue>({
   columns,
   data,
   isLoading,
-}: DataTableProps<TData, TValue>) {
+  getRowCanExpand,
+  renderSubComponent,
+}: BudgetTableProps<TData, TValue>) {
   const [expanded, setExpanded] = useState({});
 
   const table = useReactTable({
@@ -72,7 +49,7 @@ export function BudgetTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     onExpandedChange: setExpanded,
-    getRowCanExpand: () => true,
+    getRowCanExpand,
     state: {
       expanded,
     },
@@ -115,7 +92,12 @@ export function BudgetTable<TData, TValue>({
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <React.Fragment key={row.id}>
-                  <TableRow data-state={row.getIsSelected() && "selected"}>
+                  <TableRow
+                    data-state={row.getIsSelected() && "selected"}
+                    className={cn(
+                      row.getIsExpanded() && "bg-muted/30 border-b-0"
+                    )}
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -125,12 +107,10 @@ export function BudgetTable<TData, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>
-                  {row.getIsExpanded() && (
+                  {row.getIsExpanded() && renderSubComponent && (
                     <TableRow>
                       <TableCell colSpan={row.getVisibleCells().length}>
-                        <MonthlyUsageDetails
-                          annualBudget={row.original as AnnualBudget}
-                        />
+                        {renderSubComponent({ row })}
                       </TableCell>
                     </TableRow>
                   )}
@@ -170,24 +150,3 @@ export function BudgetTable<TData, TValue>({
     </div>
   );
 }
-
-interface DataTableRowActionsProps<TData> {
-  row: Row<TData>;
-  onEdit: (data: TData) => void;
-  onDelete: (data: TData) => void;
-}
-
-function DataTableRowActions<TData>({
-  row,
-  onEdit,
-  onDelete,
-}: DataTableRowActionsProps<TData>) {
-  // ... (kode yang sama)
-}
-
-export const getColumns = (
-  onEdit: (budget: AnnualBudget) => void,
-  onDelete: (budget: AnnualBudget) => void
-): ColumnDef<AnnualBudget>[] => [
-  // ... (kode yang sama)
-];

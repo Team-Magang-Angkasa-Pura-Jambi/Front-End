@@ -1,197 +1,126 @@
 "use client";
-import { motion } from "framer-motion";
-import { StatCard } from "./StatCard";
-import { AnalysisChart } from "./AnalysisChart";
-import { Header } from "./Header";
-import {
-  Droplet,
-  Fuel,
-  Plane,
-  Zap,
-  Calendar,
-} from "lucide-react";
-import { DailyAnalysisLog } from "./DailyAnalysisLog";
-import { EnergyDistributionChart } from "./EnergyDistributionChart";
-import { ClassificationSummaryChart } from "./ClassificationSummaryChart";
-import { useQuery } from "@tanstack/react-query";
-import { TemperatureStatCard } from "./TemperatureStatCard";
-import { summaryApi } from "@/services/summary.service";
-import React, { useMemo, useState } from "react";
-import { StatCardSkeleton } from "./statCardSkeleton";
-import { useRealtimeNotification } from "@/hooks/useRealtimeNotification";
-import { NotificationCard } from "./NotificationCard";
 
-const statConfig = {
-  Electricity: {
-    icon: Zap,
-    iconBgColor: "bg-yellow-500",
+import React from "react";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+import { Header } from "./Header";
+import { AnalysisChart } from "./analysisChart";
+import { AnalysisYearlyChart } from "./analysisYearlyChart";
+import { UnifiedEnergyComparisonChart } from "./dayTypeComparisonChart";
+import { ModernEfficiencyDashboard } from "./modernEfficiencyDashboard";
+import { MeterEfficiencyRanking } from "./meterEfficiencyRanking";
+import { DailyAveragePaxChart } from "./dailyAveragePaxChart";
+import { FuelRefillAnalysis } from "./fuelRefillAnalysis/fuelRefillAnalysis";
+import { EfficiencyRatioChart } from "./efficiencyRatioChart";
+import { BudgetBurnRateChart } from "./budgetBurnRateChart";
+import { ModernBudgetAnalysis } from "./modernBudgetAnalysis";
+import { useRealtimeNotification } from "@/modules/Dashboard/hooks/useRealtimeNotification";
+import { MultiEnergyForecastCard } from "./energyForecastCard";
+import { NotificationStyle } from "./notificationStyle";
+import { ResourceConsumptionSummary } from "./resourceConsumptionSummary";
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
   },
-  Water: {
-    icon: Droplet,
-    iconBgColor: "bg-sky-500",
-  },
-  Fuel: {
-    icon: Fuel,
-    iconBgColor: "bg-orange-500",
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0, scale: 0.95 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    transition: { type: "spring", stiffness: 100, damping: 15 },
   },
 };
 
 export const Page = () => {
   useRealtimeNotification();
 
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday;
-  });
-
-  const year = String(selectedDate.getFullYear());
-  const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
-
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["dashboardSummary", year, month],
-    queryFn: () => summaryApi(year, month),
-    retry: 1,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const energyDistributionData = useMemo(() => {
-    return data?.data?.summary || [];
-  }, [data]);
-
-  const processedStats = useMemo(() => {
-    if (!data?.data) return [];
-    const { summary, totalPax } = data.data;
-
-    const energyStats = summary.map((item) => {
-      const config =
-        statConfig[item.energyType as keyof typeof statConfig] || {};
-      return {
-        icon: config.icon,
-        label: item.energyType,
-        value: (item.totalConsumption.currentValue ?? 0).toLocaleString(
-          "id-ID"
-        ),
-        unit: item.unit,
-        iconBgColor: config.iconBgColor,
-        percentageChange: item.totalConsumption.percentageChange,
-      };
-    });
-
-    const paxStat = {
-      icon: Plane,
-      label: "Pax",
-      value: (totalPax?.currentValue ?? 0).toLocaleString("id-ID"),
-      unit: "Orang",
-      iconBgColor: "bg-red-500",
-      percentageChange: totalPax?.percentageChange,
-    };
-
-    return [...energyStats, paxStat];
-  }, [data]);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } },
-  };
-
-  if (isError) {
-    return (
-      <main className="w-full min-h-screen flex items-center justify-center p-4">
-        <div className="text-center bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-red-600">
-            Terjadi Kesalahan
-          </h2>
-          <p className="text-gray-500 mt-2">
-            Tidak dapat memuat data dashboard. Silakan coba lagi nanti.
-          </p>
-          <pre className="mt-4 text-xs text-left bg-gray-100 p-2 rounded-md overflow-x-auto">
-            {error?.message || "Unknown error"}
-          </pre>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="w-full min-h-screen space-y-6">
+    <main className="min-h-screen w-full space-y-8 p-1 pb-20">
       <Header />
-      <motion.div
-        variants={itemVariants}
-        initial="hidden"
-        animate="visible"
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <NotificationCard />
-      </motion.div>
 
-      <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {isLoading
-          ? Array.from({ length: 4 }).map((_, index) => (
-              <StatCardSkeleton key={`skeleton-${index}`} />
-            ))
-          : processedStats.map((stat) => (
-              <motion.div
-                key={stat.label}
-                variants={itemVariants}
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <StatCard {...stat} />
-              </motion.div>
-            ))}
-        {/* Kartu Suhu Khusus */}
-        {!isLoading && data?.data && (
-          <motion.div
-            variants={itemVariants}
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <TemperatureStatCard data={data.data} />
-          </motion.div>
-        )}
-        {/* <FuelStockChart /> */}
-        <ClassificationSummaryChart />
-        {energyDistributionData.length > 0 && (
-          <EnergyDistributionChart data={energyDistributionData} />
-        )}
-        <DailyAnalysisLog />
-      </motion.div>
-
-      {/* ================================================================== */}
-      {/* PERUBAHAN UTAMA: DARI LAYOUT 2 KOLOM MENJADI "BENTO GRID"           */}
-      {/* ================================================================== */}
-      <motion.div
-        className="grid grid-cols-1 lg:grid-cols-4 gap-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Item 1: Grafik Utama, dibuat lebih besar */}
+      <AnimatePresence mode="wait">
         <motion.div
-          className="lg:col-span-4 grid lg:grid-cols-2  gap-2  "
-          variants={itemVariants}
+          key="content"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-6"
         >
-          <AnalysisChart typeEnergy="Electricity" />
-          <AnalysisChart typeEnergy="Water" />
-        </motion.div>
+          <motion.div variants={itemVariants} layout>
+            <NotificationStyle />
+          </motion.div>
 
-        {/* Item 2: Analisis ML */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col gap-1"
-        ></motion.div>
-      </motion.div>
+          <ResourceConsumptionSummary />
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <motion.div variants={itemVariants} className="flex flex-col gap-6">
+              <div className="min-h-0 flex-1">
+                <MeterEfficiencyRanking />
+              </div>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex flex-col gap-6">
+              <div className="min-h-0">
+                <ModernEfficiencyDashboard />
+              </div>
+              <div className="min-h-0">
+                <MultiEnergyForecastCard />
+              </div>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <ModernBudgetAnalysis />
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <motion.div variants={itemVariants} className="w-full">
+              <AnalysisYearlyChart />
+            </motion.div>
+            <motion.div variants={itemVariants} className="w-full">
+              <EfficiencyRatioChart />
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <motion.div variants={itemVariants}>
+              <AnalysisChart />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <UnifiedEnergyComparisonChart />
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
+              <DailyAveragePaxChart />
+            </motion.div>
+            <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
+              <BudgetBurnRateChart />
+            </motion.div>
+            <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
+              <FuelRefillAnalysis />
+            </motion.div>
+          </div>
+
+          <motion.footer
+            variants={itemVariants}
+            className="py-10 text-center opacity-40"
+          >
+            <p className="font-mono text-[10px] uppercase italic tracking-widest">
+              Airport Operational Intelligence Dashboard
+            </p>
+          </motion.footer>
+        </motion.div>
+      </AnimatePresence>
     </main>
   );
 };

@@ -7,28 +7,28 @@ import { formatInTimeZone } from "date-fns-tz";
 import { useQuery } from "@tanstack/react-query";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/common/components/ui/button";
+import { Calendar } from "@/common/components/ui/calendar";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
+} from "@/common/components/ui/card";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/common/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/common/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/common/components/ui/tabs";
 import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { CalendarIcon } from "lucide-react";
 import { HistoryFilters } from "../types";
@@ -62,9 +62,9 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
         if (key === "type") {
           return {
             ...prev,
-            type: value,
+            type: value as EnergyTypeName,
             meterId: undefined,
-          } as HistoryFilters;
+          };
         }
 
         return {
@@ -89,7 +89,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
   const statusStyles = {
     Active: "",
     UnderMaintenance: "bg-amber-500 text-white",
-    Inactive: "bg-slate-500 text-white",
+    Inactive: "bg-background0 text-white",
     Deleted: "bg-red-500 text-white",
   };
   return (
@@ -102,8 +102,8 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
             pemakaian.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
-          <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full">
+        <CardContent className="flex flex-col items-center justify-between gap-2 md:flex-row">
+          <div className="flex w-full flex-col flex-wrap gap-2 sm:flex-row">
             <Tabs
               value={filters.type as unknown as string}
               onValueChange={(value) =>
@@ -121,7 +121,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
               onValueChange={(value) =>
                 handleFilterChange(
                   "meterId",
-                  value === "all-meters" ? null : Number(value)
+                  value === "all-meters" ? undefined : Number(value)
                 )
               }
             >
@@ -130,7 +130,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {isLoadingMeters ? (
-                  <div className="p-4 text-center text-sm text-muted-foreground">
+                  <div className="text-muted-foreground p-4 text-center text-sm">
                     Memuat...
                   </div>
                 ) : (
@@ -141,8 +141,10 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                         key={meter.meter_id}
                         value={String(meter.meter_id)}
                         className={cn(
-                          "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border",
-                          statusStyles[meter.status]
+                          "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
+                          statusStyles[
+                            meter.status as keyof typeof statusStyles
+                          ]
                         )}
                       >
                         {meter.meter_code}
@@ -159,7 +161,7 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full sm:w-[280px] justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal sm:w-[280px]",
                     !filters.date && "text-muted-foreground"
                   )}
                 >

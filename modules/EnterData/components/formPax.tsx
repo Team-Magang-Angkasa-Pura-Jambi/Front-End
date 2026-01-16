@@ -8,14 +8,14 @@ import { format } from "date-fns";
 import { CalendarIcon, Users } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/common/components/ui/button";
+import { Input } from "@/common/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+} from "@/common/components/ui/popover";
+import { Calendar } from "@/common/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -23,7 +23,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/common/components/ui/form";
 
 import { useAuthStore } from "@/stores/authStore";
 import { AxiosError } from "axios";
@@ -94,7 +94,7 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
             name="data_date"
@@ -125,9 +125,7 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("2000-01-01")
-                      }
+                      defaultMonth={field.value || new Date()}
                       initialFocus
                     />
                   </PopoverContent>
@@ -145,7 +143,7 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
                 <FormLabel>Jumlah Pax</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Users className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                     <Input
                       min={0}
                       type="number"

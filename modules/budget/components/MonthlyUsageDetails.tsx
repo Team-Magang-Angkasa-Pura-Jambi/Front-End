@@ -1,5 +1,4 @@
 import { Loader2 } from "lucide-react";
-import { AnnualBudget } from "../types";
 import { MeterAllocationDetails } from "./MeterAllocationDetails";
 import {
   Table,
@@ -8,9 +7,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/common/components/ui/table";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { annualBudgetApi } from "@/services/annualBudget.service";
+import { AnnualBudget } from "@/common/types/budget";
 
 export const MonthlyUsageDetails = ({
   annualBudget,
@@ -18,15 +17,15 @@ export const MonthlyUsageDetails = ({
   annualBudget: AnnualBudget;
 }) => {
   const year = new Date(annualBudget.period_start).getFullYear();
-  const monthlyData = annualBudget.monthlyAllocation  || [];
-  const isLoading = false; // Data is now passed directly
+  const monthlyData = annualBudget.monthlyAllocation || [];
+  const isLoading = false;
   const isError = !monthlyData;
 
   if (isLoading) {
     return (
       <div className="p-4 text-center">
-        <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
+        <Loader2 className="text-muted-foreground mx-auto h-6 w-6 animate-spin" />
+        <p className="text-muted-foreground text-sm">
           Memuat detail bulanan...
         </p>
       </div>
@@ -35,17 +34,17 @@ export const MonthlyUsageDetails = ({
 
   if (isError || !monthlyData) {
     return (
-      <div className="p-4 text-center text-destructive">
+      <div className="text-destructive p-4 text-center">
         Gagal memuat detail pemakaian bulanan.
       </div>
     );
   }
 
   return (
-    <div className="p-4 bg-muted/50">
+    <div className="bg-muted/50 p-4">
       <MeterAllocationDetails annualBudget={annualBudget} />
 
-      <h4 className="font-semibold mb-2 mt-6">
+      <h4 className="mb-2 mt-6 font-semibold">
         Detail Pemakaian Anggaran Tahun {year}
       </h4>
       <Table>

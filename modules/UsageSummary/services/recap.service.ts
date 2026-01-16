@@ -9,7 +9,7 @@ import {
 export const getRecapDataApi = async (
   params: RecapQueryParams
 ): Promise<RecapApiResponse> => {
-  const { data } = await api.get<RecapApiResponse>("/recap", {
+  const { data } = await api.get("/recap", {
     params: {
       energyType: params.type,
       startDate: params.startDate,

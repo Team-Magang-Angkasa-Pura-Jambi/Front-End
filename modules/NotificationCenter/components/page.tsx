@@ -1,241 +1,252 @@
-// src/app/notification-center/page.tsx
-
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
-import {
-  NotificationOrAlert,
-  fetchAllNotificationsApi,
-  markAsReadApi,
-  markAllAsReadApi,
-  bulkDeleteNotificationsApi,
-  bulkDeleteAlertsApi,
-  deleteAllApi,
-  markAlertAsReadApi,
-  fetchMeterAlertsApi,
-  fetchSystemAlertsApi,
-} from "@/services/notification.service";
-
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { TabType } from "../types";
+import { Card, CardContent, CardHeader } from "@/common/components/ui/card";
+import { Tabs } from "@/common/components/ui/tabs";
 import { NotificationHeader } from "./notificationTypes";
 import { NotificationTabs } from "./notificationTabs";
 import { NotificationActions } from "./notificationActions";
 import { NotificationContent } from "./notificationContent";
 import { DeleteConfirmationDialog } from "./deleteConfirmationDialog";
+import { NotificationUI, TabType } from "../types";
+import { useAlert } from "../hooks/useAlert";
+import { useNotification } from "../hooks/useNotification";
 
-import { Tabs } from "@/components/ui/tabs";
 const NotificationCenterPage = () => {
-  const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<TabType>("all");
+  const [activeTab, setActiveTab] = useState<TabType>("generals");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [dialogAction, setDialogAction] = useState<
     "delete-selected" | "delete-all" | null
   >(null);
 
-  const queryFnMap: Record<TabType, () => Promise<any>> = {
-    all: fetchAllNotificationsApi,
-    meter: fetchMeterAlertsApi,
-    system: fetchSystemAlertsApi,
-  };
+  const {
+    alertsData,
+    readAlert,
+    markAlertsAsRead,
+    bulkDelete: deleteAlerts,
+    isLoadingData: loadingAlerts,
+    isProcessing: processingAlerts,
+  } = useAlert();
 
   const {
-    data: notifications,
-    isLoading,
-    isError,
-  } = useQuery<any, Error, NotificationOrAlert[]>({
-    queryKey: ["notifications", activeTab],
-    queryFn: queryFnMap[activeTab],
-    select: (response) => {
-      // PERBAIKAN: Akses data dengan aman, karena struktur respons API bisa berbeda.
-      const data = response.data.data || [];
-
-      if (activeTab === "all") {
-        return data.map((item: any) => ({
-          ...item,
-          id: item.notification_id,
-          type: "notification",
-        }));
-      }
-      return data.map((item: any) => ({
-        ...item,
-        id: item.alert_id,
-        type: "alert",
-      }));
-    },
-  });
+    notificationsData,
+    readNotification,
+    markNotificationsAsRead,
+    bulkDelete: deleteNotifs,
+    isLoadingData: loadingNotifs,
+    isProcessing: processingNotifs,
+  } = useNotification();
 
   useEffect(() => {
     setSelectedIds(new Set());
   }, [activeTab]);
 
+  const displayData: NotificationUI[] = useMemo(() => {
+    const normalizedAlerts: NotificationUI[] = (alertsData || []).map(
+      (alert) => ({
+        id: `alert-${alert.alert_id}`,
+        rawId: alert.alert_id,
+        type: "alert",
+        title: alert.title,
+        description: alert.description,
+        date: alert.alert_timestamp,
+        is_read: alert.status === "READ",
+        status: alert.status,
+        meter_code: alert.meter_code,
+        energy_type: "Electricity",
+        acknowledged_by: alert.acknowledged_by
+          ? { username: alert.username }
+          : null,
+      })
+    );
+
+    const normalizedNotifs: NotificationUI[] = (notificationsData || []).map(
+      (notif) => ({
+        id: `notif-${notif.notification_id}`,
+        rawId: notif.notification_id,
+        type: "notification",
+        title: notif.title,
+        description: notif.message,
+        date: notif.created_at,
+        is_read: notif.is_read,
+        status: "INFO",
+      })
+    );
+
+    let combined: NotificationUI[] = [];
+    if (activeTab === "generals") {
+      combined = normalizedNotifs;
+    } else if (activeTab === "meters") {
+      combined = normalizedAlerts;
+    } else if (activeTab === "system") {
+      combined = normalizedNotifs;
+    }
+
+    return combined.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }, [alertsData, notificationsData, activeTab]);
+
+  console.log(alertsData);
+
   const unreadCount = useMemo(
-    () => (notifications || [])?.filter((n) => !n.is_read).length,
-    [notifications]
+    () => displayData.filter((n) => !n.is_read).length,
+    [displayData]
   );
+  const isListEmpty = displayData.length === 0;
+  const isAllSelected = !isListEmpty && selectedIds.size === displayData.length;
+  const isLoading = loadingAlerts || loadingNotifs;
+  const isProcessing = processingAlerts || processingNotifs;
 
-  const handleSuccess = (message: string) => {
-    toast.success(message);
-    queryClient.invalidateQueries({ queryKey: ["notifications"] }); // Invalidate all tabs for consistency
-    setSelectedIds(new Set());
-    setDialogAction(null);
-  };
+  const splitIds = (ids: Set<string>) => {
+    const alertIds: number[] = [];
+    const notifIds: number[] = [];
 
-  const handleError = (error: any, defaultMessage: string) => {
-    const message = error.response?.data?.message || defaultMessage;
-    toast.error(message);
-  };
-
-  const { mutate: markAsRead } = useMutation<
-    any,
-    Error,
-    { id: string; type: "notification" | "alert" }
-  >({
-    mutationFn: ({ id, type }) =>
-      type === "notification" ? markAsReadApi(id) : markAlertAsReadApi(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications", activeTab] });
-    },
-    onError: (err) => handleError(err, "Gagal menandai notifikasi."),
-  });
-
-  const { mutate: markAllAsRead, isPending: isMarkingAll } = useMutation({
-    mutationFn: (scope: TabType) => markAllAsReadApi(scope),
-    onSuccess: () => handleSuccess("Semua notifikasi ditandai telah dibaca."),
-    onError: (err) => handleError(err, "Gagal menandai semua notifikasi."),
-  });
-
-  const { mutate: markSelectedAsRead, isPending: isMarkingSelected } =
-    useMutation({
-      // PERBAIKAN: Logika untuk memanggil API yang benar berdasarkan tipe item.
-      mutationFn: async (ids: string[]) => {
-        const itemsToMark = (notifications || []).filter((n) =>
-          ids.includes(n.id)
-        );
-        const promises = itemsToMark.map((item) =>
-          item.type === "notification"
-            ? markAsReadApi(item.id)
-            : markAlertAsReadApi(item.id)
-        );
-        return Promise.all(promises);
-      },
-      onSuccess: () =>
-        handleSuccess("Notifikasi terpilih ditandai telah dibaca."),
-      onError: (err) => handleError(err, "Gagal menandai notifikasi."),
+    ids.forEach((id) => {
+      const [type, rawId] = id.split("-");
+      if (type === "alert") alertIds.push(Number(rawId));
+      if (type === "notif") notifIds.push(Number(rawId));
     });
 
-  const { mutate: deleteSelected, isPending: isDeletingSelected } = useMutation(
-    {
-      // PERBAIKAN: Logika untuk memanggil endpoint delete yang benar.
-      mutationFn: (params: { ids: string[]; scope: TabType }) => {
-        if (params.scope === "all") {
-          // Gunakan API notifikasi umum untuk tab "Semua"
-          return bulkDeleteNotificationsApi(params.ids);
-        }
-        // Untuk scope 'meter' atau 'system'
-        return bulkDeleteAlertsApi({
-          alertIds: params.ids,
-        });
-      },
-      onSuccess: () => handleSuccess("Notifikasi terpilih berhasil dihapus."),
-      onError: (err) => handleError(err, "Gagal menghapus notifikasi."),
-    }
-  );
-
-  const { mutate: deleteAll, isPending: isDeletingAll } = useMutation({
-    mutationFn: (scope: TabType) => deleteAllApi(scope),
-    onSuccess: () => handleSuccess("Semua notifikasi berhasil dihapus."),
-    onError: (err) => handleError(err, "Gagal menghapus semua notifikasi."),
-  });
-
-  const handleSelect = (id: string) => {
-    const newSelectedIds = new Set(selectedIds);
-    newSelectedIds.has(id) ? newSelectedIds.delete(id) : newSelectedIds.add(id);
-    setSelectedIds(newSelectedIds);
+    return { alertIds, notifIds };
   };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      // PERBAIKAN: Pastikan `notifications` adalah array sebelum di-map.
-      setSelectedIds(new Set((notifications || []).map((n) => n.id)));
-    } else {
-      setSelectedIds(new Set());
-    }
-  };
-
-  const handleNotificationClick = (notification: NotificationOrAlert) => {
-    if (!notification.is_read) {
-      markAsRead({ id: notification.id, type: notification.type });
-    }
+  const handleMarkSelectedRead = () => {
+    const { alertIds, notifIds } = splitIds(selectedIds);
+    if (alertIds.length > 0) markAlertsAsRead(alertIds);
+    if (notifIds.length > 0) markNotificationsAsRead(notifIds);
+    setSelectedIds(new Set());
   };
 
   const handleConfirmDelete = () => {
     if (dialogAction === "delete-all") {
-      deleteAll(activeTab);
+      const allIds = new Set(displayData.map((d) => d.id));
+      const { alertIds, notifIds } = splitIds(allIds);
+      if (alertIds.length > 0) deleteAlerts(alertIds);
+      if (notifIds.length > 0) deleteNotifs(notifIds);
     } else if (dialogAction === "delete-selected") {
-      deleteSelected({
-        ids: Array.from(selectedIds),
-        scope: activeTab,
-      });
+      const { alertIds, notifIds } = splitIds(selectedIds);
+      if (alertIds.length > 0) deleteAlerts(alertIds);
+      if (notifIds.length > 0) deleteNotifs(notifIds);
     }
+    setDialogAction(null);
+    setSelectedIds(new Set());
   };
 
-  const isAllSelected =
-    (notifications?.length ?? 0) > 0 &&
-    selectedIds.size === notifications?.length;
+  const handleItemClick = useCallback(
+    (item: NotificationUI) => {
+      if (!item.is_read) {
+        if (item.type === "alert") readAlert(item.rawId);
+        else readNotification(item.rawId);
+      }
+    },
+    [readAlert, readNotification]
+  );
+
+  const handleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
+
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+
+      return newSet;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(
+    (checked: boolean) => {
+      if (checked && displayData.length > 0) {
+        setSelectedIds(new Set(displayData.map((n) => n.id)));
+      } else {
+        setSelectedIds(new Set());
+      }
+    },
+    [displayData]
+  );
 
   return (
-    <div className="container mx-auto max-w-4xl py-8">
-      <Card>
+    <div className="container mx-auto max-w-5xl px-4 py-8">
+      <Card className="border-t-primary bg-card border-t-4 shadow-lg">
         <Tabs
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as TabType)}
           className="w-full"
         >
-          <NotificationHeader unreadCount={unreadCount} />
-          <CardHeader>
+          {/* HEADER */}
+          <div className="border-border/50 bg-muted/5 flex items-center justify-between border-b pr-6">
+            <NotificationHeader unreadCount={unreadCount} />
+            {isLoading && (
+              <div className="text-muted-foreground flex animate-pulse items-center gap-2 text-xs">
+                <Loader2 className="text-primary h-3 w-3 animate-spin" />
+                <span>Syncing...</span>
+              </div>
+            )}
+          </div>
+
+          <CardHeader className="bg-muted/5 pb-2 pt-4">
             <NotificationTabs />
           </CardHeader>
-          <CardContent>
-            {(notifications?.length ?? 0) > 0 && (
+
+          <CardContent className="p-0">
+            {/* TOOLBAR */}
+            <div className="border-border/40 bg-background/50 sticky top-0 z-10 border-b px-6 py-3 backdrop-blur-sm">
               <NotificationActions
                 isAllSelected={isAllSelected}
                 onSelectAll={handleSelectAll}
                 selectedCount={selectedIds.size}
-                isMarkingSelected={isMarkingSelected}
-                onMarkSelectedRead={() =>
-                  markSelectedAsRead(Array.from(selectedIds))
-                }
                 unreadCount={unreadCount}
-                isMarkingAll={isMarkingAll}
-                onMarkAllRead={() => markAllAsRead(activeTab)}
-                isDeletingSelected={isDeletingSelected}
+                isMarkingAll={false}
+                isMarkingSelected={isProcessing}
+                isDeletingSelected={isProcessing}
+                onMarkSelectedRead={handleMarkSelectedRead}
+                onMarkAllRead={() => {
+                  handleMarkSelectedRead();
+                }}
                 onDeleteSelected={() => setDialogAction("delete-selected")}
                 onDeleteAll={() => setDialogAction("delete-all")}
+                isDisabled={isLoading || isProcessing || isListEmpty}
               />
-            )}
-            <NotificationContent
-              isLoading={isLoading}
-              isError={isError}
-              notifications={notifications}
-              selectedIds={selectedIds}
-              onSelect={handleSelect}
-              onItemClick={handleNotificationClick}
-              activeTab={activeTab}
-            />
+            </div>
+
+            {/* CONTENT LIST */}
+            <div className="relative min-h-[400px] bg-slate-50/50 dark:bg-slate-950/20">
+              <NotificationContent
+                isLoading={isLoading}
+                isError={false}
+                notifications={displayData}
+                selectedIds={selectedIds}
+                onSelect={handleSelect}
+                onItemClick={handleItemClick}
+                activeTab={activeTab}
+              />
+
+              {/* Loading Overlay */}
+              {isProcessing && (
+                <div className="bg-background/50 absolute inset-0 z-50 flex flex-col items-center justify-center gap-2 backdrop-blur-[1px]">
+                  <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                  <span className="text-primary text-xs font-bold uppercase tracking-widest">
+                    Processing...
+                  </span>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Tabs>
       </Card>
+
       <DeleteConfirmationDialog
         open={!!dialogAction}
         onOpenChange={() => setDialogAction(null)}
         dialogAction={dialogAction}
         selectedCount={selectedIds.size}
         onConfirm={handleConfirmDelete}
-        isPending={isDeletingAll || isDeletingSelected}
+        isPending={isProcessing}
       />
     </div>
   );

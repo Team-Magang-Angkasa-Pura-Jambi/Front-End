@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/common/components/ui/card";
+import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/common/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,12 +31,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/DataTable";
+} from "@/common/components/ui/alert-dialog";
+import { Badge } from "@/common/components/ui/badge";
+import { DataTable } from "@/common/components/table/dataTable";
 
 import { PriceSchemeForm } from "./forms/priceSchema.form";
-import { DataTableRowActions } from "./dataTableRowActions";
 
 import { ReadingType } from "@/common/types/readingTypes";
 import { ApiErrorResponse } from "@/common/types/api";
@@ -50,6 +49,7 @@ import {
 import { getReadingTypesApi } from "../services/readingsType.service";
 import { getTaxesApi } from "../services/tax.service";
 import { schemaFormValues } from "../schemas/schemaPrice.schema";
+import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
 
 const RatesCell = ({
   row,
@@ -76,7 +76,7 @@ const RatesCell = ({
           <span className="text-muted-foreground">
             {getReadingTypeName(rate.reading_type_id)}:
           </span>
-          <span className="font-mono whitespace-nowrap font-medium">
+          <span className="whitespace-nowrap font-mono font-medium">
             {new Intl.NumberFormat("id-ID", {
               style: "currency",
               currency: "IDR",
@@ -157,11 +157,7 @@ export const createPriceSchemeColumns = (
   {
     id: "actions",
     cell: ({ row }) => (
-      <DataTableRowActions
-        row={row.original}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+      <DataTableRowActions row={row} onEdit={onEdit} onDelete={onDelete} />
     ),
   },
 ];

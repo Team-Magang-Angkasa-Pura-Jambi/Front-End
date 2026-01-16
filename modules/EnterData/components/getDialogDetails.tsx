@@ -1,5 +1,5 @@
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/common/components/ui/label";
+import { Textarea } from "@/common/components/ui/textarea";
 import { DialogType } from "../types";
 import { FormReadingElectric } from "./formElectricty";
 import { FormReadingWater } from "./formWater"; // PERBAIKAN: Impor form baru

@@ -18,14 +18,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/common/components/ui/button";
+import { Input } from "@/common/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+} from "@/common/components/ui/popover";
+import { Calendar } from "@/common/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -34,7 +34,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/common/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -42,15 +42,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/common/components/ui/select";
 
-import {
-  getEnergyTypesApi,
-  EnergyTypesApiResponse,
-} from "@/services/energyType.service";
-
-import { useAuthStore } from "@/stores/authStore";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/common/components/ui/scroll-area";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
 import { formSchema, FormValues } from "../schemas/reading.schema";
@@ -60,6 +54,10 @@ import {
   submitReadingApi,
 } from "../services";
 import { EnergyTypeName } from "@/common/types/energy";
+import {
+  EnergyTypesApiResponse,
+  getEnergyTypesApi,
+} from "@/modules/masterData/services/energyType.service";
 
 interface FormReadingProps {
   onSuccess?: () => void;
@@ -79,7 +77,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "details",
   });
@@ -172,7 +170,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <ScrollArea className="max-h-[70vh] overflow-y-auto p-4">
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
             <FormField
               control={form.control}
               name="meter_id"
@@ -218,11 +216,12 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
               name="reading_date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Tanggal Pembacaan</FormLabel>
+                  <FormLabel>Tanggal </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
+                          key={field.value?.toString()}
                           variant={"outline"}
                           className={`w-full justify-start text-left font-normal ${
                             !field.value && "text-muted-foreground"
@@ -242,6 +241,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
+                        defaultMonth={field.value}
                         initialFocus
                       />
                     </PopoverContent>
@@ -266,7 +266,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
               return (
                 <div
                   key={field.id}
-                  className="grid grid-cols-12 gap-4 items-start"
+                  className="grid grid-cols-12 items-start gap-4"
                 >
                   <div className="col-span-6">
                     <FormField
@@ -289,8 +289,8 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                                     !selectedMeterId
                                       ? "Pilih Jenis"
                                       : isLoadingData
-                                      ? "Memuat..."
-                                      : "Pilih Jenis"
+                                        ? "Memuat..."
+                                        : "Pilih Jenis"
                                   }
                                 />
                               </SelectTrigger>
@@ -363,7 +363,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-primary"
+                                className="text-muted-foreground hover:text-primary absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
                                 onClick={() =>
                                   form.setValue(
                                     `details.${index}.value`,
@@ -386,7 +386,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                       )}
                     />
                   </div>
-                  <div className="col-span-1 flex items-end h-[58px]">
+                  <div className="col-span-1 flex h-[58px] items-end">
                     {fields.length > 1 && (
                       <Button
                         variant="ghost"
@@ -394,7 +394,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                         type="button"
                         onClick={() => remove(index)}
                       >
-                        <XCircleIcon className="h-5 w-5 text-destructive" />
+                        <XCircleIcon className="text-destructive h-5 w-5" />
                       </Button>
                     )}
                   </div>

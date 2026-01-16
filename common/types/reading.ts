@@ -7,4 +7,3 @@ export interface ReadingDetail {
   reading_type_id: number | "";
   value: number | "";
 }
-
