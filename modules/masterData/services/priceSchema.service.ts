@@ -8,7 +8,7 @@ export interface PriceSchemePayload {
   description?: string | null; // Opsional sesuai schema
   is_active: boolean;
 
-  rates: {
+  rates?: {
     reading_type_id: number;
     value: number;
   }[];
