@@ -30,7 +30,7 @@ export const useBudgetAnalytics = (
 
     const rawData = found;
 
-    const toMillions = (val: number) => val / 1_000_000;
+    const toMillions = (val: number) => val / 1;
 
     const initial = toMillions(rawData.initial);
     const used = (rawData.used || []).map(toMillions);

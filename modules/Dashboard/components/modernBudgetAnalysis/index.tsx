@@ -23,7 +23,6 @@ import { useBudgetAnalytics } from "../../hooks/useBudgetAnalytics";
 import { KpiStats } from "./charts/kpiStats";
 import { SavedChart, WaterfallChart } from "./charts/waterfallChart";
 import { ErrorFetchData } from "@/common/components/ErrorFetchData";
-import { EmptyData } from "@/common/components/EmptyData";
 import { getEnergyIcon } from "./constants";
 import { useDownloadImage } from "../../hooks/useDownloadImage";
 import { Button } from "@/common/components/ui/button";
@@ -47,10 +46,6 @@ export const ModernBudgetAnalysis = () => {
   }
   if (isError) {
     return <ErrorFetchData message={error?.message} />;
-  }
-
-  if (!data) {
-    return <EmptyData />;
   }
 
   return (
@@ -97,7 +92,17 @@ export const ModernBudgetAnalysis = () => {
       </Card>
 
       <div className="grid shrink-0 grid-cols-1 gap-4 md:grid-cols-3">
-        <KpiStats totals={data?.totals} isLoading={isLoading} />
+        <KpiStats
+          totals={
+            data?.totals ?? {
+              initial: 0,
+              totalUsed: 0,
+              totalSaved: 0,
+              remaining: 0,
+            }
+          }
+          isLoading={isLoading}
+        />
       </div>
 
       <Card
