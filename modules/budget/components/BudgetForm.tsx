@@ -278,7 +278,15 @@ export function BudgetForm({
           )}
 
           {/* TOTAL BUDGET & SAVING */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div
+            className={cn(
+              "grid grid-cols-1 gap-6",
+              // Jika mode parent (ada 2 field), bagi 2 kolom.
+              // Jika mode child (cuma 1 field), buat full width agar rapi.
+              budgetType === "parent" ? "md:grid-cols-2" : "md:grid-cols-1"
+            )}
+          >
+            {/* FIELD 1: TOTAL BUDGET */}
             <FormField
               control={control}
               name="total_budget"
@@ -292,20 +300,20 @@ export function BudgetForm({
                         placeholder="0"
                         min={0}
                         {...field}
-                        // Untuk child budget, visual max (bukan validasi keras HTML karena ada Zod)
+                        // Validasi visual max untuk child budget
                         max={
                           budgetType === "child" ? availableBudget : undefined
                         }
                         className="h-11 pr-28 text-lg font-medium"
                       />
 
-                      {/* Tombol Gunakan Sisa hanya muncul di Child Mode dan jika ada sisa */}
+                      {/* Tombol Gunakan Sisa (Child Mode Only) */}
                       {budgetType === "child" && availableBudget > 0 && (
                         <Button
                           type="button"
                           variant="secondary"
                           size="sm"
-                          className="absolute right-1.5 top-1/2 h-8 -translate-y-1/2 bg-blue-50 text-xs font-medium text-blue-700 hover:bg-blue-100"
+                          className="absolute top-1/2 right-1.5 h-8 -translate-y-1/2 bg-blue-50 text-xs font-medium text-blue-700 hover:bg-blue-100"
                           onClick={() =>
                             setValue("total_budget", availableBudget)
                           }
@@ -337,6 +345,7 @@ export function BudgetForm({
               )}
             />
 
+            {/* FIELD 2: EFFICIENCY TAG (Hanya muncul saat Parent Mode) */}
             {budgetType === "parent" && (
               <FormField
                 control={control}
@@ -354,7 +363,7 @@ export function BudgetForm({
                           {...field}
                           className="h-11"
                         />
-                        <div className="text-muted-foreground pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm">
+                        <div className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm">
                           {(parseFloat(String(field.value || 0)) * 100).toFixed(
                             1
                           )}
@@ -412,7 +421,7 @@ export function BudgetForm({
             ) : (
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <Label className="text-muted-foreground text-xs uppercase tracking-wider">
+                  <Label className="text-muted-foreground text-xs tracking-wider uppercase">
                     Tipe Energi (Otomatis)
                   </Label>
                   <div className="text-primary text-lg font-bold">
@@ -527,7 +536,7 @@ export function BudgetForm({
                                   className="h-10 pr-6 text-right"
                                   {...field}
                                 />
-                                <span className="text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium">
+                                <span className="text-muted-foreground absolute top-1/2 right-2 -translate-y-1/2 text-xs font-medium">
                                   %
                                 </span>
                               </div>
