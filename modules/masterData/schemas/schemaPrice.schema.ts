@@ -5,7 +5,9 @@ export const priceSchemeSchema = z.object({
   effective_date: z.coerce.date({
     error: "Tanggal efektif wajib diisi.",
   }),
+
   is_active: z.boolean().optional().default(true),
+
   tariff_group_id: z.coerce
     .number()
     .int()
@@ -25,8 +27,9 @@ export const priceSchemeSchema = z.object({
       (items) =>
         new Set(items.map((i) => i.reading_type_id)).size === items.length,
       { message: "Setiap jenis pembacaan hanya boleh memiliki satu tarif." }
-    )
-    .optional(),
+    ).optional(),
+
+    
   tax_ids: z.array(z.coerce.number()).optional(),
 });
 

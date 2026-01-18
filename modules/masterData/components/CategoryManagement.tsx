@@ -86,13 +86,12 @@ export const CategoryManagement = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["categories"],
-    queryFn: async () => {
-      const res = await categoryApi.getAll();
-      return res.data;
-    },
+    queryFn: async () => categoryApi.getAll(),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
+
+  const categoriesData = useMemo(() => data?.data || [], [data]);
 
   const mutation = useMutation({
     mutationFn: (payload: CreateCategoryPayload) => {
@@ -181,7 +180,7 @@ export const CategoryManagement = () => {
       <CardContent>
         <DataTable<CategoryType, unknown>
           columns={columns}
-          data={data || []}
+          data={categoriesData || []}
           isLoading={isLoading}
           filterColumnId="name"
           filterPlaceholder="Cari Kategori"
