@@ -13,7 +13,7 @@ import {
   categoryApi,
   CategoryType,
   CreateCategoryPayload,
-} from "@/services/category.service";
+} from "@/modules/masterData/services/category.service";
 
 import { Button } from "@/common/components/ui/button";
 import {

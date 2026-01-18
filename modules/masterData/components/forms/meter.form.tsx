@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from "@/common/components/ui/form";
 import { DialogFooter } from "@/common/components/ui/dialog";
-import { categoryApi } from "@/services/category.service";
+import { categoryApi } from "@/modules/masterData/services/category.service";
 import { STATUS_METER } from "../../types/meter.type";
 import { MeterFormValues, meterSchema } from "../../schemas/meter.schema";
 import { ENERGY_TYPES } from "@/common/types/energy";
@@ -66,6 +66,8 @@ export const MeterForm = ({
   });
 
   const energyTypes = useMemo(() => energyTypeRes?.data || [], [energyTypeRes]);
+  
+  const categoriesData = useMemo(() => categoryRes?.data || [], [categoryRes]);
 
   const form = useForm<MeterFormValues>({
     resolver: zodResolver(meterSchema) as Resolver<MeterFormValues>,
@@ -215,7 +217,7 @@ export const MeterForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {categoryRes?.data?.map((cat) => (
+                    {categoriesData?.map((cat) => (
                       <SelectItem
                         key={cat.category_id}
                         value={String(cat.category_id)}
