@@ -62,7 +62,14 @@ export const AnnualBudgetDialog = ({
     control: form.control,
     name: "parent_budget_id",
   });
+  const allocations = form.watch("allocations") || [];
+  const totalWeight = allocations.reduce(
+    (sum, item) => sum + (parseFloat(String(item.weight || 0)) || 0),
+    0
+  );
 
+  const targetTotal = 1; // Asumsi input user adalah angka persen (contoh: 25, 50, 25)
+  const isValidTotal = Math.abs(totalWeight - targetTotal) < 1;
   useEffect(() => {
     if (open) {
       if (editingBudget) {
@@ -181,6 +188,9 @@ export const AnnualBudgetDialog = ({
               isLoadingEnergyTypes={isLoadingEnergy}
               prepareNextPeriodBudget={nextBudgetAnalysis}
               selectedEnergyTypeName={selectedEnergyTypeName}
+              isValidTotal={isValidTotal}
+              totalWeight={totalWeight}
+              targetTotal={targetTotal}
             />
           </form>
         </Form>

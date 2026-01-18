@@ -2,9 +2,16 @@
 
 import React from "react";
 import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
-import { CalendarIcon, PlusCircle, Trash2, Copy } from "lucide-react"; // Ganti XCircle dengan Trash2 untuk UX delete
-import { format } from "date-fns"; // Gunakan date-fns standar jika tidak butuh TZ spesifik, atau tetap date-fns-tz
-import { id } from "date-fns/locale"; // Tambahkan locale ID untuk format tanggal Indonesia
+import {
+  CalendarIcon,
+  PlusCircle,
+  Trash2,
+  Copy,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 import { Button } from "@/common/components/ui/button";
 import { DialogFooter } from "@/common/components/ui/dialog";
@@ -54,8 +61,11 @@ interface BudgetFormProps {
   meters: MeterType[];
   isLoadingMeters: boolean;
   isLoadingEnergyTypes: boolean;
-  prepareNextPeriodBudget?: PrepareNextPeriodBudget; // Dibuat optional untuk safety
+  prepareNextPeriodBudget?: PrepareNextPeriodBudget;
   selectedEnergyTypeName?: string;
+  isValidTotal?: boolean;
+  totalWeight?: number;
+  targetTotal?: number;
 }
 
 export function BudgetForm({
@@ -69,11 +79,14 @@ export function BudgetForm({
   isLoadingEnergyTypes,
   prepareNextPeriodBudget,
   selectedEnergyTypeName,
+  isValidTotal,
+  totalWeight,
+  targetTotal,
 }: BudgetFormProps) {
   const form = useFormContext<AnnualBudgetFormValues>();
+
   const { control, setValue, watch } = form;
 
-  // Watch period_start untuk membatasi period_end
   const periodStart = watch("period_start");
 
   const { fields, append, remove } = useFieldArray({
@@ -82,14 +95,13 @@ export function BudgetForm({
   });
 
   const allocationValues = useWatch({ control, name: "allocations" }) || [];
-  // Filter undefined/null values untuk menghindari crash saat render
+
   const selectedMeterIds = allocationValues
     .map((alloc) => alloc?.meter_id)
     .filter(Boolean);
 
   const selectedEnergyTypeId = useWatch({ control, name: "energy_type_id" });
 
-  // Helper untuk mendapatkan sisa budget
   const availableBudget =
     prepareNextPeriodBudget?.availableBudgetForNextPeriod ?? 0;
 
@@ -106,7 +118,7 @@ export function BudgetForm({
               onValueChange={(value: "parent" | "child") => {
                 setBudgetType(value);
                 setValue("budgetType", value, { shouldValidate: true });
-                // Reset allocations jika pindah ke parent agar bersih
+
                 if (value === "parent") setValue("allocations", []);
               }}
               value={budgetType}
@@ -207,7 +219,7 @@ export function BudgetForm({
                             "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
-                          disabled={!periodStart} // Disable jika start belum dipilih
+                          disabled={!periodStart}
                         >
                           {field.value ? (
                             format(field.value, "d MMMM yyyy", { locale: id })
@@ -223,10 +235,7 @@ export function BudgetForm({
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) =>
-                          // Disable tanggal sebelum period_start
-                          date < (periodStart || new Date(0))
-                        }
+                        disabled={(date) => date < (periodStart || new Date(0))}
                         initialFocus
                         className="rounded-md border shadow"
                       />
@@ -281,8 +290,7 @@ export function BudgetForm({
           <div
             className={cn(
               "grid grid-cols-1 gap-6",
-              // Jika mode parent (ada 2 field), bagi 2 kolom.
-              // Jika mode child (cuma 1 field), buat full width agar rapi.
+
               budgetType === "parent" ? "md:grid-cols-2" : "md:grid-cols-1"
             )}
           >
@@ -300,7 +308,6 @@ export function BudgetForm({
                         placeholder="0"
                         min={0}
                         {...field}
-                        // Validasi visual max untuk child budget
                         max={
                           budgetType === "child" ? availableBudget : undefined
                         }
@@ -393,7 +400,7 @@ export function BudgetForm({
                     <Select
                       onValueChange={(value) => {
                         field.onChange(Number(value));
-                        setValue("allocations", []); // Reset alokasi jika energi berubah
+                        setValue("allocations", []);
                       }}
                       value={field.value ? String(field.value) : ""}
                       disabled={isLoadingEnergyTypes || !!editingBudget}
@@ -455,7 +462,7 @@ export function BudgetForm({
                   size="sm"
                   onClick={() =>
                     append({
-                      meter_id: undefined as unknown as number, // Hacky but needed for initial empty state
+                      meter_id: undefined as unknown as number,
                       weight: 0,
                     })
                   }
@@ -504,7 +511,6 @@ export function BudgetForm({
                                   <SelectItem
                                     key={m.meter_id}
                                     value={String(m.meter_id)}
-                                    // Disable jika sudah dipilih di baris lain, KECUALI baris ini sendiri
                                     disabled={
                                       selectedMeterIds.includes(m.meter_id) &&
                                       m.meter_id !== field.value
@@ -557,6 +563,38 @@ export function BudgetForm({
                     </Button>
                   </div>
                 ))}
+              </div>
+              <div
+                className={cn(
+                  "flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition-all",
+                  isValidTotal
+                    ? "border-green-200 bg-green-50 text-green-700"
+                    : "border-destructive/30 bg-destructive/10 text-destructive"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  {isValidTotal ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5" />
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-semibold">
+                      Total Alokasi: {totalWeight?.toFixed(2)}%
+                    </span>
+                    {!isValidTotal && (
+                      <span className="text-xs opacity-90">
+                        Total harus tepat 100%. (Kurang/Lebih:{" "}
+                        {((targetTotal ?? 0) - (totalWeight ?? 0)).toFixed(2)}%)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Indikator Status Kanan */}
+                <div className="text-right font-medium">
+                  {isValidTotal ? "Valid" : "Invalid"}
+                </div>
               </div>
 
               {/* Preview Kalkulasi */}
