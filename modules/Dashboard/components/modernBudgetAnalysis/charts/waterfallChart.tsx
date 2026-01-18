@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { CHART_COLORS } from "../../../constants";
 import { Badge } from "@/common/components/ui/badge";
-import { TrendingDown, AlertCircle } from "lucide-react";
+import { TrendingDown } from "lucide-react";
 import { EmptyData } from "@/common/components/EmptyData";
 
 // Komponen Placeholder jika data kosong (Bisa Anda ganti dengan komponen EmptyData asli Anda)
