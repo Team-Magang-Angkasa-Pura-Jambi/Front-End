@@ -542,9 +542,7 @@ export function BudgetForm({
                                   className="h-10 pr-6 text-right"
                                   {...field}
                                 />
-                                <span className="text-muted-foreground absolute top-1/2 right-2 -translate-y-1/2 text-xs font-medium">
-                                  
-                                </span>
+                                <span className="text-muted-foreground absolute top-1/2 right-2 -translate-y-1/2 text-xs font-medium"></span>
                               </div>
                             </FormControl>
                             <FormMessage className="mt-1 text-xs" />
