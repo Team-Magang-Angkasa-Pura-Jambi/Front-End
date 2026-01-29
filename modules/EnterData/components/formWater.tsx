@@ -54,6 +54,7 @@ import {
   submitReadingApi,
 } from "../services";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
+import { formatToISO } from "@/utils/formatIso";
 
 interface FormReadingProps {
   onSuccess?: () => void;
@@ -161,7 +162,7 @@ export const FormReadingWater = ({
   const onSubmit = (values: FormValues) => {
     const payload: ReadingPayload = {
       meter_id: values.meter_id,
-      reading_date: values.reading_date,
+      reading_date: formatToISO(values.reading_date),
       details: values.details.map((d) => ({
         reading_type_id: d.reading_type_id,
         value: d.value,
@@ -359,7 +360,7 @@ export const FormReadingWater = ({
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="text-muted-foreground hover:text-primary absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                              className="text-muted-foreground hover:text-primary absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2"
                               onClick={() =>
                                 form.setValue(
                                   `details.${index}.value`,

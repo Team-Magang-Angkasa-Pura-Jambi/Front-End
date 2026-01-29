@@ -59,11 +59,14 @@ import {
   submitReadingApi,
 } from "../services";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
+import { formatToISO } from "@/utils/formatIso";
 
 interface FormReadingProps {
   onSuccess?: () => void;
   type_name: "Electricity" | "Water" | "Fuel";
 }
+
+
 
 export const FormReadingElectric = ({
   onSuccess,
@@ -107,6 +110,7 @@ export const FormReadingElectric = ({
   const selectedMeterId = form.watch("meter_id");
   const detailsValues = form.watch("details");
   const readingDate = form.watch("reading_date");
+  console.log(readingDate);
 
   const lastReadingQueries = useQueries({
     queries: detailsValues?.map((detail) => ({
@@ -153,7 +157,7 @@ export const FormReadingElectric = ({
   const onSubmit: SubmitHandler<FormValues> = (values) => {
     const payload: ReadingPayload = {
       meter_id: values.meter_id,
-      reading_date: values.reading_date,
+      reading_date: formatToISO(values.reading_date),
       details: values.details.map((d) => ({
         reading_type_id: d.reading_type_id,
         value: d.value,
@@ -359,7 +363,7 @@ export const FormReadingElectric = ({
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="text-muted-foreground hover:text-primary absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                                className="text-muted-foreground hover:text-primary absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2"
                                 onClick={() =>
                                   form.setValue(
                                     `details.${index}.value`,

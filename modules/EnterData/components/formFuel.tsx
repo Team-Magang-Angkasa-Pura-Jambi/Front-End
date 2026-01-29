@@ -58,6 +58,7 @@ import {
   EnergyTypesApiResponse,
   getEnergyTypesApi,
 } from "@/modules/masterData/services/energyType.service";
+import { formatToISO } from "@/utils/formatIso";
 
 interface FormReadingProps {
   onSuccess?: () => void;
@@ -157,7 +158,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
   const onSubmit = (values: FormValues) => {
     const payload: ReadingPayload = {
       meter_id: values.meter_id,
-      reading_date: values.reading_date,
+      reading_date: formatToISO(values.reading_date),
       details: values.details.map((d) => ({
         reading_type_id: d.reading_type_id,
         value: d.value,

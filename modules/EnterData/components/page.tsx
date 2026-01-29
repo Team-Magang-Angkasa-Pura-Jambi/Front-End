@@ -7,6 +7,8 @@ import { getDialogDetails } from "./getDialogDetails";
 import { cardData } from "../constant/cardData";
 import { DialogType } from "../types";
 
+
+
 export const Page = () => {
   const [openDialog, setOpenDialog] = useState<DialogType>(null);
   const [formData] = useState({});
@@ -19,6 +21,7 @@ export const Page = () => {
 
     setOpenDialog(null);
   };
+
 
   return (
     <div className="space-y-6">

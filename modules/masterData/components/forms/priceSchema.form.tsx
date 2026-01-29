@@ -39,6 +39,7 @@ import { ReadingType } from "@/common/types/readingTypes";
 import { PriceSchemeType } from "@/common/types/schemaPrice";
 import { getTaxesApi } from "../../services/tax.service";
 import { getTariffGroupsApi } from "../../services/tariffGroup.service";
+import { formatToISO } from "@/utils/formatIso";
 
 interface PriceSchemeFormProps {
   initialData?: PriceSchemeType | null;
@@ -99,11 +100,22 @@ export function PriceSchemeForm({
   const tariffGroups = tariffGroupsResponse?.data || [];
   const allTaxes = taxesResponse?.data || [];
 
+  const handleProcessData = (values: schemaFormValues) => {
+    // Pastikan tanggal dikirim sebagai ISO String
+    const formattedData = {
+      ...values,
+
+      effective_date: formatToISO(values.effective_date),
+    };
+
+    onSubmit(formattedData as unknown as schemaFormValues);
+  };
+
   return (
     <Form {...form}>
       <form
         id="price-scheme-form"
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleProcessData)}
         className="space-y-4"
       >
         <FormField

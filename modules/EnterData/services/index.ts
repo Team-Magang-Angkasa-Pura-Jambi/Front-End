@@ -2,7 +2,7 @@ import { ReadingDetail } from "@/common/types/reading";
 import api from "@/lib/api";
 
 export interface ReadingPayload {
-  reading_date: Date;
+  reading_date: Date | string;
   meter_id: number;
   details: ReadingDetail[];
 }
