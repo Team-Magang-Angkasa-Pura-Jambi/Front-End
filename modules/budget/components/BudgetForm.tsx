@@ -543,7 +543,7 @@ export function BudgetForm({
                                   {...field}
                                 />
                                 <span className="text-muted-foreground absolute top-1/2 right-2 -translate-y-1/2 text-xs font-medium">
-                                  %
+                                  
                                 </span>
                               </div>
                             </FormControl>

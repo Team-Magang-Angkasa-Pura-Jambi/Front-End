@@ -69,7 +69,7 @@ export const AnnualBudgetDialog = ({
   );
 
   const targetTotal = 1; // Asumsi input user adalah angka persen (contoh: 25, 50, 25)
-  const isValidTotal = Math.abs(totalWeight - targetTotal) < 1;
+  const isValidTotal = Math.abs(totalWeight - targetTotal) === 1;
   useEffect(() => {
     if (open) {
       if (editingBudget) {
