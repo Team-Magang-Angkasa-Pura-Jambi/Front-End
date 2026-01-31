@@ -30,11 +30,10 @@ import { id } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/common/types/api";
-import { RecapDataRow } from "../types/recap.type";
-import {
-  runSingleClassificationApi,
-  runSinglePredictionApi,
-} from "../services/recap.service";
+import { RecapDataRow, SingleAnalysisPayload } from "../types/recap.type";
+
+import { classifiesApi } from "../services/classify.service";
+import { predictApi } from "../services/predict.service";
 
 const formatCurrency = (amount: unknown): string => {
   const num = Number(amount);
@@ -127,7 +126,7 @@ const PredictionCell = ({
     AxiosError<ApiErrorResponse>,
     { date: string; meterId: number }
   >({
-    mutationFn: runSinglePredictionApi,
+    mutationFn: predictApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recapData"] });
       toast.success("Prediksi berhasil dijalankan.", {
@@ -183,9 +182,9 @@ const ClassificationActionCell = ({
   const { mutate, isPending } = useMutation<
     unknown,
     AxiosError<ApiErrorResponse>,
-    { date: string; meterId: number }
+    SingleAnalysisPayload
   >({
-    mutationFn: runSingleClassificationApi,
+    mutationFn: classifiesApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recapData"] });
       toast.success("Klasifikasi berhasil dijalankan.", {

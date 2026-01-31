@@ -174,7 +174,7 @@ export const EfficiencyRatioChart = () => {
                   axisLine={false}
                   tickLine={false}
                   // FORMATTER AXIS: 2 Angka Belakang Koma
-                  tickFormatter={(val) => `${Number(val).toFixed(2)} kWh`}
+                  tickFormatter={(val) => `${Number(val).toFixed(2)}`}
                   width={80} // Tambah lebar agar angka tidak terpotong
                   label={{
                     value: "Office (Total kWh)",

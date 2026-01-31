@@ -22,6 +22,7 @@ import { useDownloadImage } from "../../hooks/useDownloadImage";
 import { ErrorFetchData } from "@/common/components/ErrorFetchData";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { getStatusConfig } from "../../constants";
+import { formatToMwh } from "@/utils/formatKwh";
 
 export const MeterEfficiencyRanking = () => {
   const { ref, download, isExporting } = useDownloadImage<HTMLDivElement>();
@@ -38,7 +39,7 @@ export const MeterEfficiencyRanking = () => {
       ref={ref}
       className="flex h-full flex-col border-none shadow-md ring-1 ring-slate-200"
     >
-      <CardHeader className="flex flex-none flex-row items-center justify-between space-y-0 px-6 pb-4 pt-6">
+      <CardHeader className="flex flex-none flex-row items-center justify-between space-y-0 px-6 pt-6 pb-4">
         <CardTitle className="flex items-center gap-2 text-base font-bold">
           <Activity className="h-4 w-4 text-blue-500" />
           Beban Konsumsi Per Meteran
@@ -101,25 +102,22 @@ export const MeterEfficiencyRanking = () => {
                             isOver ? "text-red-600" : "text-green-600"
                           }`}
                         >
-                          {formatCurrencySmart(meter.consumption).val}{" "}
-                          <span className="text-[12px] font-normal text-slate-400">
-                            {meter.unit_of_measurement}
-                          </span>
+                          {formatToMwh(meter.consumption)}
+                          <span className="text-[12px] font-normal text-slate-400"></span>
                           {isOver && <ArrowUpRight className="h-3 w-3" />}
                         </div>
                         <p className="text-[10px] text-slate-400">
-                          {`Limit: ${formatCurrencySmart(meter.budget).val}
-                          ${meter.unit_of_measurement}`}
+                          {`Limit: ${formatToMwh(meter.budget)}`}
                         </p>
                       </div>
                     </div>
 
                     <div className="bg-background relative h-2.5 w-full overflow-hidden rounded-full">
                       <div
-                        className={`absolute left-0 top-0 h-full transition-all duration-1000 ${statusCfg.color}`}
+                        className={`absolute top-0 left-0 h-full transition-all duration-1000 ${statusCfg.color}`}
                         style={{ width: `${percentage}%` }}
                       />
-                      <div className="absolute right-0 top-0 z-10 h-full w-0.5 bg-slate-900 opacity-20" />
+                      <div className="absolute top-0 right-0 z-10 h-full w-0.5 bg-slate-900 opacity-20" />
                     </div>
                   </div>
                 );
@@ -134,7 +132,7 @@ export const MeterEfficiencyRanking = () => {
                   <Activity className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold uppercase tracking-wide">
+                  <h3 className="text-sm font-bold tracking-wide uppercase">
                     Kesehatan Sistem Metering
                   </h3>
                   <p className="text-xs text-slate-500">
@@ -156,7 +154,7 @@ export const MeterEfficiencyRanking = () => {
 
             <div className="grid grid-cols-3 gap-4 divide-x divide-slate-100">
               <div className="px-2">
-                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase text-slate-400">
+                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase">
                   <Zap className="h-3 w-3" /> Total Unit
                 </p>
                 <p className="text-2xl font-bold text-slate-800">
@@ -166,7 +164,7 @@ export const MeterEfficiencyRanking = () => {
               </div>
 
               <div className="px-4">
-                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase text-slate-400">
+                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase">
                   <AlertTriangle className="h-3 w-3 text-red-500" /> Kritis
                 </p>
                 <p className="text-2xl font-bold text-red-600">
@@ -178,7 +176,7 @@ export const MeterEfficiencyRanking = () => {
               </div>
 
               <div className="px-4">
-                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase text-slate-400">
+                <p className="mb-1 flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase">
                   <CheckCircle2 className="h-3 w-3 text-emerald-500" /> Efisien
                 </p>
                 <p className="text-2xl font-bold text-emerald-600">

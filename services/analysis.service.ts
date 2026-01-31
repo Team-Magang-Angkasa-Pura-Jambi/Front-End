@@ -74,19 +74,6 @@ export const getTodaySummaryApi = async (): Promise<
   return response.data;
 };
 
-export const getClassificationSummaryApi = async (
-  year: string,
-  month: string,
-  energyType: "Electricity" | "Water" | "Fuel",
-  meterId: number
-): Promise<ClassificationSummaryResponse> => {
-  const monthQuery = `${year}-${month}`;
-  const response = await api.get(
-    `/analytics/classification-summary?month=${monthQuery}&energyType=${energyType}&meterId=${meterId}`
-  );
-  return response.data;
-};
-
 export const getFuelStockAnalysisApi = async (
   year: string,
   month: string

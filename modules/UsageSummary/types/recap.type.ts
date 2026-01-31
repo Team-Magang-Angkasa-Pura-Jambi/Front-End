@@ -84,3 +84,30 @@ export interface RecapRecalculatePayload {
   endDate: string;
   meterId?: number | null;
 }
+export interface SingleAnalysisPayload {
+  date: string;
+  meterId: number;
+}
+
+/**
+ * Tipe data untuk request bulk range (Prediksi mingguan/bulanan)
+ */
+export interface BulkPredictionPayload {
+  /**
+   * Tanggal mulai periode.
+   * Format wajib: "YYYY-MM-DD"
+   */
+  start_date: string;
+
+  /**
+   * Tanggal akhir periode.
+   * Format wajib: "YYYY-MM-DD"
+   * Syarat: end_date >= start_date
+   */
+  end_date: string;
+
+  /**
+   * ID Meteran (Integer)
+   */
+  meter_id: number;
+}

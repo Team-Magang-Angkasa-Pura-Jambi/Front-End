@@ -168,7 +168,7 @@ export const UnifiedEnergyComparisonChart = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={data}
-                  margin={{ top: 20, right: 10, left: 0, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                   barGap={8}
                 >
                   <CartesianGrid
@@ -183,16 +183,15 @@ export const UnifiedEnergyComparisonChart = () => {
                     tick={{ fill: "#64748b", fontSize: 12, fontWeight: 600 }}
                     dy={10}
                   />
+
+                  {/* === PERBAIKAN Y-AXIS === */}
                   <YAxis
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: "#64748b", fontSize: 11 }}
-                    width={45}
-                    tickFormatter={(val) =>
-                      `${formatCurrencySmart(val).val} ${
-                        isCost ? formatCurrencySmart(val).unit : data[0]?.unit
-                      }`
-                    }
+                    width={50} // Lebarkan sedikit agar label muat
+                    // Gunakan formatCurrencySmart agar angka ribuan/jutaan terbaca ringkas
+                    tickFormatter={(val) => formatCurrencySmart(val).val}
                   />
 
                   <Tooltip
@@ -202,27 +201,31 @@ export const UnifiedEnergyComparisonChart = () => {
                       border: "none",
                       boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                       fontSize: "12px",
+                      zIndex: 100, // Pastikan tooltip di atas
                     }}
+                    // === PERBAIKAN TOOLTIP FORMATTER ===
                     formatter={(
                       value: number | undefined,
                       name: string | undefined,
                       entry
                     ) => {
-                      // 1. Tentukan Label (Hari Kerja/Libur)
+                      const val = Number(value) || 0;
+                      // Tentukan Label
                       const label =
                         name === "weekdayValue" ? "Hari Kerja" : "Hari Libur";
 
-                      // 2. Format Nilai
+                      // Tentukan Format Angka
                       if (isCost) {
-                        // Jika Biaya: "Rp 1.500.000"
-                        return [formatCurrencySmart(value ?? 0).full, label];
+                        // Jika Mode Biaya -> Format Rupiah Lengkap (Rp 1.500.000)
+                        return [formatCurrencySmart(val).full, label];
                       } else {
-                        // Jika Volume: "1.500 kWh"
-                        // Ambil unit dari payload data bar tersebut
+                        // Jika Mode Volume -> Format Angka + Unit
+                        // Ambil unit dari payload data yang sedang di-hover
                         const unit = entry.payload.unit || "";
-                        const formattedNumber = formatCurrencySmart(
-                          value ?? 0
-                        ).val; // Angka saja (1.500)
+                        // Format angka ribuan Indonesia
+                        const formattedNumber = val.toLocaleString("id-ID", {
+                          maximumFractionDigits: 2,
+                        });
                         return [`${formattedNumber} ${unit}`, label];
                       }
                     }}
@@ -249,10 +252,11 @@ export const UnifiedEnergyComparisonChart = () => {
               </ResponsiveContainer>
             </div>
 
+            {/* === SUMMARY CARDS === */}
             <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
               {data.map((item) => {
-                const valWeekday = item.weekdayValue;
-                const valHoliday = item.holidayValue;
+                const valWeekday = Number(item.weekdayValue) || 0;
+                const valHoliday = Number(item.holidayValue) || 0;
 
                 const diff =
                   valWeekday === 0

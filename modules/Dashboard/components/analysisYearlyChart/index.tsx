@@ -42,6 +42,7 @@ import { ComponentLoader } from "@/common/components/ComponentLoader";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { useDownloadImage } from "../../hooks/useDownloadImage";
 import { useAnalysisYearly } from "../../hooks/useAnalysisYearlyChart";
+import { formatToMwh } from "@/utils/formatKwh";
 
 export const AnalysisYearlyChart = () => {
   const [energyType, setEnergyType] = useState<EnergyTypeName>(
@@ -159,9 +160,7 @@ export const AnalysisYearlyChart = () => {
                   tick={{ fill: "#64748b", fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(val) =>
-                    `${formatCurrencySmart(val).val} ${volumeUnit}`
-                  }
+                  tickFormatter={(val) => `${formatToMwh(val)}`}
                   label={{
                     value: `Volume (${volumeUnit})`,
                     angle: -90,
@@ -202,14 +201,11 @@ export const AnalysisYearlyChart = () => {
                     boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                   }}
                   formatter={(
-                    value: number | undefined,
+                    value: number | undefined | string,
                     name: string | undefined
                   ) => {
                     if (name === "consumption")
-                      return [
-                        `${(value ?? 0).toLocaleString()} ${volumeUnit}`,
-                        "Volume",
-                      ];
+                      return [`${formatToMwh(Number(value))}`, "Volume"];
                     if (name === "budget")
                       return [
                         `${formatCurrencySmart(value ?? 0).val} ${

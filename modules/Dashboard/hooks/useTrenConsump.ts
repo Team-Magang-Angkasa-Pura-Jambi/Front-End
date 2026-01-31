@@ -5,7 +5,16 @@ import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.serv
 import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { getTrentConsumptionApi } from "../service/visualizations.service";
 
+// Definisi tipe sederhana untuk struktur data chart
+interface ChartDataPoint {
+  name: string;
+  pemakaian: number;
+  prediksi: number;
+  target: number;
+}
+
 export const useTrenConsump = () => {
+  // --- 1. State Management ---
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
     const date = new Date();
     const y = date.getFullYear();
@@ -14,11 +23,12 @@ export const useTrenConsump = () => {
   });
 
   const [typeEnergy, setTypeEnergy] = useState<string>("");
-
   const [selectedMeterId, setSelectedMeterId] = useState<string>("");
 
+  // --- 2. Options Generator (Months) ---
   const monthOptions = useMemo(() => {
     const options = [];
+    // Clone date agar tidak memutasi object date utama jika dipakai di tempat lain
     const date = new Date();
 
     for (let i = 0; i < 6; i++) {
@@ -29,11 +39,13 @@ export const useTrenConsump = () => {
         year: "numeric",
       });
       options.push({ value: `${y}-${m}`, label });
+      // Mundur 1 bulan
       date.setMonth(date.getMonth() - 1);
     }
     return options;
   }, []);
 
+  // --- 3. Query: Energy Types ---
   const { data: energyTypesResponse, isLoading: isTypesLoading } = useQuery({
     queryKey: ["energyTypes"],
     queryFn: () => getEnergyTypesApi(),
@@ -45,12 +57,14 @@ export const useTrenConsump = () => {
     [energyTypesResponse]
   );
 
+  // Auto-select Energy Type pertama
   useEffect(() => {
     if (energyTypesData.length > 0 && !typeEnergy) {
       setTypeEnergy(energyTypesData[0].type_name);
     }
   }, [energyTypesData, typeEnergy]);
 
+  // --- 4. Query: Meters ---
   const { data: metersResponse, isLoading: isMetersLoading } = useQuery({
     queryKey: ["meters", typeEnergy],
     queryFn: () => getMetersApi(typeEnergy),
@@ -62,20 +76,25 @@ export const useTrenConsump = () => {
     [metersResponse]
   );
 
+  // Auto-select Meter ID (Logic diperbaiki agar lebih stabil)
   useEffect(() => {
     if (metersData.length > 0) {
+      // Cek apakah meter yang sedang dipilih masih valid untuk tipe energi baru
       const isCurrentValid = metersData.some(
         (m) => String(m.meter_id) === selectedMeterId
       );
 
+      // Jika belum ada yang dipilih ATAU yang dipilih tidak valid lagi -> Pilih yang pertama
       if (!selectedMeterId || !isCurrentValid) {
         setSelectedMeterId(String(metersData[0].meter_id));
       }
     } else {
+      // Jika list meter kosong, reset selection
       setSelectedMeterId("");
     }
   }, [metersData, selectedMeterId]);
 
+  // --- 5. Parsing Periode ---
   const { year, month } = useMemo(() => {
     if (!selectedPeriod) return { year: undefined, month: undefined };
     const [yStr, mStr] = selectedPeriod.split("-");
@@ -85,6 +104,7 @@ export const useTrenConsump = () => {
     };
   }, [selectedPeriod]);
 
+  // --- 6. Query: Analysis Data ---
   const {
     data: analysisDataResponse,
     isLoading: isAnalysisLoading,
@@ -99,15 +119,16 @@ export const useTrenConsump = () => {
         month!,
         Number(selectedMeterId)
       ),
-
     enabled:
       !!selectedMeterId &&
       year !== undefined &&
       month !== undefined &&
       !!typeEnergy,
+    staleTime: 5 * 60 * 1000, // Cache data selama 5 menit
   });
 
-  const chartData = useMemo(() => {
+  // --- 7. Data Formatting ---
+  const chartData: ChartDataPoint[] = useMemo(() => {
     const rawData = analysisDataResponse?.data;
     if (!rawData || rawData.length === 0) return [];
 
@@ -118,9 +139,9 @@ export const useTrenConsump = () => {
         day: "numeric",
         month: "short",
       }),
-      pemakaian: record.actual_consumption ?? 0,
-      prediksi: record.prediction ?? 0,
-      target: record.efficiency_target ?? 0,
+      pemakaian: Number(record.actual_consumption ?? 0),
+      prediksi: Number(record.prediction ?? 0),
+      target: Number(record.efficiency_target ?? 0),
     }));
   }, [analysisDataResponse]);
 
@@ -137,71 +158,73 @@ export const useTrenConsump = () => {
     }
   }, [typeEnergy]);
 
+  // --- 8. Insights Logic (DIPERBAIKI) ---
   const insights = useMemo(() => {
-    if (chartData.length === 0) return null;
+    if (chartData.length === 0) {
+      return {
+        type: "info",
+        title: "Tidak Ada Data",
+        text: "Belum ada data konsumsi yang tercatat untuk periode dan meteran ini.",
+      };
+    }
 
+    // Hitung total agregat
     let totalActual = 0;
     let totalTarget = 0;
-    let totalPrediction = 0;
-    let daysOverTarget = 0;
 
     chartData.forEach((d) => {
       totalActual += d.pemakaian;
       totalTarget += d.target;
-      totalPrediction += d.prediksi;
-      if (d.pemakaian > d.target) daysOverTarget++;
     });
 
-    const dataCount = chartData.length;
-    const lastData = chartData[dataCount - 1];
+    // Formatting angka untuk display
+    const fmtActual = totalActual.toLocaleString("id-ID", {
+      maximumFractionDigits: 0,
+    });
+    const fmtDiff = Math.abs(totalActual - totalTarget).toLocaleString(
+      "id-ID",
+      { maximumFractionDigits: 0 }
+    );
 
-    if (totalActual === 0) {
+    // Skenario 1: Belum ada target
+    if (totalTarget === 0) {
+      return {
+        type: "info",
+        title: "Target Belum Ditentukan",
+        text: `Total konsumsi tercatat sebesar ${fmtActual} ${volumeUnit}. Target efisiensi belum diatur untuk periode ini.`,
+      };
+    }
+
+    // Hitung persentase performa (Actual vs Target)
+    const percentage = (totalActual / totalTarget) * 100;
+    const isOver = totalActual > totalTarget;
+
+    // Skenario 2: Efisien (Di bawah atau sama dengan target)
+    if (!isOver) {
+      const savingPercent = (100 - percentage).toFixed(1);
       return {
         type: "success",
-        text: "Belum ada aktivitas konsumsi energi yang tercatat pada periode ini.",
+        title: "Performa Efisien",
+        text: `Konsumsi energi terkendali. Anda menghemat ${savingPercent}% (${fmtDiff} ${volumeUnit}) di bawah batas target.`,
       };
     }
 
-    if (totalActual > totalTarget) {
-      const overPercentage = ((totalActual - totalTarget) / totalTarget) * 100;
+    // Skenario 3: Warning (Sedikit di atas target - Toleransi misal 10%)
+    if (isOver && percentage <= 110) {
+      const overPercent = (percentage - 100).toFixed(1);
       return {
         type: "warning",
-        text: `PERHATIAN: Total konsumsi bulan ini telah melampaui target sebesar ${overPercentage.toFixed(
-          1
-        )}%. Segera lakukan evaluasi operasional untuk mencegah pembengkakan biaya.`,
+        title: "Peringatan Wajar",
+        text: `Konsumsi sedikit melampaui target sebesar ${overPercent}% (${fmtDiff} ${volumeUnit}). Masih dalam batas toleransi operasional.`,
       };
     }
 
-    const deviation = lastData.pemakaian - lastData.prediksi;
-    const deviationPercent =
-      lastData.prediksi > 0 ? (deviation / lastData.prediksi) * 100 : 0;
-
-    if (deviationPercent > 20) {
-      return {
-        type: "warning",
-        text: `ANOMALI TERDETEKSI: Konsumsi hari terakhir ${deviationPercent.toFixed(
-          0
-        )}% lebih tinggi dari prediksi AI. Kemungkinan ada kebocoran atau alat yang tidak dimatikan.`,
-      };
-    }
-
-    if (daysOverTarget > dataCount / 2) {
-      return {
-        type: "warning",
-        text: `POLA KONSUMSI BURUK: ${daysOverTarget} dari ${dataCount} hari tercatat melebihi target harian. Diperlukan penyesuaian perilaku penggunaan energi.`,
-      };
-    }
-
-    const efficiency =
-      totalTarget > 0
-        ? (((totalTarget - totalActual) / totalTarget) * 100).toFixed(1)
-        : "0";
-
+    // Skenario 4: Danger/Critical (Jauh di atas target)
+    const overPercent = (percentage - 100).toFixed(1);
     return {
-      type: "success",
-      text: `PERFORMA BAGUS: Efisiensi energi terjaga dengan penghematan kumulatif sebesar ${efficiency}% (${(
-        totalTarget - totalActual
-      ).toFixed(0)} ${volumeUnit}) dibandingkan target.`,
+      type: "danger", // atau 'error' tergantung UI Library yang dipakai
+      title: "Perhatian Diperlukan",
+      text: `Konsumsi berlebih signifikan! Tercatat ${overPercent}% (${fmtDiff} ${volumeUnit}) di atas target. Disarankan evaluasi penggunaan alat berat/operasional.`,
     };
   }, [chartData, volumeUnit]);
 
@@ -224,7 +247,7 @@ export const useTrenConsump = () => {
     },
     data: {
       chartData,
-      insights,
+      insights, // Sekarang mengembalikan object { type, title, text }
     },
     status: {
       isLoading,
