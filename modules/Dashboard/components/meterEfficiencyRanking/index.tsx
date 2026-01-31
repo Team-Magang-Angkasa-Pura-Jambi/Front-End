@@ -20,7 +20,6 @@ import { Button } from "@/common/components/ui/button";
 import { useMeterEfficiencyRanking } from "../../hooks/useMeterEfficiencyRanking";
 import { useDownloadImage } from "../../hooks/useDownloadImage";
 import { ErrorFetchData } from "@/common/components/ErrorFetchData";
-import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { getStatusConfig } from "../../constants";
 import { formatToMwh } from "@/utils/formatKwh";
 
