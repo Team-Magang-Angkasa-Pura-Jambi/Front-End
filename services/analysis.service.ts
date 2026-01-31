@@ -8,12 +8,6 @@ import api from "@/lib/api";
 // Tipe untuk respons API analisis secara keseluruhan
 
 // Tipe untuk respons API ringkasan klasifikasi
-interface ClassificationSummaryResponse {
-  data: {
-    classification: "HEMAT" | "NORMAL" | "BOROS";
-    count: number;
-  }[];
-}
 
 interface FuelStockRecord {
   meter_id: number;
