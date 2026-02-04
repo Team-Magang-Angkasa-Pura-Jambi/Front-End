@@ -13,10 +13,10 @@ import {
 } from "@/common/components/ui/dialog";
 import { Button } from "@/common/components/ui/button";
 import {
-  AlertTriangle,
+  Info,
   FlaskConical,
   ExternalLink,
-  Bug,
+  Wrench, // Ikon perbaikan/dev
   GraduationCap,
 } from "lucide-react";
 
@@ -45,101 +45,125 @@ export function Announcement() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[550px]">
         <DialogHeader>
-          <div className="mb-2 flex items-center gap-2 text-amber-600">
-            <AlertTriangle className="h-5 w-5" />
+          <div className="mb-1 flex items-center gap-2 text-blue-600">
+            <Info className="h-5 w-5" />
             <span className="text-xs font-semibold tracking-wider uppercase">
-              Development & Research
+              Informasi Pengembangan
             </span>
           </div>
-          <DialogTitle className="text-xl">
-            Selamat Datang di Versi Beta
+          <DialogTitle className="text-xl font-bold text-gray-900">
+            Halo, Selamat Datang! 👋
           </DialogTitle>
-          <DialogDescription className="pt-1">
-            Website ini sedang dalam tahap pengembangan dan pengujian.
+          <DialogDescription className="text-gray-600">
+            Terima kasih telah mengakses dashboard sistem ini.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-5 py-2">
-          {/* Identitas Mahasiswa */}
-          <div className="flex items-start gap-3 rounded-lg border bg-blue-50 p-4 text-blue-900 dark:bg-blue-950 dark:text-blue-100">
-            <GraduationCap className="mt-0.5 h-6 w-6 shrink-0" />
-            <div className="space-y-1">
-              <h4 className="text-sm font-semibold">Penelitian Akademik</h4>
-              <p className="text-sm leading-relaxed">
-                Kami mahasiswa{" "}
-                <strong>Sistem Informasi Universitas Jambi</strong> ingin
-                mengadakan pengujian sistem ini untuk keperluan penelitian.
+          {/* IDENTITAS (Nada: Ramah & Memperkenalkan Diri) */}
+          <div className="flex items-start gap-4 rounded-lg border bg-blue-50/50 p-4 text-slate-800">
+            <GraduationCap className="mt-1 h-8 w-8 shrink-0 text-blue-600" />
+            <div className="space-y-2">
+              <h4 className="text-base font-semibold">
+                Perkenalkan, Kami Mahasiswa UNJA
+              </h4>
+              <p className="text-sm leading-relaxed text-slate-600">
+                Kami dari prodi{" "}
+                <strong>Sistem Informasi Universitas Jambi</strong> sedang
+                melakukan penelitian tugas akhir. Sistem ini kami bangun untuk
+                membantu operasional di sini. Mohon dukungan Bapak/Ibu untuk
+                mencoba menggunakannya.
               </p>
             </div>
           </div>
 
-          {/* Section Laporan Bug */}
-          <div className="bg-muted/40 flex items-start gap-3 rounded-md border p-3">
-            <Bug className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+          {/* STATUS DEV & BUG (Nada: Santai tapi Jelas) */}
+          <div className="flex items-start gap-3 rounded-md border border-dashed border-gray-300 bg-gray-50 p-3">
+            <Wrench className="mt-0.5 h-5 w-5 shrink-0 text-gray-500" />
             <div className="space-y-1">
-              <p className="text-sm font-medium">Kendala Teknis?</p>
-              <p className="text-muted-foreground text-xs">
-                Jika menemukan error, mohon hubungi{" "}
-                <span className="text-foreground font-medium">Super Admin</span>{" "}
-                agar segera diperbaiki.
+              <p className="text-sm font-semibold text-gray-800">
+                Masih Tahap Pengembangan (Beta)
+              </p>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Karena masih dalam tahap uji coba, mungkin Bapak/Ibu akan
+                menemukan sedikit kendala atau <i>error</i>. Jika ada yang tidak
+                berfungsi, boleh langsung infokan ke{" "}
+                <strong>Super Admin</strong> ya, Pak/Bu.
               </p>
             </div>
           </div>
 
-          {/* Section Pengujian Usability */}
+          {/* SECTION UAT (Nada: Mengajak/Meminta Tolong) */}
           <div className="space-y-3 pt-2">
-            <div className="flex items-center gap-2">
-              <FlaskConical className="h-5 w-5 text-indigo-500" />
-              <h4 className="leading-none font-semibold tracking-tight">
-                Partisipasi Pengujian (UAT)
+            <div className="flex items-center gap-2 pb-1">
+              <FlaskConical className="h-5 w-5 text-indigo-600" />
+              <h4 className="font-semibold text-gray-800">
+                Bantu Kami Menilai Aplikasi
               </h4>
             </div>
 
-            <p className="text-muted-foreground text-sm">
-              Mohon bantuan Anda untuk mencoba fitur dan mengisi kuesioner
-              melalui tautan berikut:
+            <p className="text-sm text-gray-600">
+              Kami sangat terbantu jika Bapak/Ibu berkenan meluangkan waktu
+              sebentar untuk mencoba alur aplikasi dan mengisi penilaian singkat
+              di bawah ini:
             </p>
 
-            {/* PERUBAHAN 1: Grid Layout Desktop diperlebar dari 100px jadi 150px */}
-            <div className="mt-1 grid grid-cols-1 gap-4 rounded-lg border p-3 shadow-sm sm:grid-cols-[150px_1fr]">
-              {/* PERUBAHAN 2: Container Mobile diperbesar dari h/w-[100px] jadi h/w-[150px] */}
-              <div className="mx-auto flex h-[150px] w-[150px] items-center justify-center rounded-md border bg-white p-1 sm:h-auto sm:w-auto">
-                <Image
-                  src="/image/qr-code-placeholder.png"
-                  alt="QR Code Maze"
-                  // PERUBAHAN 3: Ukuran Image Next.js disesuaikan (misal 140px agar ada padding dikit)
-                  width={140}
-                  height={140}
-                  className="object-contain"
-                />
+            <div className="mt-2 grid grid-cols-1 gap-6 rounded-xl border bg-white p-4 shadow-sm sm:grid-cols-[150px_1fr]">
+              {/* QR CODE - Ukuran Besar */}
+              <div className="flex flex-col items-center justify-center gap-2">
+                <div className="flex h-[150px] w-[150px] items-center justify-center rounded-lg border bg-white p-1">
+                  <Image
+                    src="/image/qr-code-placeholder.png"
+                    alt="Scan Barcode"
+                    width={140}
+                    height={140}
+                    className="object-contain"
+                  />
+                </div>
+                <span className="text-center text-[10px] font-medium text-gray-500">
+                  Scan lewat HP
+                </span>
               </div>
 
-              <div className="flex flex-col justify-center gap-2.5">
+              {/* ACTION BUTTONS */}
+              <div className="flex flex-col justify-center gap-3">
                 <Button
                   asChild
-                  variant="default"
-                  size="sm"
-                  className="w-full justify-between bg-indigo-600 hover:bg-indigo-700"
+                  className="w-full justify-between bg-blue-600 shadow-sm hover:bg-blue-700"
                 >
                   <Link href="https://maze.co/link-anda" target="_blank">
-                    Mulai Tes Usability (Maze)
-                    <ExternalLink className="ml-2 h-3 w-3" />
+                    <span className="flex flex-col items-start text-left">
+                      <span className="text-[11px] font-light opacity-90">
+                        Langkah 1
+                      </span>
+                      <span className="font-semibold">
+                        Coba Simulasi (Maze)
+                      </span>
+                    </span>
+                    <ExternalLink className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
+
                 <Button
                   asChild
                   variant="outline"
-                  size="sm"
-                  className="w-full justify-between"
+                  className="w-full justify-between border-blue-200 text-blue-700 hover:bg-blue-50"
                 >
                   <Link
                     href="https://forms.office.com/r/tUmXpXK05B"
                     target="_blank"
                   >
-                    Isi Kuesioner UAT
-                    <ExternalLink className="ml-2 h-3 w-3" />
+                    <span className="flex flex-col items-start text-left">
+                      <span className="text-[11px] font-normal text-gray-500">
+                        Langkah 2
+                      </span>
+                      <span className="font-semibold">
+                        Isi Penilaian Singkat
+                      </span>
+                    </span>
+                    <ExternalLink className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>
@@ -147,12 +171,13 @@ export function Announcement() {
           </div>
         </div>
 
-        <DialogFooter className="pt-2">
+        <DialogFooter className="mt-2 border-t pt-4">
           <Button
             onClick={handleClose}
-            className="w-full min-w-[140px] sm:w-auto"
+            variant="default"
+            className="w-full min-w-[150px] sm:w-auto"
           >
-            Lanjut ke Aplikasi ({timeLeft}s)
+            Masuk ke Aplikasi ({timeLeft}s)
           </Button>
         </DialogFooter>
       </DialogContent>
