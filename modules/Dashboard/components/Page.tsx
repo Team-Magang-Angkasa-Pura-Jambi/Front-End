@@ -17,6 +17,7 @@ import { useRealtimeNotification } from "@/modules/Dashboard/hooks/useRealtimeNo
 import { MultiEnergyForecastCard } from "./energyForecastCard";
 import { NotificationStyle } from "./notificationStyle";
 import { ResourceConsumptionSummary } from "./resourceConsumptionSummary";
+import { Announcement } from "./Announcement";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -45,7 +46,7 @@ export const Page = () => {
   return (
     <main className="min-h-screen w-full space-y-8 p-1 pb-20">
       <Header />
-
+      <Announcement />
       <AnimatePresence mode="wait">
         <motion.div
           key="content"
@@ -115,7 +116,7 @@ export const Page = () => {
             variants={itemVariants}
             className="py-10 text-center opacity-40"
           >
-            <p className="font-mono text-[10px] uppercase italic tracking-widest">
+            <p className="font-mono text-[10px] tracking-widest uppercase italic">
               Airport Operational Intelligence Dashboard
             </p>
           </motion.footer>

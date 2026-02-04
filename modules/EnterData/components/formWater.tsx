@@ -251,7 +251,7 @@ export const FormReadingWater = ({
                 </Popover>
                 <FormDescription>
                   {lastReadingDate
-                    ? `Data terakhir diinput: ${lastReadingDate}`
+                    ? `Data terakhir diinput: ${format(new Date(lastReadingDate), "PPP")}`
                     : "Pilih tanggal pembacaan."}
                 </FormDescription>
                 <FormMessage />

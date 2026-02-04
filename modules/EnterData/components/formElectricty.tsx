@@ -66,8 +66,6 @@ interface FormReadingProps {
   type_name: "Electricity" | "Water" | "Fuel";
 }
 
-
-
 export const FormReadingElectric = ({
   onSuccess,
   type_name,
@@ -383,7 +381,7 @@ export const FormReadingElectric = ({
                                   lastReadingValue || "-"
                                 } Pada  ${
                                   lastReadingDate && isValid(lastReadingDate)
-                                    ? format(lastReadingDate, "PPP")
+                                    ? format(new Date(lastReadingDate), "PPP")
                                     : "-"
                                 }`}
                           </FormDescription>
