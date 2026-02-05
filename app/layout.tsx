@@ -47,36 +47,40 @@ export default function RootLayout({
       >
         {/* 2. GUNAKAN KOMPONEN SCRIPT DI SINI */}
         {/* strategy="afterInteractive" memastikan script load setelah halaman interaktif agar tidak bikin lemot */}
-        <Script id="maze-snippet" strategy="afterInteractive">
-          {`
-            (function (m, a, z, e) {
-              var s, t, u, v;
-              try {
-                t = m.sessionStorage.getItem('maze-us');
-              } catch (err) {}
-            
-              if (!t) {
-                t = new Date().getTime();
+        <Script
+          id="maze-snippet"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function (m, a, z, e) {
+                var s, t, u, v;
                 try {
-                  m.sessionStorage.setItem('maze-us', t);
+                  t = m.sessionStorage.getItem('maze-us');
                 } catch (err) {}
-              }
-            
-              u = document.currentScript || (function () {
-                var w = document.getElementsByTagName('script');
-                return w[w.length - 1];
-              })();
-              v = u && u.nonce;
-            
-              s = a.createElement('script');
-              s.src = z + '?apiKey=' + e;
-              s.async = true;
-              if (v) s.setAttribute('nonce', v);
-              a.getElementsByTagName('head')[0].appendChild(s);
-              m.mazeUniversalSnippetApiKey = e;
-            })(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'd09e62d0-cf10-4f62-a1cb-61f1c7fc87f1');
-          `}
-        </Script>
+              
+                if (!t) {
+                  t = new Date().getTime();
+                  try {
+                    m.sessionStorage.setItem('maze-us', t);
+                  } catch (err) {}
+                }
+              
+                u = document.currentScript || (function () {
+                  var w = document.getElementsByTagName('script');
+                  return w[w.length - 1];
+                })();
+                v = u && u.nonce;
+              
+                s = a.createElement('script');
+                s.src = z + '?apiKey=' + e;
+                s.async = true;
+                if (v) s.setAttribute('nonce', v);
+                a.getElementsByTagName('head')[0].appendChild(s);
+                m.mazeUniversalSnippetApiKey = e;
+              })(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'd09e62d0-cf10-4f62-a1cb-61f1c7fc87f1');
+            `,
+          }}
+        />
 
         <ThemeProvider
           attribute="class"

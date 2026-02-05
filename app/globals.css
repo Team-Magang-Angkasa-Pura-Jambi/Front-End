@@ -159,3 +159,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+iframe[src*="maze.co"],
+div[class*="maze-"],
+#maze-root {
+  z-index: 2147483647 !important; /* Nilai maksimum integer CSS */
+  position: fixed !important; /* Memastikan tidak terpengaruh parent relative */
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+/* Jika Maze menyuntikkan container khusus, pastikan tidak terpotong */
+body > div[class*="maze"] {
+  overflow: visible !important;
+}
