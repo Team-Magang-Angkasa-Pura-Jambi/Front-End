@@ -35,7 +35,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-    const message = error.response?.data?.message;
     console.log(error);
 
     if (status === 401) {
