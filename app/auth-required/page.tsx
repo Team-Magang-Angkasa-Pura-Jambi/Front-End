@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/common/components/ui/card";
 import { Button } from "@/common/components/ui/button";
-import { Home, ArrowLeft, LogIn, KeyRound } from "lucide-react";
+import {  ArrowLeft, LogIn, KeyRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function AuthRequiredPage() {
