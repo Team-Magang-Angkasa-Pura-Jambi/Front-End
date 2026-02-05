@@ -13,7 +13,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, 
+  withCredentials: true,
 });
 
 /* 🔐 REQUEST INTERCEPTOR */
@@ -38,11 +38,9 @@ api.interceptors.response.use(
     console.log(error);
 
     if (status === 401) {
-      
       const logout = useAuthStore.getState().logout;
       logout();
 
-      
       if (
         typeof window !== "undefined" &&
         !window.location.pathname.startsWith("/auth-required")

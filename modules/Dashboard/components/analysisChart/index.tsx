@@ -9,7 +9,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  TooltipProps,
 } from "recharts";
 import {
   Lightbulb,
@@ -21,10 +20,6 @@ import {
   AlertTriangle,
   CalendarDays,
 } from "lucide-react";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
 
 import {
   Card,
@@ -129,6 +124,7 @@ export const AnalysisChart = () => {
   const { ref, download, isExporting } = useDownloadImage<HTMLDivElement>();
 
   // Memastikan chartData dianggap sebagai array ChartDataPoint
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const safeChartData = (chartData as unknown as ChartDataPoint[]) || [];
 
   const overTargetStats = useMemo(() => {
