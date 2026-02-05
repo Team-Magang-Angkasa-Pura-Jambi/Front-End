@@ -2,49 +2,57 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // ================= SAFE PATH =================
+  const publicPaths = [
+    "/auth/login",
+    "/auth-required",
+    "/forbidden",
+    "/not-found",
+  ];
+
+  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+
+  // ================= AUTH CHECK =================
   const authCookie = request.cookies.get("auth-storage")?.value;
 
-  let hasToken = false;
+  let token: string | null = null;
+  let role: string | null = null;
 
   if (authCookie) {
     try {
       const authState = JSON.parse(authCookie);
-
-      const token = authState?.state?.token || authState?.token;
-
-      if (token) {
-        hasToken = true;
-      }
-    } catch (e) {
-      hasToken = false;
+      token = authState?.state?.token || authState?.token || null;
+      role = authState?.state?.role || authState?.role || null;
+    } catch {
+      token = null;
+      role = null;
     }
   }
 
-  const { pathname } = request.nextUrl;
+  const hasToken = Boolean(token);
 
-  const publicPaths = ["/auth/login"];
-  const isPublicPath = publicPaths.includes(pathname);
+  // ================= RULES =================
 
-  if (hasToken && isPublicPath) {
+  // 🔐 BELUM LOGIN → AUTH REQUIRED (401)
+  if (!hasToken && !isPublicPath) {
+    return NextResponse.redirect(new URL("/auth-required", request.url));
+  }
+
+  // 🔁 SUDAH LOGIN TAPI BUKA LOGIN PAGE
+  if (hasToken && pathname.startsWith("/auth/login")) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (!hasToken && !isPublicPath) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+  // 🚫 ROLE CHECK (403)
+  if (hasToken && pathname.startsWith("/admin") && role !== "admin") {
+    return NextResponse.redirect(new URL("/forbidden", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Cocokkan semua path, KECUALI yang dimulai dengan:
-     * - api (rute API)
-     * - _next/static (file statis)
-     * - _next/image (file optimasi gambar)
-     * - favicon.ico (file ikon)
-     */
-    "/((?!api|_next/static|_next/image|.*\\..*).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|.*\\..*).*)"],
 };

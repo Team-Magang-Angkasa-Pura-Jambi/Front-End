@@ -5,12 +5,14 @@ import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.serv
 import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { getTrentConsumptionApi } from "../service/visualizations.service";
 
-// Definisi tipe sederhana untuk struktur data chart
 interface ChartDataPoint {
   name: string;
   pemakaian: number;
   prediksi: number;
   target: number;
+  // Tambahan Data Cost
+  biayaAktual: number;
+  biayaTarget: number;
 }
 
 export const useTrenConsump = () => {
@@ -28,9 +30,7 @@ export const useTrenConsump = () => {
   // --- 2. Options Generator (Months) ---
   const monthOptions = useMemo(() => {
     const options = [];
-    // Clone date agar tidak memutasi object date utama jika dipakai di tempat lain
     const date = new Date();
-
     for (let i = 0; i < 6; i++) {
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -39,7 +39,6 @@ export const useTrenConsump = () => {
         year: "numeric",
       });
       options.push({ value: `${y}-${m}`, label });
-      // Mundur 1 bulan
       date.setMonth(date.getMonth() - 1);
     }
     return options;
@@ -57,7 +56,6 @@ export const useTrenConsump = () => {
     [energyTypesResponse]
   );
 
-  // Auto-select Energy Type pertama
   useEffect(() => {
     if (energyTypesData.length > 0 && !typeEnergy) {
       setTypeEnergy(energyTypesData[0].type_name);
@@ -76,20 +74,15 @@ export const useTrenConsump = () => {
     [metersResponse]
   );
 
-  // Auto-select Meter ID (Logic diperbaiki agar lebih stabil)
   useEffect(() => {
     if (metersData.length > 0) {
-      // Cek apakah meter yang sedang dipilih masih valid untuk tipe energi baru
       const isCurrentValid = metersData.some(
         (m) => String(m.meter_id) === selectedMeterId
       );
-
-      // Jika belum ada yang dipilih ATAU yang dipilih tidak valid lagi -> Pilih yang pertama
       if (!selectedMeterId || !isCurrentValid) {
         setSelectedMeterId(String(metersData[0].meter_id));
       }
     } else {
-      // Jika list meter kosong, reset selection
       setSelectedMeterId("");
     }
   }, [metersData, selectedMeterId]);
@@ -124,7 +117,7 @@ export const useTrenConsump = () => {
       year !== undefined &&
       month !== undefined &&
       !!typeEnergy,
-    staleTime: 5 * 60 * 1000, // Cache data selama 5 menit
+    staleTime: 5 * 60 * 1000,
   });
 
   // --- 7. Data Formatting ---
@@ -142,6 +135,11 @@ export const useTrenConsump = () => {
       pemakaian: Number(record.actual_consumption ?? 0),
       prediksi: Number(record.prediction ?? 0),
       target: Number(record.efficiency_target ?? 0),
+      // Mapping Data Biaya (Pastikan API mengirim field ini atau hitung manual)
+      // Asumsi API punya field 'actual_cost' dan 'target_cost'
+      // Jika tidak ada, Anda bisa kalikan dengan tarif per unit di sini
+      biayaAktual: Number(record.consumption_cost ?? 0),
+      biayaTarget: Number(record.efficiency_target_cost ?? 0),
     }));
   }, [analysisDataResponse]);
 
@@ -158,17 +156,16 @@ export const useTrenConsump = () => {
     }
   }, [typeEnergy]);
 
-  // --- 8. Insights Logic (DIPERBAIKI) ---
+  // --- 8a. Insights Logic (Volume/Fisik) ---
   const insights = useMemo(() => {
     if (chartData.length === 0) {
       return {
         type: "info",
         title: "Tidak Ada Data",
-        text: "Belum ada data konsumsi yang tercatat untuk periode dan meteran ini.",
+        text: "Belum ada data konsumsi.",
       };
     }
 
-    // Hitung total agregat
     let totalActual = 0;
     let totalTarget = 0;
 
@@ -177,7 +174,6 @@ export const useTrenConsump = () => {
       totalTarget += d.target;
     });
 
-    // Formatting angka untuk display
     const fmtActual = totalActual.toLocaleString("id-ID", {
       maximumFractionDigits: 0,
     });
@@ -186,47 +182,99 @@ export const useTrenConsump = () => {
       { maximumFractionDigits: 0 }
     );
 
-    // Skenario 1: Belum ada target
     if (totalTarget === 0) {
       return {
         type: "info",
         title: "Target Belum Ditentukan",
-        text: `Total konsumsi tercatat sebesar ${fmtActual} ${volumeUnit}. Target efisiensi belum diatur untuk periode ini.`,
+        text: `Total: ${fmtActual} ${volumeUnit}. Target belum diset.`,
       };
     }
 
-    // Hitung persentase performa (Actual vs Target)
     const percentage = (totalActual / totalTarget) * 100;
     const isOver = totalActual > totalTarget;
 
-    // Skenario 2: Efisien (Di bawah atau sama dengan target)
     if (!isOver) {
       const savingPercent = (100 - percentage).toFixed(1);
       return {
         type: "success",
         title: "Performa Efisien",
-        text: `Konsumsi energi terkendali. Anda menghemat ${savingPercent}% (${fmtDiff} ${volumeUnit}) di bawah batas target.`,
+        text: `Hemat ${savingPercent}% (${fmtDiff} ${volumeUnit}) di bawah target.`,
       };
     }
 
-    // Skenario 3: Warning (Sedikit di atas target - Toleransi misal 10%)
     if (isOver && percentage <= 110) {
       const overPercent = (percentage - 100).toFixed(1);
       return {
         type: "warning",
         title: "Peringatan Wajar",
-        text: `Konsumsi sedikit melampaui target sebesar ${overPercent}% (${fmtDiff} ${volumeUnit}). Masih dalam batas toleransi operasional.`,
+        text: `Lebih ${overPercent}% (${fmtDiff} ${volumeUnit}) di atas target.`,
       };
     }
 
-    // Skenario 4: Danger/Critical (Jauh di atas target)
     const overPercent = (percentage - 100).toFixed(1);
     return {
-      type: "danger", // atau 'error' tergantung UI Library yang dipakai
-      title: "Perhatian Diperlukan",
-      text: `Konsumsi berlebih signifikan! Tercatat ${overPercent}% (${fmtDiff} ${volumeUnit}) di atas target. Disarankan evaluasi penggunaan alat berat/operasional.`,
+      type: "danger",
+      title: "Boros Energi",
+      text: `Over ${overPercent}% (${fmtDiff} ${volumeUnit}). Segera evaluasi.`,
     };
   }, [chartData, volumeUnit]);
+
+  // --- 8b. Cost Insights Logic (UANG / ANGGARAN) ---
+  const costInsights = useMemo(() => {
+    if (chartData.length === 0) return null;
+
+    let totalBiayaAktual = 0;
+    let totalBiayaTarget = 0;
+
+    chartData.forEach((d) => {
+      totalBiayaAktual += d.biayaAktual;
+      totalBiayaTarget += d.biayaTarget;
+    });
+
+    // Format Currency Rupiah
+    const fmtRupiah = (val: number) =>
+      new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }).format(val);
+
+    const selisihBiaya = totalBiayaAktual - totalBiayaTarget;
+    const fmtSelisih = fmtRupiah(Math.abs(selisihBiaya));
+
+    // Logic Klasifikasi Budget
+    if (totalBiayaTarget === 0) {
+      return {
+        type: "neutral",
+        title: "Realisasi Biaya",
+        text: `Total biaya bulan ini: ${fmtRupiah(totalBiayaAktual)}. Anggaran belum ditetapkan.`,
+        amount: totalBiayaAktual,
+      };
+    }
+
+    const percentageCost = (totalBiayaAktual / totalBiayaTarget) * 100;
+    const isOverBudget = totalBiayaAktual > totalBiayaTarget;
+
+    if (isOverBudget) {
+      const percentOver = (percentageCost - 100).toFixed(1);
+      return {
+        type: "over_budget", // Flag merah untuk UI
+        title: "Melebihi Anggaran",
+        text: `Biaya operasional bengkak ${fmtSelisih} (${percentOver}%) dari anggaran.`,
+        overAmount: selisihBiaya,
+        percentOver: Number(percentOver),
+      };
+    } else {
+      const percentSave = (100 - percentageCost).toFixed(1);
+      return {
+        type: "under_budget", // Flag hijau untuk UI
+        title: "Hemat Anggaran",
+        text: `Efisiensi biaya sebesar ${fmtSelisih} (${percentSave}%) di bawah anggaran.`,
+        savedAmount: Math.abs(selisihBiaya),
+        percentSaved: Number(percentSave),
+      };
+    }
+  }, [chartData]);
 
   const isLoading = isTypesLoading || isMetersLoading || isAnalysisLoading;
 
@@ -247,7 +295,8 @@ export const useTrenConsump = () => {
     },
     data: {
       chartData,
-      insights, // Sekarang mengembalikan object { type, title, text }
+      insights, // Insight Volume (Fisik)
+      costInsights, // Insight Biaya (Rupiah) <-- Baru
     },
     status: {
       isLoading,

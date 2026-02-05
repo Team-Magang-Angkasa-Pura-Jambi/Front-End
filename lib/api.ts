@@ -1,34 +1,57 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore";
 
-// Pilih baseURL berdasarkan lingkungan (development atau production)
+/* 🌍 Base URL */
 const baseURL =
   process.env.NODE_ENV === "development"
     ? process.env.NEXT_PUBLIC_API_URL_DEVELOPMENT
     : process.env.NEXT_PUBLIC_API_URL_PRODUCTION;
 
-// Buat instance Axios
+/* 🔌 Axios instance */
 const api = axios.create({
-  baseURL: baseURL,
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // penting kalau BE pakai cookie juga
 });
 
-// Buat Interceptor (penjegal) untuk request
+/* 🔐 REQUEST INTERCEPTOR */
 api.interceptors.request.use(
   (config) => {
-    // Ambil token dari Zustand store
     const token = useAuthStore.getState().token;
 
-    // Jika token ada, tambahkan ke header Authorization
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
   },
+  (error) => Promise.reject(error)
+);
+
+/* 🚨 RESPONSE INTERCEPTOR (TOKEN EXPIRED HANDLER) */
+api.interceptors.response.use(
+  (response) => response,
   (error) => {
+    const status = error.response?.status;
+    const message = error.response?.data?.message;
+    console.log(error);
+
+    if (status === 401) {
+      // 🔥 sinkronisasi FE dengan BE
+      const logout = useAuthStore.getState().logout;
+      logout();
+
+      // Hindari loop redirect
+      if (
+        typeof window !== "undefined" &&
+        !window.location.pathname.startsWith("/auth-required")
+      ) {
+        window.location.href = "/auth-required";
+      }
+    }
+
     return Promise.reject(error);
   }
 );
