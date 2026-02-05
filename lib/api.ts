@@ -13,7 +13,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // penting kalau BE pakai cookie juga
+  withCredentials: true, 
 });
 
 /* 🔐 REQUEST INTERCEPTOR */
@@ -39,11 +39,11 @@ api.interceptors.response.use(
     console.log(error);
 
     if (status === 401) {
-      // 🔥 sinkronisasi FE dengan BE
+      
       const logout = useAuthStore.getState().logout;
       logout();
 
-      // Hindari loop redirect
+      
       if (
         typeof window !== "undefined" &&
         !window.location.pathname.startsWith("/auth-required")
