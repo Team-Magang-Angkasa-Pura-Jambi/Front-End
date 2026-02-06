@@ -9,24 +9,24 @@ import api from "@/lib/api";
 
 // Tipe untuk respons API ringkasan klasifikasi
 
-interface FuelStockRecord {
-  meter_id: number;
-  meter_code: string;
-  tank_volume_liters: number;
-  latest_stock_liters: number;
-  latest_stock_date: string;
-  percentage: number;
-}
+// interface FuelStockRecord {
+//   meter_id: number;
+//   meter_code: string;
+//   tank_volume_liters: number;
+//   latest_stock_liters: number;
+//   latest_stock_date: string;
+//   percentage: number;
+// }
 
-interface FuelStockAnalysisResponse {
-  success: boolean;
-  message: string;
-  data: FuelStockRecord[];
-  meta: {
-    year: number;
-    month: number;
-  };
-}
+// interface FuelStockAnalysisResponse {
+//   success: boolean;
+//   message: string;
+//   data: FuelStockRecord[];
+//   meta: {
+//     year: number;
+//     month: number;
+//   };
+// }
 export type BudgetSummaryByEnergy = {
   energyTypeId: number;
   energyTypeName: string;

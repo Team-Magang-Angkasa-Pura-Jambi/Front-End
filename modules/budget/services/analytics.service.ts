@@ -1,7 +1,3 @@
-import api from "@/lib/api";
-
-// --- Types ---
-
 export type MonthlyBudgetAllocation = {
   month: number;
   monthName: string;
@@ -10,8 +6,6 @@ export type MonthlyBudgetAllocation = {
   remainingBudget: number;
   realizationPercentage: number | null;
 };
-
-
 
 export type BudgetPreviewPayload = {
   parent_budget_id?: number | null;
@@ -44,10 +38,3 @@ export type BudgetPreviewResponse = {
     suggestedBudgetForPeriod: number;
   } | null;
 };
-
-// --- API Implementation ---
-
-export const analyticsApi = {
-  
-};
-

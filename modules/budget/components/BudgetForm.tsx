@@ -49,7 +49,7 @@ import { AnnualBudget } from "@/common/types/budget";
 import { EnergyType } from "@/common/types/energy";
 import { MeterType } from "@/common/types/meters";
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
-import { PrepareNextPeriodBudget } from "../services/analytics.service";
+import { PrepareNextPeriodBudget } from "../services/budget.service";
 
 interface BudgetFormProps {
   budgetType: "parent" | "child";
