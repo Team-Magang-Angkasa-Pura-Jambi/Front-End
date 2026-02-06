@@ -1,5 +1,6 @@
 import { ApiResponse } from "@/common/types/api";
 import api from "@/lib/api";
+import { BudgetSummaryByEnergy } from "@/services/analysis.service";
 
 export type MonthlyBudgetAllocation = {
   month: number;
@@ -77,8 +78,8 @@ export const budgetApi = {
     return response.data.data;
   },
 
-  getSummary: async (year: number): Promise<BudgetSummaryItem[]> => {
-    const response = await api.get<ApiResponse<BudgetSummaryItem[]>>(
+  getSummary: async (year: number): Promise<BudgetSummaryByEnergy[]> => {
+    const response = await api.get<ApiResponse<BudgetSummaryByEnergy[]>>(
       prefix + "/summary",
       { params: { year } }
     );

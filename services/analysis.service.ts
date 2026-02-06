@@ -28,6 +28,7 @@ import api from "@/lib/api";
 //   };
 // }
 export type BudgetSummaryByEnergy = {
+  budgetId: number;
   energyTypeId: number;
   energyTypeName: string;
   budgetThisYear: number;
