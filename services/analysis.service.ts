@@ -67,23 +67,3 @@ export const getTodaySummaryApi = async (): Promise<
   const response = await api.get("/analytics/today-summary");
   return response.data;
 };
-
-export const getFuelStockAnalysisApi = async (
-  year: string,
-  month: string
-): Promise<FuelStockAnalysisResponse> => {
-  const monthQuery = `${year}-${month}`;
-  const response = await api.get(`/analytics/fuel-stock?month=${monthQuery}`);
-  return response.data;
-};
-export const getBudgetSummaryApi = async (
-  selectedYear: number
-): Promise<BudgetSummaryByEnergy[]> => {
-  const response = await api.get("/analytics/budget-summary", {
-    params: {
-      year: selectedYear, // 🔥 Ini akan otomatis diubah jadi URL: .../budget-summary?year=2026
-    },
-  });
-
-  return response.data.data;
-};

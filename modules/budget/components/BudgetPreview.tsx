@@ -12,8 +12,8 @@ import { Button } from "@/common/components/ui/button";
 import { Copy, Loader2 } from "lucide-react";
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
 import { useDebounce } from "@uidotdev/usehooks";
-import { getBudgetPreviewApi } from "../services/analytics.service";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
+import { budgetApi } from "../services/budget.service";
 
 export const BudgetPreview = () => {
   const {
@@ -64,7 +64,7 @@ export const BudgetPreview = () => {
       period_end,
     ],
     queryFn: () =>
-      getBudgetPreviewApi({
+      budgetApi.getBudgetPreview({
         parent_budget_id,
         total_budget: Number(total_budget) || 0,
         period_start: period_start

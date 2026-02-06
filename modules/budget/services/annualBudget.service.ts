@@ -10,20 +10,6 @@ export type YearOptionsData = {
   availableYears: number[];
 };
 
-export type BudgetSummaryItem = {
-  energyTypeId: number;
-  energyTypeName: string;
-  currentPeriod: {
-    periodStart: string | Date;
-    periodEnd: string | Date;
-    totalBudget: number;
-    totalRealization: number;
-    remainingBudget: number;
-    realizationPercentage: number;
-    status: "SAFE" | "WARNING" | "DANGER";
-  };
-};
-
 // --- API Implementation ---
 
 export const annualBudgetApi = {
@@ -70,17 +56,8 @@ export const annualBudgetApi = {
     const response = await api.get("/annual-budgets/year-options");
     return response.data;
   },
-
-  getSummary: async (year: number): Promise<BudgetSummaryItem[]> => {
-    const response = await api.get<ApiResponse<BudgetSummaryItem[]>>(
-      "/analysis/budget-summary",
-      { params: { year } }
-    );
-    return response.data.data;
-  },
 };
 
 // Export alias untuk menjaga kompatibilitas dengan kode lama jika diperlukan
 export const getAnnualBudgetApi = annualBudgetApi.getAll;
 export const yearOptionsApi = annualBudgetApi.getYearOptions;
-export const getBudgetSummaryApi = annualBudgetApi.getSummary;

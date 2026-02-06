@@ -46,7 +46,7 @@ export const summaryApi = async (
   mount: string
 ): Promise<ApiResponse<SummaryData>> => {
   const response = await api.get(
-    `/daily-summary/reports/monthly?year=${year}&month=${mount}`
+    `/daily-summary/reports-monthly?year=${year}&month=${mount}`
   );
 
   return response.data;

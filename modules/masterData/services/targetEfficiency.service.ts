@@ -69,12 +69,12 @@ export interface EfficiencyTargetPreviewResponse {
   data: EfficiencyTargetPreview;
 }
 
-const BASE_URL = "/efficiency-targets";
+const prefix = "/efficiency";
 
 export const getEfficiencyTargetsApi = async (
   params?: EfficiencyTargetQueryParams
 ): Promise<EfficiencyTargetsApiResponse> => {
-  const response = await api.get<EfficiencyTargetsApiResponse>(BASE_URL, {
+  const response = await api.get<EfficiencyTargetsApiResponse>(prefix, {
     params: params,
   });
   return response.data;
@@ -84,7 +84,7 @@ export const getEfficiencyTargetByIdApi = async (
   id: number
 ): Promise<EfficiencyTargetDetailApiResponse> => {
   const response = await api.get<EfficiencyTargetDetailApiResponse>(
-    `${BASE_URL}/${id}`
+    `${prefix}/${id}`
   );
   return response.data;
 };
@@ -93,7 +93,7 @@ export const createEfficiencyTargetApi = async (
   data: EfficiencyTargetPayload
 ): Promise<EfficiencyTargetDetailApiResponse> => {
   const response = await api.post<EfficiencyTargetDetailApiResponse>(
-    BASE_URL,
+    prefix,
     data
   );
   return response.data;
@@ -104,14 +104,14 @@ export const updateEfficiencyTargetApi = async (
   data: EfficiencyTargetPayload
 ): Promise<EfficiencyTargetDetailApiResponse> => {
   const response = await api.patch<EfficiencyTargetDetailApiResponse>(
-    `${BASE_URL}/${id}`,
+    `${prefix}/${id}`,
     data
   );
   return response.data;
 };
 
 export const deleteEfficiencyTargetApi = async (id: number): Promise<void> => {
-  await api.delete(`${BASE_URL}/${id}`);
+  await api.delete(`${prefix}/${id}`);
 };
 
 export const getEfficiencyTargetPreviewApi = async (
@@ -124,10 +124,7 @@ export const getEfficiencyTargetPreviewApi = async (
     period_end: format(data.period_end, "yyyy-MM-dd"),
   };
 
-  const response = await api.post(
-    "/analytics/efficiency-target-preview",
-    payload
-  );
+  const response = await api.post(prefix + "/preview", payload);
 
   return response.data;
 };

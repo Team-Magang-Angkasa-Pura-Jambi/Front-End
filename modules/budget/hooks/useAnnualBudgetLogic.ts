@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { format } from "date-fns-tz";
 import { AxiosError } from "axios";
 
-import { getBudgetSummaryApi } from "@/services/analysis.service";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
@@ -14,6 +13,7 @@ import {
   getAnnualBudgetApi,
   yearOptionsApi,
 } from "@/modules/budget/services/annualBudget.service";
+import { budgetApi } from "../services/budget.service";
 
 export const useAnnualBudgetLogic = () => {
   const queryClient = useQueryClient();
@@ -55,7 +55,7 @@ export const useAnnualBudgetLogic = () => {
 
   const { data: summaryRes, isLoading: isLoadingSummary } = useQuery({
     queryKey: ["budgetSummary", selectedYear],
-    queryFn: () => getBudgetSummaryApi(selectedYear),
+    queryFn: () => budgetApi.getSummary(selectedYear),
     enabled: !!selectedYear,
   });
 

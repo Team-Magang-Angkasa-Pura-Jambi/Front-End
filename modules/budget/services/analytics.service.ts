@@ -11,13 +11,7 @@ export type MonthlyBudgetAllocation = {
   realizationPercentage: number | null;
 };
 
-export type PrepareNextPeriodBudget = {
-  parentBudgetId: number;
-  parentTotalBudget: number;
-  totalAllocatedToChildren: number;
-  availableBudgetForNextPeriod: number;
-  prepareNextPeriodBudget: number;
-};
+
 
 export type BudgetPreviewPayload = {
   parent_budget_id?: number | null;
@@ -54,33 +48,6 @@ export type BudgetPreviewResponse = {
 // --- API Implementation ---
 
 export const analyticsApi = {
-  getMonthlyAllocation: async (
-    year: number
-  ): Promise<MonthlyBudgetAllocation[]> => {
-    const response = await api.get("/analytics/budget-allocation", {
-      params: { year },
-    });
-    return response.data.data;
-  },
-
-  getBudgetPreview: async (
-    payload: BudgetPreviewPayload
-  ): Promise<BudgetPreviewResponse> => {
-    const response = await api.post("/analytics/budget-preview", payload);
-    return response.data.data;
-  },
-
-  prepareNextPeriodBudget: async (
-    parentBudgetId: number
-  ): Promise<PrepareNextPeriodBudget> => {
-    const response = await api.get(
-      `/analytics/prepare-budget/${parentBudgetId}`
-    );
-    return response.data.data;
-  },
+  
 };
 
-// Alias untuk kompatibilitas jika dibutuhkan
-export const getBudgetPreviewApi = analyticsApi.getBudgetPreview;
-export const getprepareNextPeriodBudgetApi =
-  analyticsApi.prepareNextPeriodBudget;

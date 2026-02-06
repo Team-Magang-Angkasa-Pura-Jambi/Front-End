@@ -1,3 +1,4 @@
+import { ApiResponse } from "@/common/types/api";
 import api from "@/lib/api";
 
 export type MonthlyBudgetAllocation = {
@@ -45,20 +46,48 @@ export type BudgetPreviewResponse = {
     suggestedBudgetForPeriod: number;
   } | null;
 };
+export type BudgetSummaryItem = {
+  energyTypeId: number;
+  energyTypeName: string;
+  currentPeriod: {
+    periodStart: string | Date;
+    periodEnd: string | Date;
+    totalBudget: number;
+    totalRealization: number;
+    remainingBudget: number;
+    realizationPercentage: number;
+    status: "SAFE" | "WARNING" | "DANGER";
+  };
+};
 
+export type PrepareNextPeriodBudget = {
+  parentBudgetId: number;
+  parentTotalBudget: number;
+  totalAllocatedToChildren: number;
+  availableBudgetForNextPeriod: number;
+  prepareNextPeriodBudget: number;
+};
+
+const prefix = "/budgets";
 export const budgetApi = {
-  getAllocation: async (year: number): Promise<MonthlyBudgetAllocation[]> => {
-    const response = await api.get("/analytics/budget-allocation", {
-      params: { year },
-    });
-
+  getBudgetPreview: async (
+    payload: BudgetPreviewPayload
+  ): Promise<BudgetPreviewResponse> => {
+    const response = await api.post(prefix + "/preview", payload);
     return response.data.data;
   },
 
-  getPreview: async (
-    payload: BudgetPreviewPayload
-  ): Promise<BudgetPreviewResponse> => {
-    const response = await api.post("/analytics/budget-preview", payload);
+  getSummary: async (year: number): Promise<BudgetSummaryItem[]> => {
+    const response = await api.get<ApiResponse<BudgetSummaryItem[]>>(
+      prefix + "/summary",
+      { params: { year } }
+    );
+    return response.data.data;
+  },
+  prepareNextPeriodBudget: async (
+    parentBudgetId: number
+  ): Promise<PrepareNextPeriodBudget> => {
+    const response = await api.get(prefix + `/prepare/${parentBudgetId}`);
     return response.data.data;
   },
 };

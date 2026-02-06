@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   Dialog,
@@ -16,8 +15,10 @@ import {
   Info,
   FlaskConical,
   ExternalLink,
-  Wrench, // Ikon perbaikan/dev
+  Wrench,
   GraduationCap,
+  MousePointer2,
+  ClipboardCheck,
 } from "lucide-react";
 
 export function Announcement() {
@@ -62,7 +63,7 @@ export function Announcement() {
         </DialogHeader>
 
         <div className="grid gap-5 py-2">
-          {/* IDENTITAS (Nada: Ramah & Memperkenalkan Diri) */}
+          {/* IDENTITAS */}
           <div className="flex items-start gap-4 rounded-lg border bg-blue-50/50 p-4 text-slate-800">
             <GraduationCap className="mt-1 h-8 w-8 shrink-0 text-blue-600" />
             <div className="space-y-2">
@@ -72,110 +73,98 @@ export function Announcement() {
               <p className="text-sm leading-relaxed text-slate-600">
                 Kami dari prodi{" "}
                 <strong>Sistem Informasi Universitas Jambi</strong> sedang
-                melakukan penelitian tugas akhir. Sistem ini kami bangun untuk
-                membantu operasional di sini. Mohon dukungan Bapak/Ibu untuk
-                mencoba menggunakannya.
+                melakukan penelitian tugas akhir. Mohon dukungan Bapak/Ibu untuk
+                mencoba alur aplikasi ini.
               </p>
             </div>
           </div>
 
-          {/* STATUS DEV & BUG (Nada: Santai tapi Jelas) */}
+          {/* STATUS DEV */}
           <div className="flex items-start gap-3 rounded-md border border-dashed border-gray-300 bg-gray-50 p-3">
             <Wrench className="mt-0.5 h-5 w-5 shrink-0 text-gray-500" />
             <div className="space-y-1">
               <p className="text-sm font-semibold text-gray-800">
-                Masih Tahap Pengembangan (Beta)
+                Tahap Pengembangan (Beta)
               </p>
               <p className="text-xs leading-relaxed text-gray-600">
-                Karena masih dalam tahap uji coba, mungkin Bapak/Ibu akan
-                menemukan sedikit kendala atau <i>error</i>. Jika ada yang tidak
-                berfungsi, boleh langsung infokan ke{" "}
-                <strong>Super Admin</strong> ya, Pak/Bu.
+                Jika ada kendala, silakan infokan ke{" "}
+                <strong>Super Admin</strong>.
               </p>
             </div>
           </div>
 
-          {/* SECTION UAT (Nada: Mengajak/Meminta Tolong) */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center gap-2 pb-1">
+          {/* SECTION ACTION - TANPA QR */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2">
               <FlaskConical className="h-5 w-5 text-indigo-600" />
               <h4 className="font-semibold text-gray-800">
                 Bantu Kami Menilai Aplikasi
               </h4>
             </div>
 
-            <p className="text-sm text-gray-600">
-              Kami sangat terbantu jika Bapak/Ibu berkenan meluangkan waktu
-              sebentar untuk mencoba alur aplikasi dan mengisi penilaian singkat
-              di bawah ini:
-            </p>
-
-            <div className="mt-2 grid grid-cols-1 gap-6 rounded-xl border bg-white p-4 shadow-sm sm:grid-cols-[150px_1fr]">
-              {/* QR CODE - Ukuran Besar */}
-              <div className="flex flex-col items-center justify-center gap-2">
-                <div className="flex h-[150px] w-[150px] items-center justify-center rounded-lg border bg-white p-1">
-                  <Image
-                    src="/image/qr-code-placeholder.png"
-                    alt="Scan Barcode"
-                    width={140}
-                    height={140}
-                    className="object-contain"
-                  />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {/* Langkah 1: Simulasi */}
+              <Link
+                href="https://t.maze.co/495221427"
+                target="_blank"
+                className="group flex flex-col gap-3 rounded-xl border p-4 transition-all hover:border-blue-400 hover:shadow-sm"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="rounded-full bg-blue-100 p-2 text-blue-600">
+                    <MousePointer2 className="h-5 w-5" />
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase">
+                    Langkah 1
+                  </span>
                 </div>
-                <span className="text-center text-[10px] font-medium text-gray-500">
-                  Scan lewat HP
-                </span>
-              </div>
+                <div>
+                  <h5 className="text-sm font-bold text-gray-900">
+                    Coba Simulasi
+                  </h5>
+                  <p className="text-[11px] text-gray-500 italic">
+                    Uji alur sistem melalui Maze.
+                  </p>
+                </div>
+                <div className="flex items-center text-[11px] font-medium text-blue-600">
+                  Klik di sini <ExternalLink className="ml-1 h-3 w-3" />
+                </div>
+              </Link>
 
-              {/* ACTION BUTTONS */}
-              <div className="flex flex-col justify-center gap-3">
-                <Button
-                  asChild
-                  className="w-full justify-between bg-blue-600 shadow-sm hover:bg-blue-700"
-                >
-                  <Link href="https://maze.co/link-anda" target="_blank">
-                    <span className="flex flex-col items-start text-left">
-                      <span className="text-[11px] font-light opacity-90">
-                        Langkah 1
-                      </span>
-                      <span className="font-semibold">
-                        Coba Simulasi (Maze)
-                      </span>
-                    </span>
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-
-                <Button
-                  asChild
-                  variant="outline"
-                  className="w-full justify-between border-blue-200 text-blue-700 hover:bg-blue-50"
-                >
-                  <Link
-                    href="https://forms.office.com/r/tUmXpXK05B"
-                    target="_blank"
-                  >
-                    <span className="flex flex-col items-start text-left">
-                      <span className="text-[11px] font-normal text-gray-500">
-                        Langkah 2
-                      </span>
-                      <span className="font-semibold">
-                        Isi Penilaian Singkat
-                      </span>
-                    </span>
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
+              {/* Langkah 2: Penilaian */}
+              <Link
+                href="https://forms.office.com/r/tUmXpXK05B"
+                target="_blank"
+                className="group flex flex-col gap-3 rounded-xl border p-4 transition-all hover:border-indigo-400 hover:shadow-sm"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="rounded-full bg-indigo-100 p-2 text-indigo-600">
+                    <ClipboardCheck className="h-5 w-5" />
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase">
+                    Langkah 2
+                  </span>
+                </div>
+                <div>
+                  <h5 className="text-sm font-bold text-gray-900">
+                    Isi Penilaian
+                  </h5>
+                  <p className="text-[11px] text-gray-500 italic">
+                    Berikan masukan singkat Anda.
+                  </p>
+                </div>
+                <div className="flex items-center text-[11px] font-medium text-indigo-600">
+                  Buka Form <ExternalLink className="ml-1 h-3 w-3" />
+                </div>
+              </Link>
             </div>
           </div>
         </div>
 
-        <DialogFooter className="mt-2 border-t pt-4">
+        <DialogFooter className="mt-4 border-t pt-4">
           <Button
             onClick={handleClose}
             variant="default"
-            className="w-full min-w-[150px] sm:w-auto"
+            className="w-full sm:w-auto"
           >
             Masuk ke Aplikasi ({timeLeft}s)
           </Button>

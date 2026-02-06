@@ -18,7 +18,7 @@ import {
 import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { useQuery } from "@tanstack/react-query";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
-import { getprepareNextPeriodBudgetApi } from "../services/analytics.service";
+import { budgetApi } from "../services/budget.service";
 
 interface AnnualBudgetDialogProps {
   open: boolean;
@@ -141,7 +141,7 @@ export const AnnualBudgetDialog = ({
 
   const { data: nextBudgetAnalysis } = useQuery({
     queryKey: ["prepareNextPeriodBudget", parentBudgetId],
-    queryFn: () => getprepareNextPeriodBudgetApi(parentBudgetId),
+    queryFn: () => budgetApi.prepareNextPeriodBudget(parentBudgetId),
     enabled: open && !!parentBudgetId && budgetType === "child",
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
