@@ -5,22 +5,31 @@
     "plugin:tailwindcss/recommended",
     "prettier"
   ],
-  "plugins": ["simple-import-sort", "tailwindcss"],
+  "plugins": ["simple-import-sort", "tailwindcss", "unused-imports"],
   "rules": {
-    "@typescript-eslint/no-unused-vars": [
+    // 1. Matikan rule bawaan agar tidak bentrok dengan plugin
+    "@typescript-eslint/no-unused-vars": "off",
+
+    // 2. Rule utama: Error ini yang memicu auto-fix penghapusan import
+    "unused-imports/no-unused-imports": "error",
+
+    // 3. Rule pengganti no-unused-vars (tetap warn, tapi lewat plugin)
+    "unused-imports/no-unused-vars": [
       "warn",
       {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
       }
     ],
+
     "@typescript-eslint/no-explicit-any": "warn",
 
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
 
     "tailwindcss/no-custom-classname": "off",
-
     "tailwindcss/classnames-order": "off"
   },
 

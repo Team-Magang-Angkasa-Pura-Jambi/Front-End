@@ -1,58 +1,71 @@
-import z from "zod";
+import { z } from "zod";
 
-export const meterSchema = z.object({
-  meter_code: z.string().trim().min(1, "Kode meter wajib diisi."),
+export enum MeterStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  MAINTENANCE = "MAINTENANCE",
+}
 
-  status: z.enum(["Active", "Inactive", "UnderMaintenance", "DELETED"], {
-    message: "Status tidak valid.",
-  }),
+export enum TankShape {
+  CYLINDER_VERTICAL = "CYLINDER_VERTICAL",
+  CYLINDER_HORIZONTAL = "CYLINDER_HORIZONTAL",
+  BOX = "BOX",
+}
 
-  category_id: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.coerce
-      .number({ error: "Kategori wajib dipilih." })
-      .min(1, "Kategori wajib dipilih.")
-  ),
-
-  tariff_group_id: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.coerce
-      .number({ error: "Golongan tarif wajib dipilih." })
-      .min(1, "Golongan tarif wajib dipilih.")
-  ),
-
-  energy_type_id: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.coerce
-      .number({ error: "Jenis energi wajib dipilih." })
-      .min(1, "Jenis energi wajib dipilih.")
-  ),
-
-  tank_height_cm: z
-    .preprocess(
-      (val) => (val === "" || val === null ? null : val),
-      z.coerce.number().positive("Tinggi harus positif.").nullable()
-    )
-    .optional(),
-
-  tank_volume_liters: z
-    .preprocess(
-      (val) => (val === "" || val === null ? null : val),
-      z.coerce.number().positive("Volume harus positif.").nullable()
-    )
-    .optional(),
-
-  has_rollover: z.boolean().default(false),
-
-  rollover_limit: z
-    .preprocess(
-      (val) => (val === "" || val === null ? null : val),
-      z.coerce
-        .number()
-        .positive("Batas Rollover harus angka positif.")
-        .nullable()
-    )
-    .optional(),
+const profileBase = z.object({
+  shape: z.nativeEnum(TankShape).optional().nullable(),
+  capacity_liters: z.coerce.number().min(0).optional().nullable(),
+  height_max_cm: z.coerce.number().min(0).optional().nullable(),
+  diameter_cm: z.coerce.number().min(0).optional().nullable(),
+  length_cm: z.coerce.number().min(0).optional().nullable(),
+  width_cm: z.coerce.number().min(0).optional().nullable(),
 });
 
-export type MeterFormValues = z.infer<typeof meterSchema>;
+const configBase = z.object({
+  reading_type_id: z.coerce.number({ error: "Parameter wajib dipilih" }).min(1),
+  is_active: z.boolean().default(true),
+  alarm_min_threshold: z.coerce.number().optional().nullable(),
+  alarm_max_threshold: z.coerce.number().optional().nullable(),
+});
+
+export const meterFormSchema = z
+  .object({
+    meter: z.object({
+      meter_code: z.string().min(3, "Minimal 3 karakter"),
+      name: z.string().optional().nullable(),
+      serial_number: z.string().optional().nullable(),
+      energy_type_id: z.coerce.number({
+        error: "Tipe Energi wajib dipilih",
+      }),
+      status: z.nativeEnum(MeterStatus),
+
+      multiplier: z.coerce.number().default(1),
+      is_virtual: z.boolean().default(false),
+      allow_gap: z.boolean().default(false),
+      allow_decrease: z.boolean().default(false),
+
+      has_rollover: z.boolean().default(false),
+      rollover_limit: z.coerce.number().optional().nullable(),
+
+      location_id: z.coerce.number().optional().nullable(),
+      tenant_id: z.coerce.number().optional().nullable(),
+    }),
+
+    meter_profile: profileBase.optional(),
+
+    reading_config: z.array(configBase).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.meter.has_rollover &&
+      (!data.meter.rollover_limit || data.meter.rollover_limit <= 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Batas rollover wajib diisi",
+        path: ["meter", "rollover_limit"],
+      });
+    }
+  });
+
+export type MeterFormValues = z.infer<typeof meterFormSchema>;

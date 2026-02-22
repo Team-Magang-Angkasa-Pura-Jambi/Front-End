@@ -39,7 +39,12 @@ export const useModernEfficiency = (
   selectedMeterId: string,
   selectedYear: string
 ) => {
-  const { data: metersResponse, isLoading: isLoadingMeters } = useQuery({
+  const {
+    data: metersResponse,
+    isLoading: isLoadingMeters,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["electricityMeters"],
     queryFn: () => getMetersApi(ENERGY_TYPES.ELECTRICITY),
   });
@@ -146,5 +151,7 @@ export const useModernEfficiency = (
     isLoading: isLoadingMeters || isLoadingHeatmap,
     isLoadingMeters,
     isLoadingHeatmap,
+    isError,
+    error,
   };
 };

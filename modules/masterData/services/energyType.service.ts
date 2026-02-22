@@ -1,6 +1,6 @@
+import { EnergyType } from "@/common/types/energy";
 import api from "@/lib/api";
 import { EnergyTypeFormValues } from "../schemas/energyType.schema";
-import { EnergyType, EnergyTypeName } from "@/common/types/energy";
 
 export interface EnergyTypesApiResponse {
   data: EnergyType[];
@@ -12,16 +12,19 @@ interface EnergyTypeDetailApiResponse {
   status?: { code: number; message: string };
 }
 
-const BASE_URL = "/energy-types";
+const BASE_URL = "/energies";
 
-export const getEnergyTypesApi = async (
-  typeName?: EnergyTypeName
-): Promise<EnergyTypesApiResponse> => {
+export const getEnergyTypesApi = async (typeName?: string): Promise<EnergyTypesApiResponse> => {
   const response = await api.get<EnergyTypesApiResponse>(BASE_URL, {
     params: {
       typeName: typeName,
     },
   });
+  return response.data;
+};
+
+export const getEnergyWithReadingTypeTypesApi = async (): Promise<EnergyTypesApiResponse> => {
+  const response = await api.get<EnergyTypesApiResponse>(BASE_URL + "/with-reading-types", {});
   return response.data;
 };
 
@@ -36,10 +39,7 @@ export const updateEnergyTypeApi = async (
   id: number,
   data: EnergyTypeFormValues
 ): Promise<EnergyTypeDetailApiResponse> => {
-  const response = await api.patch<EnergyTypeDetailApiResponse>(
-    `${BASE_URL}/${id}`,
-    data
-  );
+  const response = await api.patch<EnergyTypeDetailApiResponse>(`${BASE_URL}/${id}`, data);
   return response.data;
 };
 

@@ -1,26 +1,13 @@
 import api from "@/lib/api";
+import { MeterFormValues } from "../schemas/meter.schema";
 import { MeterType } from "@/common/types/meters";
-import { statusMeter } from "../types/meter.type";
+import { ApiResponse } from "@/common/types/api";
 
 interface MetersApiResponse {
-  data: MeterType[];
+  data: { meter: MeterType[] };
 }
 
-interface MeterDetailApiResponse {
-  data: MeterType;
-}
-
-export interface MeterPayload {
-  meter_code: string;
-  status: statusMeter;
-  has_rollover: boolean;
-  category_id?: number;
-  tariff_group_id?: number;
-  energy_type_id?: number;
-  tank_height_cm?: number;
-  tank_volume_liters?: number;
-  rollover_limit?: number;
-}
+export type MeterDetailApiResponse = ApiResponse<MeterType>;
 
 export const getMetersApi = async (
   typeName?: string
@@ -41,7 +28,7 @@ export const getMeterByIdApi = async (
 };
 
 export const createMeterApi = async (
-  data: MeterPayload
+  data: MeterFormValues
 ): Promise<MeterDetailApiResponse> => {
   const response = await api.post<MeterDetailApiResponse>("/meters", data);
   return response.data;
@@ -49,7 +36,7 @@ export const createMeterApi = async (
 
 export const updateMeterApi = async (
   id: number,
-  data: Partial<MeterPayload>
+  data: Partial<MeterFormValues>
 ): Promise<MeterDetailApiResponse> => {
   const response = await api.patch<MeterDetailApiResponse>(
     `/meters/${id}`,

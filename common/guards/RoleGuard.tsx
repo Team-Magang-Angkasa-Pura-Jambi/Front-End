@@ -5,7 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-type Role = "Technician" | "Admin" | "SuperAdmin";
+type Role = "SUPER_ADMIN" | "ADMIN" | "TECHNICIAN";
 
 interface RoleGuardProps {
   allowedRoles: Role[];

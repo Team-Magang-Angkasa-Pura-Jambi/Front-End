@@ -1,9 +1,9 @@
 export interface ApiResponse<T> {
-  data: T;
   status: {
     code: number;
     message: string;
   };
+  data: T;
 }
 // Sesuaikan dengan JSON Backend Anda
 export interface ApiErrorResponse {

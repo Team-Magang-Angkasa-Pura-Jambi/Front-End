@@ -56,6 +56,13 @@ export const FuelRefillAnalysis = () => {
     download(`Fuel-Refill-Analysis.jpg`);
   };
 
+  if (isError) {
+    return <ErrorFetchData message={error?.message} />;
+  }
+
+  if (!isLoading) {
+    return <EmptyData />;
+  }
   return (
     <Card
       ref={ref}
