@@ -1,23 +1,24 @@
-import { ReadingType } from "./readingTypes";
-import { TariffGroup } from "./tariffGroup";
-
-export type Rate = {
+export interface Tariff {
   rate_id: number;
-  value: string;
-  reading_type_id: number;
-  reading_type?: ReadingType;
-};
+  reading_type_id: 1;
+  type_name: string;
+  label: string; // Contoh: "WBP"
+  value: string; // Contoh: "1444.7"
+  unit: string; // Contoh: "kWh"
+}
 
-export type PriceSchemeType = {
-  scheme_id: number;
-  scheme_name: string;
+export interface PriceSchemeType {
+  id: number; // Sesuai JSON baru
+  name: string;
+  description?: string; // Opsional jika tidak dikirim di list
   effective_date: string;
   is_active: boolean;
-  tariff_group_id: number;
-  tariff_group: TariffGroup;
-  rates: Rate[];
-  taxes?: TaxOnPrice[];
-};
+  total_meters: number;
+  meter_summary: string[];
+  created_by: string;
+  tariffs: Tariff[]; // Pengganti 'rates' yang nested
+}
+
 export type TaxOnPrice = {
   tax_id: number;
   tax_name: string;

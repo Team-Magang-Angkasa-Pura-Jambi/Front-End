@@ -14,8 +14,8 @@ import {
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
-  onEdit: (data: TData) => void;
-  onDelete: (data: TData) => void;
+  onEdit?: (data: TData) => void;
+  onDelete?: (data: TData) => void;
 }
 
 export function DataTableRowActions<TData>({

@@ -46,7 +46,7 @@ import {
 
 import { EnergyTypeForm } from "../components/forms/energyType.form";
 import { LoadingSkeleton } from "../components/molecules/LoadingSkeleton";
-import { MasterDataDialog } from "../components/molecules/MasterDataDialog";
+import { MasterDataDialog } from "../components/templates/MasterDataDialog";
 import { useEnergyManagement } from "../hooks/useEnergyManagement";
 
 export const UnifiedEnergyManagement = () => {

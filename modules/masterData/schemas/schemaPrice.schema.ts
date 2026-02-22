@@ -1,36 +1,32 @@
-import z from "zod";
+import { z } from "zod";
 
-export const priceSchemeSchema = z.object({
-  scheme_name: z.string().min(1, "Nama skema tidak boleh kosong."),
-  effective_date: z.coerce.date({
-    error: "Tanggal efektif wajib diisi.",
-  }),
-
-  is_active: z.boolean().optional().default(true),
-
-  tariff_group_id: z.coerce
-    .number()
-    .int()
-    .positive("Golongan tarif wajib dipilih."),
-  rates: z
-    .array(
-      z.object({
-        reading_type_id: z.coerce
-          .number()
-          .int()
-          .positive("Jenis pembacaan wajib dipilih."),
-        value: z.coerce.number(),
-      })
-    )
-    .min(1, "Minimal harus ada satu tarif.")
-    .refine(
-      (items) =>
-        new Set(items.map((i) => i.reading_type_id)).size === items.length,
-      { message: "Setiap jenis pembacaan hanya boleh memiliki satu tarif." }
-    ).optional(),
-
-    
-  tax_ids: z.array(z.coerce.number()).optional(),
+// Reusable shapes sesuai dengan BE
+const rateShape = z.object({
+  rate_id: z.number().int().optional(),
+  reading_type_id: z.coerce.number().int().positive("Jenis pembacaan wajib dipilih"),
+  rate_value: z.coerce.number().positive("Nilai tarif harus lebih dari 0"),
 });
 
-export type schemaFormValues = z.infer<typeof priceSchemeSchema>;
+export const priceSchemeSchema = z.object({
+  name: z.string().min(1, "Nama skema harga wajib diisi"),
+  description: z.string().optional().nullable(),
+  effective_date: z.date({
+    error: "Format tanggal salah",
+  }),
+  is_active: z.boolean().default(true),
+
+  // Kita kumpulkan rates di sini untuk keperluan Form UI
+  // Nanti di-transform saat onSubmit agar sesuai format BE
+  rates: z
+    .array(rateShape)
+    .min(1, "Minimal harus ada satu rincian tarif")
+    .refine(
+      (items) => {
+        const ids = items.map((i) => i.reading_type_id);
+        return new Set(ids).size === ids.length;
+      },
+      { message: "Tipe pembacaan tidak boleh duplikat dalam satu skema" }
+    ),
+});
+
+export type SchemaFormValues = z.infer<typeof priceSchemeSchema>;

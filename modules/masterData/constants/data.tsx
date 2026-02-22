@@ -3,21 +3,17 @@ import {
   DollarSign,
   DollarSignIcon,
   Droplets,
-  Landmark,
-  Percent,
   Tags,
   TrendingUp,
   Zap,
 } from "lucide-react";
 
 // import { ReadingTypeManagement } from "../components/ReadingTypeManagements";
-import { SchemePriceManagement } from "../components/SchemePriceManagement";
-import { TargetEfficiencyManagement } from "../components/targetEfficienyManagement";
-import { TariffGroupManagement } from "../components/TariffGroupManagement";
-import { TaxManagement } from "../components/TaxManagement";
 import { UnifiedEnergyManagement } from "../pages/EnergyManagement";
 import { EntityManagement } from "../pages/EntityManagement";
 import { MeterManagement } from "../pages/MeterManagement";
+import { SchemePriceManagement } from "../pages/SchemePriceManagement";
+import { TargetEfficiencyManagement } from "../pages/targetEfficienyManagement";
 
 export const masterDataGroups = [
   {
@@ -52,23 +48,17 @@ export const masterDataGroups = [
     groupIcon: DollarSign,
     items: [
       {
-        key: "tariff-groups",
-        title: "Golongan Tarif",
-        icon: Landmark,
-        component: <TariffGroupManagement />,
-      },
-      {
         key: "scheme-price",
         title: "Skema Harga",
         icon: DollarSignIcon,
         component: <SchemePriceManagement />,
       },
-      {
-        key: "taxes",
-        title: "Pajak",
-        icon: Percent,
-        component: <TaxManagement />,
-      },
+      // {
+      //   key: "taxes",
+      //   title: "Pajak",
+      //   icon: Percent,
+      //   component: <TaxManagement />,
+      // },
       {
         key: "efficiency-targets",
         title: "Target Efisiensi",

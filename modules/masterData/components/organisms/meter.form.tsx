@@ -98,6 +98,7 @@ export const MeterForm = ({
   });
 
   const energyTypes = useMemo(() => energyRes?.data || [], [energyRes]);
+  
   const allReadingTypes = useMemo(() => readingTypeRes?.data || [], [readingTypeRes]);
 
   const form = useForm<MeterFormValues>({

@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X, SquareActivity } from "lucide-react";
+import { SquareActivity, X } from "lucide-react";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,7 @@ const DialogOverlay = React.forwardRef<
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 // --- KONFIGURASI UKURAN DIALOG ---
-const DIALOG_WIDTHS = {
+export const DIALOG_WIDTHS = {
   sm: "sm:max-w-sm", // Kecil (Alert)
   default: "sm:max-w-lg", // Standar (Form biasa)
   lg: "sm:max-w-xl", // Agak lebar
@@ -44,117 +44,97 @@ const DIALOG_WIDTHS = {
 interface DialogContentProps extends React.ComponentPropsWithoutRef<
   typeof DialogPrimitive.Content
 > {
-  maxWidth?: keyof typeof DIALOG_WIDTHS; // Prop baru untuk mengatur lebar
+  maxWidth?: keyof typeof DIALOG_WIDTHS | string; // Prop baru untuk mengatur lebar
   showCloseButton?: boolean;
 }
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(
-  (
-    {
-      className,
-      children,
-      maxWidth = "default",
-      showCloseButton = true,
-      ...props
-    },
-    ref
-  ) => (
-    <DialogPortal>
-      <DialogOverlay />
-      <DialogPrimitive.Content
-        ref={ref}
-        className={cn(
-          // Base Layout & Animation
-          "fixed top-[50%] left-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 p-6 duration-200",
-          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-          "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
+>(({ className, children, maxWidth = "default", showCloseButton = true, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        // Base Layout & Animation
+        "fixed top-[50%] left-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 p-6 duration-200",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
 
-          // Dynamic Width (Kunci agar tidak tertahan)
-          DIALOG_WIDTHS[maxWidth],
+        // Dynamic Width (Kunci agar tidak tertahan)
+        DIALOG_WIDTHS[maxWidth],
 
-          // --- INDUSTRIAL THEME STYLING ---
-          // Background & Border
-          "bg-card text-card-foreground rounded-lg border shadow-2xl",
-          // Signature Top Border (Cyan/Primary)
-          "border-t-primary border-x-border border-b-border border-t-[4px]",
-          // Glow Effect Halus
-          "shadow-[0_0_40px_-10px_rgba(var(--primary),0.1)]",
-          // Overflow hidden untuk dekorasi
-          "overflow-hidden",
+        // --- INDUSTRIAL THEME STYLING ---
+        // Background & Border
+        "bg-card text-card-foreground rounded-lg border shadow-2xl",
+        // Signature Top Border (Cyan/Primary)
+        "border-t-primary border-x-border border-b-border border-t-[4px]",
+        // Glow Effect Halus
+        "shadow-[0_0_40px_-10px_rgba(var(--primary),0.1)]",
+        // Overflow hidden untuk dekorasi
+        "overflow-hidden",
 
-          className
-        )}
-        {...props}
+        className
+      )}
+      {...props}
+    >
+      {/* --- DEKORASI VISUAL (HUD ELEMENTS) --- */}
+
+      {/* 1. Ambient Glow Tengah Atas */}
+      <div className="bg-primary/50 pointer-events-none absolute top-0 left-1/2 h-[2px] w-1/3 -translate-x-1/2 blur-[2px]" />
+      <div className="bg-primary/10 pointer-events-none absolute top-0 left-1/2 h-16 w-64 -translate-x-1/2 rounded-full blur-xl" />
+
+      {/* 2. Tech Corner (Kiri Atas) */}
+      <svg
+        className="text-primary/30 pointer-events-none absolute top-2 left-2 h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
       >
-        {/* --- DEKORASI VISUAL (HUD ELEMENTS) --- */}
+        <path d="M1 1h6v6H1z" fill="currentColor" className="opacity-50" />
+        <path d="M1 9v14h14" />
+      </svg>
 
-        {/* 1. Ambient Glow Tengah Atas */}
-        <div className="bg-primary/50 pointer-events-none absolute top-0 left-1/2 h-[2px] w-1/3 -translate-x-1/2 blur-[2px]" />
-        <div className="bg-primary/10 pointer-events-none absolute top-0 left-1/2 h-16 w-64 -translate-x-1/2 rounded-full blur-xl" />
+      {/* 3. Tech Corner (Kanan Atas) */}
+      <svg
+        className="text-primary/30 pointer-events-none absolute top-2 right-2 h-4 w-4 rotate-90"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M1 1h6v6H1z" fill="currentColor" className="opacity-50" />
+        <path d="M1 9v14h14" />
+      </svg>
 
-        {/* 2. Tech Corner (Kiri Atas) */}
-        <svg
-          className="text-primary/30 pointer-events-none absolute top-2 left-2 h-4 w-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M1 1h6v6H1z" fill="currentColor" className="opacity-50" />
-          <path d="M1 9v14h14" />
-        </svg>
+      {/* 4. Background Grid Pattern Halus */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] bg-[size:24px_24px]" />
 
-        {/* 3. Tech Corner (Kanan Atas) */}
-        <svg
-          className="text-primary/30 pointer-events-none absolute top-2 right-2 h-4 w-4 rotate-90"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M1 1h6v6H1z" fill="currentColor" className="opacity-50" />
-          <path d="M1 9v14h14" />
-        </svg>
+      {/* --- CONTENT WRAPPER --- */}
+      <div className="relative z-10 grid gap-4">{children}</div>
 
-        {/* 4. Background Grid Pattern Halus */}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] bg-[size:24px_24px]" />
-
-        {/* --- CONTENT WRAPPER --- */}
-        <div className="relative z-10 grid gap-4">{children}</div>
-
-        {showCloseButton && (
-          <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 z-20 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
-        )}
-      </DialogPrimitive.Content>
-    </DialogPortal>
-  )
-);
+      {showCloseButton && (
+        <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 z-20 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+      )}
+    </DialogPrimitive.Content>
+  </DialogPortal>
+));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-const DialogHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(
-      "relative z-10 flex flex-col space-y-1.5 text-center sm:text-left",
-      className
-    )}
+    className={cn("relative z-10 flex flex-col space-y-1.5 text-center sm:text-left", className)}
     {...props}
   />
 );
 DialogHeader.displayName = "DialogHeader";
 
-const DialogFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
       "border-border/40 relative z-10 mt-2 flex flex-col-reverse border-t pt-2 sm:flex-row sm:justify-end sm:space-x-2",
@@ -173,10 +153,7 @@ const DialogTitle = React.forwardRef<
     <SquareActivity className="text-primary hidden h-5 w-5 sm:block" />
     <DialogPrimitive.Title
       ref={ref}
-      className={cn(
-        "text-foreground text-lg leading-none font-semibold tracking-tight",
-        className
-      )}
+      className={cn("text-foreground text-lg leading-none font-semibold tracking-tight", className)}
       {...props}
     />
   </div>
@@ -197,13 +174,13 @@ DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 export {
   Dialog,
-  DialogPortal,
-  DialogOverlay,
   DialogClose,
-  DialogTrigger,
   DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
   DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
 };

@@ -21,10 +21,10 @@ import { Location } from "@/common/types/location";
 import { Tenant } from "@/common/types/tenant";
 import { AlertTriangle, Building2, MapPin, Plus } from "lucide-react";
 import { LocationTable } from "../components/molecules/LocationTable";
-import { MasterDataDialog } from "../components/molecules/MasterDataDialog";
 import { TenantTable } from "../components/molecules/TenantTable";
 import { LocationForm } from "../components/organisms/LocationForm";
 import { TenantForm } from "../components/organisms/TenantForm";
+import { MasterDataDialog } from "../components/templates/MasterDataDialog";
 import { useEntityManager } from "../hooks/useEntityManagement";
 
 export const EntityManagement = () => {
