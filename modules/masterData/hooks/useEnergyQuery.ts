@@ -7,7 +7,7 @@ import { EnergyTypeFormValues } from "../schemas/energyType.schema";
 import {
   createEnergyTypeApi,
   deleteEnergyTypeApi,
-  getEnergyWithReadingTypeTypesApi,
+  getEnergyWithReadingTypesApi,
   updateEnergyTypeApi,
 } from "../services/energyType.service";
 
@@ -17,7 +17,7 @@ export const useEnergyQuery = () => {
   const useGetEnergiesWithReadings = () => {
     return useQuery({
       queryKey: ["energyTypes"],
-      queryFn: getEnergyWithReadingTypeTypesApi,
+      queryFn: getEnergyWithReadingTypesApi,
       staleTime: 1000 * 60 * 5,
     });
   };

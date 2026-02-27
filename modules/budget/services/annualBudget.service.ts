@@ -1,7 +1,7 @@
-import api from "@/lib/api";
 import { ApiResponse } from "@/common/types/api";
-import { AnnualBudget } from "@/common/types/budget";
+import { AnnualBudget, PricingSchemeDetail } from "@/common/types/budget";
 import { EnergyTypeName } from "@/common/types/energy";
+import api from "@/lib/api";
 import { AnnualBudgetFormValues } from "@/modules/budget/schemas/annualBudget.schema";
 
 // --- Types ---
@@ -25,25 +25,17 @@ export const annualBudgetApi = {
     });
     return response.data;
   },
-
-  getParents: async (year?: number): Promise<ApiResponse<AnnualBudget[]>> => {
-    const response = await api.get("/annual-budgets/parents", {
-      params: { year },
-    });
+  getById: async (budgetId: number): Promise<ApiResponse<PricingSchemeDetail>> => {
+    const response = await api.get(`/annual-budgets/${budgetId}`);
     return response.data;
   },
 
-  create: async (
-    data: AnnualBudgetFormValues
-  ): Promise<ApiResponse<AnnualBudget>> => {
+  create: async (data: AnnualBudgetFormValues): Promise<ApiResponse<AnnualBudget>> => {
     const response = await api.post("/annual-budgets", data);
     return response.data;
   },
 
-  update: async (
-    id: number,
-    data: AnnualBudgetFormValues
-  ): Promise<ApiResponse<AnnualBudget>> => {
+  update: async (id: number, data: AnnualBudgetFormValues): Promise<ApiResponse<AnnualBudget>> => {
     const response = await api.patch(`/annual-budgets/${id}`, data);
     return response.data;
   },
@@ -54,6 +46,12 @@ export const annualBudgetApi = {
 
   getYearOptions: async (): Promise<ApiResponse<YearOptionsData>> => {
     const response = await api.get("/annual-budgets/year-options");
+    return response.data;
+  },
+
+  showRemaining: async (id: number) => {
+    const response = await api.get(`/annual-budgets/${id}/remaining`);
+
     return response.data;
   },
 };

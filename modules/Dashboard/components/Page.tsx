@@ -1,23 +1,22 @@
 "use client";
 
-import React from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { useRealtimeNotification } from "@/modules/Dashboard/hooks/useRealtimeNotification";
+import { AnimatePresence, motion, Variants } from "framer-motion";
+import { Announcement } from "./Announcement";
 import { Header } from "./Header";
 import { AnalysisChart } from "./analysisChart";
 import { AnalysisYearlyChart } from "./analysisYearlyChart";
-import { UnifiedEnergyComparisonChart } from "./dayTypeComparisonChart";
-import { ModernEfficiencyDashboard } from "./modernEfficiencyDashboard";
-import { MeterEfficiencyRanking } from "./meterEfficiencyRanking";
-import { DailyAveragePaxChart } from "./dailyAveragePaxChart";
-import { FuelRefillAnalysis } from "./fuelRefillAnalysis/fuelRefillAnalysis";
-import { EfficiencyRatioChart } from "./efficiencyRatioChart";
 import { BudgetBurnRateChart } from "./budgetBurnRateChart";
-import { ModernBudgetAnalysis } from "./modernBudgetAnalysis";
-import { useRealtimeNotification } from "@/modules/Dashboard/hooks/useRealtimeNotification";
+import { DailyAveragePaxChart } from "./dailyAveragePaxChart";
+import { UnifiedEnergyComparisonChart } from "./dayTypeComparisonChart";
+import { EfficiencyRatioChart } from "./efficiencyRatioChart";
 import { MultiEnergyForecastCard } from "./energyForecastCard";
+import { FuelRefillAnalysis } from "./fuelRefillAnalysis/fuelRefillAnalysis";
+import { MeterEfficiencyRanking } from "./meterEfficiencyRanking";
+import { ModernBudgetAnalysis } from "./modernBudgetAnalysis";
+import { ModernEfficiencyDashboard } from "./modernEfficiencyDashboard";
 import { NotificationStyle } from "./notificationStyle";
 import { ResourceConsumptionSummary } from "./resourceConsumptionSummary";
-import { Announcement } from "./Announcement";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -112,10 +111,7 @@ export const Page = () => {
             </motion.div>
           </div>
 
-          <motion.footer
-            variants={itemVariants}
-            className="py-10 text-center opacity-40"
-          >
+          <motion.footer variants={itemVariants} className="py-10 text-center opacity-40">
             <p className="font-mono text-[10px] tracking-widest uppercase italic">
               Airport Operational Intelligence Dashboard
             </p>

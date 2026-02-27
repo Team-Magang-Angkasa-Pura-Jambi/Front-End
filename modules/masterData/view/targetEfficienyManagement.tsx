@@ -6,7 +6,7 @@ import { PlusCircle, Target } from "lucide-react";
 import { Card, CardContent } from "@/common/components/ui/card";
 import { Skeleton } from "@/common/components/ui/skeleton";
 
-import { TargetEfficiencyForm } from "../components/forms/targetEfficiency.form";
+import { TargetEfficiencyForm } from "../components/organisms/targetEfficiency.form";
 import { TargetKPIListRow } from "../components/molecules/TargetKPIListRow";
 import { ConfirmDeleteDialog } from "../components/templates/ConfirmDeleteDialog";
 import { MasterDataDialog } from "../components/templates/MasterDataDialog";

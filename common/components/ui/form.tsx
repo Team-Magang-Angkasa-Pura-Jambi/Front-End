@@ -1,8 +1,9 @@
 "use client";
 
-import * as React from "react";
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
+import { AlertCircle } from "lucide-react"; // Tambahkan icon untuk error
+import * as React from "react";
 import {
   Controller,
   FormProvider,
@@ -12,10 +13,9 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
-import { AlertCircle } from "lucide-react"; // Tambahkan icon untuk error
 
-import { cn } from "@/lib/utils"; // Pastikan path utils benar
 import { Label } from "@/common/components/ui/label";
+import { cn } from "@/lib/utils"; // Pastikan path utils benar
 
 const Form = FormProvider;
 
@@ -26,9 +26,7 @@ type FormFieldContextValue<
   name: TName;
 };
 
-const FormFieldContext = React.createContext<FormFieldContextValue>(
-  {} as FormFieldContextValue
-);
+const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue);
 
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -70,9 +68,7 @@ type FormItemContextValue = {
   id: string;
 };
 
-const FormItemContext = React.createContext<FormItemContextValue>(
-  {} as FormItemContextValue
-);
+const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue);
 
 function FormItem({ className, ...props }: React.ComponentProps<"div">) {
   const id = React.useId();
@@ -89,10 +85,7 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function FormLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
   const { error, formItemId } = useFormField();
 
   return (
@@ -101,7 +94,7 @@ function FormLabel({
       data-error={!!error}
       className={cn(
         // Style Khas Energi: Warna Slate, Font Medium
-        "text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300",
+        "text-xs font-semibold tracking-wide text-slate-600 uppercase dark:text-slate-300",
         // Saat Error: Warna merah industrial
         "data-[error=true]:text-red-600 dark:data-[error=true]:text-red-400",
         className
@@ -113,18 +106,13 @@ function FormLabel({
 }
 
 function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
-  const { error, formItemId, formDescriptionId, formMessageId } =
-    useFormField();
+  const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
   return (
     <Slot
       data-slot="form-control"
       id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
+      aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
       aria-invalid={!!error}
       // Kita bisa menambahkan styling border di komponen Input (terpisah),
       // tapi Slot meneruskan props ke child.
@@ -175,12 +163,12 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 }
 
 export {
-  useFormField,
   Form,
-  FormItem,
-  FormLabel,
   FormControl,
   FormDescription,
-  FormMessage,
   FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
 };

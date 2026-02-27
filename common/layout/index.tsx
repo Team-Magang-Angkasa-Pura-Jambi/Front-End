@@ -1,29 +1,26 @@
 "use client";
-import {
-  Sidebar,
-  SidebarBody,
-  SidebarLink,
-} from "@/common/components/ui/sidebar";
+import { Button } from "@/common/components/ui/button";
+import { Sidebar, SidebarBody, SidebarLink } from "@/common/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-import { usePathname, useRouter } from "next/navigation";
-import { Logo } from "./components/logo";
-import { Button } from "@/common/components/ui/button";
+import { AnimatePresence, motion, Variants } from "framer-motion";
 import {
   BarChart3,
   BookText,
   CircleUserRound,
+  Crosshair,
   Database,
   FilePenLine,
-  Loader2,
   LayoutDashboard,
+  Loader2,
   LogOut,
+  Settings2Icon,
   Users,
   Wallet,
-  Crosshair, // Icon baru untuk dekorasi
 } from "lucide-react";
-import { AnimatePresence, motion, Variants } from "framer-motion";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
+import { Logo } from "./components/logo";
 
 // ... (Variants code TETAP SAMA) ...
 const containerVariants: Variants = {
@@ -99,6 +96,13 @@ const allLinks = [
     icon: <Wallet className="h-5 w-5 shrink-0" />,
     allowedRoles: [Role.SuperAdmin, Role.Admin],
   },
+
+  {
+    label: "Formula",
+    href: "/formula",
+    icon: <Settings2Icon className="h-5 w-5 shrink-0" />,
+    allowedRoles: [Role.SuperAdmin, Role.Admin],
+  },
 ];
 
 // KOMPONEN DEKORASI BARU (Tech Tattoos)
@@ -156,9 +160,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
 
   const visibleLinks = useMemo(() => {
     if (!user?.role) return [];
-    return allLinks.filter((link) =>
-      link.allowedRoles.includes(user.role as Role)
-    );
+    return allLinks.filter((link) => link.allowedRoles.includes(user.role as Role));
   }, [user?.role]);
 
   const handleLogout = () => {
@@ -177,20 +179,14 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
           className="bg-background/80 fixed inset-0 z-[999] flex flex-col items-center justify-center backdrop-blur-sm"
         >
           <Loader2 className="text-muted-foreground h-10 w-10 animate-spin" />
-          <p className="text-muted-foreground mt-4 text-sm font-medium">
-            Memuat Sesi...
-          </p>
+          <p className="text-muted-foreground mt-4 text-sm font-medium">Memuat Sesi...</p>
         </motion.div>
       </AnimatePresence>
     );
   }
 
   return (
-    <div
-      className={cn(
-        "bg-background flex h-screen w-full flex-col overflow-hidden md:flex-row"
-      )}
-    >
+    <div className={cn("bg-background flex h-screen w-full flex-col overflow-hidden md:flex-row")}>
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="bg-card border-border justify-between gap-5 border-r">
           <div className="flex flex-1 flex-col overflow-hidden overflow-y-auto">
@@ -203,21 +199,11 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
             >
               {visibleLinks.map((link) => {
                 const isActive =
-                  link.href === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(link.href);
+                  link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
 
                 return (
-                  <motion.div
-                    key={link.href}
-                    variants={itemVariants}
-                    className="relative"
-                  >
-                    <SidebarLink
-                      key={link.href}
-                      link={link}
-                      isActive={isActive}
-                    />
+                  <motion.div key={link.href} variants={itemVariants} className="relative">
+                    <SidebarLink key={link.href} link={link} isActive={isActive} />
                   </motion.div>
                 );
               })}
@@ -225,11 +211,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           <div className="flex flex-col gap-4">
-            <motion.div
-              variants={itemVariants}
-              initial="hidden"
-              animate="visible"
-            >
+            <motion.div variants={itemVariants} initial="hidden" animate="visible">
               <Button
                 onClick={handleLogout}
                 variant="ghost"
@@ -238,9 +220,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
                 )}
               >
                 <LogOut className="text-muted-foreground group-hover:text-destructive mr-2 h-5 w-5 shrink-0 transition-colors" />
-                <span className={cn("font-medium", !open && "hidden")}>
-                  Logout
-                </span>
+                <span className={cn("font-medium", !open && "hidden")}>Logout</span>
               </Button>
             </motion.div>
 
@@ -257,10 +237,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
                 © {new Date().getFullYear()} Angkasa Pura Indonesia
               </p>
               <p className="mt-2 opacity-70">
-                Developed by{" "}
-                <span className="text-primary font-semibold">
-                  Qulls Project
-                </span>
+                Developed by <span className="text-primary font-semibold">Qulls Project</span>
               </p>
             </motion.div>
           </div>
@@ -268,7 +245,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
       </Sidebar>
 
       {/* Main Content Area */}
-      <main className="relative flex-1 overflow-y-auto p-4 md:p-8">
+      <main className="relative flex-1 overflow-y-auto p-4">
         {/* --- DEKORASI 'TECH TATTOOS' DISINI --- */}
         <TechDecorations />
 

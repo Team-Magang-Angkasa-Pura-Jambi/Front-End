@@ -1,55 +1,60 @@
-import { Label } from "@/common/components/ui/label";
-import { Textarea } from "@/common/components/ui/textarea";
+import { EnergyType } from "@/common/types/energy";
 import { DialogType } from "../types";
-import { FormReadingElectric } from "./formElectricty";
-import { FormReadingWater } from "./formWater"; // PERBAIKAN: Impor form baru
-import { FormReadingFuel } from "./formFuel"; // PERBAIKAN: Impor form baru
-import { FormReadingPax } from "./formPax"; // PERBAIKAN: Impor form baru
+import { BaseEnergyReadingForm } from "./BaseEnergyReadingForm";
+import { FormReadingPax } from "./formPax";
 
-export const getDialogDetails = (openDialog: DialogType) => {
-  switch (openDialog) {
-    case "Electricity":
-      return {
-        title: "Input Data Pemakaian Listrik",
-        description: "Masukkan total pemakaian listrik (kWh) untuk hari ini.",
-        form: <FormReadingElectric type_name="Electricity" />,
-      };
-    case "Water":
-      return {
-        title: "Input Data Pemakaian Air",
-        description: "Pilih meteran dan masukkan angka pembacaan meter air.",
-        form: <FormReadingWater type_name="Water" />, // PERBAIKAN: Gunakan komponen baru
-      };
-    case "Fuel":
-      return {
-        title: "Input Data Pemakaian BBM",
-        description: "Pilih meteran dan masukkan angka pembacaan meter BBM.",
-        form: <FormReadingFuel type_name="Fuel" />, // PERBAIKAN: Gunakan komponen baru
-      };
-    case "Pax":
-      return {
-        title: "Input Data Penumpang (PAX)",
-        description: "Masukkan jumlah penumpang keberangkatan dan kedatangan.",
-        form: <FormReadingPax />,
-      };
-    case "Log":
-      return {
-        title: "Catat Aktivitas/Kejadian Penting",
-        description:
-          "Jelaskan secara singkat kejadian penting yang terjadi hari ini.",
-        form: (
-          <div className="grid gap-4 py-4">
-            <div className="grid w-full gap-1.5">
-              <Label htmlFor="log-message">Deskripsi Kejadian</Label>
-              <Textarea
-                placeholder="Contoh: Terjadi pemadaman listrik dari PLN pukul 14:00 - 15:00."
-                id="log-message"
-              />
-            </div>
-          </div>
-        ),
-      };
-    default:
-      return null;
+export const getDialogDetails = (
+  openDialog: DialogType,
+  energyData: EnergyType[] | undefined,
+  onSuccess?: () => void
+) => {
+  if (!openDialog) return null;
+
+  // Helper untuk cari ID berdasarkan nama
+  const findId = (name: string) =>
+    energyData?.find((e) => e.name.toLowerCase() === name.toLowerCase())?.energy_type_id;
+
+  // Logika mapping dialog ke form
+  const configs: Record<string, any> = {
+    Electricity: {
+      title: "⚡ Data Listrik",
+      description: "Catat angka meteran listrik harian.",
+      id: findId("Electricity"),
+    },
+    Water: {
+      title: "💧 Data Air",
+      description: "Catat angka pembacaan meter air.",
+      id: findId("Water"),
+    },
+    Fuel: {
+      title: "⛽ Data BBM",
+      description: "Catat angka pembacaan meter BBM.",
+      id: findId("Fuel"),
+    },
+  };
+
+  // Jika yang dipilih adalah kategori energi (Electricity/Water/Fuel)
+  if (configs[openDialog]) {
+    const config = configs[openDialog];
+    return {
+      title: config.title,
+      description: config.description,
+      form: config.id ? (
+        <BaseEnergyReadingForm energy_type_id={config.id} onSuccess={onSuccess} />
+      ) : (
+        <p className="p-4 text-center text-sm italic">ID Energi tidak ditemukan di database...</p>
+      ),
+    };
   }
+
+  // Handle tipe non-energi (Pax, Log, dll)
+  if (openDialog === "Pax") {
+    return {
+      title: "✈️ Data Penumpang",
+      description: "Masukkan jumlah kedatangan dan keberangkatan.",
+      form: <FormReadingPax onSuccess={onSuccess} />,
+    };
+  }
+
+  return null;
 };

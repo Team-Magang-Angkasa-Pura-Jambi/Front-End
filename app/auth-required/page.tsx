@@ -1,18 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/common/components/ui/card";
 import { Button } from "@/common/components/ui/button";
-import {  ArrowLeft, LogIn, KeyRound } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/common/components/ui/card";
 import { cn } from "@/lib/utils";
+import { KeyRound, LogIn } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AuthRequiredPage() {
   const router = useRouter();
@@ -57,18 +51,14 @@ export default function AuthRequiredPage() {
             </span>
           </div>
 
-          <CardTitle className="text-3xl md:text-4xl">
-            Session Expired
-          </CardTitle>
-          <p className="text-muted-foreground text-sm">
-            Error 401 — Unauthorized
-          </p>
+          <CardTitle className="text-3xl md:text-4xl">Session Expired</CardTitle>
+          <p className="text-muted-foreground text-sm">Error 401 — Unauthorized</p>
         </CardHeader>
 
         <CardContent className="space-y-6 text-center">
           <p className="text-muted-foreground mx-auto max-w-sm text-sm leading-relaxed md:text-base">
-            Sesi login Anda telah berakhir atau Anda belum melakukan
-            autentikasi. Silakan login kembali untuk melanjutkan.
+            Sesi login Anda telah berakhir atau Anda belum melakukan autentikasi. Silakan login
+            kembali untuk melanjutkan.
           </p>
 
           {/* Info box */}
@@ -86,11 +76,6 @@ export default function AuthRequiredPage() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-3 sm:flex-row">
-          <Button variant="outline" onClick={() => router.back()}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Kembali
-          </Button>
-
           <Button asChild className="sm:flex-1">
             <Link href="/auth/login">
               <LogIn className="mr-2 h-4 w-4" />

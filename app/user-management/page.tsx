@@ -5,7 +5,7 @@ import UserManagementPage from "@/modules/UserManagement";
 export default function UserManagement() {
   return (
     <AuthLayouts>
-      <RoleGuard allowedRoles={["SuperAdmin" ]}>
+      <RoleGuard allowedRoles={["SUPER_ADMIN"]}>
         <UserManagementPage />
       </RoleGuard>
     </AuthLayouts>

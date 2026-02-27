@@ -62,6 +62,7 @@ export function TargetEfficiencyForm({ itemId, onAfterSave }: TargetEfficiencyFo
   });
 
   const initialData = useMemo(() => targetData?.data, [targetData]);
+  console.log(initialData);
 
   // 3. Setup Form
   const form = useForm<TargetEfficiencyFormValues>({
@@ -86,7 +87,7 @@ export function TargetEfficiencyForm({ itemId, onAfterSave }: TargetEfficiencyFo
         kpi_name: initialData.kpi_name,
         target_percentage: initialData.target_percentage,
         baseline_value: initialData.baseline_value,
-        meter_id: initialData.meter?.meter_id || initialData.meter_id,
+        meter_id: initialData.meter_id,
         period_start: initialData.period_start ? new Date(initialData.period_start) : undefined,
         period_end: initialData.period_end ? new Date(initialData.period_end) : undefined,
       });
@@ -114,7 +115,7 @@ export function TargetEfficiencyForm({ itemId, onAfterSave }: TargetEfficiencyFo
     }
   };
 
-  if ((isEditing && isLoadingTarget) || isLoadingMeters) return <ComponentLoader />;
+  if (isEditing && isLoadingTarget && isLoadingMeters) return <ComponentLoader />;
 
   return (
     <Form {...form}>

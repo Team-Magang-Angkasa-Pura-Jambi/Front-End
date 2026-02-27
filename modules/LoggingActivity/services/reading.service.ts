@@ -39,7 +39,7 @@ export type UpdateReadingSessionBody = Partial<ReadingPayload>;
 
 export interface GetReadingSessionsQuery {
   energyTypeName?: EnergyTypeName;
-  startDate?: string;
+  from_date?: string;
   endDate?: string;
   meterId?: number;
   sortBy?: "reading_date" | "created_at";
@@ -49,7 +49,7 @@ export interface GetReadingSessionsQuery {
 export const getReadingSessionsApi = async (
   params: GetReadingSessionsQuery
 ): Promise<ReadingHistoryResponse> => {
-  const response = await api.get("/readings/history", { params });
+  const response = await api.get("/reading-sessions", { params });
   return response.data;
 };
 
@@ -61,9 +61,7 @@ export const updateReadingSessionApi = async (
   return response.data;
 };
 
-export const deleteReadingSessionApi = async (
-  sessionId: number
-): Promise<{ message: string }> => {
-  const response = await api.delete(`/readings/${sessionId}`);
+export const deleteReadingSessionApi = async (sessionId: number): Promise<{ message: string }> => {
+  const response = await api.delete(`/reading-sessions/${sessionId}`);
   return response.data;
 };

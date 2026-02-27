@@ -9,11 +9,11 @@ import {
 } from "lucide-react";
 
 // import { ReadingTypeManagement } from "../components/ReadingTypeManagements";
-import { UnifiedEnergyManagement } from "../pages/EnergyManagement";
-import { EntityManagement } from "../pages/EntityManagement";
-import { MeterManagement } from "../pages/MeterManagement";
-import { SchemePriceManagement } from "../pages/SchemePriceManagement";
-import { TargetEfficiencyManagement } from "../pages/targetEfficienyManagement";
+import { UnifiedEnergyManagement } from "../view/EnergyManagement";
+import { EntityManagement } from "../view/EntityManagement";
+import { MeterManagement } from "../view/MeterManagement";
+import { SchemePriceManagement } from "../view/SchemePriceManagement";
+import { TargetEfficiencyManagement } from "../view/targetEfficienyManagement";
 
 export const masterDataGroups = [
   {

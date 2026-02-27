@@ -2,8 +2,8 @@
 
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Calendar, Landmark, Plus } from "lucide-react";
-import { useMemo } from "react";
+import { Calendar, History, Landmark, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { DataTable } from "@/common/components/table/dataTable";
 import { DataTableRowActions } from "@/common/components/table/dataTableRowActions";
@@ -11,11 +11,12 @@ import { Badge } from "@/common/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/common/components/ui/card";
 
 import { PriceSchemeType, Tariff } from "@/common/types/schemaPrice";
-import { PriceSchemeForm } from "../components/forms/priceSchema.form";
+import { PriceSchemeForm } from "../components/organisms/priceSchema.form";
 import { ConfirmDeleteDialog } from "../components/templates/ConfirmDeleteDialog";
 import { MasterDataDialog } from "../components/templates/MasterDataDialog";
 import { PageHeader } from "../components/templates/PageHeader";
 import { usePriceSchemes } from "../hooks/usePriceSchemes";
+import { SentinelAuditLog } from "../schemas/SentinelAuditLog";
 
 const TariffsCell = ({ tariffs }: { tariffs: Tariff[] }) => {
   if (!tariffs || tariffs.length === 0)
@@ -135,6 +136,8 @@ export const getPriceSchemeColumns = (
 ];
 
 export const SchemePriceManagement = () => {
+  const [isLogOpen, setIsLogOpen] = useState(false);
+
   const {
     data: schemes,
     isLoading,
@@ -169,27 +172,41 @@ export const SchemePriceManagement = () => {
             icon={Landmark}
             iconClassName="bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
           />
+          <div className="flex items-center gap-2">
+            <MasterDataDialog
+              isOpen={isLogOpen}
+              onOpenChange={setIsLogOpen}
+              triggerLabel="Riwayat"
+              triggerIcon={<History className="mr-1.5 h-4 w-4" />}
+              triggerClassName="bg-slate-800 hover:bg-slate-900 text-white transition-colors"
+              title="Audit Log Skema Harga"
+              description="Menampilkan jejak audit perubahan konfigurasi pada Skema Harga Bandara Sultan Thaha."
+              maxWidth="2xl"
+            >
+              <SentinelAuditLog entityTable="PriceScheme" height="h-[65vh]" />
+            </MasterDataDialog>
 
-          <MasterDataDialog
-            isOpen={isFormOpen}
-            onOpenChange={(open) => {
-              if (!open) closeForm();
-              else setIsFormOpen(true);
-            }}
-            triggerLabel="Tambah Skema"
-            onTriggerClick={handleCreate}
-            triggerIcon={<Plus className="mr-1.5 h-4 w-4" />}
-            title={editingItem ? "Edit Skema Harga" : "Tambah Skema Harga Baru"}
-            description="Atur parameter tarif berdasarkan jenis pembacaan meter dan tanggal efektif."
-            maxWidth="xl"
-          >
-            <PriceSchemeForm
-              initialData={editingItem}
-              onSubmit={save as unknown as (payload: unknown) => void}
-              isLoading={isSaving}
-              // onCancel={closeForm}
-            />
-          </MasterDataDialog>
+            <MasterDataDialog
+              isOpen={isFormOpen}
+              onOpenChange={(open) => {
+                if (!open) closeForm();
+                else setIsFormOpen(true);
+              }}
+              triggerLabel="Tambah Skema"
+              onTriggerClick={handleCreate}
+              triggerIcon={<Plus className="mr-1.5 h-4 w-4" />}
+              title={editingItem ? "Edit Skema Harga" : "Tambah Skema Harga Baru"}
+              description="Atur parameter tarif berdasarkan jenis pembacaan meter dan tanggal efektif."
+              maxWidth="xl"
+            >
+              <PriceSchemeForm
+                initialData={editingItem}
+                onSubmit={save as unknown as (payload: unknown) => void}
+                isLoading={isSaving}
+                // onCancel={closeForm}
+              />
+            </MasterDataDialog>
+          </div>
         </CardHeader>
 
         <CardContent className="pt-0">

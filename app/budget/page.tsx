@@ -5,7 +5,7 @@ import AnnualBudgetPage from "@/modules/budget";
 export default function EnterData() {
   return (
     <AuthLayouts>
-      <RoleGuard allowedRoles={["SuperAdmin", "Admin"]}>
+      <RoleGuard allowedRoles={["SUPER_ADMIN", "ADMIN"]}>
         <AnnualBudgetPage />
       </RoleGuard>
     </AuthLayouts>

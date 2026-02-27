@@ -1,12 +1,7 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/common/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/common/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { ActivityHistoryItem } from "../types/activity.type";
+import { ActivityHistoryItem } from "../../types/activity.type";
 
 export const ActivityLog = ({
   activities,

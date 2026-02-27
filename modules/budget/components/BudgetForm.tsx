@@ -1,35 +1,26 @@
 "use client";
 
-import React from "react";
-import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
-import {
-  CalendarIcon,
-  PlusCircle,
-  Trash2,
-  Copy,
-  CheckCircle2,
-  AlertCircle,
-} from "lucide-react";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertTriangle, Coins, Gauge, Loader2, PlusCircle, Trash2, Zap } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Resolver, useFieldArray, useForm, useWatch } from "react-hook-form";
 
+import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
+import { Card, CardContent } from "@/common/components/ui/card";
 import { DialogFooter } from "@/common/components/ui/dialog";
 import {
+  Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/common/components/ui/form";
 import { Input } from "@/common/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/common/components/ui/popover";
-import { Calendar } from "@/common/components/ui/calendar";
+import { ScrollArea } from "@/common/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -37,386 +28,183 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/common/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/common/components/ui/radio-group";
-import { ScrollArea } from "@/common/components/ui/scroll-area";
-import { Label } from "@/common/components/ui/label";
 import { Separator } from "@/common/components/ui/separator";
 
-import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/formatCurrency";
-import BudgetPreview from "./BudgetPreview";
-import { AnnualBudget } from "@/common/types/budget";
+import { AnnualBudgetAllocation } from "@/common/types/budget";
 import { EnergyType } from "@/common/types/energy";
-import { MeterType } from "@/common/types/meters";
-import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
-import { PrepareNextPeriodBudget } from "../services/budget.service";
+import { cn } from "@/lib/utils";
+import { getMetersApi } from "@/modules/masterData/services/meter.service";
+import { useAnnualBudgetLogic } from "../hooks/useAnnualBudgetLogic";
+import { annualBudgetFormSchema, AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
+import { annualBudgetApi } from "../services/annualBudget.service";
 
 interface BudgetFormProps {
-  budgetType: "parent" | "child";
-  setBudgetType: (type: "parent" | "child") => void;
-  editingBudget: AnnualBudget | null;
-  isSubmitting: boolean;
-  parentBudgets: AnnualBudget[];
+  editingBudgetId: number | null;
+  onClose: () => void;
   energyTypes: EnergyType[];
-  meters: MeterType[];
-  isLoadingMeters: boolean;
-  isLoadingEnergyTypes: boolean;
-  prepareNextPeriodBudget?: PrepareNextPeriodBudget;
-  selectedEnergyTypeName?: string;
-  isValidTotal?: boolean;
-  totalWeight?: number;
-  targetTotal?: number;
 }
 
-export function BudgetForm({
-  budgetType,
-  setBudgetType,
-  editingBudget,
-  isSubmitting,
-  parentBudgets,
-  energyTypes,
-  meters,
-  isLoadingEnergyTypes,
-  prepareNextPeriodBudget,
-  selectedEnergyTypeName,
-  isValidTotal,
-  totalWeight,
-  targetTotal,
-}: BudgetFormProps) {
-  const form = useFormContext<AnnualBudgetFormValues>();
+export function BudgetForm({ editingBudgetId, onClose, energyTypes }: BudgetFormProps) {
+  const { createOrUpdateMutation } = useAnnualBudgetLogic();
 
-  const { control, setValue, watch } = form;
-
-  const periodStart = watch("period_start");
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "allocations",
+  // --- 1. RHF INITIALIZATION ---
+  const form = useForm<AnnualBudgetFormValues>({
+    resolver: zodResolver(annualBudgetFormSchema) as Resolver<AnnualBudgetFormValues>,
+    defaultValues: {
+      name: "",
+      fiscal_year: new Date().getFullYear(),
+      total_amount: 0,
+      total_volume: 0,
+      efficiency_target_percentage: 0,
+      allocations: [],
+    },
   });
 
-  const allocationValues = useWatch({ control, name: "allocations" }) || [];
+  const {
+    control,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = form;
 
-  const selectedMeterIds = allocationValues
-    .map((alloc) => alloc?.meter_id)
-    .filter(Boolean);
+  // --- 2. FETCH DETAIL IF EDITING ---
+  const { data: detailRes, isLoading: isFetchingDetail } = useQuery({
+    queryKey: ["annualBudgetDetail", editingBudgetId],
+    queryFn: () => annualBudgetApi.getById(editingBudgetId!),
+    enabled: !!editingBudgetId,
+  });
 
+  useEffect(() => {
+    if (detailRes?.data) {
+      const d = detailRes.data;
+      reset({
+        name: d.name,
+        fiscal_year: d.fiscal_year,
+        energy_type_id: d.energy_type_id,
+        total_amount: d.total_amount,
+        total_volume: d.total_volume,
+        efficiency_target_percentage: Number(d.efficiency_target_percentage || 0),
+        description: d.description || "",
+        allocations:
+          d.allocations?.map((alloc: AnnualBudgetAllocation) => ({
+            allocation_id: alloc.allocation_id,
+            meter_id: alloc.meter_id,
+            allocated_amount: Number(alloc.allocated_amount),
+            allocated_volume: Number(alloc.allocated_volume),
+          })) || [],
+      });
+    }
+  }, [detailRes, reset]);
+
+  // --- 3. AUTO FETCH METERS ---
   const selectedEnergyTypeId = useWatch({ control, name: "energy_type_id" });
+  const selectedEnergyId = useMemo(
+    () => energyTypes.find((t) => t.energy_type_id === selectedEnergyTypeId)?.energy_type_id,
+    [selectedEnergyTypeId, energyTypes]
+  );
 
-  const availableBudget =
-    prepareNextPeriodBudget?.availableBudgetForNextPeriod ?? 0;
+  const { data: metersRes, isLoading: isLoadingMeters } = useQuery({
+    queryKey: ["meters", selectedEnergyId],
+    queryFn: () => getMetersApi(selectedEnergyId!),
+    enabled: !!selectedEnergyId,
+  });
+
+  const meters = metersRes?.data?.meter || [];
+
+  // --- 4. ALLOCATION LOGIC ---
+  const { fields, append, remove } = useFieldArray({ control, name: "allocations" });
+  const watchAllocations = useWatch({ control, name: "allocations" }) || [];
+  const watchTotalAmount = useWatch({ control, name: "total_amount" }) || 0;
+  const efficiencyTarget = useWatch({ control, name: "efficiency_target_percentage" }) || 0;
+
+  const selectedMeterIds = watchAllocations.map((a) => a.meter_id).filter(Boolean);
+  const currentAllocatedTotal = watchAllocations.reduce(
+    (sum, item) => sum + Number(item.allocated_amount || 0),
+    0
+  );
+  const remainingToAllocate = watchTotalAmount - currentAllocatedTotal;
+  const isOverAllocated = remainingToAllocate < 0;
+
+  // --- 5. SUBMIT HANDLER ---
+  const onSubmit = (values: AnnualBudgetFormValues) => {
+    createOrUpdateMutation.mutate(
+      { values, isEditing: !!editingBudgetId, id: editingBudgetId ?? undefined },
+      { onSuccess: onClose }
+    );
+  };
+
+  if (isFetchingDetail) {
+    return (
+      <div className="flex h-64 flex-col items-center justify-center space-y-4">
+        <Loader2 className="text-primary h-8 w-8 animate-spin" />
+        <p className="animate-pulse text-sm font-bold tracking-tighter uppercase">
+          Syncing Budget Details...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <ScrollArea className="max-h-[75vh] overflow-y-auto px-1">
-        <div className="space-y-6 px-4 py-2">
-          {/* TIPE ANGGARAN */}
-          <div className="space-y-3">
-            <FormLabel className="text-primary text-base font-bold">
-              Tipe Anggaran
-            </FormLabel>
-            <RadioGroup
-              onValueChange={(value: "parent" | "child") => {
-                setBudgetType(value);
-                setValue("budgetType", value, { shouldValidate: true });
-
-                if (value === "parent") setValue("allocations", []);
-              }}
-              value={budgetType}
-              className="grid grid-cols-2 gap-4"
-              disabled={!!editingBudget}
-            >
-              <div>
-                <RadioGroupItem
-                  value="parent"
-                  id="parent"
-                  className="peer sr-only"
-                />
-                <Label
-                  htmlFor="parent"
-                  className="border-muted bg-popover hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary flex cursor-pointer flex-col items-center justify-between rounded-md border-2 p-4 transition-all"
-                >
-                  <span className="text-lg font-semibold">Induk (Tahunan)</span>
-                  <span className="text-muted-foreground mt-1 text-center text-xs">
-                    Anggaran dasar per tahun
-                  </span>
-                </Label>
-              </div>
-              <div>
-                <RadioGroupItem
-                  value="child"
-                  id="child"
-                  className="peer sr-only"
-                />
-                <Label
-                  htmlFor="child"
-                  className="border-muted bg-popover hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary flex cursor-pointer flex-col items-center justify-between rounded-md border-2 p-4 transition-all"
-                >
-                  <span className="text-lg font-semibold">Periode (Anak)</span>
-                  <span className="text-muted-foreground mt-1 text-center text-xs">
-                    Sub-anggaran bulanan/triwulan
-                  </span>
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <Separator />
-
-          {/* INPUT TANGGAL */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <FormField
-              control={control}
-              name="period_start"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Periode Mulai</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "d MMMM yyyy", { locale: id })
-                          ) : (
-                            <span>Pilih tanggal</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                        className="rounded-md border shadow"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="period_end"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Periode Selesai</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                          disabled={!periodStart}
-                        >
-                          {field.value ? (
-                            format(field.value, "d MMMM yyyy", { locale: id })
-                          ) : (
-                            <span>Pilih tanggal</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < (periodStart || new Date(0))}
-                        initialFocus
-                        className="rounded-md border shadow"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* LOGIC UNTUK CHILD BUDGET */}
-          {budgetType === "child" && (
-            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+    <Form {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
+        <ScrollArea className="max-h-[75vh]">
+          <div className="space-y-8 px-6 py-6">
+            {/* SECTION 1: INFO UMUM */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={control}
-                name="parent_budget_id"
+                name="name"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Anggaran Induk (Annual)</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(Number(value))}
-                      value={field.value ? String(field.value) : ""}
-                      disabled={!!editingBudget}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih Anggaran Induk" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {parentBudgets.map((budget) => (
-                          <SelectItem
-                            key={budget.budget_id}
-                            value={String(budget.budget_id)}
-                          >
-                            {`${budget.energy_type?.type_name} - ${new Date(
-                              budget.period_start
-                            ).getFullYear()}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          )}
-
-          {/* TOTAL BUDGET & SAVING */}
-          <div
-            className={cn(
-              "grid grid-cols-1 gap-6",
-
-              budgetType === "parent" ? "md:grid-cols-2" : "md:grid-cols-1"
-            )}
-          >
-            {/* FIELD 1: TOTAL BUDGET */}
-            <FormField
-              control={control}
-              name="total_budget"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Total Budget (Rp)</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        min={0}
-                        {...field}
-                        max={
-                          budgetType === "child" ? availableBudget : undefined
-                        }
-                        className="h-11 pr-28 text-lg font-medium"
-                      />
-
-                      {/* Tombol Gunakan Sisa (Child Mode Only) */}
-                      {budgetType === "child" && availableBudget > 0 && (
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          className="absolute top-1/2 right-1.5 h-8 -translate-y-1/2 bg-blue-50 text-xs font-medium text-blue-700 hover:bg-blue-100"
-                          onClick={() =>
-                            setValue("total_budget", availableBudget)
-                          }
-                        >
-                          <Copy className="mr-1 h-3 w-3" />
-                          Max: {formatCurrency(availableBudget)}
-                        </Button>
-                      )}
-                    </div>
-                  </FormControl>
-
-                  {/* Helper Text Sisa Budget */}
-                  {budgetType === "child" && prepareNextPeriodBudget && (
-                    <FormDescription
-                      className={cn(
-                        "mt-1 text-xs",
-                        availableBudget < 0
-                          ? "text-destructive"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {availableBudget < 0
-                        ? "Anggaran induk sudah over-budget!"
-                        : "Sesuai sisa anggaran induk yang tersedia."}
-                    </FormDescription>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* FIELD 2: EFFICIENCY TAG (Hanya muncul saat Parent Mode) */}
-            {budgetType === "parent" && (
-              <FormField
-                control={control}
-                name="efficiency_tag"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Target Efisiensi (Saving)</FormLabel>
+                  <FormItem className="col-span-full">
+                    <FormLabel className="text-xs font-bold uppercase opacity-60">
+                      Nama Anggaran
+                    </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          step="0.001"
-                          min={0}
-                          placeholder="0.005"
-                          {...field}
-                          className="h-11"
-                        />
-                        <div className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm">
-                          {(parseFloat(String(field.value || 0)) * 100).toFixed(
-                            1
-                          )}
-                          %
-                        </div>
-                      </div>
+                      <Input
+                        placeholder="Contoh: Listrik Terminal 2026"
+                        className="h-11 font-medium"
+                        {...field}
+                      />
                     </FormControl>
-                    <FormDescription>
-                      Masukkan dalam desimal (contoh: 0.05 = 5%)
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            )}
-          </div>
-
-          {/* PILIH ENERGI */}
-          <div className="bg-muted/30 rounded-lg border border-dashed p-4">
-            {budgetType === "parent" ? (
+              <FormField
+                control={control}
+                name="fiscal_year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold uppercase opacity-60">Tahun</FormLabel>
+                    <FormControl>
+                      <Input type="number" className="h-11 font-medium" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={control}
                 name="energy_type_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Pilih Tipe Energi</FormLabel>
+                    <FormLabel className="text-xs font-bold uppercase opacity-60">Energi</FormLabel>
                     <Select
-                      onValueChange={(value) => {
-                        field.onChange(Number(value));
-                        setValue("allocations", []);
+                      onValueChange={(val) => {
+                        field.onChange(Number(val));
+                        reset({ ...form.getValues(), allocations: [] });
                       }}
-                      value={field.value ? String(field.value) : ""}
-                      disabled={isLoadingEnergyTypes || !!editingBudget}
+                      value={field.value?.toString()}
                     >
                       <FormControl>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue placeholder="Pilih Tipe Energi" />
+                        <SelectTrigger className="h-11 font-medium">
+                          <SelectValue placeholder="Pilih Energi" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {energyTypes.map((type) => (
-                          <SelectItem
-                            key={type.energy_type_id}
-                            value={String(type.energy_type_id)}
-                          >
-                            {type.type_name}
+                        {energyTypes.map((t) => (
+                          <SelectItem key={t.energy_type_id} value={t.energy_type_id.toString()}>
+                            {t.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -425,195 +213,225 @@ export function BudgetForm({
                   </FormItem>
                 )}
               />
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-muted-foreground text-xs tracking-wider uppercase">
-                    Tipe Energi (Otomatis)
-                  </Label>
-                  <div className="text-primary text-lg font-bold">
-                    {selectedEnergyTypeName || "Menunggu Anggaran Induk..."}
-                  </div>
-                </div>
-                {selectedEnergyTypeName && (
-                  <div className="bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-medium">
-                    Auto-inherit
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+            </div>
 
-          {/* ALOKASI METER (Hanya Child) */}
-          {budgetType === "child" && (
-            <div className="animate-in fade-in slide-in-from-bottom-2 space-y-4 border-t pt-4 duration-500">
+            <Separator className="opacity-50" />
+
+            {/* SECTION 2: PLAFON */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <FormField
+                control={control}
+                name="total_amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2 text-xs font-bold uppercase opacity-60">
+                      <Coins size={14} /> Pagu Biaya
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" className="text-primary h-11 font-bold" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="total_volume"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2 text-xs font-bold uppercase opacity-60">
+                      <Gauge size={14} /> Pagu Volume
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" className="h-11 font-bold" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="efficiency_target_percentage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2 text-xs font-bold uppercase opacity-60">
+                      <Zap size={14} /> Efisiensi
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          className="h-11 pr-12 font-bold"
+                          {...field}
+                        />
+                        <div className="absolute top-1/2 right-3 -translate-y-1/2 text-[10px] font-black uppercase opacity-40">
+                          {(Number(field.value || 0) * 100).toFixed(0)}%
+                        </div>
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Separator className="opacity-50" />
+
+            {/* SECTION 3: ALLOCATIONS */}
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <FormLabel className="text-base font-semibold">
-                    Alokasi per Meter
-                  </FormLabel>
-                  <p className="text-muted-foreground text-xs">
-                    Tentukan bobot alokasi untuk setiap meter.
-                  </p>
-                </div>
+                <h3 className="text-primary text-sm font-bold tracking-widest uppercase">
+                  Titik Alokasi Meter
+                </h3>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
+                  className="border-primary/20 hover:bg-primary/5 h-8 rounded-lg"
                   onClick={() =>
                     append({
                       meter_id: undefined as unknown as number,
-                      weight: 0,
+                      allocated_amount: 0,
+                      allocated_volume: 0,
                     })
                   }
                   disabled={
                     !selectedEnergyTypeId ||
-                    fields.length >= (meters.length || 0)
+                    isLoadingMeters ||
+                    fields.length >= (meters?.length || 0)
                   }
-                  className="gap-2"
                 >
-                  <PlusCircle className="h-4 w-4" />
-                  Tambah Meter
+                  <PlusCircle size={14} className="mr-2" /> Tambah Unit
                 </Button>
               </div>
 
-              {fields.length === 0 && (
-                <div className="bg-muted/10 text-muted-foreground rounded-lg border border-dashed py-6 text-center text-sm">
-                  Belum ada meter yang dialokasikan.
-                </div>
-              )}
+              <AnimatePresence>
+                {(errors.allocations?.root || isOverAllocated) && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                  >
+                    <div className="bg-destructive/10 text-destructive border-destructive/20 flex items-start gap-3 rounded-xl border p-4 text-sm font-medium">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <div>
+                        {errors.allocations?.root?.message ||
+                          "Alokasi biaya melebihi plafon utama."}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <Card
+                className={cn(
+                  "border-none shadow-none",
+                  isOverAllocated ? "bg-destructive/10" : "bg-muted/50"
+                )}
+              >
+                <CardContent className="flex items-center justify-between p-4">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold uppercase opacity-60">
+                      Sisa Kuota Biaya
+                    </span>
+                    <span
+                      className={cn("text-sm font-black", isOverAllocated && "text-destructive")}
+                    >
+                      Rp {remainingToAllocate.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                  <Badge
+                    variant={isOverAllocated ? "destructive" : "secondary"}
+                    className="font-bold"
+                  >
+                    {isOverAllocated ? "OVER" : "SAFE"}
+                  </Badge>
+                </CardContent>
+              </Card>
 
               <div className="grid gap-3">
                 {fields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="bg-card hover:border-primary/50 flex items-start gap-3 rounded-xl border p-3 shadow-sm transition-all"
+                    className="bg-card group hover:border-primary/40 relative flex flex-col items-start gap-4 rounded-xl border p-4 shadow-sm transition-all md:flex-row md:items-end"
                   >
-                    <div className="flex-1">
-                      <FormField
-                        control={control}
-                        name={`allocations.${index}.meter_id`}
-                        render={({ field }) => (
-                          <FormItem className="space-y-0">
-                            <Select
-                              onValueChange={(val) =>
-                                field.onChange(Number(val))
-                              }
-                              value={field.value ? String(field.value) : ""}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="h-10">
-                                  <SelectValue placeholder="Pilih Meter" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {meters.map((m) => (
-                                  <SelectItem
-                                    key={m.meter_id}
-                                    value={String(m.meter_id)}
-                                    disabled={
-                                      selectedMeterIds.includes(m.meter_id) &&
-                                      m.meter_id !== field.value
-                                    }
-                                  >
-                                    {m.meter_code}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage className="mt-1 text-xs" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="w-28">
-                      <FormField
-                        control={control}
-                        name={`allocations.${index}.weight`}
-                        render={({ field }) => (
-                          <FormItem className="space-y-0">
+                    <FormField
+                      control={control}
+                      name={`allocations.${index}.meter_id`}
+                      render={({ field: selectField }) => (
+                        <FormItem className="w-full flex-1">
+                          <FormLabel className="text-[10px] font-bold uppercase opacity-40">
+                            Meter Unit
+                          </FormLabel>
+                          <Select
+                            onValueChange={(val) => selectField.onChange(Number(val))}
+                            value={selectField.value?.toString()}
+                          >
                             <FormControl>
-                              <div className="relative">
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  min={0}
-                                  placeholder="Bobot"
-                                  className="h-10 pr-6 text-right"
-                                  {...field}
-                                />
-                                <span className="text-muted-foreground absolute top-1/2 right-2 -translate-y-1/2 text-xs font-medium"></span>
-                              </div>
+                              <SelectTrigger className="bg-muted/30 h-10 border-none font-medium">
+                                <SelectValue placeholder="Pilih Unit" />
+                              </SelectTrigger>
                             </FormControl>
-                            <FormMessage className="mt-1 text-xs" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                            <SelectContent>
+                              {meters.map((m) => {
+                                const isSelectedElsewhere =
+                                  selectedMeterIds.includes(m.meter_id) &&
+                                  selectField.value !== m.meter_id;
+                                return !isSelectedElsewhere ? (
+                                  <SelectItem key={m.meter_id} value={m.meter_id.toString()}>
+                                    {m.meter_code} - {m.name}
+                                  </SelectItem>
+                                ) : null;
+                              })}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={control}
+                      name={`allocations.${index}.allocated_amount`}
+                      render={({ field }) => (
+                        <FormItem className="w-full md:w-44">
+                          <FormLabel className="text-[10px] font-bold uppercase opacity-40">
+                            Amount
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              className="bg-muted/30 h-10 border-none font-bold"
+                              {...field}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                     <Button
+                      type="button"
                       variant="ghost"
                       size="icon"
-                      type="button"
                       onClick={() => remove(index)}
-                      className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive h-10 w-10"
+                      className="text-muted-foreground hover:text-destructive h-10 w-10"
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <Trash2 size={16} />
                     </Button>
                   </div>
                 ))}
               </div>
-              <div
-                className={cn(
-                  "flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition-all",
-                  isValidTotal
-                    ? "border-green-200 bg-green-50 text-green-700"
-                    : "border-destructive/30 bg-destructive/10 text-destructive"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  {isValidTotal ? (
-                    <CheckCircle2 className="h-5 w-5" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5" />
-                  )}
-                  <div className="flex flex-col">
-                    <span className="font-semibold">
-                      Total Alokasi: {totalWeight?.toFixed(2)}%
-                    </span>
-                    {!isValidTotal && (
-                      <span className="text-xs opacity-90">
-                        Total harus tepat 100%. (Kurang/Lebih:{" "}
-                        {((targetTotal ?? 0) - (totalWeight ?? 0)).toFixed(2)}%)
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Indikator Status Kanan */}
-                <div className="text-right font-medium">
-                  {isValidTotal ? "Valid" : "Invalid"}
-                </div>
-              </div>
-
-              {/* Preview Kalkulasi */}
-              <div className="border-primary/10 bg-primary/5 mt-4 overflow-hidden rounded-xl border">
-                <BudgetPreview />
-              </div>
             </div>
-          )}
-        </div>
-      </ScrollArea>
+          </div>
+        </ScrollArea>
 
-      <DialogFooter className="bg-background sticky bottom-0 border-t px-6 py-4">
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full md:w-auto"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Menyimpan..." : "Simpan Anggaran"}
-        </Button>
-      </DialogFooter>
-    </>
+        <DialogFooter className="bg-background sticky bottom-0 border-t p-6">
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full font-black tracking-widest uppercase shadow-xl"
+            disabled={createOrUpdateMutation.isPending || isOverAllocated}
+          >
+            {createOrUpdateMutation.isPending ? "Syncing to Sentinel..." : "Confirm & Save Budget"}
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
   );
 }

@@ -1,10 +1,29 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { PlusCircle, Search } from "lucide-react";
-import { motion, Variants, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowUpRight,
+  FileText,
+  MoreVertical,
+  Pencil,
+  PlusCircle,
+  SearchX,
+  Trash2,
+  TrendingDown,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 
+import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/common/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/common/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/common/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -12,305 +31,245 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/common/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/common/components/ui/alert-dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/common/components/ui/sheet";
 
-import { BudgetSummaryCarousel } from "./BudgetSummaryCarousel";
-import { BudgetTable } from "./BudgetTable";
-import { getColumns } from "./columns";
-import { AnnualBudgetDialog } from "./AnnualBudgetDialog";
-import { MeterAllocationDetails } from "./MeterAllocationDetails";
-
-import { AnnualBudget } from "@/common/types/budget";
-import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
+import { EnergyTypeName } from "@/common/types/energy";
+import { getEnergyIcon } from "@/modules/Dashboard/components/modernBudgetAnalysis/constants";
+import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
+import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { useAnnualBudgetLogic } from "../hooks/useAnnualBudgetLogic";
-
-// Variabel Animasi Tambahan
-const tableContainerVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.98 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.4, ease: "easeOut" },
-  },
-};
-
-const pulseVariants: Variants = {
-  initial: { opacity: 1 },
-  animate: {
-    opacity: [1, 0.5, 1],
-    transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
-  },
-};
+import { BudgetForm } from "./BudgetForm";
+import { AnnualBudgetDetailView } from "./molecules/PricingSchemeDetail";
 
 export default function AnnualBudgetPage() {
   const {
     childBudgets,
-    parentBudgets,
     isLoading,
-    isLoadingSummary,
-    summaryData,
     selectedYear,
     setSelectedYear,
     availableYears,
     selectedEnergyType,
     setSelectedEnergyType,
-    energyTypes,
-    createOrUpdateMutation,
     deleteMutation,
   } = useAnnualBudgetLogic();
 
+  // --- STATE ---
+  const [selectedBudgetId, setSelectedBudgetId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingBudget, setEditingBudget] = useState<AnnualBudget | null>(null);
-  const [budgetToDelete, setBudgetToDelete] = useState<AnnualBudget | null>(
-    null
-  );
+  const [editingBudgetId, setEditingBudgetId] = useState<number | null>(null);
 
-  const handleOpenDialog = (budget: AnnualBudget | null = null) => {
-    setEditingBudget(budget);
+  const { data: energyRes } = useQuery({
+    queryKey: ["energyTypes"],
+    queryFn: () => getEnergyTypesApi(),
+  });
+
+  const energyTypes = useMemo(() => energyRes?.data || [], [energyRes]);
+
+  // --- HANDLERS ---
+  const handleAddClick = () => {
+    setEditingBudgetId(null);
     setIsDialogOpen(true);
   };
 
-  const handleCloseDialog = (open: boolean) => {
-    setIsDialogOpen(open);
-    if (!open) setEditingBudget(null);
+  const handleEditClick = (id: number) => {
+    setEditingBudgetId(id);
+    setIsDialogOpen(true);
   };
-
-  const handleFormSubmit = (values: AnnualBudgetFormValues) => {
-    createOrUpdateMutation.mutate(
-      { values, isEditing: !!editingBudget, id: editingBudget?.budget_id },
-      { onSuccess: () => handleCloseDialog(false) }
-    );
-  };
-
-  const columns = useMemo(
-    () => getColumns(handleOpenDialog, (budget) => setBudgetToDelete(budget)),
-    []
-  );
 
   return (
-    <motion.div
-      className="container mx-auto px-4 py-10"
-      initial="hidden"
-      animate="visible"
-      variants={{
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-      }}
-    >
-      {/* HEADER SECTION */}
-      <motion.header
-        className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"
-        variants={{
-          hidden: { y: -20, opacity: 0 },
-          visible: { y: 0, opacity: 1 },
-        }}
-      >
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">
-            Manajemen Budget
-          </h1>
-          <p className="text-muted-foreground">
-            Kelola dan analisis anggaran energi tahunan Anda.
-          </p>
-        </div>
+    <div className="bg-background min-h-screen p-4 transition-colors duration-500 md:p-8">
+      <div className="mx-auto max-w-7xl space-y-10">
+        {/* HEADER */}
+        <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="bg-primary h-8 w-2 rounded-full" />
+              <h1 className="text-4xl font-black tracking-tighter md:text-5xl">
+                Sentinel <span className="text-primary">Budget</span>
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium italic">
+              Monitoring efisiensi energi Bandara Sultan Thaha.
+            </p>
+          </div>
 
-        <div className="flex items-center gap-3">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Select
-              value={selectedYear ? selectedYear.toString() : ""}
-              onValueChange={(value) => setSelectedYear(Number(value))}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="bg-background/40 border-border flex items-center gap-2 rounded-2xl border p-1 shadow-sm backdrop-blur-xl">
+              <div className="w-px" />
+              <Select value={selectedEnergyType} onValueChange={setSelectedEnergyType}>
+                <SelectTrigger className="border-none bg-transparent text-xs font-bold uppercase shadow-none focus:ring-0">
+                  <SelectValue placeholder="Energi" />
+                </SelectTrigger>
+                <SelectContent className="border-none shadow-2xl">
+                  <SelectItem value="all">Semua Energi</SelectItem>
+                  {energyTypes?.map((e) => (
+                    <SelectItem key={e.energy_type_id} value={e.energy_type_id.toString()}>
+                      {e.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={handleAddClick}
+              variant="default"
+              className="rounded-2xl shadow-lg transition-transform active:scale-95"
             >
-              <SelectTrigger className="bg-background w-[120px] shadow-sm">
-                <SelectValue placeholder="Tahun" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableYears?.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </motion.div>
+              <PlusCircle className="mr-2 h-5 w-5" /> Tambah Budget
+            </Button>
+          </div>
+        </header>
 
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Select
-              value={selectedEnergyType}
-              onValueChange={(value) => setSelectedEnergyType(value)}
-            >
-              <SelectTrigger className="bg-background w-[150px] shadow-sm">
-                <SelectValue placeholder="Energi" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Energi</SelectItem>
-                {energyTypes?.map((e) => (
-                  <SelectItem key={e.energy_type_id} value={e.type_name}>
-                    {e.type_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </motion.div>
-        </div>
-      </motion.header>
+        {/* CARDS GRID */}
+        <section className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <AnimatePresence mode="popLayout">
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="bg-muted h-80 animate-pulse rounded-4xl" />
+              ))
+            ) : childBudgets.length > 0 ? (
+              childBudgets.map((budget, index: number) => (
+                <motion.div
+                  key={budget.budget_id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="h-full"
+                >
+                  <Card className="hover:border-primary group bg-card relative flex h-full flex-col overflow-hidden border shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-xl">
+                    {/* Background Decorative */}
+                    <div className="text-muted-foreground absolute -top-8 -right-8 p-12 opacity-[0.05] transition-transform duration-700 group-hover:scale-125 group-hover:rotate-12">
+                      {getEnergyIcon(budget.energy_type.name as EnergyTypeName)}
+                    </div>
 
-      {/* CAROUSEL / ANALYTICS SECTION */}
-      <motion.section
-        className="mb-12"
-        variants={{
-          hidden: { opacity: 0, scale: 0.95 },
-          visible: { opacity: 1, scale: 1 },
-        }}
-      >
-        <div className="mb-4 flex items-center gap-2">
-          <div className="bg-primary h-2 w-2 rounded-full" />
-          <h2 className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
-            Insight Anggaran
-          </h2>
-        </div>
-        <BudgetSummaryCarousel
-          data={summaryData}
-          isLoading={isLoadingSummary}
-          selectedEnergyType={selectedEnergyType}
-        />
-      </motion.section>
+                    <CardHeader className="relative z-10 pb-2">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="secondary" className="rounded-lg font-bold">
+                          {getEnergyIcon(budget.energy_type.name as EnergyTypeName)}
+                          <span className="ml-1.5">{budget.fiscal_year}</span>
+                        </Badge>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                              <MoreVertical size={16} />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="rounded-xl border-none shadow-2xl"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => handleEditClick(budget.budget_id)}
+                              className="cursor-pointer gap-2 font-medium"
+                            >
+                              <Pencil size={14} /> Edit Data
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => deleteMutation.mutate(budget.budget_id)}
+                              className="text-destructive cursor-pointer gap-2 font-medium"
+                            >
+                              <Trash2 size={14} /> Hapus Anggaran
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      <CardTitle className="mt-4 line-clamp-2 text-2xl leading-tight font-extrabold tracking-tight italic">
+                        {budget.name}
+                      </CardTitle>
+                    </CardHeader>
 
-      {/* TABLE ACTIONS */}
-      <motion.div
-        className="mb-6 flex items-end justify-between"
-        variants={{
-          hidden: { opacity: 0, x: -20 },
-          visible: { opacity: 1, x: 0 },
-        }}
-      >
-        <div>
-          <h3 className="text-lg font-bold">Daftar Anggaran Periode</h3>
-          <p className="text-muted-foreground text-sm">
-            Menampilkan detail budget berdasarkan periode waktu.
-          </p>
-        </div>
-        <Button
-          onClick={() => handleOpenDialog(null)}
-          className="hover:shadow-primary/20 shadow-lg transition-all"
-          asChild
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+                    <CardContent className="relative z-10 flex-1 space-y-6 pt-2">
+                      <div className="flex items-end justify-between">
+                        <div className="space-y-1">
+                          <p className="text-muted-foreground text-[10px] font-black tracking-[0.2em] uppercase">
+                            Total Anggaran
+                          </p>
+                          <h3 className="text-3xl font-black">
+                            {formatCurrencySmart(budget.total_amount).full}
+                          </h3>
+                        </div>
+                      </div>
+                      {budget.efficiency_target_percentage && (
+                        <div className="bg-accent/50 flex items-center gap-4 rounded-2xl border p-4 backdrop-blur-sm">
+                          <TrendingDown className="text-primary h-5 w-5" />
+                          <div>
+                            <p className="text-muted-foreground mb-1 text-[10px] leading-none font-bold uppercase">
+                              Saving Target
+                            </p>
+                            <p className="text-sm font-black">
+                              {Number(budget.efficiency_target_percentage) * 100}% Lebih Hemat
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+
+                    <CardFooter className="bg-muted/30 relative z-10 mt-auto border-t p-4">
+                      <Button
+                        onClick={() => setSelectedBudgetId(budget.budget_id)}
+                        variant="ghost"
+                        className="group/btn w-full justify-between font-bold hover:bg-transparent"
+                      >
+                        EXPLORE ALLOCATION
+                        <div className="bg-background rounded-full border p-1 shadow-sm transition-transform group-hover:translate-x-1 group-hover:-translate-y-1">
+                          <ArrowUpRight size={14} className="text-primary" />
+                        </div>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full flex flex-col items-center justify-center space-y-4 py-20 text-center">
+                <SearchX className="text-muted-foreground h-16 w-16 opacity-20" />
+                <h3 className="text-xl font-bold">Data Tidak Ditemukan</h3>
+                <Button onClick={handleAddClick} variant="outline" className="rounded-xl">
+                  Buat Anggaran Baru
+                </Button>
+              </div>
+            )}
+          </AnimatePresence>
+        </section>
+
+        {/* DIALOG FORM - Sekarang hanya memanggil BudgetForm */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="flex max-h-[95vh] flex-col overflow-hidden border-none p-0 shadow-2xl sm:max-w-3xl">
+            <DialogHeader className="p-6 pb-2">
+              <DialogTitle className="text-2xl font-black tracking-tight italic">
+                {editingBudgetId ? "⚙️ Edit Anggaran" : "➕ Buat Anggaran"}
+                <span className="text-primary ml-2">Tahunan</span>
+              </DialogTitle>
+            </DialogHeader>
+
+            {/* SEKARANG FORM ADA DI DALAM SINI */}
+            <BudgetForm
+              editingBudgetId={editingBudgetId}
+              onClose={() => setIsDialogOpen(false)}
+              energyTypes={energyTypes}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* SIDE SHEET DETAIL */}
+        <Sheet open={!!selectedBudgetId} onOpenChange={() => setSelectedBudgetId(null)}>
+          <SheetContent
+            side="right"
+            className="bg-background/95 w-full overflow-y-auto border-none px-3 shadow-2xl backdrop-blur-md sm:max-w-150"
           >
-            <PlusCircle className="mr-2 h-4 w-4" /> Tambah Budget
-          </motion.button>
-        </Button>
-      </motion.div>
-
-      {/* DATA TABLE SECTION */}
-      <motion.div variants={tableContainerVariants} className="relative">
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div
-              key="loading"
-              variants={pulseVariants}
-              initial="initial"
-              animate="animate"
-              className="bg-muted/20 flex h-[400px] w-full flex-col items-center justify-center gap-3 rounded-xl border"
-            >
-              <div className="border-primary h-10 w-10 animate-spin rounded-full border-4 border-t-transparent" />
-              <p className="text-muted-foreground text-sm font-medium">
-                Menyiapkan data...
-              </p>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="table"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-card overflow-hidden rounded-xl border shadow-xl"
-            >
-              <BudgetTable
-                columns={columns}
-                data={childBudgets}
-                isLoading={false}
-                getRowCanExpand={(row) => !!row.original.allocations?.length}
-                renderSubComponent={({ row }) => (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <MeterAllocationDetails annualBudget={row.original} />
-                  </motion.div>
-                )}
-              />
-
-              {childBudgets.length === 0 && (
-                <div className="text-muted-foreground flex flex-col items-center justify-center py-20">
-                  <Search className="mb-4 h-10 w-10 opacity-20" />
-                  <p>Tidak ada data anggaran ditemukan untuk filter ini.</p>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* DIALOGS */}
-      <AnnualBudgetDialog
-        open={isDialogOpen}
-        onOpenChange={handleCloseDialog}
-        editingBudget={editingBudget}
-        parentBudgets={parentBudgets}
-        onSubmit={handleFormSubmit}
-        isSubmitting={createOrUpdateMutation.isPending}
-      />
-
-      <AlertDialog
-        open={!!budgetToDelete}
-        onOpenChange={() => setBudgetToDelete(null)}
-      >
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl">
-              Konfirmasi Penghapusan
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Anda akan menghapus budget periode{" "}
-              <span className="text-foreground font-bold">
-                {budgetToDelete &&
-                  new Date(budgetToDelete.period_start).toLocaleDateString(
-                    "id-ID",
-                    { month: "long", year: "numeric", day: "numeric" }
-                  )}
-              </span>
-              . Data ini akan hilang permanen dari sistem.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">Batal</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl px-6"
-              onClick={() =>
-                deleteMutation.mutate(budgetToDelete!.budget_id, {
-                  onSuccess: () => setBudgetToDelete(null),
-                })
-              }
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus Data"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </motion.div>
+            <SheetHeader className="mb-6 pt-4">
+              <div className="bg-muted text-muted-foreground mb-2 flex w-fit items-center gap-2 rounded-full p-1 px-3 text-[10px] font-black uppercase">
+                <FileText size={12} /> Detail Budget Log
+              </div>
+              <SheetTitle className="text-2xl font-black tracking-tighter italic">
+                Overview & Alokasi Anggaran
+              </SheetTitle>
+            </SheetHeader>
+            {selectedBudgetId && <AnnualBudgetDetailView schemeId={selectedBudgetId} />}
+          </SheetContent>
+        </Sheet>
+      </div>
+    </div>
   );
 }

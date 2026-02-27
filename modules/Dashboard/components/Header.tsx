@@ -1,18 +1,27 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import { useAuthStore } from "@/stores/authStore";
-import { NotificationPopover } from "./NotificationPopover";
 import { ThemeToggle } from "@/common/components/ui/ThemeToggle";
 import { Card } from "@/common/components/ui/card"; // Pastikan path ini benar
 import { Skeleton } from "@/common/components/ui/skeleton"; // Opsional: untuk loading state
+import { getUserApi } from "@/modules/profile/services/users.service";
+import { useAuthStore } from "@/stores/authStore";
+import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { NotificationPopover } from "./NotificationPopover";
 
 export const Header = () => {
   const { user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [dateString, setDateString] = useState("");
   const [greeting, setGreeting] = useState("");
+
+  const { data: response } = useQuery({
+    queryKey: ["userProfile", user?.id],
+    queryFn: () => getUserApi(Number(user?.id)),
+    enabled: !!user,
+  });
+  const profile = response?.data;
 
   // Handle Hydration & Date Logic
   useEffect(() => {
@@ -47,19 +56,17 @@ export const Header = () => {
             <Image
               width={50}
               height={50}
-              src="https://assets.aceternity.com/manu.png"
+              src={profile?.image_url || "https://assets.aceternity.com/manu.png"}
               alt="User Avatar"
               className="h-10 w-10 rounded-full"
             />
           </div>
 
           <div className="flex flex-col">
-            <h1 className="text-lg font-bold leading-tight text-slate-900 dark:text-slate-100">
+            <h1 className="text-lg leading-tight font-bold text-slate-900 dark:text-slate-100">
               {greeting}, {user?.username || "Guest"}! 👋
             </h1>
-            <p className="text-muted-foreground text-xs font-medium">
-              {dateString}
-            </p>
+            <p className="text-muted-foreground text-xs font-medium">{dateString}</p>
           </div>
         </div>
 

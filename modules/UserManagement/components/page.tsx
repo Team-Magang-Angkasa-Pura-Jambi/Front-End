@@ -1,44 +1,39 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  getUsersApi,
   createUserApi,
-  updateUserApi,
   deleteUserApi,
+  getUsersApi,
+  updateUserApi,
 } from "@/modules/profile/services/users.service";
 import { CreateUserPayload, UpdateUserPayload } from "@/types/users.types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 
 // --- Komponen UI ---
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/common/components/ui/card";
-import { createColumns } from "./CreateColumns";
 import { Button } from "@/common/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/common/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/common/components/ui/dialog";
+import { UserProfileData } from "@/common/types/user";
+import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
-import { UserForm } from "./UserForm";
-import { DeleteUserDialog } from "./DeleteUserDialog";
 import { DataTable } from "../../../common/components/table/dataTable";
+import { createColumns } from "./CreateColumns";
+import { DeleteUserDialog } from "./DeleteUserDialog";
 import RolesPage from "./role";
-import { User } from "@/common/types/user";
+import { UserForm } from "./UserForm";
 
 export const Page = () => {
   const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserProfileData | null>(null);
 
   const { data: usersResponse, isLoading } = useQuery({
     queryKey: ["users"],
@@ -77,16 +72,15 @@ export const Page = () => {
       setIsDeleteOpen(false);
       setSelectedUser(null);
     },
-    onError: (error) =>
-      toast.error(`Gagal menghapus pengguna: ${error.message}`),
+    onError: (error) => toast.error(`Gagal menghapus pengguna: ${error.message}`),
   });
 
-  const handleOpenForm = (user: User | null = null) => {
+  const handleOpenForm = (user: UserProfileData | null = null) => {
     setSelectedUser(user);
     setIsFormOpen(true);
   };
 
-  const handleOpenDelete = (user: User) => {
+  const handleOpenDelete = (user: UserProfileData) => {
     setSelectedUser(user);
     setIsDeleteOpen(true);
   };
@@ -99,16 +93,11 @@ export const Page = () => {
     }
   };
 
-  const columns = useMemo(
-    () => createColumns(handleOpenForm, handleOpenDelete),
-    []
-  );
+  const columns = useMemo(() => createColumns(handleOpenForm, handleOpenDelete), []);
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight">
-        Manajemen Pengguna & Peran
-      </h2>
+      <h2 className="text-3xl font-bold tracking-tight">Manajemen Pengguna & Peran</h2>
       <p className="text-muted-foreground">
         Kelola semua akun pengguna dan peran yang terdaftar di sistem.
       </p>
@@ -142,9 +131,7 @@ export const Page = () => {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {selectedUser ? "Edit Pengguna" : "Tambah Pengguna Baru"}
-            </DialogTitle>
+            <DialogTitle>{selectedUser ? "Edit Pengguna" : "Tambah Pengguna Baru"}</DialogTitle>
             <DialogDescription>
               Kelola semua akun pengguna yang terdaftar di sistem.
             </DialogDescription>

@@ -1,13 +1,13 @@
 import { ApiResponse } from "@/common/types/api";
-import { User } from "@/common/types/user";
+import { UserProfileData } from "@/common/types/user";
 import api from "@/lib/api";
 import { CreateUserPayload, UpdateUserPayload } from "@/types/users.types";
 
 interface UserApiResponse {
-  data: User[];
+  data: UserProfileData[];
 }
 interface SingleUserApiResponse {
-  data: User;
+  data: UserProfileData;
 }
 
 export interface userHistory {
@@ -24,16 +24,12 @@ export const getUsersApi = async (): Promise<UserApiResponse> => {
   const response = await api.get("/users");
   return response.data;
 };
-export const getUserApi = async (
-  id: number
-): Promise<SingleUserApiResponse> => {
+export const getUserApi = async (id: number): Promise<SingleUserApiResponse> => {
   const response = await api.get(`/users/${id}`);
   return response.data;
 };
 
-export const getUserActivitiesApi = async (
-  id: number
-): Promise<ApiResponse<userHistory[]>> => {
+export const getUserActivitiesApi = async (id: number): Promise<ApiResponse<userHistory[]>> => {
   const response = await api.get(`/users/${id}/activities`);
   return response.data;
 };

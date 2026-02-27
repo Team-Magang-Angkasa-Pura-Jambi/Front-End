@@ -16,7 +16,7 @@ export interface LastReading {
 }
 
 export const submitReadingApi = async (payload: ReadingPayload) => {
-  const response = await api.post("/readings", payload);
+  const response = await api.post("/reading-sessions", payload);
   return response.data;
 };
 

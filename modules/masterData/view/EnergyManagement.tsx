@@ -44,8 +44,8 @@ import {
   DialogTitle,
 } from "@/common/components/ui/dialog";
 
-import { EnergyTypeForm } from "../components/forms/energyType.form";
 import { LoadingSkeleton } from "../components/molecules/LoadingSkeleton";
+import { EnergyTypeForm } from "../components/organisms/energyType.form";
 import { MasterDataDialog } from "../components/templates/MasterDataDialog";
 import { useEnergyManagement } from "../hooks/useEnergyManagement";
 

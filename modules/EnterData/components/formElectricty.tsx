@@ -1,35 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
-import {
-  useMutation,
-  useQueries,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
-  useForm,
-  useFieldArray,
-  SubmitHandler,
-  Resolver,
-} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, isValid } from "date-fns";
-import {
-  CalendarIcon,
-  ClipboardPaste,
-  PlusCircleIcon,
-  XCircleIcon,
-} from "lucide-react";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { CalendarIcon, ClipboardPaste, Loader2, PlusCircleIcon, XCircleIcon } from "lucide-react";
+import { useMemo } from "react";
+import { Resolver, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/common/components/ui/button";
-import { Input } from "@/common/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/common/components/ui/popover";
 import { Calendar } from "@/common/components/ui/calendar";
 import {
   Form,
@@ -40,168 +19,135 @@ import {
   FormLabel,
   FormMessage,
 } from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/common/components/ui/popover";
+import { ScrollArea } from "@/common/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/common/components/ui/select";
 
-import { ScrollArea } from "@/common/components/ui/scroll-area";
-import { formSchema, FormValues } from "../schemas/reading.schema";
-import { AxiosError } from "axios";
-import { ApiErrorResponse } from "@/common/types/api";
-import {
-  getLastReadingApi,
-  ReadingPayload,
-  submitReadingApi,
-} from "../services";
+import { cn } from "@/lib/utils";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
+import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { formatToISO } from "@/utils/formatIso";
+import { formSchema, FormValues } from "../schemas/reading.schema";
+import { getLastReadingApi, submitReadingApi } from "../services";
 
 interface FormReadingProps {
   onSuccess?: () => void;
   type_name: "Electricity" | "Water" | "Fuel";
 }
 
-export const FormReadingElectric = ({
-  onSuccess,
-  type_name,
-}: FormReadingProps) => {
+export const FormReadingElectric = ({ onSuccess, type_name }: FormReadingProps) => {
   const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
-      meter_id: undefined,
-      reading_date: new Date(),
-      details: [],
+      reading: {
+        meter_id: undefined,
+        reading_date: new Date(),
+        details: [{ reading_type_id: undefined, value: 0 }],
+        notes: "",
+      },
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "details",
+    name: "reading.details",
   });
 
+  // Fetch Master Data
   const { data: energyTypeData, isLoading: isLoadingData } = useQuery({
     queryKey: ["energyData", type_name],
     queryFn: () => getEnergyTypesApi(type_name),
-    refetchOnWindowFocus: false,
   });
 
-  const meters = useMemo(
-    () => energyTypeData?.data[0]?.meters || [],
-    [energyTypeData]
-  );
+  const { data: metersRes, isLoading: isLoadingMeters } = useQuery({
+    queryKey: ["meters"],
+    queryFn: () => getMetersApi(),
+  });
+
+  const meters = useMemo(() => metersRes?.data.meter || [], [metersRes]);
+
   const readingTypes = useMemo(
     () => energyTypeData?.data[0]?.reading_types || [],
     [energyTypeData]
   );
-  const unit = useMemo(
-    () => energyTypeData?.data[0]?.unit_of_measurement || "...",
-    [energyTypeData]
-  );
+  const unit = useMemo(() => energyTypeData?.data[0]?.unit_standard || "...", [energyTypeData]);
 
-  const selectedMeterId = form.watch("meter_id");
-  const detailsValues = form.watch("details");
-  const readingDate = form.watch("reading_date");
-  console.log(readingDate);
+  // Watchers
+  const selectedMeterId = form.watch("reading.meter_id");
+  const readingDate = form.watch("reading.reading_date");
+  const detailsValues = form.watch("reading.details");
 
+  // Last Reading Logic
   const lastReadingQueries = useQueries({
-    queries: detailsValues?.map((detail) => ({
-      queryKey: [
-        "lastReading",
-        selectedMeterId,
-        detail.reading_type_id,
-        readingDate,
-      ],
+    queries: detailsValues.map((detail) => ({
+      queryKey: ["lastReading", selectedMeterId, detail.reading_type_id, readingDate],
       queryFn: () =>
-        getLastReadingApi(
-          selectedMeterId,
-          detail.reading_type_id,
-          readingDate.toISOString()
-        ),
-
-      enabled: !!selectedMeterId && !!detail.reading_type_id,
-      refetchOnWindowFocus: false,
+        getLastReadingApi(selectedMeterId, detail.reading_type_id, readingDate.toISOString()),
+      enabled: !!selectedMeterId && !!detail.reading_type_id && !!readingDate,
     })),
   });
 
-  const { mutate, isPending } = useMutation<
-    unknown,
-    AxiosError<ApiErrorResponse>,
-    ReadingPayload
-  >({
-    mutationFn: (readingData: ReadingPayload) => submitReadingApi(readingData),
+  const { mutate, isPending } = useMutation({
+    mutationFn: (payload: FormValues) => submitReadingApi(payload as any),
     onSuccess: () => {
-      toast.success("Data berhasil dikirim!");
+      toast.success("Data pembacaan berhasil disimpan!");
       form.reset();
-      queryClient.invalidateQueries({
-        queryKey: ["readings", "analysisData", "lastReading"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["readings"] });
       onSuccess?.();
     },
-    onError: (error) => {
-      const message =
-        error.response?.data?.status?.message ||
-        "Terjadi kesalahan tidak terduga.";
-      toast.error(message);
+    onError: (error: any) => {
+      toast.error(error.response?.data?.status?.message || "Gagal mengirim data.");
     },
   });
 
-  const onSubmit: SubmitHandler<FormValues> = (values) => {
-    const payload: ReadingPayload = {
-      meter_id: values.meter_id,
-      reading_date: formatToISO(values.reading_date),
-      details: values.details.map((d) => ({
-        reading_type_id: d.reading_type_id,
-        value: d.value,
-      })),
+  const onSubmit = (values: FormValues) => {
+    // Karena schema sudah dibungkus 'reading', kita tinggal format tanggalnya saja
+    const formattedPayload = {
+      ...values,
+      reading: {
+        ...values.reading,
+        reading_date: formatToISO(values.reading.reading_date),
+      },
     };
-    mutate(payload);
+    mutate(formattedPayload as any);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <ScrollArea className="max-h-[70vh] overflow-y-auto p-4">
-          <div className="grid gap-6 md:grid-cols-2">
+        <ScrollArea className="max-h-[70vh] p-1">
+          <div className="grid gap-6 px-1 md:grid-cols-2">
+            {/* METER SELECT */}
             <FormField
               control={form.control}
-              name="meter_id"
+              name="reading.meter_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Pilih Meteran</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    value={field.value ? String(field.value) : ""}
-                    disabled={isLoadingData}
+                    onValueChange={(val) => field.onChange(Number(val))}
+                    value={field.value?.toString()}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue
-                          placeholder={
-                            isLoadingData
-                              ? "Memuat meteran..."
-                              : "Pilih Meteran"
-                          }
-                        />
+                        <SelectValue placeholder={isLoadingData ? "Memuat..." : "Pilih Meteran"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectGroup>
-                        {meters.map((meter) => (
-                          <SelectItem
-                            key={meter?.meter_id}
-                            value={meter?.meter_id.toString()}
-                          >
-                            {meter.meter_code}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
+                      {meters.map((m) => (
+                        <SelectItem key={m.meter_id} value={m.meter_id.toString()}>
+                          {m.meter_code}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -209,28 +155,25 @@ export const FormReadingElectric = ({
               )}
             />
 
+            {/* DATE PICKER */}
             <FormField
               control={form.control}
-              name="reading_date"
+              name="reading.reading_date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Tanggal</FormLabel>
+                  <FormLabel>Tanggal Pembacaan</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          key={field.value?.toString()}
-                          variant={"outline"}
-                          className={`w-full justify-start text-left font-normal ${
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
-                          }`}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? (
-                            format(field.value, "d MMMM yyyy") // Sesuaikan format
-                          ) : (
-                            <span>Pilih tanggal</span>
                           )}
+                        >
+                          {field.value ? format(field.value, "PPP") : <span>Pilih Tanggal</span>}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
@@ -239,85 +182,56 @@ export const FormReadingElectric = ({
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        defaultMonth={field.value || new Date()}
                         initialFocus
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormDescription></FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <hr className="my-4 border-dashed" />
+          <hr className="my-6 border-dashed" />
 
-          <div className="space-y-4">
+          {/* DYNAMIC DETAILS */}
+          <div className="space-y-4 px-1">
             {fields.map((field, index) => {
-              const lastReadingQuery = lastReadingQueries[index];
-              const lastReadingValue = lastReadingQuery?.data?.data?.value;
-              const dateString =
-                lastReadingQuery?.data?.data?.session?.reading_date;
-              const lastReadingDate = dateString ? new Date(dateString) : null;
+              const lastQuery = lastReadingQueries[index];
+              const lastValue = lastQuery?.data?.data?.value;
 
               return (
                 <div
                   key={field.id}
-                  className="grid grid-cols-12 items-start gap-4"
+                  className="bg-muted/30 grid grid-cols-12 items-end gap-4 rounded-lg border p-3"
                 >
                   <div className="col-span-6">
                     <FormField
                       control={form.control}
-                      name={`details.${index}.reading_type_id`}
-                      render={({ field }) => (
+                      name={`reading.details.${index}.reading_type_id`}
+                      render={({ field: detailField }) => (
                         <FormItem>
-                          <FormLabel className={index > 0 ? "sr-only" : ""}>
-                            Jenis Pemakaian
+                          <FormLabel className="text-xs font-bold uppercase opacity-60">
+                            Tipe Pembacaan
                           </FormLabel>
                           <Select
-                            onValueChange={field.onChange}
-                            value={field?.value?.toString()}
-                            disabled={isLoadingData || meters.length === 0}
+                            onValueChange={(v) => detailField.onChange(Number(v))}
+                            value={detailField.value?.toString()}
                           >
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue
-                                  placeholder={
-                                    !selectedMeterId
-                                      ? "Pilih Jenis"
-                                      : isLoadingData
-                                        ? "Memuat..."
-                                        : "Pilih Jenis"
-                                  }
-                                />
+                              <SelectTrigger className="bg-background">
+                                <SelectValue placeholder="Pilih Tipe" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectGroup>
-                                {readingTypes
-                                  .filter((type) => {
-                                    const isUsedInOtherRows =
-                                      detailsValues.some(
-                                        (d, idx) =>
-                                          idx !== index && // 'index' didapat dari map fieldArray
-                                          Number(d.reading_type_id) ===
-                                            type.reading_type_id
-                                      );
-
-                                    return !isUsedInOtherRows;
-                                  })
-                                  .map((type) => (
-                                    <SelectItem
-                                      key={type.reading_type_id}
-                                      value={
-                                        type.reading_type_id?.toString() || ""
-                                      }
-                                    >
-                                      {type.type_name}
-                                    </SelectItem>
-                                  ))}
-                              </SelectGroup>
+                              {readingTypes.map((t) => (
+                                <SelectItem
+                                  key={t.reading_type_id}
+                                  value={t.reading_type_id.toString()}
+                                >
+                                  {t.type_name}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -325,82 +239,58 @@ export const FormReadingElectric = ({
                       )}
                     />
                   </div>
+
                   <div className="col-span-5">
                     <FormField
                       control={form.control}
-                      name={`details.${index}.value`}
-                      render={({ field }) => (
+                      name={`reading.details.${index}.value`}
+                      render={({ field: valueField }) => (
                         <FormItem>
-                          <FormLabel className={index > 0 ? "sr-only" : ""}>
+                          <FormLabel className="text-xs font-bold uppercase opacity-60">
                             Nilai ({unit})
                           </FormLabel>
                           <div className="relative">
                             <FormControl>
                               <Input
-                                type="text"
-                                inputMode="decimal"
+                                type="number"
                                 step="any"
-                                min={lastReadingValue}
-                                placeholder="0.00"
-                                className="pr-10"
-                                {...field}
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(
-                                    /,/g,
-                                    "."
-                                  );
-                                  field.onChange(value);
-                                }}
-                                disabled={
-                                  !detailsValues[index]?.reading_type_id
-                                }
+                                className="bg-background pr-10"
+                                {...valueField}
                               />
                             </FormControl>
-                            {lastReadingValue && (
+                            {lastValue !== undefined && (
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="text-muted-foreground hover:text-primary absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2"
+                                className="text-muted-foreground absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2"
                                 onClick={() =>
-                                  form.setValue(
-                                    `details.${index}.value`,
-                                    lastReadingValue ??
-                                      ("" as unknown as number)
-                                  )
+                                  form.setValue(`reading.details.${index}.value`, lastValue)
                                 }
                               >
-                                <ClipboardPaste className="h-4 w-4" />
+                                <ClipboardPaste size={14} />
                               </Button>
                             )}
                           </div>
-                          <FormDescription>
-                            {lastReadingQuery?.isFetching
-                              ? "Mencari..."
-                              : `Angka terakhir: ${
-                                  lastReadingValue || "-"
-                                } Pada  ${
-                                  lastReadingDate && isValid(lastReadingDate)
-                                    ? format(new Date(lastReadingDate), "PPP")
-                                    : "-"
-                                }`}
+                          <FormDescription className="text-[10px]">
+                            Terakhir: {lastQuery?.isFetching ? "..." : lastValue || "-"}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-                  <div className="col-span-1 flex h-[58px] items-end">
-                    {fields.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        type="button"
-                        onClick={() => remove(index)}
-                      >
-                        <XCircleIcon className="text-destructive h-5 w-5" />
-                      </Button>
-                    )}
+
+                  <div className="col-span-1 pb-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => remove(index)}
+                      className="text-destructive"
+                    >
+                      <XCircleIcon size={18} />
+                    </Button>
                   </div>
                 </div>
               );
@@ -412,21 +302,26 @@ export const FormReadingElectric = ({
             variant="outline"
             size="sm"
             className="mt-4"
-            onClick={() =>
-              append({
-                reading_type_id: "" as unknown as number,
-                value: "" as unknown as number,
-              })
-            }
+            onClick={() => append({ reading_type_id: undefined as any, value: 0 })}
             disabled={fields.length >= readingTypes.length}
           >
-            <PlusCircleIcon className="mr-2 h-4 w-4" />
-            Tambah Baris
+            <PlusCircleIcon className="mr-2 h-4 w-4" /> Tambah Baris
           </Button>
 
-          <div className="flex justify-end pt-6">
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Mengirim..." : "Kirim Data"}
+          <div className="flex justify-end pt-8">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full px-12 font-bold md:w-auto"
+              disabled={isPending}
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Mengirim...
+                </>
+              ) : (
+                "Simpan Pembacaan"
+              )}
             </Button>
           </div>
         </ScrollArea>
