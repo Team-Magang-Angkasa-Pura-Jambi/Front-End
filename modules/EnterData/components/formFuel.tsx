@@ -249,7 +249,7 @@ export const FormReadingFuel = ({ onSuccess, type_name }: FormReadingProps) => {
                   </Popover>
                   <FormDescription>
                     {lastReadingDate
-                      ? `Data terakhir diinput: ${format(new Date(lastReadingDate), "PPP")}`
+                      ? `Data terakhir diinput: ${lastReadingDate}`
                       : "Pilih tanggal pembacaan."}
                   </FormDescription>
                   <FormMessage />

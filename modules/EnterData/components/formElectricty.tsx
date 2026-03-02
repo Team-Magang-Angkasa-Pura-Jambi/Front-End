@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   useMutation,
   useQueries,
@@ -14,7 +14,8 @@ import {
   Resolver,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, isValid } from "date-fns";
+import { format, isValid, addDays } from "date-fns";
+import { id } from "date-fns/locale";
 import {
   CalendarIcon,
   ClipboardPaste,
@@ -108,27 +109,57 @@ export const FormReadingElectric = ({
   const selectedMeterId = form.watch("meter_id");
   const detailsValues = form.watch("details");
   const readingDate = form.watch("reading_date");
-  console.log(readingDate);
 
   const lastReadingQueries = useQueries({
-    queries: detailsValues?.map((detail) => ({
-      queryKey: [
-        "lastReading",
-        selectedMeterId,
-        detail.reading_type_id,
-        readingDate,
-      ],
-      queryFn: () =>
-        getLastReadingApi(
+    queries:
+      detailsValues?.map((detail) => ({
+        queryKey: [
+          "lastReading",
           selectedMeterId,
           detail.reading_type_id,
-          readingDate.toISOString()
-        ),
-
-      enabled: !!selectedMeterId && !!detail.reading_type_id,
-      refetchOnWindowFocus: false,
-    })),
+          readingDate,
+        ],
+        queryFn: () =>
+          getLastReadingApi(
+            selectedMeterId,
+            detail.reading_type_id,
+            readingDate.toISOString()
+          ),
+        enabled: !!selectedMeterId && !!detail.reading_type_id,
+        refetchOnWindowFocus: false,
+      })) || [],
   });
+
+  // PERBAIKAN: useEffect untuk set tanggal otomatis H+1
+  useEffect(() => {
+    // Cari query pertama yang sukses dan punya data session
+    const firstSuccessfulData = lastReadingQueries.find(
+      (q) => q.isSuccess && q.data?.data?.session?.reading_date
+    );
+
+    if (firstSuccessfulData) {
+      const lastDateStr = firstSuccessfulData?.data?.data.session.reading_date;
+      const lastDate = new Date(lastDateStr ?? new Date());
+
+      if (isValid(lastDate)) {
+        const nextDay = addDays(lastDate, 1);
+
+        // Hanya update jika tanggal berbeda untuk menghindari infinite loop
+        if (
+          format(nextDay, "yyyy-MM-dd") !== format(readingDate, "yyyy-MM-dd")
+        ) {
+          form.setValue("reading_date", nextDay);
+        }
+      }
+    }
+  }, [
+    // Dependency stringified untuk performa & menghindari loop
+    lastReadingQueries
+      .map((q) => q.data?.data?.session?.reading_date)
+      .join(","),
+    form,
+    readingDate,
+  ]);
 
   const { mutate, isPending } = useMutation<
     unknown,
@@ -138,7 +169,11 @@ export const FormReadingElectric = ({
     mutationFn: (readingData: ReadingPayload) => submitReadingApi(readingData),
     onSuccess: () => {
       toast.success("Data berhasil dikirim!");
-      form.reset();
+      form.reset({
+        meter_id: undefined,
+        reading_date: new Date(),
+        details: [],
+      });
       queryClient.invalidateQueries({
         queryKey: ["readings", "analysisData", "lastReading"],
       });
@@ -158,7 +193,7 @@ export const FormReadingElectric = ({
       reading_date: formatToISO(values.reading_date),
       details: values.details.map((d) => ({
         reading_type_id: d.reading_type_id,
-        value: d.value,
+        value: Number(d.value),
       })),
     };
     mutate(payload);
@@ -176,7 +211,7 @@ export const FormReadingElectric = ({
                 <FormItem>
                   <FormLabel>Pilih Meteran</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(val) => field.onChange(Number(val))}
                     value={field.value ? String(field.value) : ""}
                     disabled={isLoadingData}
                   >
@@ -184,24 +219,20 @@ export const FormReadingElectric = ({
                       <SelectTrigger>
                         <SelectValue
                           placeholder={
-                            isLoadingData
-                              ? "Memuat meteran..."
-                              : "Pilih Meteran"
+                            isLoadingData ? "Memuat..." : "Pilih Meteran"
                           }
                         />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectGroup>
-                        {meters.map((meter) => (
-                          <SelectItem
-                            key={meter?.meter_id}
-                            value={meter?.meter_id.toString()}
-                          >
-                            {meter.meter_code}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
+                      {meters.map((meter) => (
+                        <SelectItem
+                          key={meter.meter_id}
+                          value={meter.meter_id.toString()}
+                        >
+                          {meter.meter_code}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -219,15 +250,12 @@ export const FormReadingElectric = ({
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          key={field.value?.toString()}
-                          variant={"outline"}
-                          className={`w-full justify-start text-left font-normal ${
-                            !field.value && "text-muted-foreground"
-                          }`}
+                          variant="outline"
+                          className={`w-full justify-start text-left font-normal ${!field.value && "text-muted-foreground"}`}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {field.value ? (
-                            format(field.value, "d MMMM yyyy") // Sesuaikan format
+                            format(field.value, "d MMMM yyyy", { locale: id })
                           ) : (
                             <span>Pilih tanggal</span>
                           )}
@@ -239,12 +267,10 @@ export const FormReadingElectric = ({
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        defaultMonth={field.value || new Date()}
                         initialFocus
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormDescription></FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -255,11 +281,10 @@ export const FormReadingElectric = ({
 
           <div className="space-y-4">
             {fields.map((field, index) => {
-              const lastReadingQuery = lastReadingQueries[index];
-              const lastReadingValue = lastReadingQuery?.data?.data?.value;
-              const dateString =
-                lastReadingQuery?.data?.data?.session?.reading_date;
-              const lastReadingDate = dateString ? new Date(dateString) : null;
+              const queryResult = lastReadingQueries[index];
+              const lastVal = queryResult?.data?.data?.value;
+              const lastDateStr =
+                queryResult?.data?.data?.session?.reading_date;
 
               return (
                 <div
@@ -270,54 +295,44 @@ export const FormReadingElectric = ({
                     <FormField
                       control={form.control}
                       name={`details.${index}.reading_type_id`}
-                      render={({ field }) => (
+                      render={({ field: typeField }) => (
                         <FormItem>
                           <FormLabel className={index > 0 ? "sr-only" : ""}>
                             Jenis Pemakaian
                           </FormLabel>
                           <Select
-                            onValueChange={field.onChange}
-                            value={field?.value?.toString()}
-                            disabled={isLoadingData || meters.length === 0}
+                            onValueChange={(val) =>
+                              typeField.onChange(Number(val))
+                            }
+                            value={
+                              typeField.value ? String(typeField.value) : ""
+                            }
+                            disabled={!selectedMeterId}
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue
-                                  placeholder={
-                                    !selectedMeterId
-                                      ? "Pilih Jenis"
-                                      : isLoadingData
-                                        ? "Memuat..."
-                                        : "Pilih Jenis"
-                                  }
-                                />
+                                <SelectValue placeholder="Pilih Jenis" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectGroup>
-                                {readingTypes
-                                  .filter((type) => {
-                                    const isUsedInOtherRows =
-                                      detailsValues.some(
-                                        (d, idx) =>
-                                          idx !== index && // 'index' didapat dari map fieldArray
-                                          Number(d.reading_type_id) ===
-                                            type.reading_type_id
-                                      );
-
-                                    return !isUsedInOtherRows;
-                                  })
-                                  .map((type) => (
-                                    <SelectItem
-                                      key={type.reading_type_id}
-                                      value={
-                                        type.reading_type_id?.toString() || ""
-                                      }
-                                    >
-                                      {type.type_name}
-                                    </SelectItem>
-                                  ))}
-                              </SelectGroup>
+                              {readingTypes
+                                .filter(
+                                  (t) =>
+                                    !detailsValues.some(
+                                      (d, idx) =>
+                                        idx !== index &&
+                                        Number(d.reading_type_id) ===
+                                          t.reading_type_id
+                                    )
+                                )
+                                .map((type) => (
+                                  <SelectItem
+                                    key={type.reading_type_id}
+                                    value={type.reading_type_id.toString()}
+                                  >
+                                    {type.type_name}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -325,11 +340,12 @@ export const FormReadingElectric = ({
                       )}
                     />
                   </div>
+
                   <div className="col-span-5">
                     <FormField
                       control={form.control}
                       name={`details.${index}.value`}
-                      render={({ field }) => (
+                      render={({ field: valField }) => (
                         <FormItem>
                           <FormLabel className={index > 0 ? "sr-only" : ""}>
                             Nilai ({unit})
@@ -338,35 +354,29 @@ export const FormReadingElectric = ({
                             <FormControl>
                               <Input
                                 type="text"
-                                inputMode="decimal"
-                                step="any"
-                                min={lastReadingValue}
                                 placeholder="0.00"
                                 className="pr-10"
-                                {...field}
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(
-                                    /,/g,
-                                    "."
-                                  );
-                                  field.onChange(value);
-                                }}
+                                {...valField}
+                                onChange={(e) =>
+                                  valField.onChange(
+                                    e.target.value.replace(/,/g, ".")
+                                  )
+                                }
                                 disabled={
                                   !detailsValues[index]?.reading_type_id
                                 }
                               />
                             </FormControl>
-                            {lastReadingValue && (
+                            {lastVal !== undefined && (
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="text-muted-foreground hover:text-primary absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2"
+                                className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2"
                                 onClick={() =>
                                   form.setValue(
                                     `details.${index}.value`,
-                                    lastReadingValue ??
-                                      ("" as unknown as number)
+                                    lastVal
                                   )
                                 }
                               >
@@ -374,28 +384,24 @@ export const FormReadingElectric = ({
                               </Button>
                             )}
                           </div>
-                          <FormDescription>
-                            {lastReadingQuery?.isFetching
-                              ? "Mencari..."
-                              : `Angka terakhir: ${
-                                  lastReadingValue || "-"
-                                } Pada  ${
-                                  lastReadingDate && isValid(lastReadingDate)
-                                    ? format(new Date(lastReadingDate), "PPP")
-                                    : "-"
-                                }`}
+                          <FormDescription className="text-[10px]">
+                            {queryResult?.isFetching
+                              ? "Memuat..."
+                              : lastVal
+                                ? `Terakhir: ${lastVal} (${lastDateStr ? format(new Date(lastDateStr), "dd/MM/yy") : "-"})`
+                                : "Belum ada data"}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
+
                   <div className="col-span-1 flex h-[58px] items-end">
                     {fields.length > 1 && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        type="button"
                         onClick={() => remove(index)}
                       >
                         <XCircleIcon className="text-destructive h-5 w-5" />
@@ -414,14 +420,13 @@ export const FormReadingElectric = ({
             className="mt-4"
             onClick={() =>
               append({
-                reading_type_id: "" as unknown as number,
-                value: "" as unknown as number,
+                reading_type_id: undefined as unknown as number,
+                value: undefined as unknown as number,
               })
             }
             disabled={fields.length >= readingTypes.length}
           >
-            <PlusCircleIcon className="mr-2 h-4 w-4" />
-            Tambah Baris
+            <PlusCircleIcon className="mr-2 h-4 w-4" /> Tambah Baris
           </Button>
 
           <div className="flex justify-end pt-6">
