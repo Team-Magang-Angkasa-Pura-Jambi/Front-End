@@ -4,7 +4,8 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ================= SAFE PATH =================
+  const isRootPath = pathname === "/";
+
   const publicPaths = [
     "/auth/login",
     "/auth-required",
@@ -14,38 +15,35 @@ export function middleware(request: NextRequest) {
 
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
-  // ================= AUTH CHECK =================
   const authCookie = request.cookies.get("auth-storage")?.value;
-
-  let token: string | null = null;
-  let role: string | null = null;
+  let hasToken = false;
+  let role = null;
 
   if (authCookie) {
     try {
-      const authState = JSON.parse(authCookie);
-      token = authState?.state?.token || authState?.token || null;
-      role = authState?.state?.role || authState?.role || null;
-    } catch {
-      token = null;
-      role = null;
+      const decodedCookie = decodeURIComponent(authCookie);
+      const authState = JSON.parse(decodedCookie);
+
+      const token = authState?.state?.token || authState?.token;
+      role = authState?.state?.role || authState?.role;
+      hasToken = !!token;
+    } catch (e) {
+      hasToken = false;
     }
   }
 
-  const hasToken = Boolean(token);
-
-  // ================= RULES =================
-
-  // 🔐 BELUM LOGIN → AUTH REQUIRED (401)
   if (!hasToken && !isPublicPath) {
+    if (isRootPath) {
+      return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
+
     return NextResponse.redirect(new URL("/auth-required", request.url));
   }
 
-  // 🔁 SUDAH LOGIN TAPI BUKA LOGIN PAGE
   if (hasToken && pathname.startsWith("/auth/login")) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 🚫 ROLE CHECK (403)
   if (hasToken && pathname.startsWith("/admin") && role !== "admin") {
     return NextResponse.redirect(new URL("/forbidden", request.url));
   }
@@ -54,5 +52,15 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|.*\\..*).*)"],
+  matcher: [
+    /*
+     * Match semua request path kecuali:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - semua file dengan ekstensi (svg, png, jpg, dll)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
+  ],
 };

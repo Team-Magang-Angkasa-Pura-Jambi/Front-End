@@ -19,7 +19,7 @@ export default function AuthRequiredPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
-      {/* ================= BACKGROUND IMAGE ================= */}
+      
       <div className="absolute inset-0 -z-20">
         <Image
           src="/image/session-expired.png"
@@ -30,18 +30,18 @@ export default function AuthRequiredPage() {
         />
       </div>
 
-      {/* Soft overlay */}
+      
       <div className="from-background/60 via-background/70 to-background/90 absolute inset-0 -z-10 bg-gradient-to-b" />
 
-      {/* ================= DECORATION ================= */}
-      {/* calm auth glow */}
+      
+      
       <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl" />
       <div className="pointer-events-none absolute -right-40 -bottom-40 h-[28rem] w-[28rem] rounded-full bg-indigo-500/20 blur-3xl" />
 
-      {/* grid */}
+      
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.04)_1px,transparent_1px)] bg-[size:48px_48px]" />
 
-      {/* ================= CARD ================= */}
+      
       <Card
         className={cn(
           "relative z-10 w-full max-w-lg backdrop-blur",
@@ -49,7 +49,7 @@ export default function AuthRequiredPage() {
         )}
       >
         <CardHeader className="items-center text-center">
-          {/* Badge */}
+          
           <div className="mb-6 flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-1.5 text-blue-600">
             <KeyRound className="h-4 w-4" />
             <span className="text-xs font-semibold tracking-wide uppercase">
@@ -71,7 +71,7 @@ export default function AuthRequiredPage() {
             autentikasi. Silakan login kembali untuk melanjutkan.
           </p>
 
-          {/* Info box */}
+          
           <div className="bg-muted/40 mx-auto max-w-[340px] rounded-md border p-4 text-left text-sm">
             <div className="mb-2 flex items-center gap-2 font-medium">
               <LogIn className="h-4 w-4 text-blue-500" />
@@ -86,11 +86,6 @@ export default function AuthRequiredPage() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-3 sm:flex-row">
-          <Button variant="outline" onClick={() => router.back()}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Kembali
-          </Button>
-
           <Button asChild className="sm:flex-1">
             <Link href="/auth/login">
               <LogIn className="mr-2 h-4 w-4" />
