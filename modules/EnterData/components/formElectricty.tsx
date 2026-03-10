@@ -148,12 +148,7 @@ export const FormReadingElectric = ({
         }
       }
     }
-  }, [
-    lastReadingQueries
-      .map((q) => q.data?.data?.session?.reading_date)
-      .join(","),
-    form,
-  ]);
+  }, [ lastReadingQueries, ]);
 
   const { mutate, isPending } = useMutation<
     unknown,

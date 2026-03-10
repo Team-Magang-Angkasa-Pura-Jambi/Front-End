@@ -152,12 +152,7 @@ export const FormReadingWater = ({
         }
       }
     }
-  }, [
-    lastReadingsQueries
-      .map((q) => q.data?.data?.session?.reading_date)
-      .join(","),
-    form,
-  ]);
+  }, [lastReadingsQueries]);
 
   const { mutate, isPending } = useMutation<
     unknown,
