@@ -48,6 +48,7 @@ export const useDailyAveragePax = () => {
     queryFn: () => getDailyAveragePaxApi(parseInt(year), parseInt(month)),
 
     placeholderData: (previousData) => previousData,
+    refetchOnWindowFocus: false, // Cache 5 menit
   });
 
   const chartData = useMemo(() => {

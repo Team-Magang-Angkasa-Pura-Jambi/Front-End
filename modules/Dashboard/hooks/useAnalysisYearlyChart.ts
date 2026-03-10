@@ -7,6 +7,7 @@ export const useAnalysisYearly = (energyType: EnergyTypeName, year: number) => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["yearlyAnalysis", energyType, year],
     queryFn: () => getYearlyAnalysisApi(energyType, year),
+    refetchOnWindowFocus: false, // Cache 5 menit
   });
 
   const chartData = useMemo(() => data?.data.chartData || [], [data?.data]);

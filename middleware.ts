@@ -27,7 +27,7 @@ export function middleware(request: NextRequest) {
       const token = authState?.state?.token || authState?.token;
       role = authState?.state?.role || authState?.role;
       hasToken = !!token;
-    } catch (e) {
+    } catch (_e) {
       hasToken = false;
     }
   }

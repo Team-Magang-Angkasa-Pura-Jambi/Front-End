@@ -44,7 +44,6 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -130,9 +129,7 @@ export const FormReadingElectric = ({
       })) || [],
   });
 
-  // PERBAIKAN: useEffect untuk set tanggal otomatis H+1
   useEffect(() => {
-    // Cari query pertama yang sukses dan punya data session
     const firstSuccessfulData = lastReadingQueries.find(
       (q) => q.isSuccess && q.data?.data?.session?.reading_date
     );
@@ -144,7 +141,6 @@ export const FormReadingElectric = ({
       if (isValid(lastDate)) {
         const nextDay = addDays(lastDate, 1);
 
-        // Hanya update jika tanggal berbeda untuk menghindari infinite loop
         if (
           format(nextDay, "yyyy-MM-dd") !== format(readingDate, "yyyy-MM-dd")
         ) {
@@ -153,12 +149,10 @@ export const FormReadingElectric = ({
       }
     }
   }, [
-    // Dependency stringified untuk performa & menghindari loop
     lastReadingQueries
       .map((q) => q.data?.data?.session?.reading_date)
       .join(","),
     form,
-    readingDate,
   ]);
 
   const { mutate, isPending } = useMutation<

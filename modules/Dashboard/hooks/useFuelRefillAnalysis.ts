@@ -20,6 +20,7 @@ export const useFuelRefillAnalysis = () => {
     queryKey: ["meters", "fuel"],
     queryFn: () => getMetersApi("Fuel"),
     staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false, // Cache 5 menit
   });
 
   const meterData = useMemo(

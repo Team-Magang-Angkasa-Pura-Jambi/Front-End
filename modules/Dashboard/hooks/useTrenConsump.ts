@@ -10,13 +10,12 @@ interface ChartDataPoint {
   pemakaian: number;
   prediksi: number;
   target: number;
-  // Tambahan Data Cost
+
   biayaAktual: number;
   biayaTarget: number;
 }
 
 export const useTrenConsump = () => {
-  // --- 1. State Management ---
   const [selectedPeriod, setSelectedPeriod] = useState<string>(() => {
     const date = new Date();
     const y = date.getFullYear();
@@ -27,7 +26,6 @@ export const useTrenConsump = () => {
   const [typeEnergy, setTypeEnergy] = useState<string>("");
   const [selectedMeterId, setSelectedMeterId] = useState<string>("");
 
-  // --- 2. Options Generator (Months) ---
   const monthOptions = useMemo(() => {
     const options = [];
     const date = new Date();
@@ -44,7 +42,6 @@ export const useTrenConsump = () => {
     return options;
   }, []);
 
-  // --- 3. Query: Energy Types ---
   const { data: energyTypesResponse, isLoading: isTypesLoading } = useQuery({
     queryKey: ["energyTypes"],
     queryFn: () => getEnergyTypesApi(),
@@ -62,11 +59,11 @@ export const useTrenConsump = () => {
     }
   }, [energyTypesData, typeEnergy]);
 
-  // --- 4. Query: Meters ---
   const { data: metersResponse, isLoading: isMetersLoading } = useQuery({
     queryKey: ["meters", typeEnergy],
     queryFn: () => getMetersApi(typeEnergy),
     enabled: !!typeEnergy,
+    refetchOnWindowFocus: false, // Cache 5 menit
   });
 
   const metersData = useMemo(
@@ -87,7 +84,6 @@ export const useTrenConsump = () => {
     }
   }, [metersData, selectedMeterId]);
 
-  // --- 5. Parsing Periode ---
   const { year, month } = useMemo(() => {
     if (!selectedPeriod) return { year: undefined, month: undefined };
     const [yStr, mStr] = selectedPeriod.split("-");
@@ -97,7 +93,6 @@ export const useTrenConsump = () => {
     };
   }, [selectedPeriod]);
 
-  // --- 6. Query: Analysis Data ---
   const {
     data: analysisDataResponse,
     isLoading: isAnalysisLoading,
@@ -120,7 +115,6 @@ export const useTrenConsump = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // --- 7. Data Formatting ---
   const chartData: ChartDataPoint[] = useMemo(() => {
     const rawData = analysisDataResponse?.data;
     if (!rawData || rawData.length === 0) return [];
@@ -135,9 +129,7 @@ export const useTrenConsump = () => {
       pemakaian: Number(record.actual_consumption ?? 0),
       prediksi: Number(record.prediction ?? 0),
       target: Number(record.efficiency_target ?? 0),
-      // Mapping Data Biaya (Pastikan API mengirim field ini atau hitung manual)
-      // Asumsi API punya field 'actual_cost' dan 'target_cost'
-      // Jika tidak ada, Anda bisa kalikan dengan tarif per unit di sini
+
       biayaAktual: Number(record.consumption_cost ?? 0),
       biayaTarget: Number(record.efficiency_target_cost ?? 0),
     }));
@@ -156,7 +148,6 @@ export const useTrenConsump = () => {
     }
   }, [typeEnergy]);
 
-  // --- 8a. Insights Logic (Volume/Fisik) ---
   const insights = useMemo(() => {
     if (chartData.length === 0) {
       return {
@@ -219,7 +210,6 @@ export const useTrenConsump = () => {
     };
   }, [chartData, volumeUnit]);
 
-  // --- 8b. Cost Insights Logic (UANG / ANGGARAN) ---
   const costInsights = useMemo(() => {
     if (chartData.length === 0) return null;
 
@@ -231,7 +221,6 @@ export const useTrenConsump = () => {
       totalBiayaTarget += d.biayaTarget;
     });
 
-    // Format Currency Rupiah
     const fmtRupiah = (val: number) =>
       new Intl.NumberFormat("id-ID", {
         style: "currency",
@@ -242,7 +231,6 @@ export const useTrenConsump = () => {
     const selisihBiaya = totalBiayaAktual - totalBiayaTarget;
     const fmtSelisih = fmtRupiah(Math.abs(selisihBiaya));
 
-    // Logic Klasifikasi Budget
     if (totalBiayaTarget === 0) {
       return {
         type: "neutral",
@@ -258,7 +246,7 @@ export const useTrenConsump = () => {
     if (isOverBudget) {
       const percentOver = (percentageCost - 100).toFixed(1);
       return {
-        type: "over_budget", // Flag merah untuk UI
+        type: "over_budget",
         title: "Melebihi Anggaran",
         text: `Biaya operasional bengkak ${fmtSelisih} (${percentOver}%) dari anggaran.`,
         overAmount: selisihBiaya,
@@ -267,7 +255,7 @@ export const useTrenConsump = () => {
     } else {
       const percentSave = (100 - percentageCost).toFixed(1);
       return {
-        type: "under_budget", // Flag hijau untuk UI
+        type: "under_budget",
         title: "Hemat Anggaran",
         text: `Efisiensi biaya sebesar ${fmtSelisih} (${percentSave}%) di bawah anggaran.`,
         savedAmount: Math.abs(selisihBiaya),
@@ -295,8 +283,8 @@ export const useTrenConsump = () => {
     },
     data: {
       chartData,
-      insights, // Insight Volume (Fisik)
-      costInsights, // Insight Biaya (Rupiah) <-- Baru
+      insights,
+      costInsights,
     },
     status: {
       isLoading,

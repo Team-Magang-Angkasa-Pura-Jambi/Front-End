@@ -14,6 +14,7 @@ export const useResourceConsumptionSummary = (year: string, month: string) => {
     queryKey: ["dashboardSummary", year, month],
     queryFn: () => summaryApi(year, month),
     staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false, // Cache 5 menit
   });
 
   const processedStats = useMemo(() => {

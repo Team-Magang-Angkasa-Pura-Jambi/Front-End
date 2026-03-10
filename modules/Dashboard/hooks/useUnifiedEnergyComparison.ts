@@ -53,7 +53,8 @@ export const useUnifiedEnergyComparison = () => {
             queryParams.year,
             queryParams.month
           ),
-        staleTime: 5 * 60 * 1000, // Cache 5 menit
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false, // Cache 5 menit
       },
       {
         queryKey: [
@@ -69,6 +70,7 @@ export const useUnifiedEnergyComparison = () => {
             queryParams.month
           ),
         staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false, // Cache 5 menit
       },
       {
         queryKey: [
@@ -84,6 +86,7 @@ export const useUnifiedEnergyComparison = () => {
             queryParams.month
           ),
         staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false, // Cache 5 menit
       },
     ],
   });

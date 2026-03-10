@@ -189,8 +189,7 @@ export const UnifiedEnergyComparisonChart = () => {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: "#64748b", fontSize: 11 }}
-                    width={50} // Lebarkan sedikit agar label muat
-                    // Gunakan formatCurrencySmart agar angka ribuan/jutaan terbaca ringkas
+                    width={50}
                     tickFormatter={(val) => formatCurrencySmart(val).val}
                   />
 
@@ -201,28 +200,23 @@ export const UnifiedEnergyComparisonChart = () => {
                       border: "none",
                       boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                       fontSize: "12px",
-                      zIndex: 100, // Pastikan tooltip di atas
+                      zIndex: 100,
                     }}
-                    // === PERBAIKAN TOOLTIP FORMATTER ===
                     formatter={(
                       value: number | undefined,
                       name: string | undefined,
                       entry
                     ) => {
                       const val = Number(value) || 0;
-                      // Tentukan Label
-                      const label =
-                        name === "weekdayValue" ? "Hari Kerja" : "Hari Libur";
 
-                      // Tentukan Format Angka
+                      const label =
+                        name === "weekday_cons" ? "Hari Kerja" : "Hari Libur";
+
                       if (isCost) {
-                        // Jika Mode Biaya -> Format Rupiah Lengkap (Rp 1.500.000)
                         return [formatCurrencySmart(val).full, label];
                       } else {
-                        // Jika Mode Volume -> Format Angka + Unit
-                        // Ambil unit dari payload data yang sedang di-hover
                         const unit = entry.payload.unit || "";
-                        // Format angka ribuan Indonesia
+
                         const formattedNumber = val.toLocaleString("id-ID", {
                           maximumFractionDigits: 2,
                         });

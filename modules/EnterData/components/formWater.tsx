@@ -44,7 +44,6 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -158,7 +157,6 @@ export const FormReadingWater = ({
       .map((q) => q.data?.data?.session?.reading_date)
       .join(","),
     form,
-    readingDate,
   ]);
 
   const { mutate, isPending } = useMutation<
@@ -404,7 +402,7 @@ export const FormReadingWater = ({
         </div>
 
         <Button
-          type="button" 
+          type="button"
           variant="outline"
           size="sm"
           className="mt-4"

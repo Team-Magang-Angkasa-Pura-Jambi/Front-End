@@ -42,6 +42,7 @@ export const useModernEfficiency = (
   const { data: metersResponse, isLoading: isLoadingMeters } = useQuery({
     queryKey: ["electricityMeters"],
     queryFn: () => getMetersApi(ENERGY_TYPES.ELECTRICITY),
+    refetchOnWindowFocus: false, // Cache 5 menit
   });
 
   const meters = useMemo(() => metersResponse?.data || [], [metersResponse]);
