@@ -38,6 +38,8 @@ export const useBudgetBurnRateChart = () => {
     queryFn: () => getBudgetBurnRateApi(parseInt(year), parseInt(month)),
 
     placeholderData: (previousData) => previousData,
+        refetchOnWindowFocus: false, // Cache 5 menit
+
   });
 
   const chartData = useMemo(() => apiResponse?.data || [], [apiResponse?.data]);

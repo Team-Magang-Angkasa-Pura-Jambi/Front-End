@@ -9,6 +9,8 @@ export const useMeterEfficiencyRanking = () => {
     queryFn: MeterRankApi,
     staleTime: 1000 * 60 * 5,
     retry: 1,
+        refetchOnWindowFocus: false, // Cache 5 menit
+
   });
 
   const meters = useMemo(() => {

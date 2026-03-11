@@ -8,7 +8,7 @@ import { AxiosError } from "axios";
 
 export const useLogin = () => {
   const router = useRouter();
-  const setToken = useAuthStore((state) => state.setAuth);
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   return useMutation<
     LoginResponseDTO,
@@ -16,18 +16,21 @@ export const useLogin = () => {
     LoginCredentials
   >({
     mutationFn: authService.login,
+
     onSuccess: (response) => {
       const { token, user } = response.data;
 
-      setToken(token, user);
+      setAuth(token, user);
 
       router.push("/");
     },
+
     onError: (error) => {
-      console.log(
-        "Pesan Error Backend:",
-        error.response?.data?.status?.message
-      );
+      const errorMessage =
+        error.response?.data?.status?.message ||
+        "Terjadi kesalahan saat login.";
+
+      console.error("Pesan Error Backend:", errorMessage);
     },
   });
 };

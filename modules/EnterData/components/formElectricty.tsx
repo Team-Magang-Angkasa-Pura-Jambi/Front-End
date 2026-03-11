@@ -171,6 +171,7 @@ export const FormReadingElectric = ({
         queryKey: ["readings", "analysisData", "lastReading"],
       });
       onSuccess?.();
+      onError?.()
     },
     onError: (error) => {
       const message =

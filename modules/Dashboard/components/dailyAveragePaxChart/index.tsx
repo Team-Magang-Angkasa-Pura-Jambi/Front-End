@@ -146,6 +146,7 @@ export const DailyAveragePaxChart = () => {
                     stroke="#f1f5f9"
                   />
                   <XAxis
+                    dataKey="day"
                     axisLine={false}
                     tickLine={false}
                     tick={{
