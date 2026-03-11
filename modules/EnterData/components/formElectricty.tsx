@@ -170,6 +170,7 @@ export const FormReadingElectric = ({
       queryClient.invalidateQueries({
         queryKey: ["readings", "analysisData", "lastReading"],
       });
+      onSuccess?.();
     },
     onError: (error) => {
       const message =
