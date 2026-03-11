@@ -1,13 +1,11 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore";
 
-/* 🌍 Base URL */
 const baseURL =
   process.env.NODE_ENV === "development"
     ? process.env.NEXT_PUBLIC_API_URL_DEVELOPMENT
     : process.env.NEXT_PUBLIC_API_URL_PRODUCTION;
 
-/* 🔌 Axios instance */
 const api = axios.create({
   baseURL,
   headers: {
@@ -16,7 +14,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-/* 🔐 REQUEST INTERCEPTOR */
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().token;
@@ -30,22 +27,29 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-/* 🚨 RESPONSE INTERCEPTOR (TOKEN EXPIRED HANDLER) */
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-    console.log(error);
+    const requestUrl = error.config?.url || "";
 
     if (status === 401) {
-      const logout = useAuthStore.getState().logout;
-      logout();
+      const isApiLogin = requestUrl.includes("/auth/login");
 
-      if (
+      const isFrontendLogin =
         typeof window !== "undefined" &&
-        !window.location.pathname.startsWith("/auth-required")
-      ) {
-        window.location.href = "/auth-required";
+        window.location.pathname.includes("/auth/login");
+
+      if (!isApiLogin && !isFrontendLogin) {
+        const logout = useAuthStore.getState().logout;
+        logout();
+
+        if (
+          typeof window !== "undefined" &&
+          !window.location.pathname.startsWith("/auth-required")
+        ) {
+          window.location.href = "/auth-required";
+        }
       }
     }
 
