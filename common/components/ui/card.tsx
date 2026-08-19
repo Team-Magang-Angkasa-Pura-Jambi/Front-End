@@ -29,15 +29,15 @@ const Card = React.forwardRef<
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-xl">
       {/* A. Pola Dot Grid */}
       {/* Menggunakan warna netral (#a1a1aa) agar masuk di light/dark mode */}
-      <div className="absolute inset-0 h-full w-full bg-[radial-gradient(#a1a1aa_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.2] dark:opacity-[0.15]" />
+      <div className="absolute inset-0 h-full w-full bg-[radial-gradient(#a1a1aa_1px,transparent_1px)] opacity-[0.2] [background-size:20px_20px] dark:opacity-[0.15]" />
 
       {/* B. Ambient Glow (Pojok Kanan Atas) */}
       {/* Dark mode: Glow sedikit lebih terang (opacity 10%) agar terlihat di background gelap */}
-      <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-blue-500/5 blur-3xl transition-all duration-500 group-hover:bg-blue-500/10 dark:bg-blue-500/10 dark:group-hover:bg-blue-500/20" />
+      <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-blue-500/5 blur-3xl transition-all duration-500 group-hover:bg-blue-500/10 dark:bg-blue-500/10 dark:group-hover:bg-blue-500/20" />
 
       {/* C. Aksen Garis Pudar (Bawah ke Atas) */}
       {/* Menyesuaikan gradient fade agar menyatu dengan warna background masing-masing mode */}
-      <div className="absolute right-0 bottom-0 left-0 h-24 bg-gradient-to-t from-white/80 to-transparent dark:from-slate-950/80" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/80 to-transparent dark:from-slate-950/80" />
     </div>
 
     {/* --- KONTEN UTAMA --- */}
@@ -65,7 +65,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-lg leading-none font-semibold tracking-tight",
+      "text-lg font-semibold leading-none tracking-tight",
       "text-slate-900 dark:text-slate-100", // Pastikan judul kontras
       className
     )}

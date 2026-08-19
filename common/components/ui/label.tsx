@@ -15,9 +15,9 @@ const Label = React.forwardRef<
     ref={ref}
     data-slot="label"
     className={cn(
-      "flex items-center gap-2 select-none",
+      "flex select-none items-center gap-2",
 
-      "text-[11px] leading-none font-bold tracking-wider uppercase",
+      "text-[11px] font-bold uppercase leading-none tracking-wider",
 
       "text-muted-foreground",
 

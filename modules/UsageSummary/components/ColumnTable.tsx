@@ -1,234 +1,201 @@
 "use client";
 
-import React from "react";
+import { Badge } from "@/common/components/ui/badge";
+import { Button } from "@/common/components/ui/button";
+import { ApiErrorResponse } from "@/common/types/api";
+import { cn } from "@/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Column, ColumnDef, Row } from "@tanstack/react-table";
+import { AxiosError } from "axios";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 import {
   ArrowUpDown,
+  BrainCircuit,
   Briefcase,
   Calendar,
-  DollarSign,
   Droplets,
   Flame,
   Fuel,
   Home,
+  Loader2,
+  Minus,
   Target,
+  Thermometer,
   TrendingDown,
   TrendingUp,
-  Thermometer,
   Users,
-  BrainCircuit,
+  Wallet,
   Zap,
-  Loader2,
 } from "lucide-react";
-import { Minus } from "lucide-react";
-import { Badge } from "@/common/components/ui/badge";
-import { Button } from "@/common/components/ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import React from "react";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { AxiosError } from "axios";
-import { ApiErrorResponse } from "@/common/types/api";
 import { RecapDataRow } from "../types/recap.type";
-import {
-  runSingleClassificationApi,
-  runSinglePredictionApi,
-} from "../services/recap.service";
 
-const formatCurrency = (amount: unknown): string => {
-  const num = Number(amount);
+import { classifiesApi } from "../services/classify.service";
+import { predictApi } from "../services/predict.service";
 
-  if (amount === null || amount === undefined || isNaN(num)) {
-    return "-";
-  }
-  const formatted = new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(num);
+const idrFormat = new Intl.NumberFormat("id-ID", {
+  style: "currency",
+  currency: "IDR",
+  maximumFractionDigits: 0,
+});
 
-  return formatted.replace(/\s/g, "");
+const numFormat = new Intl.NumberFormat("id-ID", {
+  maximumFractionDigits: 2,
+});
+
+const formatCurrency = (val: unknown): string => {
+  const num = Number(val);
+  if (val == null || isNaN(num)) return "-";
+  return idrFormat.format(num).replace(/\s/g, "");
 };
 
-const formatNumber = (value: unknown): string => {
-  const num = Number(value);
-  if (value === null || value === undefined || isNaN(num)) {
-    return "-";
-  }
-  return new Intl.NumberFormat("id-ID", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(num);
+const formatNumber = (val: unknown): string => {
+  const num = Number(val);
+  if (val == null || isNaN(num)) return "-";
+  return numFormat.format(num);
 };
 
-const SortableHeader = ({
-  column,
-  title,
-}: {
-  column: Column<RecapDataRow, unknown>;
-  title: string;
-}) => (
+const SortableHeader = ({ column, title }: { column: Column<any, any>; title: string }) => (
   <Button
     variant="ghost"
     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    className="h-auto p-0 text-left hover:bg-transparent"
+    className="h-auto p-0 text-left font-bold hover:bg-transparent"
   >
     {title}
-    <ArrowUpDown className="ml-2 h-4 w-4" />
+    <ArrowUpDown className="ml-2 h-3.5 w-3.5 opacity-50" />
   </Button>
 );
 
-const ClassificationBadge = ({
-  classification,
-}: {
-  classification: RecapDataRow["classification"];
-}) => {
-  if (!classification || classification === "UNKNOWN") {
-    return <span className="text-muted-foreground">-</span>;
+const IconLabel = ({ icon: Icon, label }: { icon: React.ElementType; label: React.ReactNode }) => (
+  <div className="flex items-center gap-2">
+    <Icon className="text-muted-foreground h-4 w-4 shrink-0" />
+    <span className="font-medium">{label}</span>
+  </div>
+);
+
+const CLASSIFICATION_MAP = {
+  HEMAT: {
+    badge: "bg-emerald-500 hover:bg-emerald-600 text-white border-transparent",
+    text: "text-emerald-600 dark:text-emerald-500",
+    icon: TrendingDown,
+  },
+  NORMAL: {
+    badge: "bg-slate-100 hover:bg-slate-200 text-slate-800 border-transparent",
+    text: "text-slate-600 dark:text-slate-400",
+    icon: Minus,
+  },
+  BOROS: {
+    badge: "bg-destructive hover:bg-destructive/90 text-white border-transparent",
+    text: "text-red-600 dark:text-red-500",
+    icon: TrendingUp,
+  },
+} as const;
+
+type ClassificationType = keyof typeof CLASSIFICATION_MAP;
+
+const normalizeClassification = (raw: unknown): ClassificationType | null => {
+  if (!raw || typeof raw !== "string") return null;
+  const upper = raw.toUpperCase().trim();
+  if (upper === "UNKNOWN" || upper === "") return null;
+  if (
+    upper.includes("EFISIEN") ||
+    upper.includes("HEMAT") ||
+    upper.includes("LAYANAN TIDAK MAKSIMAL") ||
+    upper.includes("SANGAT EFISIEN")
+  ) {
+    return "HEMAT";
   }
-
-  const colorMap: Record<"HEMAT" | "NORMAL" | "BOROS", string> = {
-    HEMAT: "bg-emerald-500 hover:bg-emerald-600 text-white border-transparent",
-    NORMAL: "",
-    BOROS: "",
-  };
-
-  const variantMap: Record<
-    "HEMAT" | "NORMAL" | "BOROS",
-    "default" | "destructive"
-  > = {
-    HEMAT: "default",
-    NORMAL: "default",
-    BOROS: "destructive",
-  };
-
-  return (
-    <Badge
-      className={cn("w-20 justify-center", colorMap[classification])}
-      variant={variantMap[classification]}
-    >
-      {classification}
-    </Badge>
-  );
+  if (upper === "NORMAL") {
+    return "NORMAL";
+  }
+  if (upper.includes("BOROS") || upper.includes("OVER BUDGET")) {
+    return "BOROS";
+  }
+  return null;
 };
 
-const PredictionCell = ({
+const AiActionCell = ({
   row,
   meterId,
+  actionType,
 }: {
   row: Row<RecapDataRow>;
   meterId: number | null;
+  actionType: "predict" | "classify";
 }) => {
   const queryClient = useQueryClient();
-  const { mutate, isPending } = useMutation<
-    unknown,
-    AxiosError<ApiErrorResponse>,
-    { date: string; meterId: number }
-  >({
-    mutationFn: runSinglePredictionApi,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recapData"] });
-      toast.success("Prediksi berhasil dijalankan.", {
-        description: "Data mungkin memerlukan beberapa saat untuk diperbarui.",
-      });
-    },
-    onError: (error) => {
-      toast.error("Gagal menjalankan prediksi.", {
-        description: error.response?.data?.status?.message || error.message,
-      });
-    },
-  });
+  const isPredict = actionType === "predict";
 
-  const handlePredict = () => {
+  type ActionVariables = {
+    meterId: number;
+    rowData: RecapDataRow;
+  };
+
+  const { mutate, isPending } = useMutation<unknown, AxiosError<ApiErrorResponse>, ActionVariables>(
+    {
+      mutationFn: async ({ meterId, rowData }) => {
+        const date = String(rowData.date).split("T")[0];
+
+        if (isPredict) {
+          return predictApi({
+            date,
+            meterId,
+          });
+        } else {
+          return classifiesApi({
+            meter_id: meterId,
+            summary_id: rowData.id,
+            suhu_rata: rowData.suhu_rata_rata ?? undefined,
+            suhu_max: rowData.suhu_max ?? undefined,
+            pax: rowData.pax ?? undefined,
+            is_hari_kerja: rowData.is_workday === true ? 1 : 0,
+          });
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["recapData"] });
+        toast.success(`${isPredict ? "Prediksi" : "Klasifikasi"} berhasil dijalankan.`, {
+          description: "Data akan segera diperbarui.",
+        });
+      },
+      onError: (error) => {
+        toast.error(`Gagal menjalankan ${isPredict ? "prediksi" : "klasifikasi"}.`, {
+          description: error.response?.data?.status?.message || error.message,
+        });
+      },
+    }
+  );
+
+  const handleAction = () => {
     if (!meterId) {
       toast.warning(
-        "Pilih satu meter terlebih dahulu untuk melakukan prediksi."
+        `Pilih satu meter terlebih dahulu untuk melakukan ${isPredict ? "prediksi" : "klasifikasi"}.`
       );
       return;
     }
-    const date = new Date(row.original.date).toISOString().split("T")[0];
-    mutate({ date, meterId });
+    mutate({ meterId, rowData: row.original });
   };
 
   return (
     <Button
       variant="outline"
       size="sm"
-      onClick={handlePredict}
+      onClick={handleAction}
       disabled={isPending || !meterId}
-      className="w-full"
+      className="w-full shadow-sm"
     >
-      <span className="mr-2 flex h-4 w-4 items-center justify-center">
-        {isPending ? (
-          <Loader2 key="loading" className="animate-spin" />
-        ) : (
-          <BrainCircuit className="mr-2 h-4 w-4" />
-        )}
-      </span>
-      Prediksi
+      {isPending ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <BrainCircuit className="mr-2 h-4 w-4" />
+      )}
+      {isPredict ? "Prediksi" : "Klasifikasi"}
     </Button>
   );
 };
 
-const ClassificationActionCell = ({
-  row,
-  meterId,
-}: {
-  row: Row<RecapDataRow>;
-  meterId: number | null;
-}) => {
-  const queryClient = useQueryClient();
-  const { mutate, isPending } = useMutation<
-    unknown,
-    AxiosError<ApiErrorResponse>,
-    { date: string; meterId: number }
-  >({
-    mutationFn: runSingleClassificationApi,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recapData"] });
-      toast.success("Klasifikasi berhasil dijalankan.", {
-        description: "Data mungkin memerlukan beberapa saat untuk diperbarui.",
-      });
-    },
-    onError: (error) => {
-      toast.error("Gagal menjalankan klasifikasi.", {
-        description: error.response?.data?.status?.message || error.message,
-      });
-    },
-  });
-
-  const handleClassify = () => {
-    if (!meterId) {
-      toast.warning(
-        "Pilih satu meter terlebih dahulu untuk melakukan klasifikasi."
-      );
-      return;
-    }
-    const date = new Date(row.original.date).toISOString().split("T")[0];
-    mutate({ date, meterId });
-  };
-
-  return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleClassify}
-      disabled={isPending || !meterId}
-      className="w-full"
-    >
-      <span className="mr-2 flex h-4 w-4 items-center justify-center">
-        {isPending ? (
-          <Loader2 key="loading" className="animate-spin" />
-        ) : (
-          <BrainCircuit className="mr-2 h-4 w-4" />
-        )}
-      </span>
-      Klasifikasi
-    </Button>
-  );
-};
 export const createColumns = (
   dataType: "Electricity" | "Water" | "Fuel",
   meterId: number | null
@@ -236,178 +203,148 @@ export const createColumns = (
   const baseColumns: ColumnDef<RecapDataRow>[] = [
     {
       accessorKey: "date",
-      header: ({ column }) => (
-        <SortableHeader column={column} title="Tanggal" />
-      ),
+      header: ({ column }) => <SortableHeader column={column} title="Tanggal" />,
       cell: ({ row }) => {
-        const dateValue = row.getValue("date") as string | Date;
+        const dateValue = row.getValue("date") as string;
         if (!dateValue) return "-";
-
-        const dateOnlyString = new Date(dateValue).toISOString().split("T")[0];
-
+        const cleanDate = dateValue.split("T")[0];
         return (
-          <div className="flex items-center gap-2">
-            <Calendar className="text-muted-foreground h-4 w-4" />
-            <span>
-              {format(new Date(`${dateOnlyString}T00:00:00`), "dd MMM yyyy", {
-                locale: id,
-              })}
-            </span>
-          </div>
+          <IconLabel
+            icon={Calendar}
+            label={format(new Date(`${cleanDate}T00:00:00`), "dd MMM yyyy", { locale: id })}
+          />
         );
       },
     },
   ];
 
-  let specificColumns: ColumnDef<RecapDataRow>[] = [];
-
-  switch (dataType) {
-    case "Electricity":
-      specificColumns = [
+  const isElectricity = dataType === "Electricity";
+  const dynamicColumns: ColumnDef<RecapDataRow>[] = isElectricity
+    ? [
         {
           accessorKey: "target",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="Target (kWh)" />
-          ),
+          header: ({ column }) => <SortableHeader column={column} title="Target (kWh)" />,
           cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-              <Target className="text-muted-foreground h-4 w-4" />
-              <span>{formatNumber(row.getValue("target"))}</span>
-            </div>
+            <IconLabel icon={Target} label={formatNumber(row.getValue("target"))} />
           ),
         },
         {
-          accessorKey: "wbp",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="WBP (kWh)" />
-          ),
+          accessorKey: "pemakaian wbp",
+          header: ({ column }) => <SortableHeader column={column} title="WBP (kWh)" />,
           cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-              <Zap className="text-muted-foreground h-4 w-4" />
-              <span>{formatNumber(row.getValue("wbp"))}</span>
-            </div>
+            <IconLabel icon={Zap} label={formatNumber(row.getValue("pemakaian wbp"))} />
           ),
         },
         {
-          accessorKey: "lwbp",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="LWBP (kWh)" />
-          ),
+          accessorKey: "pemakaian lwbp",
+          header: ({ column }) => <SortableHeader column={column} title="LWBP (kWh)" />,
           cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-              <Zap className="text-muted-foreground h-4 w-4" />
-              <span>{formatNumber(row.getValue("lwbp"))}</span>
-            </div>
+            <IconLabel icon={Zap} label={formatNumber(row.getValue("pemakaian lwbp"))} />
           ),
         },
         {
           accessorKey: "consumption",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="Total Konsumsi (kWh)" />
+          header: ({ column }) => <SortableHeader column={column} title="Total Konsumsi (kWh)" />,
+          cell: ({ row }) => (
+            <span className="font-semibold">{formatNumber(row.getValue("consumption"))}</span>
           ),
-          cell: ({ row }) => formatNumber(row.getValue("consumption")),
         },
-
         {
           accessorKey: "pax",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="Pax" />
-          ),
-          cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-              <Users className="text-muted-foreground h-4 w-4" />
-              <span>{formatNumber(row.getValue("pax"))}</span>
-            </div>
-          ),
+          header: ({ column }) => <SortableHeader column={column} title="Pax" />,
+          cell: ({ row }) => <IconLabel icon={Users} label={formatNumber(row.getValue("pax"))} />,
         },
         {
-          accessorKey: "avg_temp",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="Suhu (°C)" />
-          ),
+          id: "suhu",
+          header: ({ column }) => <SortableHeader column={column} title="Suhu (°C)" />,
           cell: ({ row }) => {
-            const avgTemp = row.getValue("avg_temp") as number;
-            const maxTemp = row.original.max_temp || 0;
-            const isHotMaxTemp = maxTemp > 30;
-            const isHotAvgTemp = avgTemp > 30;
+            const rawAvg = row.original.suhu_rata_rata;
+            const rawMax = row.original.suhu_max;
+
+            if (
+              (rawAvg === null || rawAvg === undefined) &&
+              (rawMax === null || rawMax === undefined)
+            ) {
+              return <span className="text-muted-foreground">-</span>;
+            }
+
+            const avgTemp = rawAvg !== null && rawAvg !== undefined ? Number(rawAvg) : null;
+            const maxTemp = rawMax !== null && rawMax !== undefined ? Number(rawMax) : null;
 
             return (
-              <div className="flex flex-col gap-2">
-                <Badge variant={isHotAvgTemp ? "destructive" : "secondary"}>
-                  <div className="flex items-center gap-1.5">
-                    {isHotAvgTemp ? (
-                      <Flame className="h-4 w-4" />
+              <div className="flex flex-col gap-1.5">
+                {avgTemp !== null && (
+                  <Badge
+                    variant={avgTemp > 30 ? "destructive" : "secondary"}
+                    className="w-fit text-[10px]"
+                    title="Suhu Rata-rata"
+                  >
+                    {avgTemp > 30 ? (
+                      <Flame className="mr-1 h-3 w-3" />
                     ) : (
-                      <Thermometer className="h-4 w-4" />
+                      <Thermometer className="mr-1 h-3 w-3" />
                     )}
-                    <span>{formatNumber(avgTemp)}</span>
-                  </div>
-                </Badge>
-                <Badge variant={isHotMaxTemp ? "destructive" : "secondary"}>
-                  <div className="flex items-center gap-1.5">
-                    {isHotMaxTemp ? (
-                      <Flame className="h-4 w-4" />
+                    Avg: {formatNumber(avgTemp)}
+                  </Badge>
+                )}
+
+                {maxTemp !== null && (
+                  <Badge
+                    variant={maxTemp > 30 ? "destructive" : "secondary"}
+                    className="w-fit text-[10px]"
+                    title="Suhu Maksimal"
+                  >
+                    {maxTemp > 30 ? (
+                      <Flame className="mr-1 h-3 w-3" />
                     ) : (
-                      <Thermometer className="h-4 w-4" />
+                      <Thermometer className="mr-1 h-3 w-3" />
                     )}
-                    <span>{formatNumber(maxTemp)}</span>
-                  </div>
-                </Badge>
+                    Max: {formatNumber(maxTemp)}
+                  </Badge>
+                )}
               </div>
             );
           },
         },
         {
-          accessorKey: "is_workday",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="Hari Kerja" />
-          ),
-          cell: ({ row }) => (
-            <div className="flex items-center gap-2">
-              {row.getValue("is_workday") ? (
-                <Briefcase className="text-muted-foreground h-4 w-4" />
-              ) : (
-                <Home className="text-muted-foreground h-4 w-4" />
-              )}
-              <span>{row.getValue("is_workday") ? "Hari Kerja" : "Libur"}</span>
-            </div>
-          ),
+          accessorKey: "hari_kerja",
+          header: ({ column }) => <SortableHeader column={column} title="Hari Kerja" />,
+          cell: ({ row }) => {
+            const isWorkday = row.getValue("hari_kerja") === "Kerja";
+            return (
+              <IconLabel
+                icon={isWorkday ? Briefcase : Home}
+                label={isWorkday ? "Hari Kerja" : "Libur"}
+              />
+            );
+          },
         },
         {
           accessorKey: "classification",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="Nilai Deviasi" />
-          ),
+          header: ({ column }) => <SortableHeader column={column} title="Nilai Deviasi" />,
           cell: ({ row }) => {
-            const classification = row.original.classification;
+            const rawClass = row.original.classification;
+            const type = normalizeClassification(rawClass);
             const score = row.original.confidence_score;
 
-            if (!classification || classification === "UNKNOWN") {
-              return <ClassificationActionCell row={row} meterId={meterId} />;
+            // Tampilkan tombol action JIKA klasifikasi belum ada atau UNKNOWN
+            if (!type || !CLASSIFICATION_MAP[type]) {
+              return <AiActionCell row={row} meterId={meterId} actionType="classify" />;
             }
 
-            const styleMap = {
-              HEMAT: "text-green-600 dark:text-green-500",
-              NORMAL: "text-slate-600 dark:text-slate-400",
-              BOROS: "text-red-600 dark:text-red-500",
-            } as const;
-
-            const iconMap = {
-              HEMAT: <TrendingDown className="h-3.5 w-3.5" />,
-              NORMAL: <Minus className="h-3.5 w-3.5" />,
-              BOROS: <TrendingUp className="h-3.5 w-3.5" />,
-            };
+            const config = CLASSIFICATION_MAP[type];
+            const TrendIcon = config.icon;
 
             return (
-              <div className="flex flex-col items-center justify-center gap-1.5 text-center">
-                <ClassificationBadge classification={classification} />
+              <div className="flex flex-col items-center justify-center gap-2">
+                <Badge className={cn("w-20 justify-center shadow-sm", config.badge)}>
+                  {rawClass} {/* Tetap pertahankan format aslinya saat ditampilkan */}
+                </Badge>
                 <div
-                  className={`flex items-center gap-1 font-mono text-xs ${styleMap[classification]}`}
+                  className={cn("flex items-center gap-1 font-mono text-xs font-bold", config.text)}
                 >
-                  {iconMap[classification]}
-                  <span className="font-semibold">{`${score?.toFixed(
-                    1
-                  )}%`}</span>
+                  <TrendIcon className="h-3.5 w-3.5" />
+                  {score != null ? `${score.toFixed(1)}%` : "-"}
                 </div>
               </div>
             );
@@ -415,79 +352,59 @@ export const createColumns = (
         },
         {
           accessorKey: "predict",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="Prediksi" />
-          ),
+          header: ({ column }) => <SortableHeader column={column} title="Prediksi" />,
           cell: ({ row }) => {
-            const predictionValue = row.original.prediction;
-            return predictionValue != null ? (
-              <div className="text-center font-mono">
-                {formatNumber(predictionValue)}
-              </div>
-            ) : (
-              <PredictionCell row={row} meterId={meterId} />
-            );
+            const pred = row.original.prediction;
+
+            // PERBAIKAN 3: Validasi ketat untuk tipe data null dan undefined
+            if (pred !== null && pred !== undefined) {
+              return (
+                <div className="text-primary text-center font-mono font-semibold">
+                  {formatNumber(pred)}
+                </div>
+              );
+            }
+
+            // Jika kosong, tampilkan action button
+            return <AiActionCell row={row} meterId={meterId} actionType="predict" />;
           },
         },
-      ];
-      break;
-
-    case "Water":
-    case "Fuel":
-      specificColumns = [
+      ]
+    : [
         {
           accessorKey: "target",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="Target" />
+          header: ({ column }) => <SortableHeader column={column} title="Target" />,
+          cell: ({ row }) => (
+            <IconLabel
+              icon={Target}
+              label={`${formatNumber(row.getValue("target"))} ${dataType === "Water" ? "m³" : "L"}`}
+            />
           ),
-          cell: ({ row }) => {
-            const amount = row.getValue("target");
-            const unit = dataType === "Water" ? "m³" : "L";
-            return (
-              <div className="flex items-center gap-2">
-                <Target className="text-muted-foreground h-4 w-4" />
-                <span>
-                  {formatNumber(amount)} {unit}
-                </span>
-              </div>
-            );
-          },
         },
         {
           accessorKey: "consumption",
-          header: ({ column }) => (
-            <SortableHeader column={column} title="Pemakaian" />
+          header: ({ column }) => <SortableHeader column={column} title="Pemakaian" />,
+          cell: ({ row }) => (
+            <IconLabel
+              icon={dataType === "Water" ? Droplets : Fuel}
+              label={`${formatNumber(row.getValue("consumption"))} ${dataType === "Water" ? "m³" : "L"}`}
+            />
           ),
-          cell: ({ row }) => {
-            const amount = row.getValue("consumption");
-            const unit = dataType === "Water" ? "m³" : "L";
-            const Icon = dataType === "Water" ? Droplets : Fuel;
-            return (
-              <div className="flex items-center gap-2">
-                <Icon className="text-muted-foreground h-4 w-4" />
-                <span>
-                  {formatNumber(amount)} {unit}
-                </span>
-              </div>
-            );
-          },
         },
       ];
-      break;
-  }
 
   const commonEndColumns: ColumnDef<RecapDataRow>[] = [
     {
       accessorKey: "cost",
       header: ({ column }) => <SortableHeader column={column} title="Biaya" />,
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 font-medium">
-          <DollarSign className="text-muted-foreground h-4 w-4" />
-          <span>{formatCurrency(row.getValue("cost"))}</span>
+        <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
+          <Wallet className="h-4 w-4 shrink-0 text-emerald-600" />
+          {formatCurrency(row.getValue("cost"))}
         </div>
       ),
     },
   ];
 
-  return [...baseColumns, ...specificColumns, ...commonEndColumns];
+  return [...baseColumns, ...dynamicColumns, ...commonEndColumns];
 };

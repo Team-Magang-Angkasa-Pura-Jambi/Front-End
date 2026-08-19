@@ -1,34 +1,58 @@
-import axios from "axios";
 import { useAuthStore } from "@/stores/authStore";
+import axios from "axios";
 
-// Pilih baseURL berdasarkan lingkungan (development atau production)
-const baseURL =
+  const baseURL =
   process.env.NODE_ENV === "development"
     ? process.env.NEXT_PUBLIC_API_URL_DEVELOPMENT
     : process.env.NEXT_PUBLIC_API_URL_PRODUCTION;
 
-// Buat instance Axios
-const api = axios.create({
-  baseURL: baseURL,
+  const api = axios.create({
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
-// Buat Interceptor (penjegal) untuk request
-api.interceptors.request.use(
+  api.interceptors.request.use(
   (config) => {
-    // Ambil token dari Zustand store
     const token = useAuthStore.getState().token;
 
-    // Jika token ada, tambahkan ke header Authorization
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
   },
+  (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  (response) => response,
   (error) => {
+    const status = error.response?.status;
+    const requestUrl = error.config?.url;
+
+    if (status === 401) {
+      const isLoginRequest = requestUrl?.includes("/login") || requestUrl?.includes("/auth");
+
+      if (!isLoginRequest) {
+        const logout = useAuthStore.getState().logout;
+        logout();
+
+        if (typeof window !== "undefined") {
+          const currentPath = window.location.pathname;
+
+          const isCurrentlyOnAuthPage = currentPath.startsWith("/auth") || currentPath === "/login";
+          const isAlreadyOnAuthRequired = currentPath.startsWith("/auth-required");
+
+          if (!isCurrentlyOnAuthPage && !isAlreadyOnAuthRequired) {
+            window.location.href = "/auth-required";
+          }
+        }
+      }
+    }
+
     return Promise.reject(error);
   }
 );

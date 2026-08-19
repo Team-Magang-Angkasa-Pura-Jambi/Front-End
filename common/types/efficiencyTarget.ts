@@ -1,19 +1,19 @@
-import { EnergyType } from "./energy";
-import { MeterType } from "./meters";
-
-export type EfficiencyTarget = {
+export interface EfficiencyTarget {
   target_id: number;
+  meter_id: number;
   kpi_name: string;
-  target_value: number;
-  target_cost: number;
   period_start: string;
   period_end: string;
-  meter_id: number;
-
-  meter?: MeterType;
-  energy_type?: EnergyType;
-  set_by_user?: {
-    id: number;
-    username: string;
+  target_percentage: number; // API mengirim string "0.05"
+  baseline_value: number; // API mengirim string "150000.5"
+  created_at: string;
+  created_by?: string | null;
+  // Relasi opsional (tergantung include backend)
+  meter?: {
+    meter_id: number;
+    meter_code: string;
+    energy_type?: {
+      unit_of_measurement: string;
+    };
   };
-};
+}

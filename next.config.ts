@@ -14,6 +14,12 @@ const nextConfig = {
         hostname: "ui-avatars.com",
         pathname: "/**",
       },
+      {
+        // Koma (,) seharusnya TIDAK ADA di sini setelah "https"
+        protocol: "https",
+        hostname: "utfs.io",
+        pathname: "/**",
+      },
     ],
   },
 };

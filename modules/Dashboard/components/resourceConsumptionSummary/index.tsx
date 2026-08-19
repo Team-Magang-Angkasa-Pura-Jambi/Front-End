@@ -1,11 +1,12 @@
 "use client";
+
+import { ErrorFetchData } from "@/common/components/ErrorFetchData";
 import { motion, Variants } from "framer-motion";
+import { useState } from "react";
+import { useResourceConsumptionSummary } from "../../hooks/useResourceConsumptionSummary";
+import { StatCard } from "./components/StatCard";
 import { StatCardSkeleton } from "./components/statCardSkeleton";
 import { TemperatureStatCard } from "./components/TemperatureStatCard";
-import { useState } from "react";
-import { StatCard } from "./components/StatCard";
-import { ErrorFetchData } from "@/common/components/ErrorFetchData";
-import { useResourceConsumptionSummary } from "../../hooks/useResourceConsumptionSummary";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -29,17 +30,19 @@ const itemVariants: Variants = {
 };
 
 export const ResourceConsumptionSummary = () => {
-  const [selectedDate] = useState(() => {
+  const [selectedDate] = useState<Date>(() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     return yesterday;
   });
 
-  const year = String(selectedDate.getFullYear());
-  const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+  const year = selectedDate.getFullYear();
+  const month = selectedDate.getMonth() + 1;
 
-  const { error, isError, isLoading, processedStats, cardData } =
-    useResourceConsumptionSummary(year, month);
+  const { error, isError, isLoading, processedStats, cardData } = useResourceConsumptionSummary(
+    year,
+    month
+  );
 
   if (isError) {
     return <ErrorFetchData message={error?.message} />;
@@ -49,28 +52,44 @@ export const ResourceConsumptionSummary = () => {
     <motion.div
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5"
       variants={containerVariants}
+      initial="hidden"
+      animate="visible"
     >
-      {isLoading
-        ? Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)
-        : processedStats.map((stat) => (
+      {isLoading ? (
+        Array.from({ length: 5 }).map((_, i) => (
+          <motion.div key={`skeleton-${i}`} variants={itemVariants}>
+            <StatCardSkeleton />
+          </motion.div>
+        ))
+      ) : (
+        <>
+          {processedStats.map((stat) => (
             <motion.div
               key={stat.label}
               variants={itemVariants}
               whileHover={{ y: -5, transition: { duration: 0.2 } }}
               layout
+              initial="hidden"
+              animate="visible"
             >
               <StatCard {...stat} />
             </motion.div>
           ))}
-      {!isLoading && cardData?.data && (
-        <motion.div
-          variants={itemVariants}
-          whileHover={{ y: -5 }}
-          layout
-          className="sm:col-span-2 lg:col-span-1"
-        >
-          <TemperatureStatCard data={cardData.data} />
-        </motion.div>
+
+          {cardData?.data?.overview_metrics.weather &&
+            (cardData?.data?.overview_metrics as any)?.card_config?.weather?.show !== false && (
+            <motion.div
+              variants={itemVariants}
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              layout
+              className="sm:col-span-2 lg:col-span-1"
+              initial="hidden"
+              animate="visible"
+            >
+              <TemperatureStatCard data={cardData.data} />
+            </motion.div>
+          )}
+        </>
       )}
     </motion.div>
   );

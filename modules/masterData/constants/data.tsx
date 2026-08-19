@@ -1,24 +1,18 @@
 import {
   Building,
+  Calculator,
   DollarSign,
   DollarSignIcon,
   Droplets,
-  Landmark,
-  Percent,
-  Ruler,
-  Tags,
   TrendingUp,
   Zap,
 } from "lucide-react";
 
-import { MeterManagement } from "../components/MeterManagement";
-import { TypeEnergyManagement } from "../components/TypeEnergyManagement";
-import { ReadingTypeManagement } from "../components/ReadingTypeManagements";
-import { CategoryManagement } from "../components/CategoryManagement";
-import { TariffGroupManagement } from "../components/TariffGroupManagement";
-import { SchemePriceManagement } from "../components/SchemePriceManagement";
-import { TaxManagement } from "../components/TaxManagement";
-import { TargetEfficiencyManagement } from "../components/targetEfficienyManagement";
+import { CalculationTemplateManagement } from "../view/CalculationTemplateManagement";
+import { UnifiedEnergyManagement } from "../view/EnergyManagement";
+import { MeterManagement } from "../view/MeterManagement";
+import { SchemePriceManagement } from "../view/SchemePriceManagement";
+import { TargetEfficiencyManagement } from "../view/targetEfficienyManagement";
 
 export const masterDataGroups = [
   {
@@ -36,20 +30,20 @@ export const masterDataGroups = [
         key: "energy-types",
         title: "Jenis Energi",
         icon: Droplets,
-        component: <TypeEnergyManagement />,
+        component: <UnifiedEnergyManagement />,
       },
       {
-        key: "reading-types",
-        title: "Jenis Pembacaan",
-        icon: Ruler,
-        component: <ReadingTypeManagement />,
+        key: "calculation-formulas",
+        title: "Kalkulasi & Rumus",
+        icon: Calculator,
+        component: <CalculationTemplateManagement />,
       },
-      {
-        key: "category",
-        title: "Kategori",
-        icon: Tags,
-        component: <CategoryManagement />,
-      },
+      // {
+      //   key: "entities",
+      //   title: "Entitas & Lokasi",
+      //   icon: MapPin,
+      //   component: <EntityManagement />,
+      // },
     ],
   },
   {
@@ -58,22 +52,10 @@ export const masterDataGroups = [
     groupIcon: DollarSign,
     items: [
       {
-        key: "tariff-groups",
-        title: "Golongan Tarif",
-        icon: Landmark,
-        component: <TariffGroupManagement />,
-      },
-      {
         key: "scheme-price",
         title: "Skema Harga",
         icon: DollarSignIcon,
         component: <SchemePriceManagement />,
-      },
-      {
-        key: "taxes",
-        title: "Pajak",
-        icon: Percent,
-        component: <TaxManagement />,
       },
       {
         key: "efficiency-targets",

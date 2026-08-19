@@ -1,3 +1,3 @@
-import { Page as PageEnterData } from "./components/page";
+import { DataEntryPage } from "./components/page";
 
-export default PageEnterData;
+export default DataEntryPage;

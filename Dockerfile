@@ -1,23 +1,18 @@
-# Gunakan image Node.js versi Long-Term Support (LTS) yang cocok
+# Gunakan image node alpine yang kecil
 FROM node:18-alpine
 
-# Set direktori kerja di dalam container
 WORKDIR /app
 
-# Salin package.json dan package-lock.json (atau yarn.lock) terlebih dahulu
-# Ini memanfaatkan cache layer Docker, sehingga 'npm install' tidak selalu dijalankan
-# jika dependensi tidak berubah.
+# Copy package json
 COPY package*.json ./
 
-# Install semua dependensi, termasuk devDependencies
-RUN npm install
+# Install dependencies saja (tanpa build)
+RUN npm install --legacy-peer-deps
 
-# Salin sisa kode aplikasi. Perubahan selanjutnya akan di-handle oleh volume.
+# Copy sisa codingan
 COPY . .
 
-# Expose port default untuk server pengembangan Next.js/React
 EXPOSE 3000
 
-# Perintah untuk menjalankan server pengembangan
-# Pastikan script 'dev' ada di package.json Anda
+# Jalankan mode dev (langsung jalan tanpa nunggu build)
 CMD ["npm", "run", "dev"]

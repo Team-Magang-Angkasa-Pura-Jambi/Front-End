@@ -71,7 +71,7 @@ export function MultiSelect({
       onKeyDown={handleKeyDown}
       className="overflow-visible bg-transparent"
     >
-      <div className="group border-input ring-offset-background focus-within:ring-ring rounded-md border px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-offset-2">
+      <div className="border-input ring-offset-background focus-within:ring-ring group rounded-md border px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-offset-2">
         <div className="flex flex-wrap gap-1">
           {selected.map((optionValue) => {
             const option = options.find((o) => o.value === optionValue);

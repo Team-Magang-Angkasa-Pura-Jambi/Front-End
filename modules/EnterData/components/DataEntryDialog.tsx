@@ -12,31 +12,32 @@ export interface DialogDetails {
   form: React.ReactNode;
 }
 
-export interface EntryDataProps {
+export interface DataEntryDialogProps {
   isOpen: boolean;
   onClose: () => void;
   details: DialogDetails | null;
-
-  onSubmit: (e: React.FormEvent) => void;
-
-  isSubmitting: boolean;
 }
 
-export const DataEntryDialog = ({
-  isOpen,
-  onClose,
-  details,
-}: EntryDataProps) => {
+export const DataEntryDialog = ({ isOpen, onClose, details }: DataEntryDialogProps) => {
   if (!details) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{details.title}</DialogTitle>
-          <DialogDescription>{details.description}</DialogDescription>
+      <DialogContent maxWidth="2xl" className="max-h-[92vh] overflow-hidden p-6 gap-3">
+        {/* Header */}
+        <DialogHeader className="pb-3 border-b border-border/50">
+          <DialogTitle className="text-xl font-black tracking-tight">
+            {details.title}
+          </DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground">
+            {details.description}
+          </DialogDescription>
         </DialogHeader>
-        {details.form}
+
+        {/* Kontainer Form */}
+        <div className="w-full">
+          {details.form}
+        </div>
       </DialogContent>
     </Dialog>
   );

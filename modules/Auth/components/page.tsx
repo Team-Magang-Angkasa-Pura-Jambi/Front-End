@@ -10,7 +10,7 @@ export const Page = () => {
     <div className="flex min-h-screen items-center justify-center bg-[#d6d3d1] p-4">
       <div className="relatve relative flex w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-2xl md:h-full md:min-h-[650px] md:flex-row">
         <svg
-          className="absolute top-[280px] -left-[410px] z-10 rotate-[125deg]"
+          className="absolute -left-[410px] top-[280px] z-10 rotate-[125deg]"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 1440 320"
         >

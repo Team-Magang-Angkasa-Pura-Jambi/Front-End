@@ -1,17 +1,13 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/common/components/ui/card";
-import { Loader2, AlertTriangle, BookLock } from "lucide-react";
+import { AlertTriangle, BookLock, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,155 +18,219 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/common/components/ui/alert-dialog";
-import { toast } from "sonner";
+import { Button } from "@/common/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 
-import { createColumns } from "./ColumnTable";
-import { RecapHeader } from "./Header";
-import { HistoryFilters } from "../types";
-import { ReadingForm } from "./readingForm";
+import { ApiErrorResponse } from "@/common/types/api";
 import {
   deleteReadingSessionApi,
   getReadingSessionsApi,
   ReadingHistory,
-} from "../services/reading.service";
-import { deletePaxApi } from "../services/pax.service";
+} from "@/modules/EnterData/services";
+import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 
-import { DataTable } from "./Table";
-import { PaxDailyTable, DailyPaxData } from "./PaxDailyTable";
-import { PaxEditForm } from "./PaxEditForm";
-import { AxiosError } from "axios";
-import { ApiErrorResponse } from "@/common/types/api";
+import { deletePaxApi, getPaxApi } from "../services/pax.service";
+import { HistoryFilters } from "../types";
+
+import { createColumns } from "./ColumnTable";
+import { RecapHeader } from "./Header";
 import { ManagementDialog } from "./ManagementDialog";
-import { ENERGY_TYPES, EnergyTypeName } from "@/common/types/energy";
+import { DailyPaxData, PaxDailyTable } from "./PaxDailyTable";
+import { PaxEditForm } from "./PaxEditForm";
+import { ReadingForm } from "./readingForm";
+import { DataTable } from "./Table";
 
 export const Page = () => {
   const queryClient = useQueryClient();
+
   const now = new Date();
-
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const firstDayOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  const firstDayOfNextMonth = new Date(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    1
-  );
+  const STORAGE_KEY = "history_filters_state";
 
-  const [filters, setFilters] = useState<HistoryFilters>({
-    type: "Electricity",
-    date: {
-      from: firstDayOfMonth,
-      to: firstDayOfNextMonth,
-    },
-    sortBy: "reading_date",
-    sortOrder: "desc",
-    meterId: undefined,
+  const [filters, setFilters] = useState<
+    Omit<HistoryFilters, "meter_id"> & {
+      meter_id?: number;
+      type?: string;
+      energy_type_id?: number;
+    }
+  >(() => {
+    if (typeof window === "undefined") {
+      return {
+        date: { from: firstDayOfMonth, to: firstDayOfNextMonth },
+        meter_id: undefined,
+        type: "Energy",
+      };
+    }
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          meter_id: parsed.meter_id ? Number(parsed.meter_id) : undefined,
+          type: parsed.type || "Energy",
+          energy_type_id: parsed.energy_type_id ? Number(parsed.energy_type_id) : undefined,
+          date: {
+            from: parsed.date?.from ? new Date(parsed.date.from) : firstDayOfMonth,
+            to: parsed.date?.to ? new Date(parsed.date.to) : firstDayOfNextMonth,
+          },
+        };
+      } catch (e) {
+        console.error("Gagal membaca filter dari storage", e);
+      }
+    }
+
+    return {
+      date: { from: firstDayOfMonth, to: firstDayOfNextMonth },
+      meter_id: undefined,
+      type: "Energy",
+    };
   });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ReadingHistory | null>(null);
   const [itemToDelete, setItemToDelete] = useState<ReadingHistory | null>(null);
 
   const [isPaxModalOpen, setIsPaxModalOpen] = useState(false);
-  const [editingPaxData, setEditingPaxData] = useState<DailyPaxData | null>(
-    null
-  );
-
+  const [editingPaxData, setEditingPaxData] = useState<DailyPaxData | null>(null);
   const [paxToDelete, setPaxToDelete] = useState<DailyPaxData | null>(null);
 
-  const { type, date, sortBy, sortOrder, meterId } = filters;
+  const { date, meter_id, type: activeType } = filters;
+  const isPaxTab = activeType === "Pax";
 
+  const { data: typesEnergies } = useQuery({
+    queryKey: ["typesEnergies"],
+    queryFn: () => getEnergyTypesApi(),
+  });
+
+  useEffect(() => {
+    if (typesEnergies?.data && typesEnergies.data.length > 0 && !filters.meter_id && !isPaxTab) {
+      const firstEnergy = typesEnergies.data[0];
+      setFilters((prev) => ({
+        ...prev,
+        energy_type_id: prev.energy_type_id || firstEnergy.energy_type_id,
+      }));
+    }
+  }, [typesEnergies, filters.meter_id, isPaxTab]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+    }
+  }, [filters]);
+
+  // QUERY READING HISTORY (Aktif saat Tab Energy)
   const {
-    data: queryData,
-    isLoading,
-    isFetching,
-    isError,
+    data: readingQueryData,
+    isLoading: isLoadingReading,
+    isFetching: isFetchingReading,
+    isError: isErrorReading,
   } = useQuery({
-    queryKey: ["readingHistory", type, date, meterId, sortBy, sortOrder],
+    queryKey: ["readingHistory", date?.from?.toISOString(), date?.to?.toISOString(), meter_id],
     queryFn: () =>
       getReadingSessionsApi({
-        energyTypeName: type as unknown as EnergyTypeName,
-        startDate: date?.from
-          ? new Date(
-              Date.UTC(
-                date.from.getFullYear(),
-                date.from.getMonth(),
-                date.from.getDate()
-              )
-            ).toISOString()
-          : new Date().toISOString(),
-
-        // Perbaikan di sini: Cek keberadaan date.to
-        endDate:
-          date?.from && date?.to
-            ? new Date(
-                Date.UTC(
-                  date.to.getFullYear(),
-                  date.to.getMonth(),
-                  date.to.getDate()
-                )
-              ).toISOString()
-            : new Date().toISOString(),
-
-        meterId,
-        sortBy,
-        sortOrder,
+        from_date: date?.from ? format(date?.from, "yyyy-MM-dd") : "",
+        to_date: date?.to ? format(date?.to, "yyyy-MM-dd") : "",
+        meter_id: meter_id as number,
       }),
-    enabled: !!date?.from && !!date?.to,
+    enabled: !isPaxTab && !!date?.from && !!date?.to && !!meter_id,
     refetchOnWindowFocus: false,
   });
 
-  const historyData = useMemo<ReadingHistory[]>(() => {
-    const data = queryData?.data;
+  // QUERY PAX (Aktif saat Tab Pax)
+  const {
+    data: paxQueryData,
+    isLoading: isLoadingPax,
+    isError: isErrorPax,
+  } = useQuery({
+    queryKey: ["paxHistory", date?.from?.toISOString(), date?.to?.toISOString()],
+    queryFn: () =>
+      getPaxApi({
+        start_date: date?.from ? format(date?.from, "yyyy-MM-dd") : "",
+        end_date: date?.to ? format(date?.to, "yyyy-MM-dd") : "",
+      }),
+    enabled: isPaxTab && !!date?.from && !!date?.to,
+    refetchOnWindowFocus: false,
+  });
+
+  const historyData = useMemo(() => {
+    const data = readingQueryData?.data;
     return Array.isArray(data) ? data : [];
-  }, [queryData?.data]);
+  }, [readingQueryData?.data]);
+
+  // PERBAIKAN: Penanganan ekstraksi response data Pax yang fleksibel & aman
+  const paxData = useMemo(() => {
+    if (!paxQueryData) return [];
+
+    // Kasus 1: paxQueryData.data.pax_data (Standar response API wrapper)
+    const nestedPaxData = (paxQueryData as { data?: { pax_data?: DailyPaxData[] } })?.data
+      ?.pax_data;
+    if (Array.isArray(nestedPaxData)) return nestedPaxData;
+
+    // Kasus 2: paxQueryData.pax_data
+    const directPaxData = (paxQueryData as { pax_data?: DailyPaxData[] })?.pax_data;
+    if (Array.isArray(directPaxData)) return directPaxData;
+
+    // Kasus 3: paxQueryData.data
+    const rawData = (paxQueryData as { data?: DailyPaxData[] })?.data;
+    if (Array.isArray(rawData)) return rawData;
+
+    return [];
+  }, [paxQueryData]);
+
+  const columns = useMemo(() => {
+    const handleOpenEdit = (item: ReadingHistory) => {
+      setEditingItem(item);
+      setIsModalOpen(true);
+    };
+
+    const handleDelete = (item: ReadingHistory) => {
+      setItemToDelete(item);
+    };
+
+    return createColumns(handleOpenEdit, handleDelete);
+  }, []);
 
   const { mutate: deleteSession, isPending: isDeleting } = useMutation<
     unknown,
     AxiosError<ApiErrorResponse>,
     number
   >({
-    mutationFn: (item) => deleteReadingSessionApi(item),
+    mutationFn: (id) => deleteReadingSessionApi(id),
     onSuccess: () => {
       toast.success("Data pencatatan berhasil dihapus!");
       queryClient.invalidateQueries({ queryKey: ["readingHistory"] });
       setItemToDelete(null);
     },
     onError: (error) => {
-      toast.error(
-        `Gagal menghapus: ${
-          error.response?.data?.status?.message || "Terjadi kesalahan"
-        }`
-      );
+      toast.error(error.response?.data?.status?.message || "Gagal menghapus data.");
     },
   });
 
+  // PERBAIKAN: Memasang pemicu hapus Pax dengan pax_id
   const { mutate: deletePax, isPending: isDeletingPax } = useMutation<
     unknown,
     AxiosError<ApiErrorResponse>,
     DailyPaxData
   >({
-    mutationFn: (item: DailyPaxData) => deletePaxApi(item.paxId),
+    mutationFn: (item) => deletePaxApi(item.pax_id),
     onSuccess: () => {
       toast.success("Data Pax berhasil dihapus!");
-      queryClient.invalidateQueries({ queryKey: ["readingHistory"] });
+      queryClient.invalidateQueries({ queryKey: ["paxHistory"] });
       setPaxToDelete(null);
     },
     onError: (error) => {
-      toast.error(
-        `Gagal menghapus Pax: ${
-          error.response?.data?.status?.message || "Terjadi kesalahan"
-        }`
-      );
+      toast.error(error.response?.data?.status?.message || "Gagal menghapus data Pax.");
     },
   });
-
-  const handleOpenEdit = useCallback((item: ReadingHistory) => {
-    setEditingItem(item);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleDelete = useCallback((item: ReadingHistory) => {
-    setItemToDelete(item);
-  }, []);
 
   const handleOpenPaxEdit = useCallback((paxData: DailyPaxData) => {
     setEditingPaxData(paxData);
@@ -181,52 +241,58 @@ export const Page = () => {
     setPaxToDelete(paxData);
   }, []);
 
-  const columns = useMemo(
-    () => createColumns(handleOpenEdit, handleDelete),
-    [handleOpenEdit, handleDelete]
-  );
-
   const renderContent = () => {
-    if (isLoading) {
+    const activeIsLoading = isPaxTab ? isLoadingPax : isLoadingReading;
+    const activeIsError = isPaxTab ? isErrorPax : isErrorReading;
+    const activeDataLength = isPaxTab ? paxData.length : historyData.length;
+
+    if (activeIsLoading) {
       return (
-        <Card className="flex h-96 flex-col items-center justify-center text-center">
+        <Card className="flex h-96 flex-col items-center justify-center border-dashed text-center">
           <CardContent className="p-6">
-            <Loader2 className="text-muted-foreground mx-auto h-12 w-12 animate-spin" />
-            <h3 className="mt-4 text-lg font-semibold">Memuat Riwayat...</h3>
+            <Loader2 className="text-primary mx-auto h-12 w-12 animate-spin" />
+            <h3 className="mt-4 text-lg font-semibold">Memuat Data...</h3>
             <p className="text-muted-foreground mt-2 text-sm">
-              Mohon tunggu sebentar.
+              Mengambil riwayat {isPaxTab ? "penumpang" : "pencatatan"} terbaru.
             </p>
           </CardContent>
         </Card>
       );
     }
 
-    if (isError) {
+    if (activeIsError) {
       return (
-        <Card className="bg-destructive/10 border-destructive flex h-96 flex-col items-center justify-center text-center">
+        <Card className="bg-destructive/5 border-destructive/20 flex h-96 flex-col items-center justify-center text-center">
           <CardContent className="p-6">
             <AlertTriangle className="text-destructive mx-auto h-12 w-12" />
-            <h3 className="text-destructive mt-4 text-lg font-semibold">
-              Gagal Mengambil Data
-            </h3>
+            <h3 className="text-destructive mt-4 text-lg font-bold">Gagal Mengambil Data</h3>
             <p className="text-muted-foreground mt-2 text-sm">
-              Terjadi kesalahan pada server. Coba muat ulang halaman.
+              Terjadi kesalahan koneksi. Silakan coba lagi.
             </p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() =>
+                queryClient.invalidateQueries({
+                  queryKey: [isPaxTab ? "paxHistory" : "readingHistory"],
+                })
+              }
+            >
+              Coba Lagi
+            </Button>
           </CardContent>
         </Card>
       );
     }
 
-    if (historyData?.length === 0) {
+    if (activeDataLength === 0) {
       return (
-        <Card className="flex h-96 flex-col items-center justify-center text-center">
+        <Card className="bg-muted/20 flex h-96 flex-col items-center justify-center border-dashed text-center">
           <CardContent className="p-6">
-            <BookLock className="text-muted-foreground mx-auto h-12 w-12" />
-            <h3 className="mt-4 text-lg font-semibold">
-              Riwayat Tidak Ditemukan
-            </h3>
-            <p className="text-muted-foreground mt-2 text-sm">
-              Tidak ada data pencatatan yang cocok dengan filter yang Anda
+            <BookLock className="text-muted-foreground/50 mx-auto h-12 w-12" />
+            <h3 className="mt-4 text-lg font-semibold">Data Tidak Ditemukan</h3>
+            <p className="text-muted-foreground mx-auto mt-2 max-w-xs text-sm">
+              Tidak ada riwayat {isPaxTab ? "penumpang" : "pencatatan"} untuk periode yang Anda
               pilih.
             </p>
           </CardContent>
@@ -234,99 +300,86 @@ export const Page = () => {
       );
     }
 
+    if (isPaxTab) {
+      return <PaxDailyTable data={paxData} onEdit={handleOpenPaxEdit} onDelete={handleDeletePax} />;
+    }
+
     return (
-      <div className="grid grid-cols-1 gap-6 space-y-6 md:grid-cols-2">
-        {filters.type === ENERGY_TYPES.ELECTRICITY && (
-          <PaxDailyTable
-            data={historyData}
-            onEdit={handleOpenPaxEdit}
-            onDelete={handleDeletePax}
-          />
-        )}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Tabel Riwayat Pencatatan</CardTitle>
-                <CardDescription>
-                  Menampilkan detail data pencatatan meteran sesuai filter.
-                </CardDescription>
-              </div>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Tabel Riwayat Pencatatan</CardTitle>
+              <CardDescription>Menampilkan detail angka stand meteran.</CardDescription>
             </div>
-          </CardHeader>
-          <CardContent>
-            <DataTable
-              columns={columns}
-              data={historyData}
-              isLoading={isFetching}
-            />
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <DataTable columns={columns} data={historyData} isLoading={isFetchingReading} />
+        </CardContent>
+      </Card>
     );
   };
 
   return (
     <div className="space-y-6">
-      <RecapHeader filters={filters} setFilters={setFilters} />
+      <RecapHeader
+        filters={filters}
+        setFilters={setFilters}
+        typesEnergies={typesEnergies?.data || []}
+      />
+
       {renderContent()}
 
       <ManagementDialog
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={
-          editingItem ? "Edit Input Data" : `Tambah Catatan ${filters.type}`
-        }
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingItem(null);
+        }}
+        title="Edit Data Meteran"
       >
-        <ReadingForm
-          initialData={editingItem}
-          onSuccess={() => setIsModalOpen(false)}
-        />
+        <ReadingForm initialData={editingItem} onSuccess={() => setIsModalOpen(false)} />
       </ManagementDialog>
 
       {editingPaxData && (
         <ManagementDialog
           isOpen={isPaxModalOpen}
-          onClose={() => setIsPaxModalOpen(false)}
+          onClose={() => {
+            setIsPaxModalOpen(false);
+            setEditingPaxData(null);
+          }}
           title="Update Jumlah Pax Harian"
         >
-          <PaxEditForm
-            initialData={editingPaxData}
-            onSuccess={() => setIsPaxModalOpen(false)}
-          />
+          <PaxEditForm initialData={editingPaxData} onSuccess={() => setIsPaxModalOpen(false)} />
         </ManagementDialog>
       )}
 
-      <AlertDialog
-        open={!!itemToDelete}
-        onOpenChange={() => setItemToDelete(null)}
-      >
+      <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Apakah Anda Yakin?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Data Pencatatan?</AlertDialogTitle>
             <AlertDialogDescription>
-              Aksi ini tidak dapat dibatalkan. Ini akan menghapus data
-              pencatatan untuk meteran{" "}
-              <span className="font-bold">
-                {itemToDelete?.meter.meter_code}
+              Anda akan menghapus data meteran{" "}
+              <span className="text-foreground font-bold">
+                {itemToDelete?.meter?.meter_code || `ID ${itemToDelete?.meter_id}`}
               </span>{" "}
-              pada tanggal{" "}
-              <span className="font-bold">
+              tanggal{" "}
+              <span className="text-foreground font-bold">
                 {itemToDelete
-                  ? format(new Date(itemToDelete.reading_date), "dd MMM yyyy", {
-                      locale: id,
-                    })
-                  : ""}
+                  ? format(new Date(itemToDelete.reading_date), "dd MMM yyyy", { locale: id })
+                  : "-"}
               </span>
               .
+              <br />
+              Data yang dihapus tidak dapat dikembalikan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() =>
-                itemToDelete && deleteSession(itemToDelete.session_id)
-              }
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => itemToDelete && deleteSession(itemToDelete.session_id)}
               disabled={isDeleting}
             >
               {isDeleting ? "Menghapus..." : "Ya, Hapus"}
@@ -335,22 +388,16 @@ export const Page = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
-        open={!!paxToDelete}
-        onOpenChange={() => setPaxToDelete(null)}
-      >
+      <AlertDialog open={!!paxToDelete} onOpenChange={(open) => !open && setPaxToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Apakah Anda Yakin?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Data Pax?</AlertDialogTitle>
             <AlertDialogDescription>
-              Aksi ini tidak dapat dibatalkan. Ini akan menghapus data Pax pada
-              tanggal{" "}
-              <span className="font-bold">
+              Menghapus data jumlah penumpang tanggal{" "}
+              <span className="text-foreground font-bold">
                 {paxToDelete
-                  ? format(new Date(paxToDelete?.date), "dd MMMM yyyy", {
-                      locale: id,
-                    })
-                  : ""}
+                  ? format(new Date(paxToDelete.date), "dd MMM yyyy", { locale: id })
+                  : "-"}
               </span>
               .
             </AlertDialogDescription>
@@ -358,7 +405,8 @@ export const Page = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deletePax(paxToDelete!)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => paxToDelete && deletePax(paxToDelete)}
               disabled={isDeletingPax}
             >
               {isDeletingPax ? "Menghapus..." : "Ya, Hapus"}

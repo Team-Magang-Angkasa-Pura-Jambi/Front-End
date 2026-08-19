@@ -1,10 +1,10 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { Droplets, Fuel, Plane, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { Plane, Droplets, Zap, Fuel } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getTodaySummaryApi } from "@/services/analysis.service";
+import { getTodaySummaryApi } from "../service/visualizations.service";
 
 export const useRealtimeNotification = () => {
   const shownNotifications = useRef(new Set<string>());
@@ -12,55 +12,50 @@ export const useRealtimeNotification = () => {
   const { data: todaySummaryResponse } = useQuery({
     queryKey: ["new-data-notifications"],
     queryFn: getTodaySummaryApi,
-
     refetchInterval: 60000,
     refetchOnWindowFocus: true,
-    staleTime: 0,
   });
 
   useEffect(() => {
-    const responseData = todaySummaryResponse?.data.sumaries;
-    const metaData = todaySummaryResponse?.data.meta;
+    if (!todaySummaryResponse?.data) return;
+    const { sumaries, meta } = todaySummaryResponse.data;
 
-    if (!responseData) return;
+    sumaries?.forEach((notif) => {
+      const id = `summary-${notif.summary_id}-${notif.total_consumption}`;
 
-    if (responseData.length > 0) {
-      responseData.forEach((notif) => {
-        const notificationId = `summary-${notif.summary_id}`;
+      if (!shownNotifications.current.has(id)) {
+        const isFuel = notif.type_name === "Fuel";
+        const isWater = notif.type_name === "Water";
 
-        if (!shownNotifications.current.has(notificationId)) {
-          const consumption = notif.total_consumption;
-
-          let Icon = Zap;
-          if (notif.type_name === "Water") Icon = Droplets;
-          if (notif.type_name === "Fuel") Icon = Fuel;
-
-          toast(
-            `+${consumption.toLocaleString("id-ID")} ${notif.unit_of_measurement} Baru`,
-            {
-              description: `Meteran ${notif.meter_code} (${notif.type_name}) baru saja diperbarui.`,
-              icon: <Icon className="text-primary h-5 w-5" />,
-              duration: 5000,
-            }
-          );
-
-          shownNotifications.current.add(notificationId);
-        }
-      });
-    }
-
-    if (metaData && metaData.pax !== null) {
-      const paxNotificationId = `pax-${metaData.date}-${metaData.pax}`;
-
-      if (!shownNotifications.current.has(paxNotificationId)) {
         toast(
-          `Update Penumpang: ${metaData.pax.toLocaleString("id-ID")} Orang`,
+          `Update ${notif.type_name}: ${notif.total_consumption.toLocaleString("id-ID")} ${notif.unit_of_measurement}`,
           {
-            description: `Total data penumpang tercatat untuk hari ini.`,
-            icon: <Plane className="h-5 w-5 text-sky-500" />,
+            description: `Meteran ${notif.meter_code} aktif.`,
+            icon: isFuel ? (
+              <Fuel className="text-orange-500" />
+            ) : isWater ? (
+              <Droplets className="text-blue-500" />
+            ) : (
+              <Zap className="text-yellow-500" />
+            ),
+            className: isFuel ? "border-orange-200 bg-orange-50" : "",
           }
         );
-        shownNotifications.current.add(paxNotificationId);
+
+        shownNotifications.current.add(id);
+      }
+    });
+
+    if (meta && meta.pax !== null) {
+      const id = `pax-${meta.date}-${meta.pax}`;
+
+      if (!shownNotifications.current.has(id)) {
+        toast(`Arus Penumpang: ${meta.pax.toLocaleString("id-ID")} Pax`, {
+          description: "Data volume penumpang baru saja diperbarui.",
+          icon: <Plane className="text-sky-500" />,
+        });
+
+        shownNotifications.current.add(id);
       }
     }
   }, [todaySummaryResponse]);

@@ -1,39 +1,45 @@
-import { MonthlyBudgetAllocation } from "@/modules/budget/services/analytics.service";
-import { EnergyType } from "./energy";
-
-export interface AnnualBudgetAllocation {
-  allocation_id: number;
-  weight: number;
-  budget_id: number;
-  meter_id: number;
-  meter: {
-    meter_id: number;
-    meter_code: string;
-  };
-  allocatedBudget: number;
-  totalRealization: number;
-  remainingBudget: number;
-  realizationPercentage: number;
+export interface EnergyType {
+  energy_type_id: number;
+  name: string;
+  unit_standard: string;
 }
 
+/**
+ * Interface Base Budget (Digunakan untuk List/Daftar)
+ */
 export interface AnnualBudget {
   budget_id: number;
-  period_start: string;
-  period_end: string;
-  total_budget: number | null;
-  efficiency_tag: number | null;
-  energy_type: EnergyType | null;
-  parent_budget_id?: number | null;
-  allocations: AnnualBudgetAllocation[];
-  totalRealization: number;
-  remainingBudget: number;
-  realizationPercentage: number;
-  monthlyAllocation: MonthlyBudgetAllocation[];
-  createdAt: string;
-  updatedAt: string;
+  fiscal_year: number;
+  energy_type_id: number;
+  name: string;
+  total_amount: string; // Prisma Decimal dikirim sebagai string di JSON
+  efficiency_target_percentage: string | null; // Prisma Decimal dikirim sebagai string
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by: number | null;
+  updated_by: number | null;
+
+  // Relations
+  energy_type: EnergyType;
 }
 
-export type MonthlyUsageDetails = {
-  month: number;
-  allocatedBudget: number;
-};
+/**
+ * Interface Detail Budget (Response untuk getById)
+ */
+export interface AnnualBudgetDetail extends AnnualBudget {
+  creator?: {
+    username: string;
+  };
+  updater?: {
+    username: string;
+  };
+}
+
+/**
+ * Interface Sisa Budget (Response untuk showRemaining)
+ */
+export interface AnnualBudgetRemaining extends AnnualBudget {
+  total_realization: number;
+  remaining_budget: number;
+}

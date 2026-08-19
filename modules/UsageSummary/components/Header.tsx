@@ -1,34 +1,38 @@
 "use client";
 
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import { cn } from "@/lib/utils";
+import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import {
-  CalendarIcon,
-  FileDown,
-  RotateCw,
-  Zap,
-  Droplets,
-  Fuel,
-} from "lucide-react";
-import { ColumnDef } from "@tanstack/react-table";
-import { cn } from "@/lib/utils";
+import { CalendarIcon, Droplets, FileDown, Fuel, RotateCw, Zap } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-// UI Components
 import { Button } from "@/common/components/ui/button";
 import { Calendar } from "@/common/components/ui/calendar";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/common/components/ui/card";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/common/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/common/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/common/components/ui/dropdown-menu";
+import { Input } from "@/common/components/ui/input";
+import { Label } from "@/common/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/common/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -36,32 +40,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/common/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/common/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/common/components/ui/dialog";
-import { Input } from "@/common/components/ui/input";
-import { Label } from "@/common/components/ui/label";
 import { toast } from "sonner";
 
-// Services & Utils
-import { exportToExcel, exportToPdf } from "@/lib/exportUtils";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getMetersApi } from "@/modules/masterData/services/meter.service";
-import { companyLogoBase64 } from "@/lib/logoBase64";
-import { ConsumpFilter, RecapDataRow, RecapSummary } from "../types/recap.type";
-import { recalculateRecapApi } from "../services/recap.service";
 import { EnergyTypeName } from "@/common/types/energy";
+import { exportToExcel, exportToPdf } from "@/lib/exportUtils";
+import { companyLogoBase64 } from "@/lib/logoBase64";
+import { recalculateApi } from "@/modules/EnterData/services";
+import { getMetersApi } from "@/modules/masterData/services/meter.service";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ConsumpFilter, RecapDataRow, RecapSummary } from "../types/recap.type";
 
 interface RecapHeaderProps {
   filters: ConsumpFilter;
@@ -82,53 +69,75 @@ export const RecapHeader = ({
 }: RecapHeaderProps) => {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const ENERGY_CONFIG = {
-    Electricity: {
-      label: "Listrik",
-      icon: <Zap className="h-4 w-4" />,
-      color: "text-amber-500",
-      active: "bg-amber-500 text-white",
-    },
-    Water: {
-      label: "Air",
-      icon: <Droplets className="h-4 w-4" />,
-      color: "text-blue-500",
-      active: "bg-blue-500 text-white",
-    },
-    Fuel: {
-      label: "BBM",
-      icon: <Fuel className="h-4 w-4" />,
-      color: "text-orange-600",
-      active: "bg-orange-600 text-white",
-    },
-  };
+  const queryClient = useQueryClient();
+  const ENERGY_CONFIG = useMemo(
+    () => ({
+      Electricity: {
+        id: 1,
+        label: "Listrik",
+        icon: <Zap className="h-4 w-4" />,
+        color: "text-amber-500",
+        active: "bg-amber-500 text-white",
+      },
+      Water: {
+        id: 2,
+        label: "Air",
+        icon: <Droplets className="h-4 w-4" />,
+        color: "text-blue-500",
+        active: "bg-blue-500 text-white",
+      },
+      Fuel: {
+        id: 3,
+        label: "BBM",
+        icon: <Fuel className="h-4 w-4" />,
+        color: "text-orange-600",
+        active: "bg-orange-600 text-white",
+      },
+    }),
+    []
+  );
+
+  const activeEnergyId = ENERGY_CONFIG[filters.type as keyof typeof ENERGY_CONFIG].id;
 
   const { data: metersResponse } = useQuery({
-    queryKey: ["meters", filters.type],
-    queryFn: () => getMetersApi(filters.type),
+    queryKey: ["meters", activeEnergyId],
+    queryFn: () => getMetersApi(Number(activeEnergyId)),
     refetchOnWindowFocus: false,
   });
 
+  const handleFilterChange = useCallback(
+    <K extends keyof ConsumpFilter>(key: K, value: ConsumpFilter[K]) => {
+      setFilters((prev) => {
+        const next = { ...prev, [key]: value };
+
+        if (key === "type") next.meterId = undefined;
+        return next;
+      });
+    },
+    [setFilters]
+  );
+
+  useEffect(() => {
+    const meters = metersResponse?.data?.meter;
+    if (meters && meters.length > 0 && !filters.meterId) {
+      handleFilterChange("meterId", meters[0].meter_id);
+    }
+  }, [metersResponse, filters.meterId, handleFilterChange]);
+
   const activeMeterLabel = useMemo(() => {
-    if (!filters.meterId) return "Semua Meteran";
-    const meter = metersResponse?.data?.find(
-      (m) => m.meter_id === filters.meterId
-    );
-    return meter ? meter.meter_code : "Meteran";
+    const meter = metersResponse?.data?.meter.find((m) => m.meter_id === filters.meterId);
+    return meter ? meter.meter_code : "Memuat Meteran...";
   }, [filters.meterId, metersResponse]);
 
   const subtitleText = useMemo(() => {
     const { from, to } = filters.date || {};
     const dateStr =
-      from && to
-        ? `${format(from, "d MMM yyyy")} - ${format(to, "d MMM yyyy")}`
-        : "Semua Periode";
+      from && to ? `${format(from, "d MMM yyyy")} - ${format(to, "d MMM yyyy")}` : "Semua Periode";
     return `Kategori: ${ENERGY_CONFIG[filters.type as keyof typeof ENERGY_CONFIG].label} | Meter: ${activeMeterLabel} | ${dateStr}`;
   }, [filters.date, filters.type, ENERGY_CONFIG, activeMeterLabel]);
 
   const [pdfOptions, setPdfOptions] = useState({
-    title: `Laporan Rekapitulasi ${filters.type}`,
+    title: `Laporan Rekapitulasi`,
     subtitle: subtitleText,
     headerColor: "#2F5597",
   });
@@ -141,28 +150,24 @@ export const RecapHeader = ({
     }));
   }, [subtitleText, filters.type]);
 
-  const handleFilterChange = useCallback(
-    <K extends keyof ConsumpFilter>(key: K, value: ConsumpFilter[K]) => {
-      setFilters((prev) => {
-        const next = { ...prev, [key]: value };
-        if (key === "type") next.meterId = undefined;
-        return next;
-      });
-    },
-    [setFilters]
-  );
-
   const { mutate: recalculate, isPending: isRecalculating } = useMutation({
     mutationFn: () => {
-      if (!filters.date?.from || !filters.date?.to)
-        throw new Error("Pilih rentang tanggal.");
-      return recalculateRecapApi({
-        startDate: format(filters.date.from, "yyyy-MM-dd"),
-        endDate: format(filters.date.to, "yyyy-MM-dd"),
-        meterId: filters.meterId,
+      if (!filters.date?.from || !filters.date?.to || !filters.meterId)
+        throw new Error("Lengkapi Filter");
+      return recalculateApi({
+        start_date: format(filters.date.from, "yyyy-MM-dd"),
+        to_date: format(filters.date.to, "yyyy-MM-dd"),
+        meter_id: filters.meterId,
       });
     },
-    onSuccess: () => toast.success("Data sedang dihitung ulang..."),
+    onSuccess: () => {
+      toast.success("Kalkulasi ulang berhasil, menyegarkan data...");
+
+      queryClient.invalidateQueries({
+        queryKey: ["recapData"],
+      });
+    },
+
     onError: (err) => toast.error(err.message || "Gagal hitung ulang"),
   });
 
@@ -173,7 +178,7 @@ export const RecapHeader = ({
       ...columns
         .filter((col) => "accessorKey" in col)
         .map((col) => {
-          const c = col;
+          const c = col as any;
           return {
             header: typeof c.header === "string" ? c.header : c.accessorKey,
             dataKey: c.accessorKey as keyof RecapDataRow,
@@ -183,8 +188,7 @@ export const RecapHeader = ({
 
     const enrichedData = dataToExport.map((item) => ({
       ...item,
-      energy_type:
-        ENERGY_CONFIG[filters.type as keyof typeof ENERGY_CONFIG].label,
+      energy_type: ENERGY_CONFIG[filters.type as keyof typeof ENERGY_CONFIG].label,
       meter_name: item.meter?.meter_code || activeMeterLabel,
     }));
 
@@ -200,14 +204,7 @@ export const RecapHeader = ({
         companyLogoBase64
       );
     } else {
-      exportToPdf(
-        exportColumns,
-        enrichedData,
-        pdfOptions,
-        fileName,
-        summary,
-        companyLogoBase64
-      );
+      exportToPdf(exportColumns, enrichedData, pdfOptions, fileName, summary, companyLogoBase64);
       setIsPdfModalOpen(false);
     }
   };
@@ -218,9 +215,7 @@ export const RecapHeader = ({
         <CardHeader className="pb-4">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
-              <CardTitle className="text-xl font-bold">
-                Rekap Data Konsumsi
-              </CardTitle>
+              <CardTitle className="text-xl font-bold">Rekap Data Konsumsi</CardTitle>
               <CardDescription>
                 Kelola dan ekspor laporan penggunaan energi operasional.
               </CardDescription>
@@ -232,12 +227,7 @@ export const RecapHeader = ({
                 onClick={() => recalculate()}
                 disabled={isRecalculating || isFetching}
               >
-                <RotateCw
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    isRecalculating && "animate-spin"
-                  )}
-                />
+                <RotateCw className={cn("mr-2 h-4 w-4", isRecalculating && "animate-spin")} />
                 Sinkron Data
               </Button>
               <DropdownMenu>
@@ -265,22 +255,17 @@ export const RecapHeader = ({
 
         <CardContent>
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end">
-            {/* TIPE ENERGI SELECTOR */}
             <div className="space-y-2">
               <Label className="text-muted-foreground text-[10px] font-bold uppercase">
                 Jenis Energi
               </Label>
               <div className="bg-muted border-border/50 flex w-fit rounded-xl border p-1">
-                {(
-                  Object.keys(ENERGY_CONFIG) as (keyof typeof ENERGY_CONFIG)[]
-                ).map((key) => {
+                {(Object.keys(ENERGY_CONFIG) as (keyof typeof ENERGY_CONFIG)[]).map((key) => {
                   const isActive = filters.type === key;
                   return (
                     <button
                       key={key}
-                      onClick={() =>
-                        handleFilterChange("type", key as EnergyTypeName)
-                      }
+                      onClick={() => handleFilterChange("type", key as EnergyTypeName)}
                       className={cn(
                         "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all",
                         isActive
@@ -295,26 +280,19 @@ export const RecapHeader = ({
               </div>
             </div>
 
-            {/* METER SELECTOR */}
             <div className="space-y-2">
               <Label className="text-muted-foreground text-[10px] font-bold uppercase">
                 Lokasi Meteran
               </Label>
               <Select
-                value={filters.meterId ? String(filters.meterId) : "all"}
-                onValueChange={(val) =>
-                  handleFilterChange(
-                    "meterId",
-                    val === "all" ? undefined : Number(val)
-                  )
-                }
+                value={filters.meterId ? String(filters.meterId) : ""}
+                onValueChange={(val) => handleFilterChange("meterId", Number(val))}
               >
                 <SelectTrigger className="bg-background border-border/60 h-10 w-[200px] rounded-xl">
-                  <SelectValue placeholder="Pilih Meteran" />
+                  <SelectValue placeholder="Memuat Meteran..." />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
-                  <SelectItem value="all">Semua Lokasi</SelectItem>
-                  {metersResponse?.data?.map((m) => (
+                  {metersResponse?.data?.meter.map((m) => (
                     <SelectItem key={m.meter_id} value={String(m.meter_id)}>
                       {m.meter_code}
                     </SelectItem>
@@ -323,7 +301,6 @@ export const RecapHeader = ({
               </Select>
             </div>
 
-            {/* DATE RANGE */}
             <div className="space-y-2">
               <Label className="text-muted-foreground text-[10px] font-bold uppercase">
                 Periode Waktu
@@ -360,23 +337,18 @@ export const RecapHeader = ({
         </CardContent>
       </Card>
 
-      {/* PDF CUSTOMIZATION DIALOG */}
       <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
         <DialogContent className="rounded-2xl">
           <DialogHeader>
             <DialogTitle>Kustomisasi Laporan PDF</DialogTitle>
-            <DialogDescription>
-              Sesuaikan tampilan dokumen sebelum diunduh.
-            </DialogDescription>
+            <DialogDescription>Sesuaikan tampilan dokumen sebelum diunduh.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label>Judul Laporan</Label>
               <Input
                 value={pdfOptions.title}
-                onChange={(e) =>
-                  setPdfOptions((p) => ({ ...p, title: e.target.value }))
-                }
+                onChange={(e) => setPdfOptions((p) => ({ ...p, title: e.target.value }))}
               />
             </div>
             <div className="space-y-2">

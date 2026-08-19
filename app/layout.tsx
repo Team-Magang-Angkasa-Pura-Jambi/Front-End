@@ -1,15 +1,16 @@
-import "./globals.css";
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import { QueryProvider } from "@/providers/QueryProvider";
 import { Toaster } from "@/common/components/ui/sonner";
-import { SocketProvider } from "@/providers/SocketProvider";
 import { cn } from "@/lib/utils";
+import { QueryProvider } from "@/providers/QueryProvider";
+import { SocketProvider } from "@/providers/SocketProvider";
+import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
+import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Konfigurasi Font Plus Jakarta Sans
+const fontJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
+  variable: "--font-jakarta",
 });
 
 const geistMono = Geist_Mono({
@@ -31,14 +32,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          geistSans.variable,
+          fontJakarta.variable,
           geistMono.variable,
-          "min-h-screen antialiased",
-
+          "min-h-screen font-sans antialiased", // Menambahkan font-sans agar langsung aktif
           "bg-background text-foreground",
-
           "selection:bg-primary/20 selection:text-primary",
-
           "[&::-webkit-scrollbar]:w-2",
           "[&::-webkit-scrollbar-track]:bg-transparent",
           "[&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700",

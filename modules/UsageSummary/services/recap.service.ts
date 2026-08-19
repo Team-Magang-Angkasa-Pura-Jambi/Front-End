@@ -1,15 +1,8 @@
 import api from "@/lib/api";
-import {
-  RecapApiResponse,
-  RecapQueryParams,
-  RecapRecalculatePayload,
-  RecapSingleClassificationPayload,
-} from "../types/recap.type";
+import { RecapApiResponse, RecapQueryParams, RecapRecalculatePayload } from "../types/recap.type";
 
-export const getRecapDataApi = async (
-  params: RecapQueryParams
-): Promise<RecapApiResponse> => {
-  const { data } = await api.get("/recap", {
+export const getRecapDataApi = async (params: RecapQueryParams): Promise<RecapApiResponse> => {
+  const { data } = await api.get("/daily-summaries/recap", {
     params: {
       energyType: params.type,
       startDate: params.startDate,
@@ -19,23 +12,6 @@ export const getRecapDataApi = async (
     },
   });
   return data;
-};
-
-export const runSingleClassificationApi = async (
-  payload: RecapSingleClassificationPayload
-) => {
-  const { data } = await api.post(
-    "/analytics/run-single-classification",
-    payload
-  );
-  return data;
-};
-export const runSinglePredictionApi = async (payload: {
-  date: string;
-  meterId: number;
-}) => {
-  const response = await api.post("/analytics/run-single-prediction", payload);
-  return response.data;
 };
 
 export const recalculateRecapApi = async (payload: RecapRecalculatePayload) => {

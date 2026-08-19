@@ -58,7 +58,7 @@ export const NotificationActions = ({
         />
         <label
           htmlFor="select-all"
-          className="text-muted-foreground cursor-pointer text-xs font-medium tracking-wider uppercase select-none"
+          className="text-muted-foreground cursor-pointer select-none text-xs font-medium uppercase tracking-wider"
         >
           Select All
         </label>

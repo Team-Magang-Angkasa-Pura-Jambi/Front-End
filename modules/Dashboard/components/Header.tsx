@@ -1,18 +1,27 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import { useAuthStore } from "@/stores/authStore";
-import { NotificationPopover } from "./NotificationPopover";
 import { ThemeToggle } from "@/common/components/ui/ThemeToggle";
 import { Card } from "@/common/components/ui/card"; // Pastikan path ini benar
 import { Skeleton } from "@/common/components/ui/skeleton"; // Opsional: untuk loading state
+import { getUserApi } from "@/modules/profile/services/users.service";
+import { useAuthStore } from "@/stores/authStore";
+import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
+import { NotificationPopover } from "./NotificationPopover";
+import { useEffect, useState } from "react";
 
 export const Header = () => {
   const { user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [dateString, setDateString] = useState("");
   const [greeting, setGreeting] = useState("");
+
+  const { data: response } = useQuery({
+    queryKey: ["userProfile", user?.id],
+    queryFn: () => getUserApi(Number(user?.id)),
+    enabled: !!user,
+  });
+  const profile = response?.data;
 
   // Handle Hydration & Date Logic
   useEffect(() => {
@@ -39,17 +48,17 @@ export const Header = () => {
   if (!mounted) return <Skeleton className="h-24 w-full rounded-xl" />;
 
   return (
-    <Card className="/50 /50 mb-6 w-full border-slate-200 p-4 shadow-sm backdrop-blur-sm">
-      <div className="flex items-center justify-between">
+    <Card className="mb-6 w-full border-slate-200 bg-white/70 p-4 shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/70">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Left Side: User Profile */}
         <div className="flex items-center gap-4">
           <div className="relative h-12 w-12 overflow-hidden rounded-full ring-2 ring-slate-100 dark:ring-slate-800">
             <Image
               width={50}
               height={50}
-              src="https://assets.aceternity.com/manu.png"
+              src={profile?.image_url || "https://assets.aceternity.com/manu.png"}
               alt="User Avatar"
-              className="h-10 w-10 rounded-full"
+              className="h-12 w-12 rounded-full object-cover"
             />
           </div>
 
@@ -57,15 +66,12 @@ export const Header = () => {
             <h1 className="text-lg leading-tight font-bold text-slate-900 dark:text-slate-100">
               {greeting}, {user?.username || "Guest"}! 👋
             </h1>
-            <p className="text-muted-foreground text-xs font-medium">
-              {dateString}
-            </p>
+            <p className="text-muted-foreground text-xs font-medium">{dateString}</p>
           </div>
         </div>
 
         {/* Right Side: Actions */}
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className="bg-background dark:bg-background mx-2 hidden h-8 w-[1px] md:block"></div>
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <NotificationPopover />
           <ThemeToggle />
         </div>

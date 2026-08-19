@@ -2,15 +2,11 @@ import { EnergyTypeName } from "@/common/types/energy";
 import { DateRange } from "react-day-picker";
 
 // 1. Definisikan Enum/Union untuk konsistensi di seluruh aplikasi
-export type ClassificationStatus =
-  | "HEMAT"
-  | "NORMAL"
-  | "BOROS"
-  | "UNKNOWN"
-  | null;
+export type ClassificationStatus = "HEMAT" | "NORMAL" | "BOROS" | "UNKNOWN" | null;
 
 // 2. Gunakan satu interface utama untuk data baris tabel
 export interface RecapDataRow {
+  id: number;
   date: string | Date;
   consumption: number | null;
   wbp: number | null;
@@ -19,8 +15,8 @@ export interface RecapDataRow {
   pax: number | null;
   cost: number | null;
   cost_before_tax?: number | null; // Tambahkan untuk mendukung kalkulasi pajak
-  max_temp: number | null;
-  avg_temp: number | null;
+  suhu_max: number | null;
+  suhu_rata_rata: number | null;
   is_workday?: boolean | null;
   classification: ClassificationStatus;
   confidence_score?: number | null;
@@ -83,4 +79,31 @@ export interface RecapRecalculatePayload {
   startDate: string;
   endDate: string;
   meterId?: number | null;
+}
+export interface SingleAnalysisPayload {
+  date: string;
+  meterId: number;
+}
+
+/**
+ * Tipe data untuk request bulk range (Prediksi mingguan/bulanan)
+ */
+export interface BulkPredictionPayload {
+  /**
+   * Tanggal mulai periode.
+   * Format wajib: "YYYY-MM-DD"
+   */
+  start_date: string;
+
+  /**
+   * Tanggal akhir periode.
+   * Format wajib: "YYYY-MM-DD"
+   * Syarat: end_date >= start_date
+   */
+  end_date: string;
+
+  /**
+   * ID Meteran (Integer)
+   */
+  meter_id: number;
 }

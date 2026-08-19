@@ -1,191 +1,122 @@
-"use client";
+// src/app/notification-center/_components/notificationItem.tsx
 
-import React from "react";
 import { formatDistanceToNow } from "date-fns";
-import { id as localeId } from "date-fns/locale";
-import { motion } from "framer-motion";
-import { Clock, Info, AlertTriangle, ChevronRight, User } from "lucide-react";
+import { id } from "date-fns/locale";
+import { Check } from "lucide-react";
+import React from "react";
 
-import { Checkbox } from "@/common/components/ui/checkbox";
+import { Button } from "@/common/components/ui/button";
+import { Checkbox } from "@/common/components/ui/checkbox"; // Pastikan path ini sesuai dengan project Anda
 import { cn } from "@/lib/utils";
-import { AlertStatus, StatusIndicator } from "./notification-status";
-import { NotificationUI } from "../types";
+import { CATEGORY_ICON, SEVERITY_CONFIG } from "../constants";
+import { NotificationItem as NotificationType } from "../types";
 
-interface NotificationItemProps {
-  notification: NotificationUI;
+// Pro-Dev: Interface disesuaikan dengan data yang dikirim oleh NotificationList
+interface Props {
+  notification: NotificationType;
   isSelected: boolean;
-  onSelect: (id: string) => void;
-  onClick: (notification: NotificationUI) => void;
+  onSelect: (id: number) => void;
+  onClick: (notification: NotificationType) => void;
 }
 
-const itemVariants = {
-  hidden: { x: -10, opacity: 0 },
-  visible: { x: 0, opacity: 1 },
-  exit: { x: -10, opacity: 0, transition: { duration: 0.2 } },
-};
+export const NotificationItem = React.memo(
+  ({ notification, isSelected, onSelect, onClick }: Props) => {
+    const { notification_id, severity, category, is_read, title, message, created_at } =
+      notification;
 
-const cardStyles = {
-  [AlertStatus.NEW]:
-    "bg-destructive/[0.03] border-destructive/20 hover:bg-destructive/[0.06]",
-  [AlertStatus.HANDLED]:
-    "bg-emerald-500/[0.03] border-emerald-500/20 hover:bg-emerald-500/[0.06]",
-  DEFAULT: "bg-primary/[0.03] border-primary/20 hover:bg-primary/[0.06]",
-};
+    const SeverityIcon = SEVERITY_CONFIG[severity]?.icon || SEVERITY_CONFIG.INFO.icon;
+    const CategoryIcon = CATEGORY_ICON[category] || CATEGORY_ICON.SYSTEM;
+    const severityStyle = SEVERITY_CONFIG[severity] || SEVERITY_CONFIG.INFO;
 
-const checkboxStyles = {
-  [AlertStatus.NEW]:
-    "border-destructive/50 data-[state=checked]:bg-destructive data-[state=checked]:border-destructive",
-  [AlertStatus.HANDLED]:
-    "border-emerald-500/50 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500",
-  DEFAULT:
-    "border-primary/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary",
-};
-
-export const NotificationItem = React.forwardRef<
-  HTMLLIElement,
-  NotificationItemProps
->(({ notification, isSelected, onSelect, onClick }, ref) => {
-  const isUnread = !notification.is_read;
-  const isAlert = notification.type === "alert";
-  const status = (notification.status as AlertStatus) || "INFO";
-
-  return (
-    <motion.li
-      ref={ref}
-      variants={itemVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      layout="position"
-      onClick={() => onClick(notification)}
-      className={cn(
-        // Base styles
-        "group relative flex cursor-pointer items-start gap-4 overflow-hidden rounded-md border p-4 transition-all duration-200 select-none",
-
-        // Logic: Jika sudah dibaca (isRead) dan sudah dihandle (HANDLED),
-        // gunakan style kartu berdasarkan status. Jika belum, gunakan style default/card.
-        !isUnread && status !== AlertStatus.HANDLED
-          ? "bg-card border-border/40 hover:bg-accent/5"
-          : cardStyles[status as keyof typeof cardStyles] || cardStyles.DEFAULT,
-
-        // Selection styles
-        isSelected &&
-          "ring-primary border-primary/50 bg-primary/[0.02] shadow-sm ring-1"
-      )}
-    >
-      {/* UNREAD INDICATOR STRIP */}
-      {isUnread && (
-        <div
-          className={cn(
-            "absolute top-0 bottom-0 left-0 w-[3px] shadow-[0_0_8px_rgba(var(--primary),0.6)]",
-            status === AlertStatus.NEW ? "bg-destructive" : "bg-primary"
-          )}
-        />
-      )}
-
-      {/* CHECKBOX */}
-      <div className="z-10 mt-1">
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={() => onSelect(notification.id)}
-          onClick={(e) => e.stopPropagation()}
-          className={cn(
-            "shadow-sm transition-colors",
-            !isUnread && status !== AlertStatus.HANDLED
-              ? "border-muted-foreground/30"
-              : checkboxStyles[status as keyof typeof cardStyles] ||
-                  checkboxStyles.DEFAULT
-          )}
-        />
-      </div>
-
-      {/* ICON TYPE */}
+    return (
       <div
         className={cn(
-          "mt-0.5 shrink-0 rounded-full p-2 shadow-sm ring-1 ring-black/5 ring-inset",
-          isAlert
-            ? "bg-red-500/10 text-red-600"
-            : "bg-blue-500/10 text-blue-600"
+          "group relative flex gap-4 rounded-xl border p-4 transition-all duration-200",
+          isSelected
+            ? "border-blue-300 bg-blue-50/60 shadow-sm dark:bg-blue-900/20" // State ketika di-checklist
+            : is_read
+              ? "border-transparent bg-white hover:border-slate-200 hover:bg-slate-50 dark:bg-slate-950 dark:hover:bg-slate-900"
+              : "border-blue-100 bg-blue-50/30 shadow-sm dark:border-blue-900/30 dark:bg-blue-900/10"
         )}
       >
-        {isAlert ? (
-          <AlertTriangle className="h-4 w-4" />
-        ) : (
-          <Info className="h-4 w-4" />
+        {/* Unread Indicator Dot */}
+        {!is_read && (
+          <div className="absolute top-1/2 left-0 -ml-1 h-2 w-2 -translate-y-1/2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
         )}
-      </div>
 
-      {/* MAIN CONTENT */}
-      <div className="min-w-0 flex-1 space-y-1.5">
-        {/* Header Row: Title & Status */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <p
-              className={cn(
-                "truncate pr-1 text-sm transition-colors",
-                isUnread
-                  ? "text-foreground font-bold"
-                  : "text-muted-foreground font-medium"
-              )}
-            >
-              {notification.title}
-            </p>
-
-            {/* Tampilkan Badge Status jika bukan INFO biasa */}
-            {status !== ("INFO" as string) && (
-              <StatusIndicator
-                status={status}
-                className="shrink-0 origin-left scale-90"
-              />
-            )}
-          </div>
-
-          {/* Timestamp */}
-          {notification.date && (
-            <div className="text-muted-foreground/60 bg-background/50 border-border/50 flex shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[10px]">
-              <Clock className="h-3 w-3" />
-              <span>
-                {formatDistanceToNow(new Date(notification.date), {
-                  addSuffix: true,
-                  locale: localeId,
-                })}
-              </span>
-            </div>
-          )}
+        {/* 1. CHECKBOX AREA (Untuk Bulk Actions) */}
+        <div className="mt-2.5 flex shrink-0 items-center justify-center">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onSelect(notification_id)}
+            className="h-4 w-4 transition-transform data-[state=checked]:scale-110"
+          />
         </div>
 
-        {/* Description */}
-        <p
+        {/* 2. ICON WRAPPER */}
+        <div
           className={cn(
-            "line-clamp-2 text-xs leading-relaxed",
-            isUnread ? "text-foreground/80" : "text-muted-foreground/60"
+            "mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+            severityStyle.bg
           )}
         >
-          {notification.description}
-        </p>
+          <SeverityIcon className={cn("h-5 w-5", severityStyle.color)} />
+        </div>
 
-        {/* Metadata Footer: Verified By (Khusus Alert) */}
-        {notification.acknowledged_by && (
-          <div className="mt-1 flex items-center gap-2 pt-2">
-            <div className="bg-primary/5 border-primary/10 flex items-center gap-1.5 rounded-full border px-2 py-1">
-              <User className="text-primary h-3 w-3" />
-              <span className="text-muted-foreground text-[10px] font-medium tracking-tight uppercase">
-                Verified by
-                <span className="text-foreground ml-0.5 font-bold">
-                  {notification.acknowledged_by.username}
-                </span>
-              </span>
-            </div>
+        {/* 3. CONTENT AREA (Bisa di-klik untuk melihat detail / tandai dibaca) */}
+        <div
+          className="flex flex-1 cursor-pointer flex-col gap-1"
+          onClick={() => onClick(notification)} // Klik area teks akan memanggil fungsi dari parent
+        >
+          <div className="flex items-start justify-between gap-2">
+            <h4
+              className={cn(
+                "text-sm font-semibold",
+                is_read ? "text-slate-700 dark:text-slate-300" : "text-slate-900 dark:text-white"
+              )}
+            >
+              {title}
+            </h4>
+            <span className="shrink-0 text-[10px] font-medium text-slate-400">
+              {formatDistanceToNow(new Date(created_at), { addSuffix: true, locale: id })}
+            </span>
           </div>
-        )}
-      </div>
 
-      {/* Hover Action Hint */}
-      <div className="translate-x-2 self-center opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-        <ChevronRight className="text-muted-foreground/50 h-5 w-5" />
-      </div>
-    </motion.li>
-  );
-});
+          <p
+            className={cn(
+              "text-xs leading-relaxed",
+              is_read ? "text-slate-500" : "font-medium text-slate-700 dark:text-slate-300"
+            )}
+          >
+            {message}
+          </p>
 
+          {/* 4. TAGS & ACTIONS */}
+          <div className="mt-2 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 text-[9px] font-semibold tracking-wider text-slate-500 uppercase dark:bg-slate-800 dark:text-slate-400">
+              <CategoryIcon className="h-3 w-3" />
+              {category.replace("_", " ")}
+            </div>
+
+            {!is_read && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 cursor-pointer text-xs font-medium text-blue-600 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                onClick={(e) => {
+                  e.stopPropagation(); // Mencegah bentrok dengan onClick di Content Area
+                  onClick(notification);
+                }}
+              >
+                <Check className="mr-1 h-3 w-3" /> Tandai Dibaca
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
+// Penamaan untuk React DevTools
 NotificationItem.displayName = "NotificationItem";

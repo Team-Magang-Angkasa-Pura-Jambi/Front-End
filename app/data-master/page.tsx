@@ -5,7 +5,7 @@ import MasterDataPage from "@/modules/masterData";
 export default function EnterData() {
   return (
     <AuthLayouts>
-      <RoleGuard allowedRoles={["SuperAdmin", "Admin"]}>
+      <RoleGuard allowedRoles={["SUPER_ADMIN", "ADMIN"]}>
         <MasterDataPage />
       </RoleGuard>
     </AuthLayouts>

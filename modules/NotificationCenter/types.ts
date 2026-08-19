@@ -1,21 +1,31 @@
-// src/app/notification-center/types.ts
-export type TabType = "generals" | "meters" | "system";
-// src/app/types/index.ts (atau lokasi types Anda)
+// NotificationCenter/types.ts
 
-export type AlertStatus = "NEW" | "READ" | "HANDLED";
+export type NotificationCategory =
+  | "SYSTEM"
+  | "THRESHOLD_BREACH"
+  | "ANOMALY_DETECTED"
+  | "MAINTENANCE"
+  | "BUDGET_WARNING"
+  | "DATA_ENTRY";
 
-export interface NotificationUI {
-  id: string; // ID Unik String (ex: "alert-1", "notif-5")
-  rawId: number; // ID Asli Database (ex: 1, 5)
-  type: "alert" | "notification";
+export type NotificationSeverity = "INFO" | "SUCCESS" | "WARNING" | "CRITICAL";
+
+export interface NotificationItem {
+  notification_id: number;
+  category: NotificationCategory;
+  severity: NotificationSeverity;
   title: string;
-  description: string;
-  date: string | Date; // Tanggal untuk sorting
+  message: string;
   is_read: boolean;
-  status: AlertStatus | "INFO";
+  reference_table: string | null;
+  reference_id: number | null;
+  created_at: string;
+}
 
-  // Data Spesifik Alert
-  meter_code?: string | null;
-  energy_type?: string | null;
-  acknowledged_by?: { username: string } | null;
+export interface NotificationResponse {
+  data: NotificationItem[];
+  meta: {
+    unread_count: number;
+    total: number;
+  };
 }

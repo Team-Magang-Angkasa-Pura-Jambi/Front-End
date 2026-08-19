@@ -118,7 +118,7 @@ export const GlobalError: React.FC<GlobalErrorProps> = ({
                   <div className="max-h-40 overflow-auto rounded-lg border border-slate-800 bg-slate-900 p-4 text-left font-mono text-[10px] text-red-300 shadow-inner">
                     <div className="mb-2 flex items-center gap-2 border-b border-slate-700 pb-2">
                       <Terminal className="h-3 w-3 text-slate-500" />
-                      <span className="font-bold text-slate-500 uppercase">
+                      <span className="font-bold uppercase text-slate-500">
                         System Stack Trace
                       </span>
                     </div>

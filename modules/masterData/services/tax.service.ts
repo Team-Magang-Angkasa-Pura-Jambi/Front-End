@@ -1,49 +1,16 @@
-import api from "@/lib/api";
+import { ApiResponse } from "@/common/types/api";
 import { Taxes } from "@/common/types/taxes";
+import api from "@/lib/api";
 import { taxFormValue } from "../schemas/taxes.schema";
 
-interface TaxesApiResponse {
-  data: Taxes[];
-  status?: { code: number; message: string };
-}
+export const getTaxesApi = (): Promise<ApiResponse<Taxes[]>> =>
+  api.get("/taxes").then((r) => r.data);
 
-interface TaxDetailApiResponse {
-  data: Taxes;
-  status?: { code: number; message: string };
-}
+export const createTaxApi = (data: taxFormValue): Promise<ApiResponse<Taxes>> =>
+  api.post("/taxes", data).then((r) => r.data);
 
-const BASE_URL = "/tax";
+export const updateTaxApi = (id: number, data: taxFormValue): Promise<ApiResponse<Taxes>> =>
+  api.patch(`/taxes/${id}`, data).then((r) => r.data);
 
-export const getTaxesApi = async (): Promise<TaxesApiResponse> => {
-  const response = await api.get<TaxesApiResponse>(BASE_URL);
-  return response.data;
-};
-
-export const getTaxByIdApi = async (
-  id: number
-): Promise<TaxDetailApiResponse> => {
-  const response = await api.get<TaxDetailApiResponse>(`${BASE_URL}/${id}`);
-  return response.data;
-};
-
-export const createTaxApi = async (
-  data: taxFormValue
-): Promise<TaxDetailApiResponse> => {
-  const response = await api.post<TaxDetailApiResponse>(BASE_URL, data);
-  return response.data;
-};
-
-export const updateTaxApi = async (
-  id: number,
-  data: taxFormValue
-): Promise<TaxDetailApiResponse> => {
-  const response = await api.patch<TaxDetailApiResponse>(
-    `${BASE_URL}/${id}`,
-    data
-  );
-  return response.data;
-};
-
-export const deleteTaxApi = async (id: number): Promise<void> => {
-  await api.delete(`${BASE_URL}/${id}`);
-};
+export const deleteTaxApi = (id: number): Promise<ApiResponse<void>> =>
+  api.delete(`/taxes/${id}`).then((r) => r.data);

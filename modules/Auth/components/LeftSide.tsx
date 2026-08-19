@@ -101,7 +101,7 @@ export const LeftSide = () => {
             Username
           </legend>
           <div className="relative">
-            <User className="text-muted-foreground absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 group-focus-within:text-blue-600" />
+            <User className="text-muted-foreground absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 group-focus-within:text-blue-600" />
             <Input
               required
               type="text"
@@ -109,7 +109,7 @@ export const LeftSide = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
-              className="h-auto w-full border-none bg-transparent py-2 pr-4 pl-10 text-black focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-auto w-full border-none bg-transparent py-2 pl-10 pr-4 text-black focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
         </motion.fieldset>
@@ -122,7 +122,7 @@ export const LeftSide = () => {
             Password
           </legend>
           <div className="relative">
-            <Lock className="text-muted-foreground absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 group-focus-within:text-blue-600" />
+            <Lock className="text-muted-foreground absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 group-focus-within:text-blue-600" />
             <Input
               required
               type="password"
@@ -130,7 +130,7 @@ export const LeftSide = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="h-auto w-full border-none bg-transparent py-2 pr-4 pl-10 text-black focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-auto w-full border-none bg-transparent py-2 pl-10 pr-4 text-black focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
         </motion.fieldset>

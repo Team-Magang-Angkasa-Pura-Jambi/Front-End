@@ -1,9 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/common/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/common/components/ui/card";
 import { Skeleton } from "@/common/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -12,9 +7,10 @@ import React from "react";
 interface StatCardProps {
   icon: React.ElementType;
   label: string;
-  value: string;
-  unit: string;
-  iconBgColor: string;
+  value: string | number; // Dukung number agar lebih fleksibel
+  unit?: string; // Dibuat opsional dengan ?
+  iconBgColor?: string; // Dibuat opsional dengan ?
+  subValue?: string; // Tambahan untuk info ekstra
 }
 
 // Komponen utama untuk menampilkan data statistik
@@ -23,21 +19,28 @@ export const StatCard: React.FC<StatCardProps> = ({
   label,
   value,
   unit,
-  iconBgColor,
+  iconBgColor = "bg-primary", // Default color jika tidak diisi
+  subValue,
 }) => {
   return (
-    <Card className="flex h-full flex-col justify-between overflow-hidden">
+    <Card className="flex h-full flex-col justify-between overflow-hidden border shadow-sm transition-all hover:shadow-md">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-muted-foreground text-sm font-medium">
+        <CardTitle className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
           {label}
         </CardTitle>
-        <div className={cn("rounded-full p-2 text-white", iconBgColor)}>
-          <Icon className="h-5 w-5" />
+        {/* Gunakan opacity pada background agar ikon tetap terlihat kontras */}
+        <div className={cn("rounded-full p-2 text-white shadow-sm", iconBgColor)}>
+          <Icon className="h-4 w-4" />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-muted-foreground text-xs">{unit}</p>
+      <CardContent className="pb-4">
+        <div className="flex items-baseline gap-1">
+          <div className="text-xl font-bold tracking-tight">{value}</div>
+          {unit && <span className="text-muted-foreground text-[10px] font-medium">{unit}</span>}
+        </div>
+        {subValue && (
+          <p className="text-muted-foreground mt-1 text-[10px] font-medium">{subValue}</p>
+        )}
       </CardContent>
     </Card>
   );

@@ -11,6 +11,8 @@ import {
   getSortedRowModel,
   ColumnFiltersState,
   getFilteredRowModel,
+  getExpandedRowModel,
+  Row,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -31,6 +33,7 @@ interface DataTableProps<TData, TValue> {
   isLoading: boolean;
   filterColumnId?: string;
   filterPlaceholder?: string;
+  renderSubComponent?: (props: { row: Row<TData> }) => React.ReactElement;
 }
 
 export const DataTable = <TData, TValue>({
@@ -39,6 +42,7 @@ export const DataTable = <TData, TValue>({
   isLoading,
   filterColumnId,
   filterPlaceholder,
+  renderSubComponent,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -54,6 +58,8 @@ export const DataTable = <TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    getRowCanExpand: () => true, // Izinkan expand
+    getExpandedRowModel: getExpandedRowModel(),
     state: {
       sorting,
       columnFilters,
@@ -123,6 +129,8 @@ export const DataTable = <TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className={`cursor-pointer ${row.getIsExpanded() ? "bg-muted/50" : ""}`}
+                onClick={() => row.toggleExpanded()}
                 // PERBAIKAN: Hapus className="hover:bg-muted/50".
                 // Biarkan TableRow default (dari ui/table) yang menangani hover effect
                 // agar muncul glow Cyan/Primary.
@@ -132,6 +140,18 @@ export const DataTable = <TData, TValue>({
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
+                {/* 4. ROW DETAIL (Hanya muncul jika row.getIsExpanded() true) */}
+                {row.getIsExpanded() && renderSubComponent && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="border-b p-0"
+                    >
+                      {/* Render komponen detail disini */}
+                      {renderSubComponent({ row })}
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableRow>
             ))
           ) : (

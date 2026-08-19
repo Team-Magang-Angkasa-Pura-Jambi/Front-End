@@ -48,7 +48,7 @@ function TabsTrigger({
       data-slot="tabs-trigger"
       className={cn(
         // BASE BUTTON:
-        "ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+        "ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 
         // ACTIVE STATE (THE "ENERGY" POP):
         // 1. Background jadi solid (Putih/Hitam) + Shadow halus
@@ -78,7 +78,7 @@ function TabsContent({
       data-slot="tabs-content"
       className={cn(
         // Animasi halus saat konten muncul
-        "ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+        "ring-offset-background focus-visible:ring-ring mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
         "animate-in fade-in-50 zoom-in-95 duration-200",
         className
       )}

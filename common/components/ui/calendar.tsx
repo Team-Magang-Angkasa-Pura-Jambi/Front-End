@@ -1,20 +1,11 @@
 "use client";
 
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import * as React from "react";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
-import {
-  ButtonProps,
-  DayButton,
-  DayPicker,
-  getDefaultClassNames,
-} from "react-day-picker";
+import { ButtonProps, DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
 
-import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/common/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function Calendar({
   className,
@@ -44,16 +35,12 @@ function Calendar({
         )}
         captionLayout={captionLayout}
         formatters={{
-          formatMonthDropdown: (date) =>
-            date.toLocaleString("default", { month: "short" }),
+          formatMonthDropdown: (date) => date.toLocaleString("default", { month: "short" }),
           ...formatters,
         }}
         classNames={{
           root: cn("w-fit", defaultClassNames.root),
-          months: cn(
-            "flex gap-4 flex-col md:flex-row relative z-10",
-            defaultClassNames.months
-          ),
+          months: cn("flex gap-4 flex-col md:flex-row relative z-10", defaultClassNames.months),
           month: cn("flex flex-col w-full gap-4", defaultClassNames.month),
           nav: cn(
             "flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between px-1",
@@ -85,18 +72,9 @@ function Calendar({
             "group/day w-9 h-9 p-0 text-center text-sm focus-within:relative focus-within:z-20",
             defaultClassNames.day
           ),
-          today: cn(
-            "bg-accent/50 text-accent-foreground rounded-md",
-            defaultClassNames.today
-          ),
-          outside: cn(
-            "text-muted-foreground/50 opacity-50",
-            defaultClassNames.outside
-          ),
-          disabled: cn(
-            "text-muted-foreground opacity-30",
-            defaultClassNames.disabled
-          ),
+          today: cn("bg-accent/50 text-accent-foreground rounded-md", defaultClassNames.today),
+          outside: cn("text-muted-foreground/50 opacity-50", defaultClassNames.outside),
+          disabled: cn("text-muted-foreground opacity-30", defaultClassNames.disabled),
           hidden: cn("invisible", defaultClassNames.hidden),
           ...classNames,
         }}
@@ -150,8 +128,7 @@ function CalendarDayButton({
           !isRangeMiddle &&
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground z-10 scale-105 rounded-md font-bold shadow-[0_0_10px_rgba(var(--primary),0.5)]",
 
-        isRangeMiddle &&
-          "bg-primary/10 text-primary hover:bg-primary/20 rounded-none",
+        isRangeMiddle && "bg-primary/10 text-primary hover:bg-primary/20 rounded-none",
 
         isToday &&
           !isSelected &&

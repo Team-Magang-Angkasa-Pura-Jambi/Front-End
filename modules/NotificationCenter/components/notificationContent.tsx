@@ -1,60 +1,57 @@
 // src/app/notification-center/_components/notification-content.tsx
 
-import { Inbox, AlertTriangle, RefreshCw } from "lucide-react";
-import { TabsContent } from "@/common/components/ui/tabs";
-import { NotificationUI, TabType } from "../types";
-import { NotificationList } from "./notificationList";
-import { Skeleton } from "@/common/components/ui/skeleton";
 import { Button } from "@/common/components/ui/button";
+import { Skeleton } from "@/common/components/ui/skeleton";
+import { AlertTriangle, Inbox, RefreshCw } from "lucide-react";
+import { NotificationItem } from "../types";
+import { NotificationList } from "./notificationList";
 
 interface NotificationContentProps {
   isLoading: boolean;
   isError: boolean;
-  notifications?: NotificationUI[]; // Update ke tipe yang sudah dinormalisasi
-  selectedIds: Set<string>;
-  onSelect: (id: string) => void;
-  onItemClick: (notification: NotificationUI) => void;
-  activeTab: TabType;
-  onRetry?: () => void; // Tambahan untuk handling error refetch
+  notifications?: NotificationItem[]; // Menggunakan tipe data tunggal yang baru
+  selectedIds: Set<number>; // Menggunakan number
+  onSelect: (id: number) => void;
+  onItemClick: (notification: NotificationItem) => void;
+  onRetry?: () => void;
 }
 
 export const NotificationContent = ({
   isLoading,
   isError,
   notifications,
-  activeTab,
   onRetry,
   ...listProps
 }: NotificationContentProps) => {
   const renderContent = () => {
-    // 1. LOADING STATE (Sesuai layout NotificationItem baru)
+    // 1. LOADING STATE
     if (isLoading) {
       return (
-        <div className="space-y-3 p-1">
+        <div className="space-y-3 p-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="border-border/50 bg-card/40 flex items-start gap-4 rounded-lg border p-4"
+              className="border-border/50 bg-card/40 flex items-start gap-4 rounded-xl border p-4 shadow-sm"
             >
               {/* Checkbox Skeleton */}
-              <Skeleton className="mt-1 h-4 w-4 shrink-0 rounded-sm" />
+              <Skeleton className="mt-1 h-4 w-4 shrink-0 rounded-[4px]" />
 
               {/* Icon Circle Skeleton */}
-              <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+              <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
 
-              <div className="flex-1 space-y-2">
-                {/* Title & Badge */}
+              <div className="flex-1 space-y-2.5 pt-1">
+                {/* Title & Time Badge */}
                 <div className="flex w-full justify-between gap-4">
                   <Skeleton className="h-4 w-1/3" />
-                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-3 w-16" />
                 </div>
                 {/* Description */}
                 <Skeleton className="h-3 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
 
-                {/* Metadata Footer */}
+                {/* Tag/Category Footer */}
                 <div className="pt-2">
-                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-5 w-24 rounded-md" />
                 </div>
               </div>
             </div>
@@ -66,13 +63,11 @@ export const NotificationContent = ({
     // 2. ERROR STATE
     if (isError) {
       return (
-        <div className="text-destructive border-destructive/20 bg-destructive/[0.02] m-4 flex h-[400px] flex-col items-center justify-center rounded-xl border-2 border-dashed p-8">
+        <div className="text-destructive border-destructive/20 bg-destructive/[0.02] m-4 flex min-h-[400px] flex-col items-center justify-center rounded-xl border-2 border-dashed p-8">
           <div className="bg-destructive/10 ring-destructive/30 mb-4 rounded-full p-4 ring-1">
             <AlertTriangle className="h-10 w-10 animate-pulse" />
           </div>
-          <h3 className="text-lg font-bold tracking-widest uppercase">
-            System Failure
-          </h3>
+          <h3 className="text-lg font-bold tracking-widest uppercase">System Failure</h3>
           <p className="text-muted-foreground mt-2 max-w-xs text-center text-sm">
             Gagal menyinkronkan data log notifikasi. Jalur komunikasi terputus.
           </p>
@@ -90,7 +85,7 @@ export const NotificationContent = ({
     // 3. EMPTY STATE
     if (!notifications || notifications.length === 0) {
       return (
-        <div className="relative flex h-[500px] flex-col items-center justify-center overflow-hidden text-center select-none">
+        <div className="relative flex min-h-[450px] flex-col items-center justify-center overflow-hidden text-center select-none">
           {/* Background Grid Pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.05]" />
 
@@ -99,15 +94,12 @@ export const NotificationContent = ({
               <Inbox className="text-muted-foreground h-12 w-12" />
             </div>
 
-            <h3 className="text-foreground text-xl font-black tracking-tight">
-              SYSTEM IDLE
-            </h3>
+            <h3 className="text-foreground text-xl font-black tracking-tight">ALL CLEAR</h3>
 
             <div className="bg-primary/5 border-primary/20 mt-3 flex items-center gap-2 rounded-full border px-4 py-1.5">
               <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
-              <span className="text-primary font-mono text-xs font-medium uppercase">
-                No logs in{" "}
-                {activeTab === "generals" ? "All Channels" : activeTab}
+              <span className="text-primary font-mono text-xs font-medium tracking-wider uppercase">
+                No active logs
               </span>
             </div>
 
@@ -120,15 +112,12 @@ export const NotificationContent = ({
     }
 
     // 4. DATA LIST
-    return <NotificationList notifications={notifications} {...listProps} />;
+    return (
+      <div className="p-4">
+        <NotificationList notifications={notifications} {...listProps} />
+      </div>
+    );
   };
 
-  return (
-    <TabsContent
-      value={activeTab}
-      className="mt-0 w-full focus-visible:outline-none"
-    >
-      {renderContent()}
-    </TabsContent>
-  );
+  return <div className="animate-in fade-in w-full duration-300">{renderContent()}</div>;
 };

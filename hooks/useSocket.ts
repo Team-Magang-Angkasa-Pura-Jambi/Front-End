@@ -1,11 +1,10 @@
-// src/hooks/useSocket.ts
 "use client";
 
-import { useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { socket } from "@/lib/socket";
 import { useAuthStore } from "@/stores/authStore";
 import { useQueryClient } from "@tanstack/react-query";
-import { socket } from "@/lib/socket"; // Impor instance socket yang dibagikan
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 export const useSocketListeners = () => {
   const { user } = useAuthStore();
@@ -13,21 +12,15 @@ export const useSocketListeners = () => {
   const recalculationToastId = useRef<string | number | null>(null);
 
   useEffect(() => {
-    // Bergabung ke room pribadi setelah user teridentifikasi dan socket terhubung
     if (user && socket.connected) {
       const userId = String(user.id);
       socket.emit("join_room", userId);
       console.log(`Socket client bergabung ke room: ${userId}`);
     }
-  }, [user]); // Dijalankan saat user atau status koneksi berubah
+  }, [user]);
 
   useEffect(() => {
-    // Listener untuk notifikasi umum dari backend
-    const onNewNotification = (payload: {
-      title: string;
-      message: string;
-      link?: string;
-    }) => {
+    const onNewNotification = (payload: { title: string; message: string; link?: string }) => {
       console.log("Menerima notifikasi umum:", payload);
       toast.info(payload.title, {
         description: payload.message,
@@ -38,16 +31,11 @@ export const useSocketListeners = () => {
             }
           : undefined,
       });
-      // Invalidate query untuk me-refresh daftar notifikasi jika ada
+
       queryClient.invalidateQueries({ queryKey: ["latestNotification"] });
     };
 
-    // --- Listener untuk proses kalkulasi ulang ---
-
-    const onRecalculationProgress = (payload: {
-      processed: number;
-      total: number;
-    }) => {
+    const onRecalculationProgress = (payload: { processed: number; total: number }) => {
       const progress = Math.round((payload.processed / payload.total) * 100);
       const message = `Memproses data rekapitulasi... (${progress}%)`;
 
@@ -77,15 +65,11 @@ export const useSocketListeners = () => {
       }
     };
 
-    // Listener untuk notifikasi lama (jika masih digunakan)
     const onNewNotificationAvailable = () => {
-      console.log(
-        "Sinyal 'new_notification_available' diterima! Memuat ulang data notifikasi..."
-      );
+      console.log("Sinyal 'new_notification_available' diterima! Memuat ulang data notifikasi...");
       queryClient.invalidateQueries({ queryKey: ["latestNotification"] });
     };
 
-    // Listener dari Header.tsx (untuk konsolidasi)
     const onRecalculationComplete = (data: { message?: string }) => {
       const message = data.message || "Perhitungan ulang selesai!";
       toast.success(message, {
@@ -94,15 +78,13 @@ export const useSocketListeners = () => {
       queryClient.invalidateQueries({ queryKey: ["recapData"] });
     };
 
-    // Daftarkan listener ke event 'new_notification'
     socket.on("new_notification", onNewNotification);
     socket.on("recalculation:progress", onRecalculationProgress);
     socket.on("recalculation:success", onRecalculationSuccess);
     socket.on("recalculation:error", onRecalculationError);
-    socket.on("new_notification_available", onNewNotificationAvailable); // Dari SocketProvider
-    socket.on("recalculation_complete", onRecalculationComplete); // Dari Header.tsx
+    socket.on("new_notification_available", onNewNotificationAvailable);
+    socket.on("recalculation_complete", onRecalculationComplete);
 
-    // Fungsi cleanup untuk menghapus listener saat komponen unmount
     return () => {
       socket.off("new_notification", onNewNotification);
       socket.off("recalculation:progress", onRecalculationProgress);

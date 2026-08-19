@@ -1,13 +1,7 @@
 "use client";
 
-import * as React from "react";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-} from "@tanstack/react-table";
+import { Button } from "@/common/components/ui/button";
+import { Skeleton } from "@/common/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -16,8 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/common/components/ui/table";
-import { Button } from "@/common/components/ui/button";
-import { Skeleton } from "@/common/components/ui/skeleton";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -59,10 +58,7 @@ export function DataTable<TData, TValue>({
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -79,11 +75,10 @@ export function DataTable<TData, TValue>({
                   className="hover:bg-muted/50"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                    <TableCell key={cell.id} className="py-3 align-top">
+                      {" "}
+                      {/* Tambahkan align-top */}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>

@@ -86,7 +86,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
 
         // TYPOGRAPHY TEKNIKAL:
         // text-muted-foreground: Warna abu-abu yang pas di light/dark
-        "text-muted-foreground text-[11px] font-bold tracking-wider uppercase",
+        "text-muted-foreground text-[11px] font-bold uppercase tracking-wider",
 
         "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className

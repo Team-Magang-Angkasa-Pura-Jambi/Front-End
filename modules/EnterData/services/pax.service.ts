@@ -1,8 +1,8 @@
 import api from "@/lib/api";
 
 export interface PaxPayload {
-  data_date: string;
-  total_pax: number;
+  date: string;
+  pax_count: number;
 }
 
 export const submitPaxApi = async (payload: PaxPayload) => {

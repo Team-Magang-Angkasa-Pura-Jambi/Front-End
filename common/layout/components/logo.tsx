@@ -66,10 +66,10 @@ export const Logo = () => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="flex flex-col justify-center leading-none whitespace-nowrap"
+            className="flex flex-col justify-center whitespace-nowrap leading-none"
           >
             {/* Baris 1: SENTINEL (Primary & Bold) */}
-            <div className="text-primary flex overflow-hidden text-sm font-black tracking-wide uppercase">
+            <div className="text-primary flex overflow-hidden text-sm font-black uppercase tracking-wide">
               {brandName.split("").map((char, index) => (
                 <motion.span key={`brand-${index}`} variants={letterVariants}>
                   {char === " " ? "\u00A0" : char}
@@ -81,7 +81,7 @@ export const Logo = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.3 } }}
-              className="text-muted-foreground mt-0.5 text-[10px] font-medium tracking-widest uppercase"
+              className="text-muted-foreground mt-0.5 text-[10px] font-medium uppercase tracking-widest"
             >
               {subBrand}
             </motion.div>
