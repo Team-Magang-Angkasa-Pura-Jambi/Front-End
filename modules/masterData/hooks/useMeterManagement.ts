@@ -20,7 +20,6 @@ export const useMeterManagement = () => {
 
   const metersData = useMemo(() => metersResponse?.data?.meter || [], [metersResponse]);
 
-  // --- TAMBAHKAN INI: Mencari data lengkap untuk di-edit ---
   const editingData = useMemo(() => {
     if (!selectedMeterId) return null;
     return metersData.find((m) => m.meter_id === selectedMeterId) || null;
@@ -57,7 +56,7 @@ export const useMeterManagement = () => {
 
   const handleCloseForm = useCallback(() => {
     setIsFormOpen(false);
-    // Beri sedikit delay sebelum null-kan ID agar transisi modal mulus
+
     setTimeout(() => setSelectedMeterId(null), 200);
   }, []);
 
@@ -103,7 +102,6 @@ export const useMeterManagement = () => {
     selectedMeterId,
     setSelectedMeterId,
 
-    // --- EXPOSE INI ---
     editingData,
 
     isLoading,

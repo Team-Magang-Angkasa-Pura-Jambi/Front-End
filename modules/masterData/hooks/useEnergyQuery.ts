@@ -7,13 +7,20 @@ import { EnergyTypeFormValues } from "../schemas/energyType.schema";
 import {
   createEnergyTypeApi,
   deleteEnergyTypeApi,
+  getEnergyTypesApi,
   getEnergyWithReadingTypesApi,
   updateEnergyTypeApi,
 } from "../services/energyType.service";
 
-export const useEnergyQuery = () => {
+export const useEnergyQuery = (typeName?: string) => {
   const queryClient = useQueryClient();
-
+  const useGetEnergies = () => {
+    return useQuery({
+      queryKey: ["energyTypes"],
+      queryFn: () => getEnergyTypesApi(typeName),
+      staleTime: 1000 * 60 * 5,
+    });
+  };
   const useGetEnergiesWithReadings = () => {
     return useQuery({
       queryKey: ["energyTypes"],
@@ -41,5 +48,5 @@ export const useEnergyQuery = () => {
     });
   };
 
-  return { useGetEnergiesWithReadings, useUpsertEnergy, useDeleteEnergy };
+  return { useGetEnergies, useGetEnergiesWithReadings, useUpsertEnergy, useDeleteEnergy };
 };

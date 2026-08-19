@@ -6,6 +6,8 @@ import {
   Activity,
   AlertTriangle,
   BoxSelect,
+  BrainCircuit,
+  Calculator,
   Database,
   Gauge,
   Plus,
@@ -13,6 +15,7 @@ import {
   Save,
   Settings2,
   Trash2,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { Resolver, SubmitHandler, useFieldArray, useForm } from "react-hook-form";
@@ -46,15 +49,22 @@ import {
 import { Separator } from "@/common/components/ui/separator";
 import { Switch } from "@/common/components/ui/switch";
 
+// Pastikan skema dan enum sudah di-update di file ini
 import {
+  MeterCategory,
   meterFormSchema,
   MeterFormValues,
   MeterStatus,
   TankShape,
 } from "../../schemas/meter.schema";
+
 import { getEnergyTypesApi } from "../../services/energyType.service";
 import { getMeterByIdApi } from "../../services/meter.service";
 import { getReadingTypesApi } from "../../services/readingsType.service";
+
+// Tiga service baru yang perlu Anda pastikan sudah ada di folder services Anda
+import { getCalculationTemplatesApi } from "../../services/calculationTemplate.service";
+import { getPriceSchemesApi } from "../../services/priceSchema.service";
 
 const ENERGY_TYPES = {
   FUEL: "Fuel",
@@ -73,6 +83,7 @@ export const MeterForm = ({
   onSubmit,
   isLoading: isSubmitting,
 }: MeterFormProps) => {
+  // 1. Fetching Data Utama
   const {
     data: energyRes,
     isSuccess: isEnergyLoaded,
@@ -87,6 +98,18 @@ export const MeterForm = ({
     queryFn: () => getReadingTypesApi(),
   });
 
+  // 2. Fetching Data Baru (Formula & Price Scheme)
+  const { data: templateRes } = useQuery({
+    queryKey: ["calculationTemplates"],
+    queryFn: () => getCalculationTemplatesApi(),
+  });
+
+  const { data: priceSchemeRes } = useQuery({
+    queryKey: ["priceSchemes"],
+    queryFn: () => getPriceSchemesApi(),
+  });
+
+  // 3. Fetching Data Detail Meter
   const {
     data: meterDetailRes,
     isLoading: loadingMeterDetail,
@@ -97,9 +120,11 @@ export const MeterForm = ({
     enabled: !!meterId,
   });
 
+  // Memoize Data Options
   const energyTypes = useMemo(() => energyRes?.data || [], [energyRes]);
-  
   const allReadingTypes = useMemo(() => readingTypeRes?.data || [], [readingTypeRes]);
+  const calculationTemplates = useMemo(() => templateRes?.data || [], [templateRes]);
+  const priceSchemes = useMemo(() => priceSchemeRes?.data || [], [priceSchemeRes]);
 
   const form = useForm<MeterFormValues>({
     resolver: zodResolver(meterFormSchema) as Resolver<MeterFormValues>,
@@ -116,6 +141,10 @@ export const MeterForm = ({
         allow_decrease: false,
         has_rollover: false,
         rollover_limit: undefined,
+        // Default field baru
+        category: MeterCategory.LAINNYA,
+        calculation_template_id: undefined,
+        price_scheme_id: undefined,
       },
       meter_profile: undefined,
       reading_config: [],
@@ -148,6 +177,10 @@ export const MeterForm = ({
           allow_decrease: data.allow_decrease,
           has_rollover: !!data.rollover_limit,
           rollover_limit: data.rollover_limit ?? undefined,
+          // Set field baru saat mode Edit
+          category: data.category || MeterCategory.LAINNYA,
+          calculation_template_id: data.calculation_template_id ?? undefined,
+          price_scheme_id: data.price_scheme_id ?? undefined,
         },
         meter_profile: data.tank_profile
           ? {
@@ -195,7 +228,6 @@ export const MeterForm = ({
         className="grid grid-cols-1 gap-6 lg:grid-cols-12"
       >
         <div className="space-y-6 lg:col-span-8">
-          {/* Ringkasan Error Skema (Global Feedback) */}
           {Object.keys(formErrors).length > 0 && (
             <Alert variant="destructive" className="bg-red-50">
               <AlertTriangle className="h-4 w-4" />
@@ -288,7 +320,118 @@ export const MeterForm = ({
             </CardContent>
           </Card>
 
-          {/* Section 2: Parameters */}
+          {/* Section: Konfigurasi Sistem & ML (BARU) */}
+          <Card className="border-t-4 border-t-purple-500 shadow-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-purple-50 p-2 text-purple-600">
+                  <BrainCircuit className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Konfigurasi Sistem & ML</CardTitle>
+                  <CardDescription>
+                    Atur formula kalkulasi, skema harga, dan model AI.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {/* Kategori ML Model */}
+              <FormField
+                control={form.control}
+                name="meter.category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kategori (Klasifikasi Model AI)</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value ?? MeterCategory.LAINNYA}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Kategori" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={MeterCategory.TERMINAL}>Terminal</SelectItem>
+                        <SelectItem value={MeterCategory.KANTOR}>Kantor</SelectItem>
+                        <SelectItem value={MeterCategory.LAINNYA}>Lainnya (Tanpa ML)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-[11px] font-medium" />
+                  </FormItem>
+                )}
+              />
+
+              {/* Skema Harga */}
+              <FormField
+                control={form.control}
+                name="meter.price_scheme_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-1.5">
+                      <Wallet className="text-muted-foreground h-3.5 w-3.5" /> Skema Harga
+                    </FormLabel>
+                    <Select
+                      onValueChange={(val) =>
+                        field.onChange(val === "none" ? undefined : Number(val))
+                      }
+                      value={field.value?.toString() ?? "none"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Skema Harga" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Tidak Ada / Default</SelectItem>
+                        {priceSchemes.map((scheme) => (
+                          <SelectItem key={scheme.id} value={scheme.id.toString()}>
+                            {scheme.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-[11px] font-medium" />
+                  </FormItem>
+                )}
+              />
+
+              {/* Formula / Calculation Template */}
+              <FormField
+                control={form.control}
+                name="meter.calculation_template_id"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel className="flex items-center gap-1.5">
+                      <Calculator className="text-muted-foreground h-3.5 w-3.5" /> Formula Kalkulasi
+                    </FormLabel>
+                    <Select
+                      onValueChange={(val) => field.onChange(val === "none" ? undefined : val)}
+                      value={field.value ?? "none"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Formula Kalkulasi" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Tidak Ada (Manual / RAW)</SelectItem>
+                        {calculationTemplates.map((template) => (
+                          <SelectItem key={template.template_id} value={template.template_id}>
+                            {template.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-[11px] font-medium" />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Section: Parameters */}
           <Card className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <div className="flex items-center gap-3">
@@ -319,7 +462,7 @@ export const MeterForm = ({
                   key={field.id}
                   className="grid grid-cols-12 items-start gap-3 rounded-xl border bg-slate-50/50 p-4"
                 >
-                  <div className="col-span-12 md:col-span-5">
+                  <div className="col-span-12 md:col-span-11">
                     <FormField
                       control={form.control}
                       name={`reading_config.${index}.reading_type_id`}
@@ -353,51 +496,7 @@ export const MeterForm = ({
                       )}
                     />
                   </div>
-                  <div className="col-span-5 md:col-span-3">
-                    <FormField
-                      control={form.control}
-                      name={`reading_config.${index}.alarm_min_threshold`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-muted-foreground text-[10px] font-bold uppercase">
-                            Min
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              value={field.value ?? ""}
-                              className="h-9"
-                            />
-                          </FormControl>
-                          <FormMessage className="text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="col-span-5 md:col-span-3">
-                    <FormField
-                      control={form.control}
-                      name={`reading_config.${index}.alarm_max_threshold`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-muted-foreground text-[10px] font-bold uppercase">
-                            Max
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              value={field.value ?? ""}
-                              className="h-9"
-                            />
-                          </FormControl>
-                          <FormMessage className="text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="col-span-2 flex justify-end pt-5 md:col-span-1">
+                  <div className="col-span-1 flex justify-end pt-5 md:col-span-1">
                     <Button
                       type="button"
                       variant="ghost"
@@ -432,7 +531,7 @@ export const MeterForm = ({
                 </div>
               </CardHeader>
               <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="meter_profile.shape"
                   render={({ field }) => (
@@ -457,7 +556,7 @@ export const MeterForm = ({
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
                 <FormField
                   control={form.control}
                   name="meter_profile.capacity_liters"
@@ -484,8 +583,7 @@ export const MeterForm = ({
                     </FormItem>
                   )}
                 />
-                {/* Conditional Dimensions */}
-                {(tankShape === TankShape.CYLINDER_VERTICAL ||
+                {/* {(tankShape === TankShape.CYLINDER_VERTICAL ||
                   tankShape === TankShape.CYLINDER_HORIZONTAL) && (
                   <FormField
                     control={form.control}
@@ -500,35 +598,35 @@ export const MeterForm = ({
                       </FormItem>
                     )}
                   />
-                )}
-                {tankShape === TankShape.BOX && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="meter_profile.length_cm"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Panjang (cm)</FormLabel>
-                          <FormControl>
-                            <Input type="number" {...field} value={field.value ?? ""} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="meter_profile.width_cm"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Lebar (cm)</FormLabel>
-                          <FormControl>
-                            <Input type="number" {...field} value={field.value ?? ""} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
+                )} */}
+                {/* {tankShape === TankShape.BOX && ( */}
+                {/* <> */}
+                {/* <FormField
+                  control={form.control}
+                  name="meter_profile.length_cm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Panjang (cm)</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} value={field.value ?? ""} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                /> */}
+                {/* <FormField
+                    control={form.control}
+                    name="meter_profile.width_cm"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Lebar (cm)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  /> */}
+                {/* </> */}
+                {/* )} */}
               </CardContent>
             </Card>
           )}

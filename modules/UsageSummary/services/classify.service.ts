@@ -1,9 +1,15 @@
 import api from "@/lib/api";
-import { SingleAnalysisPayload } from "../types/recap.type";
 
-const CLASSIFY_PREFIX = "/classify";
+export interface EvaluationPayload {
+  meter_id: number;
+  summary_id: number;
+  suhu_rata?: number;
+  suhu_max?: number;
+  pax?: number;
+  is_hari_kerja?: number;
+}
 
-export const classifiesApi = async (payload: SingleAnalysisPayload) => {
-  const { data } = await api.post(`${CLASSIFY_PREFIX}`, payload);
+export const classifiesApi = async (payload: EvaluationPayload) => {
+  const { data } = await api.post(`/evaluations/run`, payload);
   return data;
 };

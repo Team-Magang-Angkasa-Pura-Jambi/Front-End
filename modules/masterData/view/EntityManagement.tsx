@@ -17,17 +17,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/common/components/ui/card";
-import { Location } from "@/common/types/location";
 import { Tenant } from "@/common/types/tenant";
-import { AlertTriangle, Building2, MapPin, Plus } from "lucide-react";
+import { AlertTriangle, Building2, History, MapPin, Plus } from "lucide-react";
+import { useState } from "react";
 import { LocationTable } from "../components/molecules/LocationTable";
 import { TenantTable } from "../components/molecules/TenantTable";
 import { LocationForm } from "../components/organisms/LocationForm";
 import { TenantForm } from "../components/organisms/TenantForm";
 import { MasterDataDialog } from "../components/templates/MasterDataDialog";
 import { useEntityManager } from "../hooks/useEntityManagement";
+import { SentinelAuditLog } from "../schemas/SentinelAuditLog";
 
 export const EntityManagement = () => {
+  const [isAuditOpen, setIsAuditOpen] = useState(false);
   // Gunakan Generic secara eksplisit agar hook tahu tipe datanya
   const tenant = useEntityManager<Tenant>("tenant");
   const location = useEntityManager<Location>("location");
@@ -43,13 +45,28 @@ export const EntityManagement = () => {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-          Manajemen Entitas
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          Kelola aset strategis Sultan Thaha: Profil Mitra Tenant dan Struktur Hirarki Lokasi.
-        </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            Manajemen Entitas
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Kelola aset strategis Sultan Thaha: Profil Mitra Tenant dan Struktur Hirarki Lokasi.
+          </p>
+        </div>
+
+        <MasterDataDialog
+          isOpen={isAuditOpen}
+          onOpenChange={setIsAuditOpen}
+          triggerLabel="Riwayat Audit"
+          triggerIcon={<History className="mr-1.5 h-4 w-4" />}
+          triggerClassName="bg-slate-800 hover:bg-slate-900 text-white transition-colors"
+          title="Audit Log Entitas Lokasi & Tenant"
+          description="Menampilkan jejak audit perubahan konfigurasi pada Master Lokasi dan Mitra Tenant."
+          maxWidth="3xl"
+        >
+          <SentinelAuditLog entityTable="Location,Tenant" height="h-[65vh]" />
+        </MasterDataDialog>
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">

@@ -6,11 +6,8 @@ import { cn } from "@/lib/utils";
 import { KeyRound, LogIn } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function AuthRequiredPage() {
-  const router = useRouter();
-
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
       {/* ================= BACKGROUND IMAGE ================= */}

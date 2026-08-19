@@ -183,7 +183,7 @@ export const SchemePriceManagement = () => {
               description="Menampilkan jejak audit perubahan konfigurasi pada Skema Harga Bandara Sultan Thaha."
               maxWidth="2xl"
             >
-              <SentinelAuditLog entityTable="PriceScheme" height="h-[65vh]" />
+              <SentinelAuditLog entityTable="PriceScheme,SchemeRate" height="h-[65vh]" />
             </MasterDataDialog>
 
             <MasterDataDialog

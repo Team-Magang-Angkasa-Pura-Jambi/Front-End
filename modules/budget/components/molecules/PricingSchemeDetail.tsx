@@ -2,14 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Activity, Calendar, Layers, PieChart, TrendingUp, User, Zap } from "lucide-react";
+import { Calendar, PieChart, TrendingUp, User, Zap } from "lucide-react";
 
 import { Badge } from "@/common/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/common/components/ui/card";
 import { Progress } from "@/common/components/ui/progress";
 import { ScrollArea } from "@/common/components/ui/scroll-area";
 import { Skeleton } from "@/common/components/ui/skeleton";
-import { AnnualBudgetAllocation } from "@/common/types/budget";
 import { formatCurrencySmart } from "@/utils/formatCurrencySmart";
 import { annualBudgetApi } from "../../services/annualBudget.service";
 
@@ -113,62 +112,7 @@ export const AnnualBudgetDetailView = ({ schemeId }: BudgetDetailProps) => {
           </CardContent>
         </Card>
 
-        {/* SECTION 2: Allocation List */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-sm font-black tracking-tight uppercase">
-              <Layers className="text-primary h-4 w-4" />
-              Titik Alokasi Energi
-            </h3>
-            <Badge variant="outline" className="text-[10px]">
-              {detail.allocations.length} Meter Terhubung
-            </Badge>
-          </div>
-
-          <div className="grid gap-4">
-            {detail.allocations.map((alloc: AnnualBudgetAllocation) => (
-              <Card key={alloc.allocation_id} className="hover:border-primary transition-all">
-                <CardHeader className="bg-muted/30 border-b py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-background rounded-xl border p-2 shadow-sm">
-                        <Activity className="text-primary h-5 w-5" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm leading-none font-bold">{alloc.meter.name}</h4>
-                        <p className="text-muted-foreground mt-1 font-mono text-[9px] tracking-tighter uppercase">
-                          {alloc.meter.meter_code}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge variant="secondary" className="font-bold">
-                      {formatCurrencySmart(alloc.allocated_amount).full}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="grid grid-cols-4 gap-2 text-center md:grid-cols-6 lg:grid-cols-6">
-                    {Object.entries(alloc.monthly_distribution_profile).map(([month, val]) => (
-                      <div
-                        key={month}
-                        className="bg-muted/50 hover:bg-muted rounded-lg border p-2 transition-colors"
-                      >
-                        <div className="text-muted-foreground text-[8px] font-black uppercase">
-                          {month}
-                        </div>
-                        <div className="text-[10px] font-bold">
-                          {(Number(val) / 1000000).toFixed(1)}M
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* SECTION 3: Metadata Info */}
+        {/* SECTION 2: Metadata Info */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Card className="bg-muted/30 shadow-none">
             <CardContent className="flex items-center gap-3 p-4">
@@ -204,9 +148,10 @@ export const AnnualBudgetDetailView = ({ schemeId }: BudgetDetailProps) => {
                 <p className="text-[11px] leading-relaxed text-amber-700/80 dark:text-slate-400">
                   Direncanakan penghematan sebesar{" "}
                   <span className="font-bold text-amber-900 dark:text-amber-300">
-                    {detail.efficiency_target_percentage}%
+                    {/* Perbaikan kalkulasi persentase: dikali 100 */}
+                    {Math.round(Number(detail.efficiency_target_percentage) * 100)}%
                   </span>{" "}
-                  dari konsumsi riil tahun sebelumnya.
+                  dari konsumsi riil sebelumnya.
                 </p>
               </div>
             </div>
@@ -221,14 +166,10 @@ export const AnnualBudgetDetailView = ({ schemeId }: BudgetDetailProps) => {
 const DetailSkeleton = () => (
   <div className="space-y-8 pr-4">
     <Skeleton className="h-[280px] w-full rounded-2xl" />
-    <div className="space-y-4">
-      <Skeleton className="h-6 w-1/3" />
-      <Skeleton className="h-32 w-full rounded-xl" />
-      <Skeleton className="h-32 w-full rounded-xl" />
-    </div>
     <div className="grid grid-cols-2 gap-4">
       <Skeleton className="h-16 w-full rounded-xl" />
       <Skeleton className="h-16 w-full rounded-xl" />
     </div>
+    <Skeleton className="h-24 w-full rounded-xl" />
   </div>
 );

@@ -1,3 +1,5 @@
+import { MeterCategory } from "@/modules/masterData/schemas/meter.schema";
+
 export interface meters {
   meter_id: number;
   meter_code: string;
@@ -62,6 +64,7 @@ export interface ReadingConfig {
 // 2. Definisi Utama MeterType
 
 export type MeterType = {
+  category: MeterCategory;
   // Identitas
   meter_id: number;
   meter_code: string;
@@ -116,6 +119,10 @@ export type MeterType = {
         }>;
       };
     }>;
+    validations: {
+      rule: string;
+      error_message: string;
+    }[];
   };
   // Jika ada data user pembuat/pengupdate
   updater?: {

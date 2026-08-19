@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/common/components/ui/dropdown-menu";
-import { ReadingHistory } from "../services/reading.service"; // Pastikan type diimport
+import { ReadingHistory } from "@/modules/EnterData/services";
 
 export const createColumns = (
   onEdit: (item: ReadingHistory) => void,
@@ -39,9 +39,9 @@ export const createColumns = (
     header: "Meteran",
     cell: ({ row }) => (
       <div className="flex flex-col">
-        <span className="font-bold">{row.original.meter.name}</span>
+        <span className="font-bold">{row.original.meter?.name}</span>
         <span className="text-muted-foreground text-xs">
-          {row.original.meter.meter_code || "Tanpa Kode"}
+          {row.original.meter?.meter_code || "Tanpa Kode"}
         </span>
       </div>
     ),

@@ -1,5 +1,6 @@
 import { ApiResponse } from "@/common/types/api";
 import api from "@/lib/api";
+import { BudgetTrackingType } from "@/modules/budget/services/annualBudget.service";
 const prefix = "/visualizations";
 
 type UsageCategory = "HEMAT" | "NORMAL" | "BOROS" | "UNKNOWN";
@@ -27,17 +28,23 @@ export type EnergyOutlookType = {
   status: UsageCategory;
   over: number;
 };
+
+export interface HeatmapDay {
+  id: string;
+  dateDisplay: string;
+  status: UsageCategory;
+  confidence: string | null;
+  color: string;
+}
+export interface HeatmapMonthGroup {
+  monthName: string;
+  offset: number;
+  days: HeatmapDay[];
+}
 export type YearlyHeatmapType = {
-  classification_date: string;
-  classification: UsageCategory;
-  confidence_score?: number;
-};
-export type BudgetTrackingType = {
-  year: string;
-  energyType: string;
-  initial: number;
-  used: number[];
-  saved: number[];
+  groupedData: HeatmapMonthGroup[];
+  statsSummary: Record<Exclude<UsageCategory, "UNKNOWN">, number>;
+  totalDays: number;
 };
 
 export type YearlyAnalysisType = {
@@ -86,14 +93,31 @@ export type BudgetBurnRateType = {
   efficent: number;
 };
 
+export interface TodaySummaryResponse {
+  meta: {
+    date: Date;
+    pax: number | null;
+  };
+  sumaries: NewDataCountNotification[];
+}
+
+export interface NewDataCountNotification {
+  summary_id: number;
+  summary_date: Date;
+  total_consumption: number;
+  total_cost: number;
+  meter_code: string;
+  type_name: "Electricity" | "Water" | "Fuel";
+  unit_of_measurement: string;
+  classification: string | null;
+}
+
 export const MeterRankApi = async (): Promise<ApiResponse<MeterRankType[]>> => {
   const result = await api.get(`${prefix}/meter-rank`);
   return result.data;
 };
 
-export const EnergyOutlookApi = async (): Promise<
-  ApiResponse<EnergyOutlookType[]>
-> => {
+export const EnergyOutlookApi = async (): Promise<ApiResponse<EnergyOutlookType[]>> => {
   const result = await api.get(`${prefix}/energy-outlook`);
   return result.data;
 };
@@ -101,7 +125,7 @@ export const EnergyOutlookApi = async (): Promise<
 export const yearlyHeatmapApi = async (
   meterId: number,
   year: number
-): Promise<ApiResponse<YearlyHeatmapType[]>> => {
+): Promise<ApiResponse<YearlyHeatmapType>> => {
   const result = await api.get(`${prefix}/yearly-heatmap`, {
     params: {
       meterId: meterId,
@@ -113,12 +137,31 @@ export const yearlyHeatmapApi = async (
 
 export type DailyAveragePaxType = { day: string; avgPax: number };
 
-export type getFuelRefillAnalysisType = {
+export interface FuelMonthRecord {
   month: string;
-  refill: number;
   consumption: number;
+  refill: number;
   remainingStock: number;
-};
+}
+
+export interface FuelAnalysisResult {
+  chartData: FuelMonthRecord[];
+  summary: {
+    totalConsumption: number;
+    totalRefill: number;
+    balance: number;
+    lastRefill: string;
+    status: "Safe" | "Critical";
+  };
+  latestStockInfo: {
+    month: string;
+    value: number;
+  };
+  stockThresholds: {
+    minStockLimit: number;
+  };
+}
+
 export type GetAnalysisQuery = {
   energyType: string;
   month: string;
@@ -142,15 +185,84 @@ export type MeterAnalysisData = {
   data: DailyAnalysisRecord[];
 };
 
+export interface MetricCompare {
+  current_value: number;
+  unit: string;
+  growth_percentage: number;
+}
+
+export interface WeatherMetric {
+  average_temp: number;
+  max_temp: number;
+  unit: string;
+}
+
+export interface EnergyMetricCard {
+  consumption: MetricCompare;
+  cost: MetricCompare;
+}
+
+export interface MetricCardsResult {
+  overview_metrics: {
+    pax: MetricCompare;
+    weather: WeatherMetric;
+    energy: Record<string, EnergyMetricCard>;
+  };
+}
+
+export interface UnifiedEnergyData {
+  category: string;
+  weekdayValue: number;
+  holidayValue: number;
+  unit?: string;
+}
+
+export interface DailyPaxData {
+  name: string;
+  date: string; // Saat melewati API (JSON), Date akan berubah menjadi ISO string
+  avgPax: number;
+}
+
+export interface EnergyPaxCorrelationResult {
+  energyComparison: UnifiedEnergyData[];
+  paxTrend: DailyPaxData[];
+}
+export const getMetricCard = async (
+  year?: number,
+  month?: number
+): Promise<ApiResponse<MetricCardsResult>> => {
+  const response = await api.get(`${prefix}/metric-cards`, {
+    params: {
+      year,
+      month,
+    },
+  });
+
+  return response.data;
+};
+
+export const getEnergyPaxCorrelationApi = async (
+  year?: number,
+  month?: number
+): Promise<ApiResponse<EnergyPaxCorrelationResult>> => {
+  const response = await api.get(`${prefix}/energy-pax-correlation`, {
+    params: {
+      year,
+      month,
+    },
+  });
+
+  return response.data;
+};
 export const getTrentConsumptionApi = async (
-  energyType: string,
+  energyId: number,
   year: number,
   month: number,
   meterId: number
 ): Promise<ApiResponse<MeterAnalysisData[]>> => {
   const response = await api.get(`${prefix}/trent-consumption`, {
     params: {
-      energyTypeName: energyType,
+      energyId: energyId,
       month: month,
       meterId: meterId,
       year,
@@ -160,20 +272,18 @@ export const getTrentConsumptionApi = async (
   return response.data;
 };
 
-export const getBudgetTrackingApi = async (): Promise<
-  ApiResponse<BudgetTrackingType[]>
-> => {
+export const getBudgetTrackingApi = async (): Promise<ApiResponse<BudgetTrackingType[]>> => {
   const result = await api.get(`${prefix}/budget-tracking`);
   return result.data;
 };
 
 export const getYearlyAnalysisApi = async (
-  energyTypeName: string,
+  energyId: number,
   year: number
 ): Promise<ApiResponse<YearlyAnalysisResult>> => {
   const result = await api.get(`${prefix}/yearly-analysis`, {
     params: {
-      energyTypeName: energyTypeName,
+      energyId: energyId,
       year: year,
     },
   });
@@ -237,8 +347,8 @@ export const getBudgetBurnRateApi = async (
 export const getFuelRefillAnalysisApi = async (
   year: number,
   meterId: number
-): Promise<ApiResponse<getFuelRefillAnalysisType[]>> => {
-  const result = await api.get(`${prefix}/fuel-refill-analysis`, {
+): Promise<ApiResponse<FuelAnalysisResult>> => {
+  const result = await api.get(`${prefix}/yearly-logistics`, {
     params: {
       year: year,
       meterId: meterId,
@@ -246,3 +356,47 @@ export const getFuelRefillAnalysisApi = async (
   });
   return result.data;
 };
+
+export const getTodaySummaryApi = async (): Promise<ApiResponse<TodaySummaryResponse>> => {
+  const response = await api.get(`${prefix}/today-summary`);
+  return response.data;
+};
+
+export interface DashboardCardMetersConfig {
+  electricityMeterIds: number[];
+  waterMeterIds: number[];
+  fuelMeterIds: number[];
+}
+
+export interface MeterOptionItem {
+  meter_id: number;
+  meter_code: string;
+  name: string | null;
+  category: "TERMINAL" | "KANTOR" | "LAINNYA";
+  energy_type_id: number;
+  location?: {
+    name: string;
+  } | null;
+}
+
+export interface DashboardCardConfigResponse {
+  config: DashboardCardMetersConfig;
+  availableMeters: {
+    electricity: MeterOptionItem[];
+    water: MeterOptionItem[];
+    fuel: MeterOptionItem[];
+  };
+}
+
+export const getDashboardCardConfigApi = async (): Promise<ApiResponse<DashboardCardConfigResponse>> => {
+  const response = await api.get(`${prefix}/card-config`);
+  return response.data;
+};
+
+export const updateDashboardCardConfigApi = async (
+  payload: DashboardCardMetersConfig
+): Promise<ApiResponse<DashboardCardMetersConfig>> => {
+  const response = await api.put(`${prefix}/card-config`, payload);
+  return response.data;
+};
+

@@ -1,16 +1,19 @@
 import { ApiResponse } from "@/common/types/api";
-import { AnnualBudget, PricingSchemeDetail } from "@/common/types/budget";
+import { AnnualBudget, AnnualBudgetDetail, AnnualBudgetRemaining } from "@/common/types/budget";
 import { EnergyTypeName } from "@/common/types/energy";
 import api from "@/lib/api";
 import { AnnualBudgetFormValues } from "@/modules/budget/schemas/annualBudget.schema";
 
-// --- Types ---
-
+export type BudgetTrackingType = {
+  year: string;
+  energyType: string;
+  initial: number;
+  used: number[];
+  saved: number[];
+};
 export type YearOptionsData = {
   availableYears: number[];
 };
-
-// --- API Implementation ---
 
 export const annualBudgetApi = {
   getAll: async (
@@ -25,7 +28,8 @@ export const annualBudgetApi = {
     });
     return response.data;
   },
-  getById: async (budgetId: number): Promise<ApiResponse<PricingSchemeDetail>> => {
+
+  getById: async (budgetId: number): Promise<ApiResponse<AnnualBudgetDetail>> => {
     const response = await api.get(`/annual-budgets/${budgetId}`);
     return response.data;
   },
@@ -44,18 +48,24 @@ export const annualBudgetApi = {
     await api.delete(`/annual-budgets/${budgetId}`);
   },
 
-  getYearOptions: async (): Promise<ApiResponse<YearOptionsData>> => {
-    const response = await api.get("/annual-budgets/year-options");
-    return response.data;
-  },
-
-  showRemaining: async (id: number) => {
+  showRemaining: async (id: number): Promise<ApiResponse<AnnualBudgetRemaining>> => {
     const response = await api.get(`/annual-budgets/${id}/remaining`);
-
     return response.data;
   },
 };
 
-// Export alias untuk menjaga kompatibilitas dengan kode lama jika diperlukan
+export const getBudgetTrackingApi = async (
+  year: number,
+  energyTypeId: number
+): Promise<ApiResponse<BudgetTrackingType>> => {
+  const result = await api.get(`/annual-budgets/tracking`, {
+    params: {
+      year,
+      energy_type_id: energyTypeId,
+    },
+  });
+
+  return result.data;
+};
+
 export const getAnnualBudgetApi = annualBudgetApi.getAll;
-export const yearOptionsApi = annualBudgetApi.getYearOptions;

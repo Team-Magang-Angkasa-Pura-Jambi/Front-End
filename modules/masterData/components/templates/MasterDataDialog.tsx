@@ -9,11 +9,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/common/components/ui/dialog";
+import { ScrollArea } from "@/common/components/ui/scroll-area"; // 1. Import ScrollArea
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import { ReactNode } from "react";
 
-// 1. Fix Typo dan Definisikan Mapping Width
+// Definisikan Mapping Width
 export type MaxWidth =
   | "sm"
   | "md"
@@ -80,7 +81,7 @@ export const MasterDataDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button
-          onClick={(e) => {
+          onClick={(_e) => {
             // Jalankan custom logic (misal: reset form) sebelum dialog trigger bawaan
             if (onTriggerClick) onTriggerClick();
           }}
@@ -92,31 +93,37 @@ export const MasterDataDialog = ({
       </DialogTrigger>
 
       <DialogContent
-        // 2. Setup Layout Modal: Max Height & Width
+        // Setup Layout Modal: Max Height & Width
         className={cn(
-          "max-h-[85vh] overflow-hidden border-none bg-transparent p-0 shadow-2xl",
+          "overflow-hidden border-none bg-transparent p-0 shadow-2xl",
           "flex flex-col gap-0", // Reset gap default shadcn
           sizeClass
         )}
       >
-        <div className="bg-background flex h-full flex-col overflow-hidden rounded-xl border shadow-sm">
-          {/* 3. Header Section (Sticky Top) */}
-          <div className="bg-muted/10 shrink-0 border-b px-6 py-4">
-            <DialogHeader>
-              <DialogTitle className="text-foreground text-xl font-bold tracking-tight">
-                {title}
-              </DialogTitle>
-              {description && (
-                <DialogDescription className="text-muted-foreground text-sm">
-                  {description}
-                </DialogDescription>
-              )}
-            </DialogHeader>
-          </div>
+        <ScrollArea className="max-h-[85vh] w-full flex-1">
+          <div className="bg-background flex h-full flex-col overflow-hidden rounded-xl border shadow-sm">
+            {/* Header Section (Sticky Top) */}
+            <div className="bg-muted/10 shrink-0 border-b px-6 py-4">
+              <DialogHeader>
+                <DialogTitle className="text-foreground text-xl font-bold tracking-tight">
+                  {title}
+                </DialogTitle>
+                {description && (
+                  <DialogDescription className="text-muted-foreground text-sm">
+                    {description}
+                  </DialogDescription>
+                )}
+              </DialogHeader>
+            </div>
 
-          {/* 4. Content Section (Scrollable) */}
-          <div className="custom-scrollbar flex-1 overflow-y-auto p-6">{children}</div>
-        </div>
+            {/* Content Section (Scrollable dengan ScrollArea) */}
+            {/* 
+              Padding p-6 dipindah ke div dalam sini agar scrollbar bawaan 
+              shadcn tetap menempel di ujung kanan border dialog 
+            */}
+            <div className="p-6">{children}</div>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

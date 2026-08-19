@@ -62,7 +62,6 @@ export function TargetEfficiencyForm({ itemId, onAfterSave }: TargetEfficiencyFo
   });
 
   const initialData = useMemo(() => targetData?.data, [targetData]);
-  console.log(initialData);
 
   // 3. Setup Form
   const form = useForm<TargetEfficiencyFormValues>({
@@ -107,13 +106,38 @@ export function TargetEfficiencyForm({ itemId, onAfterSave }: TargetEfficiencyFo
   const selectedMeterId = form.watch("meter_id");
 
   // 6. Handle Submit
+  // 6. Handle Submit
   const onSubmit = (values: TargetEfficiencyFormValues) => {
-    save(values);
+    // Safety check untuk memuaskan TypeScript (meskipun biasanya form sudah ditahan Zod jika kosong)
+    if (!values.period_start || !values.period_end) {
+      return;
+    }
+
+    const adjustedValues = {
+      ...values,
+      // Kunci ke UTC Midnight, tipe data tetap object Date!
+      period_start: new Date(
+        Date.UTC(
+          values.period_start.getFullYear(),
+          values.period_start.getMonth(),
+          values.period_start.getDate()
+        )
+      ),
+      period_end: new Date(
+        Date.UTC(
+          values.period_end.getFullYear(),
+          values.period_end.getMonth(),
+          values.period_end.getDate()
+        )
+      ),
+    };
+
+    save(adjustedValues);
 
     if (onAfterSave) {
       onAfterSave();
     }
-  };
+  };    
 
   if (isEditing && isLoadingTarget && isLoadingMeters) return <ComponentLoader />;
 

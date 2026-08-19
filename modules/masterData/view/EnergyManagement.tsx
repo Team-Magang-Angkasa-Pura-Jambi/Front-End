@@ -4,12 +4,15 @@ import {
   AlertTriangle,
   Edit3,
   GaugeCircle,
+  History,
   Info,
   MonitorDot,
   Plus,
   Settings2,
   Trash2,
 } from "lucide-react";
+import { useState } from "react";
+import { SentinelAuditLog } from "../schemas/SentinelAuditLog";
 
 import {
   Accordion,
@@ -44,18 +47,52 @@ import {
   DialogTitle,
 } from "@/common/components/ui/dialog";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
+
 import { LoadingSkeleton } from "../components/molecules/LoadingSkeleton";
 import { EnergyTypeForm } from "../components/organisms/energyType.form";
+import { ReadingTypeForm } from "../components/organisms/readingType.form";
 import { MasterDataDialog } from "../components/templates/MasterDataDialog";
 import { useEnergyManagement } from "../hooks/useEnergyManagement";
+import { ApiErrorResponse } from "../hooks/useResource";
+import { deleteReadingTypeApi } from "../services/readingsType.service";
+import { EnergyType } from "../types";
+
+// ============================================================================
+// 1. TYPE DEFINITIONS (PRO-DEV PRACTICE)
+// Pastikan tipe ini ada di "../types" Anda. Jika belum, deklarasikan seperti ini:
+// ============================================================================
+export interface MeterConfig {
+  meter?: {
+    name: string;
+    meter_code: string;
+  };
+}
+
+export interface ReadingType {
+  reading_type_id: number;
+  type_name: string;
+  unit: string;
+  meter_configs?: MeterConfig[];
+}
+
+// Tipe khusus untuk state penghapusan agar propertinya ketat (strict)
+interface ReadingToDelete {
+  id: number;
+  name: string;
+}
 
 export const UnifiedEnergyManagement = () => {
-  // Ambil semua state dan function dari Custom Hook Management
+  const queryClient = useQueryClient();
+
+  // 1. Hook Induk (Energy Management)
   const {
     energyData,
     isLoading,
     isSaving,
-    isDeleting,
+    isDeleting: isDeletingEnergy, // Re-name agar tidak bingung dengan loading delete reading type
     isFormOpen,
     editingData,
     itemToDelete,
@@ -67,6 +104,56 @@ export const UnifiedEnergyManagement = () => {
     handleConfirmDelete,
     getIcon,
   } = useEnergyManagement();
+
+  // 2. State Lokal dengan Typing yang Ketat
+  const [isAuditOpen, setIsAuditOpen] = useState<boolean>(false);
+  const [isReadingFormOpen, setIsReadingFormOpen] = useState<boolean>(false);
+  const [readingToDelete, setReadingToDelete] = useState<ReadingToDelete | null>(null);
+  const [selectedEnergy, setSelectedEnergy] = useState<EnergyType | null>(null);
+  const [selectedReadingType, setSelectedReadingType] = useState<ReadingType | null>(null);
+
+  // 3. Handlers untuk Reading Type (Menggunakan tipe objek yang tepat)
+  const   handleAddReadingType = (energy: EnergyType) => {
+    setSelectedEnergy(energy);
+    setSelectedReadingType(null); // Mode Create
+    setIsReadingFormOpen(true);
+  };
+
+  const handleEditReadingType = (readingType: ReadingType, energy: EnergyType) => {
+    setSelectedEnergy(energy);
+    setSelectedReadingType(readingType); // Mode Edit
+    setIsReadingFormOpen(true);
+  };
+
+  const handleDeleteReadingType = (readingTypeId: number, typeName: string) => {
+    setReadingToDelete({ id: readingTypeId, name: typeName });
+  };
+
+  // 4. Mutasi Delete dengan Destructuring isPending
+  const { mutate: deleteReadingType, isPending: isDeletingReadingType } = useMutation<
+    unknown,
+    AxiosError<ApiErrorResponse>,
+    number
+  >({
+    mutationFn: (typeReadingId: number) => deleteReadingTypeApi(typeReadingId),
+    onSuccess: () => {
+      toast.success("Parameter berhasil dihapus!");
+      queryClient.invalidateQueries({ queryKey: ["energyTypes"] });
+      setReadingToDelete(null); // Tutup modal otomatis saat sukses
+    },
+    onError: (error) => {
+      toast.error("Terjadi Kesalahan", {
+        description: error?.response?.data?.message || "Gagal menghapus data.",
+      });
+    },
+  });
+
+  // Handler konfirmasi delete tidak perlu parameter, langsung ambil dari state.
+  // Ini menghindari error TS: argumen "number | undefined" saat dipanggil di JSX.
+  const confirmDeleteReadingType = () => {
+    if (!readingToDelete) return;
+    deleteReadingType(readingToDelete.id);
+  };
 
   if (isLoading) return <LoadingSkeleton />;
 
@@ -84,23 +171,38 @@ export const UnifiedEnergyManagement = () => {
             </CardDescription>
           </div>
 
-          <MasterDataDialog
-            isOpen={isFormOpen}
-            onOpenChange={setIsFormOpen}
-            onTriggerClick={handleAddNew}
-            triggerLabel="Tipe Baru"
-            title={
-              editingData ? `Edit Konfigurasi ${editingData.name}` : "Registrasi Tipe Energi Baru"
-            }
-            description="Sesuaikan nama energi, unit standar, dan daftar parameter bacaan."
-            maxWidth="2xl"
-          >
-            <EnergyTypeForm
-              initialData={editingData}
-              onSubmit={handleUpsert}
-              isLoading={isSaving}
-            />
-          </MasterDataDialog>
+          <div className="flex items-center gap-2">
+            <MasterDataDialog
+              isOpen={isAuditOpen}
+              onOpenChange={setIsAuditOpen}
+              triggerLabel="Riwayat"
+              triggerIcon={<History className="mr-1.5 h-4 w-4" />}
+              triggerClassName="bg-slate-800 hover:bg-slate-900 text-white transition-colors"
+              title="Audit Log Parameter Energi"
+              description="Menampilkan jejak audit perubahan konfigurasi pada Tipe Energi & Parameter Bacaan."
+              maxWidth="3xl"
+            >
+              <SentinelAuditLog entityTable="EnergyType,ReadingType" height="h-[65vh]" />
+            </MasterDataDialog>
+
+            <MasterDataDialog
+              isOpen={isFormOpen}
+              onOpenChange={setIsFormOpen}
+              onTriggerClick={handleAddNew}
+              triggerLabel="Tipe Baru"
+              title={
+                editingData ? `Edit Konfigurasi ${editingData.name}` : "Registrasi Tipe Energi Baru"
+              }
+              description="Sesuaikan nama energi, unit standar, dan daftar parameter bacaan."
+              maxWidth="2xl"
+            >
+              <EnergyTypeForm
+                initialData={editingData}
+                onSubmit={handleUpsert}
+                isLoading={isSaving}
+              />
+            </MasterDataDialog>
+          </div>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -113,7 +215,7 @@ export const UnifiedEnergyManagement = () => {
               >
                 <AccordionTrigger className="group p-5 hover:no-underline">
                   <div className="flex items-center gap-5 text-left">
-                    <div className="bg-muted/50 border-border/50 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition-transform group-hover:scale-105">
+                    <div className="border-border/50 bg-muted/50 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition-transform group-hover:scale-105">
                       {getIcon(energy.name)}
                     </div>
                     <div className="space-y-1">
@@ -121,7 +223,7 @@ export const UnifiedEnergyManagement = () => {
                         <span className="text-lg font-bold">{energy.name}</span>
                         <Badge
                           variant="secondary"
-                          className="bg-primary/5 text-primary border-primary/20 h-5 px-2 py-0 font-mono text-[10px]"
+                          className="border-primary/20 bg-primary/5 text-primary h-5 px-2 py-0 font-mono text-[10px]"
                         >
                           {energy.unit_standard}
                         </Badge>
@@ -179,22 +281,31 @@ export const UnifiedEnergyManagement = () => {
                               </Badge>
                             </div>
 
-                            <div className="flex translate-x-2 transform gap-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
+                            <div className="flex transform gap-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
                               <Button
-                                onClick={() => handleEditEnergy(energy)}
+                                onClick={() => handleEditReadingType(param, energy)}
                                 variant="ghost"
                                 size="icon"
                                 className="hover:border-border hover:bg-background h-8 w-8 rounded-full border border-transparent"
                               >
                                 <Edit3 className="h-3.5 w-3.5" />
                               </Button>
+                              <Button
+                                onClick={() =>
+                                  handleDeleteReadingType(param.reading_type_id, param.type_name)
+                                }
+                                variant="ghost"
+                                size="icon"
+                                className="hover:border-border hover:bg-background h-8 w-8 rounded-full border border-transparent"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
                             </div>
                           </div>
 
-                          {/* METER CHIPS SECTION */}
                           {param.meter_configs && param.meter_configs.length > 0 && (
                             <div className="flex flex-wrap gap-1.5">
-                              {param.meter_configs.map((config, idx) => (
+                              {param.meter_configs.map((config, idx: number) => (
                                 <div
                                   key={idx}
                                   className="bg-background/50 text-muted-foreground hover:bg-background flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] transition-colors"
@@ -212,9 +323,10 @@ export const UnifiedEnergyManagement = () => {
                       ))}
 
                       <Button
-                        variant="tech" // Menggunakan ghost agar background awal transparan
-                        onClick={() => handleEditEnergy(energy)}
+                        variant="ghost"
+                        onClick={() => handleAddReadingType(energy)}
                         size="lg"
+                        className="group hover:bg-muted/50 flex justify-start gap-3"
                       >
                         <div className="bg-muted-foreground/10 group-hover:bg-primary/10 flex h-6 w-6 items-center justify-center rounded-full transition-colors">
                           <Plus className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-all duration-300 group-hover:rotate-90" />
@@ -232,23 +344,31 @@ export const UnifiedEnergyManagement = () => {
         </CardContent>
       </Card>
 
-      {/* --- MODAL FORM --- */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      {/* MODAL: FORM READING TYPE */}
+      <Dialog open={isReadingFormOpen} onOpenChange={setIsReadingFormOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>
-              {editingData ? `Edit Konfigurasi ${editingData.name}` : "Registrasi Tipe Energi Baru"}
+              {selectedReadingType
+                ? `Edit Parameter: ${selectedReadingType.type_name}`
+                : "Registrasi Parameter Baru"}
             </DialogTitle>
             <DialogDescription>
-              Sesuaikan nama energi, unit standar, dan daftar parameter bacaan.
+              Kelola tipe pembacaan untuk energi {selectedEnergy?.name || ""}.
             </DialogDescription>
           </DialogHeader>
 
-          <EnergyTypeForm initialData={editingData} onSubmit={handleUpsert} isLoading={isSaving} />
+          {selectedEnergy && (
+            <ReadingTypeForm
+              energyId={selectedEnergy.energy_type_id}
+              readingTypeId={selectedReadingType?.reading_type_id}
+              onSuccessCallback={() => setIsReadingFormOpen(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
 
-      {/* --- ALERT DIALOG DELETE --- */}
+      {/* MODAL: HAPUS ENERGY TYPE */}
       <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
         <AlertDialogContent className="max-w-[400px]">
           <AlertDialogHeader>
@@ -262,16 +382,48 @@ export const UnifiedEnergyManagement = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingEnergy}>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
                 handleConfirmDelete();
               }}
               className="bg-red-600 text-white hover:bg-red-700"
-              disabled={isDeleting}
+              disabled={isDeletingEnergy}
             >
-              {isDeleting ? "Menghapus..." : "Ya, Hapus"}
+              {isDeletingEnergy ? "Menghapus..." : "Ya, Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* MODAL: HAPUS READING TYPE */}
+      <AlertDialog
+        open={!!readingToDelete}
+        onOpenChange={(open) => !open && setReadingToDelete(null)}
+      >
+        <AlertDialogContent className="max-w-[400px]">
+          <AlertDialogHeader>
+            <div className="mb-2 flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              <AlertDialogTitle>Hapus Parameter Bacaan?</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-sm">
+              Menghapus parameter <strong>{readingToDelete?.name}</strong>. Aksi ini tidak dapat
+              dibatalkan dan akan gagal jika parameter ini masih terikat pada konfigurasi meteran.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingReadingType}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDeleteReadingType();
+              }}
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={isDeletingReadingType} // Loading state milik ReadingType
+            >
+              {isDeletingReadingType ? "Menghapus..." : "Ya, Hapus"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

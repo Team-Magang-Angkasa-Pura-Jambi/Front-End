@@ -1,16 +1,15 @@
 import {
   Building,
+  Calculator,
   DollarSign,
   DollarSignIcon,
   Droplets,
-  Tags,
   TrendingUp,
   Zap,
 } from "lucide-react";
 
-// import { ReadingTypeManagement } from "../components/ReadingTypeManagements";
+import { CalculationTemplateManagement } from "../view/CalculationTemplateManagement";
 import { UnifiedEnergyManagement } from "../view/EnergyManagement";
-import { EntityManagement } from "../view/EntityManagement";
 import { MeterManagement } from "../view/MeterManagement";
 import { SchemePriceManagement } from "../view/SchemePriceManagement";
 import { TargetEfficiencyManagement } from "../view/targetEfficienyManagement";
@@ -33,13 +32,18 @@ export const masterDataGroups = [
         icon: Droplets,
         component: <UnifiedEnergyManagement />,
       },
-
       {
-        key: "entities",
-        title: "Entitas",
-        icon: Tags,
-        component: <EntityManagement />,
+        key: "calculation-formulas",
+        title: "Kalkulasi & Rumus",
+        icon: Calculator,
+        component: <CalculationTemplateManagement />,
       },
+      // {
+      //   key: "entities",
+      //   title: "Entitas & Lokasi",
+      //   icon: MapPin,
+      //   component: <EntityManagement />,
+      // },
     ],
   },
   {
@@ -53,12 +57,6 @@ export const masterDataGroups = [
         icon: DollarSignIcon,
         component: <SchemePriceManagement />,
       },
-      // {
-      //   key: "taxes",
-      //   title: "Pajak",
-      //   icon: Percent,
-      //   component: <TaxManagement />,
-      // },
       {
         key: "efficiency-targets",
         title: "Target Efisiensi",

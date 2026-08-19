@@ -13,15 +13,15 @@ import {
 export const useMeterQuery = () => {
   const queryClient = useQueryClient();
 
-  const useGetMeters = (typeName?: string) =>
+  const useGetMeters = (energy_type_id?: number) =>
     useQuery({
-      queryKey: ["meters", typeName],
-      queryFn: () => getMetersApi(typeName),
+      queryKey: ["meters", energy_type_id],
+      queryFn: () => getMetersApi(),
       staleTime: 1000 * 60 * 5,
       refetchOnWindowFocus: false,
     });
 
-  const useGetMeterDetail = (id: number | null) =>
+  const useGetMeterDetail = (id?: number | null) =>
     useQuery({
       queryKey: ["meter-detail", id],
       queryFn: () => getMeterByIdApi(id!),

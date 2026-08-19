@@ -1,31 +1,55 @@
-import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 
-import { getMetersApi } from "@/modules/masterData/services/meter.service";
+import { MeterType } from "@/common/types/meters";
+import { useMeterQuery } from "@/modules/masterData/hooks/useMeterQuery";
 import { getFuelRefillAnalysisApi } from "../service/visualizations.service";
 
-export const useFuelRefillAnalysis = () => {
-  const [year, setYear] = useState<string>(() =>
-    new Date().getFullYear().toString()
-  );
+export interface FuelMonthRecord {
+  month: string;
+  consumption: number;
+  refill: number;
+  remainingStock: number;
+}
 
-  const [meterId, setMeterId] = useState<string | undefined>(undefined);
+export interface FuelSummary {
+  totalConsumption: number;
+  totalRefill: number;
+  balance: number;
+  lastRefill: string;
+  status: "Safe" | "Critical";
+}
+
+export const useFuelRefillAnalysis = () => {
+  const [year, setYear] = useState<string>(() => new Date().getFullYear().toString());
+  const [meterId, setMeterId] = useState<string>("");
 
   const yearOptions = useMemo(() => {
     const curr = new Date().getFullYear();
     return [curr - 1, curr, curr + 1].map(String);
   }, []);
 
-  const { data: meterDataResponse, isLoading: isMeterLoading } = useQuery({
-    queryKey: ["meters", "fuel"],
-    queryFn: () => getMetersApi("Fuel"),
-    staleTime: 5 * 60 * 1000,
-  });
+  const { useGetMeters } = useMeterQuery();
 
-  const meterData = useMemo(
-    () => meterDataResponse?.data || [],
-    [meterDataResponse]
-  );
+  const { data: meterDataResponse, isLoading: isMeterLoading } = useGetMeters();
+
+  const meterData: MeterType[] = useMemo(() => {
+    const rawData = meterDataResponse?.data;
+
+    const finalArray = Array.isArray(rawData)
+      ? rawData
+      : rawData && typeof rawData === "object" && "meter" in rawData && Array.isArray(rawData.meter)
+        ? rawData.meter
+        : [];
+
+    return finalArray.filter((meter: MeterType) => !!meter.tank_profile);
+  }, [meterDataResponse]);
+
+  useEffect(() => {
+    if (meterData.length > 0 && !meterId) {
+      setMeterId(String(meterData[0].meter_id));
+    }
+  }, [meterData, meterId]);
 
   useEffect(() => {
     if (meterData.length > 0 && !meterId) {
@@ -40,65 +64,37 @@ export const useFuelRefillAnalysis = () => {
     error,
   } = useQuery({
     queryKey: ["fuel-refill-analysis", year, meterId],
-    queryFn: () => getFuelRefillAnalysisApi(parseInt(year), parseInt(meterId!)),
-
+    queryFn: () => getFuelRefillAnalysisApi(parseInt(year), parseInt(meterId)),
     enabled: !!meterId,
+    staleTime: 5 * 60 * 1000,
   });
 
-  const chartData = useMemo(() => apiResponse?.data || [], [apiResponse]);
+  const chartData: FuelMonthRecord[] = useMemo(
+    () => apiResponse?.data?.chartData || [],
+    [apiResponse]
+  );
 
-  const stockThresholds = useMemo(() => {
-    if (!chartData.length) return { maxCapacity: 0, minStockLimit: 0 };
+  const stockThresholds = useMemo(
+    () => apiResponse?.data?.stockThresholds || { minStockLimit: 0 },
+    [apiResponse]
+  );
 
-    const maxRecordedStock = Math.max(
-      ...chartData.map((d) => d.remainingStock)
-    );
+  const latestStockInfo = useMemo(
+    () => apiResponse?.data?.latestStockInfo || { month: "-", value: 0 },
+    [apiResponse]
+  );
 
-    const minStockLimit = maxRecordedStock * 0.2;
-
-    return { maxCapacity: maxRecordedStock, minStockLimit };
-  }, [chartData]);
-
-  const latestStockInfo = useMemo(() => {
-    if (!chartData.length) return { month: "-", value: 0 };
-
-    const lastValidData = [...chartData]
-      .reverse()
-      .find((d) => d.remainingStock > 0);
-
-    return {
-      month: lastValidData ? lastValidData.month : "-",
-      value: lastValidData ? lastValidData.remainingStock : 0,
-    };
-  }, [chartData]);
-
-  const summary = useMemo(() => {
-    if (!chartData.length)
-      return { balance: 0, lastRefill: "-", status: "Neutral" };
-
-    const totalRefill = chartData.reduce(
-      (acc: number, curr) => acc + curr.refill,
-      0
-    );
-    const totalCons = chartData.reduce(
-      (acc: number, curr) => acc + curr.consumption,
-      0
-    );
-
-    const balance = totalRefill - totalCons;
-
-    const lastRefillData = [...chartData].reverse().find((d) => d.refill > 0);
-
-    const isCritical = latestStockInfo.value < stockThresholds.minStockLimit;
-
-    return {
-      totalRefill,
-      totalCons,
-      balance,
-      lastRefill: lastRefillData ? lastRefillData.month : "Belum ada",
-      status: isCritical ? "Critical" : "Safe",
-    };
-  }, [chartData, latestStockInfo.value, stockThresholds.minStockLimit]);
+  const summary: FuelSummary = useMemo(
+    () =>
+      apiResponse?.data?.summary || {
+        totalConsumption: 0,
+        totalRefill: 0,
+        balance: 0,
+        lastRefill: "-",
+        status: "Safe",
+      },
+    [apiResponse]
+  );
 
   const isLoading = isMeterLoading || isAnalysisLoading;
 

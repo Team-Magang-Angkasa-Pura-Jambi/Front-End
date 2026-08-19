@@ -70,7 +70,7 @@ const MeterManagementContent = () => {
               description="Menampilkan jejak audit perubahan konfigurasi pada sistem meter Bandara Sultan Thaha."
               maxWidth="2xl"
             >
-              <SentinelAuditLog entityTable="Meter" height="h-[65vh]" />
+              <SentinelAuditLog entityTable="Meter,MeterReadingConfig" height="h-[65vh]" />
             </MasterDataDialog>
 
             {/* Upsert Meter Dialog */}

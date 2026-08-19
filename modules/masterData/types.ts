@@ -2,9 +2,8 @@
 
 export interface EnergyType {
   energy_type_id: number;
-  type_name: string;
-  unit_of_measurement: string;
-  is_active: boolean;
+  name: string;
+  unit_standard: string;
 }
 
 export interface Meter {

@@ -5,12 +5,6 @@ import { toast } from "sonner";
 import { UploadDropzone } from "@/lib/uploadthing";
 import { useAuthStore } from "@/stores/authStore";
 
-interface ImageUploadProps {
-  value: string | null | undefined;
-  onChange: (url: string) => void;
-  disabled?: boolean;
-  endpoint?: "profileImage";
-}
 
 export const ImageUpload = ({ value, onChange }: any) => {
   const token = useAuthStore((state) => state.token);

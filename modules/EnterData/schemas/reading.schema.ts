@@ -7,7 +7,7 @@ export const formSchema = z.object({
       error: "Format tanggal salah",
     }),
     notes: z.string().optional().nullable(),
-    evidence_image_url: z.string().url("URL gambar tidak valid").optional().nullable(),
+    evidence_image_url: z.string().optional().nullable(),
     details: z
       .array(
         z.object({

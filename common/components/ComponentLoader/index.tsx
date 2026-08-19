@@ -8,13 +8,10 @@ interface ComponentLoaderProps {
   className?: string;
 }
 
-export const ComponentLoader = ({
-  text = "Memuat data...",
-  className,
-}: ComponentLoaderProps) => {
+export const ComponentLoader = ({ text = "Memuat data...", className }: ComponentLoaderProps) => {
   return (
     <div
-      className={`relative flex min-h-[200px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white/50 p-8 shadow-sm ${className}`}
+      className={`relative flex min-h-[200px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-slate-100 p-8 shadow-sm ${className}`}
     >
       {/* Background Shimmer Effect */}
       <motion.div

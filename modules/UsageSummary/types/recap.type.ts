@@ -2,15 +2,11 @@ import { EnergyTypeName } from "@/common/types/energy";
 import { DateRange } from "react-day-picker";
 
 // 1. Definisikan Enum/Union untuk konsistensi di seluruh aplikasi
-export type ClassificationStatus =
-  | "HEMAT"
-  | "NORMAL"
-  | "BOROS"
-  | "UNKNOWN"
-  | null;
+export type ClassificationStatus = "HEMAT" | "NORMAL" | "BOROS" | "UNKNOWN" | null;
 
 // 2. Gunakan satu interface utama untuk data baris tabel
 export interface RecapDataRow {
+  id: number;
   date: string | Date;
   consumption: number | null;
   wbp: number | null;
@@ -19,8 +15,8 @@ export interface RecapDataRow {
   pax: number | null;
   cost: number | null;
   cost_before_tax?: number | null; // Tambahkan untuk mendukung kalkulasi pajak
-  max_temp: number | null;
-  avg_temp: number | null;
+  suhu_max: number | null;
+  suhu_rata_rata: number | null;
   is_workday?: boolean | null;
   classification: ClassificationStatus;
   confidence_score?: number | null;

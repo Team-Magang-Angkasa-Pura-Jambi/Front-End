@@ -1,6 +1,7 @@
 import z from "zod";
 
 export const readingTypeItemSchema = z.object({
+  id: z.number().optional().nullable(),
   type_name: z.string().min(1, "Nama bacaan wajib diisi."),
   unit: z.string().min(1, "Satuan wajib diisi."),
 });

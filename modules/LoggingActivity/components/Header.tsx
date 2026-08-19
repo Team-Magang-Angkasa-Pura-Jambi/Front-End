@@ -27,13 +27,14 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/common/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-import { EnergyTypeName } from "@/common/types/energy";
+import { EnergyType } from "@/common/types/energy";
 import { getMetersApi } from "@/modules/masterData/services/meter.service";
 import { HistoryFilters } from "../types";
 
 interface RecapHeaderProps {
-  filters: HistoryFilters;
-  setFilters: React.Dispatch<React.SetStateAction<HistoryFilters>>;
+  filters: HistoryFilters & { energy_type_id?: number; type?: string };
+  setFilters: React.Dispatch<React.SetStateAction<any>>;
+  typesEnergies: EnergyType[];
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -43,29 +44,52 @@ const STATUS_STYLES: Record<string, string> = {
   DELETED: "bg-red-50 text-red-700 border-red-200 hover:bg-red-100",
 };
 
-export const RecapHeader: React.FC<RecapHeaderProps> = ({ filters, setFilters }) => {
+export const RecapHeader: React.FC<RecapHeaderProps> = ({ filters, setFilters, typesEnergies }) => {
+  const activeTabValue = filters.type === "Pax" ? "Pax" : filters.energy_type_id?.toString() || "";
+
   const { data: metersResponse, isLoading: isLoadingMeters } = useQuery({
-    queryKey: ["metersForRecap", filters.type],
-    queryFn: () => getMetersApi(filters.meterId),
+    queryKey: ["metersForRecap", filters.energy_type_id],
+    queryFn: () => getMetersApi(filters.energy_type_id as number),
     staleTime: 1000 * 60 * 5,
+
+    enabled: activeTabValue !== "Pax" && !!filters.energy_type_id,
   });
 
-  const meters = useMemo(() => metersResponse?.data.meter || [], [metersResponse]);
+  const meters = useMemo(() => metersResponse?.data?.meter || [], [metersResponse]);
 
   const handleTypeChange = (value: string) => {
-    const newType = value as EnergyTypeName;
-    setFilters((prev) => ({
-      ...prev,
-      type: newType,
-      meterId: undefined,
-    }));
+    if (value === "Pax") {
+      setFilters((prev: any) => ({
+        ...prev,
+        type: "Pax",
+        energy_type_id: undefined,
+        meter_id: undefined,
+      }));
+    } else {
+      setFilters((prev: any) => ({
+        ...prev,
+        type: "Energy",
+        energy_type_id: Number(value),
+        meter_id: undefined,
+      }));
+    }
   };
 
   useEffect(() => {
-    if (!isLoadingMeters && meters.length > 0 && !filters.meterId) {
-      setFilters((prev) => ({ ...prev, meterId: meters[0].meter_id }));
+    if (!isLoadingMeters && meters.length > 0 && !filters.meter_id && filters.type !== "Pax") {
+      setFilters((prev: any) => ({ ...prev, meter_id: meters[0].meter_id }));
     }
-  }, [meters, filters.meterId, isLoadingMeters, setFilters]);
+  }, [meters, filters.meter_id, isLoadingMeters, filters.type, setFilters]);
+
+  useEffect(() => {
+    if (typesEnergies?.length > 0 && !filters.energy_type_id && filters.type !== "Pax") {
+      setFilters((prev: any) => ({
+        ...prev,
+        type: "Energy",
+        energy_type_id: typesEnergies[0].energy_type_id,
+      }));
+    }
+  }, [typesEnergies, filters.energy_type_id, filters.type, setFilters]);
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
@@ -77,7 +101,6 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({ filters, setFilters })
     <Card className="border-l-primary border-l-4 shadow-sm transition-all hover:shadow-md">
       <CardHeader className="pb-4">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
-          {/* TITLE SECTION */}
           <div className="space-y-1">
             <CardTitle className="text-xl font-bold tracking-tight">Riwayat Data</CardTitle>
             <CardDescription className="text-sm">
@@ -85,12 +108,20 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({ filters, setFilters })
             </CardDescription>
           </div>
 
-          {/* TABS KATEGORI (Dipindah ke Header agar hirarki lebih jelas) */}
-          <Tabs value={filters.type} onValueChange={handleTypeChange} className="w-full md:w-auto">
-            <TabsList className="grid w-full grid-cols-3 md:w-[300px]">
-              <TabsTrigger value="Electricity">Listrik</TabsTrigger>
-              <TabsTrigger value="Water">Air</TabsTrigger>
-              <TabsTrigger value="Fuel">BBM</TabsTrigger>
+          <Tabs
+            value={activeTabValue}
+            onValueChange={handleTypeChange}
+            className="w-full md:w-auto"
+          >
+            <TabsList className="grid w-full grid-cols-4 md:w-[400px]">
+              {typesEnergies?.map((e) => (
+                <TabsTrigger key={e.energy_type_id} value={e.energy_type_id.toString()}>
+                  {e.name}
+                </TabsTrigger>
+              ))}
+              <TabsTrigger key="Pax" value="Pax">
+                Pax
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -98,63 +129,78 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({ filters, setFilters })
 
       <CardContent>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* FILTER 1: METER SELECTION */}
           <div className="space-y-2">
             <label className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
               Pilih Meteran
             </label>
-            <Select
-              value={filters.meterId?.toString()}
-              onValueChange={(val) => setFilters((prev) => ({ ...prev, meterId: Number(val) }))}
-              disabled={isLoadingMeters}
-            >
-              <SelectTrigger className="bg-background hover:border-primary/50 focus:ring-primary/20 h-11 w-full font-medium transition-all">
-                {isLoadingMeters ? (
-                  <div className="text-muted-foreground flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-xs">Memuat data...</span>
-                  </div>
-                ) : (
-                  <SelectValue placeholder="Pilih Meteran" />
-                )}
-              </SelectTrigger>
-              <SelectContent>
-                {meters.length === 0 ? (
-                  <div className="text-muted-foreground flex flex-col items-center justify-center py-6 text-center text-sm">
-                    <p>Tidak ada meteran tersedia</p>
-                  </div>
-                ) : (
-                  meters.map((meter) => (
+
+            {filters.type === "Pax" ? (
+              <Select disabled value="empty">
+                <SelectTrigger className="bg-muted/30 h-11 w-full font-medium">
+                  <SelectValue placeholder="Data Pax tidak memerlukan meteran" />
+                </SelectTrigger>
+              </Select>
+            ) : (
+              <Select
+                value={filters.meter_id ? filters.meter_id.toString() : undefined}
+                onValueChange={(val) =>
+                  setFilters((prev: any) => ({ ...prev, meter_id: Number(val) }))
+                }
+                disabled={isLoadingMeters}
+              >
+                <SelectTrigger className="bg-background hover:border-primary/50 focus:ring-primary/20 h-11 w-full font-medium transition-all">
+                  {isLoadingMeters ? (
+                    <div className="text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-xs">Memuat data...</span>
+                    </div>
+                  ) : (
+                    <SelectValue placeholder="Pilih Meteran" />
+                  )}
+                </SelectTrigger>
+                <SelectContent>
+                  {meters.length === 0 ? (
                     <SelectItem
-                      key={meter.meter_id}
-                      value={meter.meter_id.toString()}
-                      className="cursor-pointer py-3"
+                      value="empty"
+                      disabled
+                      className="text-muted-foreground justify-center py-6 text-center text-sm"
                     >
-                      <div className="flex w-full items-center justify-between gap-4">
-                        <div className="flex flex-col">
-                          <span className="text-foreground font-semibold">{meter.meter_code}</span>
-                          <span className="text-muted-foreground text-[10px]">
-                            {meter.name || "Meteran Umum"}
-                          </span>
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "pointer-events-none h-5 px-2 text-[10px] font-medium capitalize",
-                            STATUS_STYLES[meter.status] || STATUS_STYLES.INACTIVE
-                          )}
-                        >
-                          {meter.status.toLowerCase().replace("_", " ")}
-                        </Badge>
-                      </div>
+                      Tidak ada meteran tersedia
                     </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+                  ) : (
+                    meters.map((meter: any) => (
+                      <SelectItem
+                        key={meter.meter_id}
+                        value={meter.meter_id.toString()}
+                        className="cursor-pointer py-3"
+                      >
+                        <div className="flex w-full items-center justify-between gap-4">
+                          <div className="flex flex-col text-left">
+                            <span className="text-foreground font-semibold">
+                              {meter.meter_code}
+                            </span>
+                            <span className="text-muted-foreground text-[10px]">
+                              {meter.name || "Meteran Umum"}
+                            </span>
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "pointer-events-none h-5 px-2 text-[10px] font-medium capitalize",
+                              STATUS_STYLES[meter.status] || STATUS_STYLES.INACTIVE
+                            )}
+                          >
+                            {meter.status?.toLowerCase().replace("_", " ") || "inactive"}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
-          {/* FILTER 2: DATE RANGE PICKER */}
           <div className="space-y-2">
             <label className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
               Periode Laporan
@@ -193,9 +239,9 @@ export const RecapHeader: React.FC<RecapHeaderProps> = ({ filters, setFilters })
                     initialFocus
                     mode="range"
                     defaultMonth={filters.date?.from}
-                    selected={filters.date}
+                    selected={filters.date as any}
                     onSelect={(range) => {
-                      setFilters((prev) => ({ ...prev, date: range }));
+                      setFilters((prev: any) => ({ ...prev, date: range }));
                     }}
                     numberOfMonths={2}
                     className="p-3"

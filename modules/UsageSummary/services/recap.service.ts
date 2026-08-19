@@ -1,14 +1,8 @@
 import api from "@/lib/api";
-import {
-  RecapApiResponse,
-  RecapQueryParams,
-  RecapRecalculatePayload,
-} from "../types/recap.type";
+import { RecapApiResponse, RecapQueryParams, RecapRecalculatePayload } from "../types/recap.type";
 
-export const getRecapDataApi = async (
-  params: RecapQueryParams
-): Promise<RecapApiResponse> => {
-  const { data } = await api.get("/recap", {
+export const getRecapDataApi = async (params: RecapQueryParams): Promise<RecapApiResponse> => {
+  const { data } = await api.get("/daily-summaries/recap", {
     params: {
       energyType: params.type,
       startDate: params.startDate,

@@ -12,26 +12,22 @@ import { getDialogDetails } from "./getDialogDetails";
 export const DataEntryPage = () => {
   const [openDialog, setOpenDialog] = useState<DialogType>(null);
 
-  // 1. Fetch data energi dari API
   const { data: energyRes, isLoading } = useQuery({
     queryKey: ["master", "energy-types-list"],
     queryFn: () => getEnergyTypesApi(),
     staleTime: Infinity,
   });
 
-  // 2. Map cardData dengan ID dari API secara dinamis
   const dynamicCards = useMemo(() => {
     const apiEnergies = energyRes?.data || [];
 
     return cardData.map((card) => {
-      // Cari data energi di API yang namanya sama dengan type di cardData
-      // Contoh: mencari "Electricity" di API untuk dapat energy_type_id
       const match = apiEnergies.find((e) => e.name.toLowerCase() === card.type.toLowerCase());
 
       return {
         ...card,
-        energy_id: match?.energy_type_id, // Tambahkan ID jika ketemu
-        // Card tetap bisa diklik jika type-nya bukan kategori energi (seperti Pax atau Log)
+        energy_id: match?.energy_type_id,
+
         isReady: match || card.type === "Pax" || card.type === "Log",
       };
     });
@@ -53,7 +49,6 @@ export const DataEntryPage = () => {
             title={card.title}
             description={card.description}
             icon={card.icon}
-            // Jika data API belum beres, card energi kita disable dulu
             disabled={isLoading || !card.isReady}
             onClick={() => setOpenDialog(card.type as DialogType)}
           />
@@ -63,7 +58,6 @@ export const DataEntryPage = () => {
       <DataEntryDialog
         isOpen={!!openDialog}
         onClose={() => setOpenDialog(null)}
-        // Kirim list energyRes?.data agar helper getDialogDetails bisa mencari ID-nya
         details={getDialogDetails(openDialog, energyRes?.data, () => setOpenDialog(null))}
       />
     </div>

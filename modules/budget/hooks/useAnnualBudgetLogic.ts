@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import axios from "axios";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -9,7 +9,6 @@ import { AnnualBudget } from "@/common/types/budget";
 import {
   annualBudgetApi,
   getAnnualBudgetApi,
-  yearOptionsApi,
 } from "@/modules/budget/services/annualBudget.service";
 import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
 import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
@@ -17,25 +16,17 @@ import { AnnualBudgetFormValues } from "../schemas/annualBudget.schema";
 export const useAnnualBudgetLogic = () => {
   const queryClient = useQueryClient();
 
-  // State Filter
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedEnergyType, setSelectedEnergyType] = useState<string>("all");
 
   const handleApiError = (err: unknown, defaultMsg: string) => {
-    const error = err as AxiosError<{ message: string }>;
-    const message = error.response?.data.message || defaultMsg;
+    const message =
+      axios.isAxiosError(err) && err.response?.data?.message
+        ? err.response.data.message
+        : defaultMsg;
     toast.error(message);
   };
 
-  // 1. Fetch Pilihan Tahun - Set staleTime Infinity karena data ini jarang berubah
-  const { data: yearsRes, isLoading: isLoadingYears } = useQuery({
-    queryKey: ["meta", "fiscal-years"],
-    queryFn: yearOptionsApi,
-    staleTime: Infinity, // Tidak akan fetch ulang selama aplikasi running
-    gcTime: 1000 * 60 * 60, // Simpan di cache 1 jam
-  });
-
-  // 2. Fetch Tipe Energi - Set staleTime Infinity
   const { data: energyRes, isLoading: isLoadingEnergyTypes } = useQuery({
     queryKey: ["master", "energy-types"],
     queryFn: () => getEnergyTypesApi(),
@@ -43,23 +34,20 @@ export const useAnnualBudgetLogic = () => {
     gcTime: 1000 * 60 * 60,
   });
 
-  // 3. Fetch List Anggaran - Gunakan staleTime 5 menit agar tidak fetch tiap ganti tab
   const { data: budgetsRes, isLoading: isLoadingBudgets } = useQuery({
-    queryKey: ["annualBudgets", selectedYear], // Akan fetch ulang HANYA jika tahun ganti
+    queryKey: ["annualBudgets", selectedYear],
     queryFn: () => getAnnualBudgetApi(selectedYear),
-    staleTime: 1000 * 60 * 5, // Data dianggap fresh selama 5 menit
-    refetchOnWindowFocus: false, // Jangan fetch ulang saat user balik ke browser tab ini
+    staleTime: 1000 * 60 * 5,
   });
 
-  const availableYears = useMemo(() => yearsRes?.data?.availableYears || [], [yearsRes]);
-  const energyTypes = useMemo(() => energyRes?.data || [], [energyRes]);
+  const energyTypes = useMemo(() => energyRes?.data || [], [energyRes?.data]);
 
-  // Filter Client-Side tetap di useMemo agar tidak berat
-  const childBudgets = useMemo(() => {
-    const data = budgetsRes?.data || [];
-    if (selectedEnergyType === "all") return data;
-    return data.filter((b: AnnualBudget) => b.energy_type_id.toString() === selectedEnergyType);
-  }, [budgetsRes, selectedEnergyType]);
+  const filteredBudgets = useMemo(() => {
+    const budgets = budgetsRes?.data || [];
+
+    if (selectedEnergyType === "all") return budgets;
+    return budgets.filter((b: AnnualBudget) => b.energy_type_id.toString() === selectedEnergyType);
+  }, [budgetsRes?.data, selectedEnergyType]);
 
   const createOrUpdateMutation = useMutation({
     mutationFn: async ({
@@ -71,55 +59,29 @@ export const useAnnualBudgetLogic = () => {
       isEditing: boolean;
       id?: number;
     }) => {
-      const payload = {
-        budget: {
-          ...values,
-          allocations: isEditing
-            ? {
-                upsert: values.allocations.map((alloc) => ({
-                  where: { allocation_id: alloc.allocation_id || 0 },
-                  update: {
-                    allocated_amount: alloc.allocated_amount,
-                    allocated_volume: alloc.allocated_volume,
-                  },
-                  create: {
-                    meter_id: alloc.meter_id,
-                    allocated_amount: alloc.allocated_amount,
-                    allocated_volume: alloc.allocated_volume,
-                  },
-                })),
-              }
-            : {
-                create: values.allocations.map((alloc) => ({
-                  meter_id: alloc.meter_id,
-                  allocated_amount: alloc.allocated_amount,
-                  allocated_volume: alloc.allocated_volume,
-                })),
-              },
-        },
-      };
+      if (isEditing && id) return annualBudgetApi.update(id, values);
+      return annualBudgetApi.create(values);
+    },
+    onSuccess: (_, { isEditing, id }) => {
+      toast.success(`Anggaran berhasil ${isEditing ? "diperbarui" : "dibuat"}.`);
 
-      return isEditing && id
-        ? annualBudgetApi.update(id, payload)
-        : annualBudgetApi.create(payload);
-    },
-    onSuccess: (_, vars) => {
-      toast.success(`Budget berhasil ${vars.isEditing ? "diperbarui" : "dibuat"}.`);
-      // Invalidate cache secara spesifik
       queryClient.invalidateQueries({ queryKey: ["annualBudgets"] });
-      // Jika ada query detail, invalidate juga
-      queryClient.invalidateQueries({ queryKey: ["annualBudgetDetail"] });
+
+      if (isEditing && id) {
+        queryClient.invalidateQueries({ queryKey: ["annualBudgetDetail", id] });
+        queryClient.invalidateQueries({ queryKey: ["annualBudgetRemaining", id] });
+      }
     },
-    onError: (err) => handleApiError(err, "Gagal menyimpan budget."),
+    onError: (err) => handleApiError(err, "Gagal menyimpan data anggaran."),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => annualBudgetApi.delete(id),
+    mutationFn: annualBudgetApi.delete,
     onSuccess: () => {
-      toast.success("Budget berhasil dihapus.");
+      toast.success("Anggaran berhasil dihapus.");
       queryClient.invalidateQueries({ queryKey: ["annualBudgets"] });
     },
-    onError: (err) => handleApiError(err, "Gagal menghapus budget."),
+    onError: (err) => handleApiError(err, "Gagal menghapus anggaran."),
   });
 
   return {
@@ -127,10 +89,9 @@ export const useAnnualBudgetLogic = () => {
     setSelectedYear,
     selectedEnergyType,
     setSelectedEnergyType,
-    availableYears,
     energyTypes,
-    childBudgets,
-    isLoading: isLoadingBudgets || isLoadingYears || isLoadingEnergyTypes,
+    filteredBudgets,
+    isLoading: isLoadingBudgets || isLoadingEnergyTypes,
     createOrUpdateMutation,
     deleteMutation,
   };

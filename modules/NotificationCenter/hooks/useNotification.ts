@@ -1,74 +1,119 @@
+// NotificationCenter/hooks/useNotification.ts
+import { ApiResponse } from "@/common/types/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo } from "react";
-
 import { toast } from "sonner";
-import {
-  getNotificationApi,
-  readAllNotificationsApi,
-  readNotificationApi,
-} from "../services/notification.service";
-import { bulkDeleteNotificationsApi } from "@/services/notification.service";
-import { AxiosError } from "axios";
+import { NotificationPayload, notificationService } from "../services/notification.service";
 
 export const useNotification = () => {
   const queryClient = useQueryClient();
   const QUERY_KEY = ["notifications"];
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  // 1. Fetch Data
+  const { data, isLoading } = useQuery({
     queryKey: QUERY_KEY,
-    queryFn: getNotificationApi,
+    queryFn: notificationService.getAll,
+    refetchInterval: 30000, // Auto refresh tiap 30 detik
   });
 
-  const notificationsData = useMemo(
-    () => data?.data.notifications || [],
-    [data]
-  );
-  const meta = useMemo(() => data?.data.meta, [data]);
+  // 2. Mutasi: Tandai 1 Dibaca (Optimistic Update)
+  const markAsRead = useMutation({
+    mutationFn: notificationService.markAsRead,
+    onMutate: async (id: number) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEY });
+      const previousData = queryClient.getQueryData<ApiResponse<NotificationPayload>>(QUERY_KEY);
 
-  const handleMutationSuccess = (message: string) => {
-    toast.success(message);
-    queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-  };
-
-  const handleMutationError = (error: AxiosError<{ message: string }>) => {
-    const msg = error?.response?.data?.message || "Terjadi kesalahan sistem";
-    toast.error(msg);
-  };
-
-  const { mutate: readNotification, isPending: isReading } = useMutation({
-    mutationFn: (id: number) => readNotificationApi(id),
-    onSuccess: (res) =>
-      handleMutationSuccess(res.status?.message || "Berhasil dibaca"),
-    onError: handleMutationError,
+      if (previousData) {
+        queryClient.setQueryData<ApiResponse<NotificationPayload>>(QUERY_KEY, {
+          ...previousData,
+          data: {
+            ...previousData.data,
+            notifications: previousData.data.notifications.map((notif) =>
+              notif.notification_id === id ? { ...notif, is_read: true } : notif
+            ),
+          },
+        });
+      }
+      return { previousData };
+    },
+    onError: (__err, __id, context) => {
+      queryClient.setQueryData(QUERY_KEY, context?.previousData);
+      toast.error("Gagal menandai notifikasi");
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
   });
 
-  const { mutate: markNotificationsAsRead, isPending: isMarking } = useMutation(
-    {
-      mutationFn: (ids: number[]) => readAllNotificationsApi(ids),
-      onSuccess: (res) =>
-        handleMutationSuccess(res.status?.message || "Ditandai dibaca"),
-      onError: handleMutationError,
-    }
-  );
+  // 3. Mutasi: Tandai Banyak Dibaca (Optimistic Update)
+  const bulkMarkAsRead = useMutation({
+    mutationFn: notificationService.bulkMarkAsRead,
+    onMutate: async (ids: number[]) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEY });
+      const previousData = queryClient.getQueryData<ApiResponse<NotificationPayload>>(QUERY_KEY);
 
-  const { mutate: bulkDelete, isPending: isDeleting } = useMutation({
-    mutationFn: (ids: number[]) => bulkDeleteNotificationsApi(ids),
-    onSuccess: (res) => handleMutationSuccess(res.status?.message || "Dihapus"),
-    onError: handleMutationError,
+      if (previousData) {
+        queryClient.setQueryData<ApiResponse<NotificationPayload>>(QUERY_KEY, {
+          ...previousData,
+          data: {
+            ...previousData.data,
+            notifications: previousData.data.notifications.map((notif) =>
+              ids.includes(notif.notification_id) ? { ...notif, is_read: true } : notif
+            ),
+          },
+        });
+      }
+      return { previousData };
+    },
+    onError: (__err, __ids, context) => {
+      queryClient.setQueryData(QUERY_KEY, context?.previousData);
+      toast.error("Gagal menandai notifikasi");
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
   });
+
+  // 4. Mutasi: Hapus Banyak Notifikasi (Optimistic Update)
+  const bulkDelete = useMutation({
+    mutationFn: notificationService.bulkDelete,
+    onMutate: async (ids: number[]) => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEY });
+      const previousData = queryClient.getQueryData<ApiResponse<NotificationPayload>>(QUERY_KEY);
+
+      if (previousData) {
+        queryClient.setQueryData<ApiResponse<NotificationPayload>>(QUERY_KEY, {
+          ...previousData,
+          data: {
+            ...previousData.data,
+            // Filter out (buang) notifikasi yang ID-nya ada di dalam array 'ids'
+            notifications: previousData.data.notifications.filter(
+              (notif) => !ids.includes(notif.notification_id)
+            ),
+          },
+        });
+      }
+      return { previousData };
+    },
+    onError: (err, ids, context) => {
+      queryClient.setQueryData(QUERY_KEY, context?.previousData);
+      toast.error("Gagal menghapus notifikasi");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      toast.success("Notifikasi berhasil dihapus");
+    },
+  });
+
+  // 5. Ekstraksi dan Kalkulasi Data untuk UI
+  const notifications = data?.data?.notifications || [];
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  // Kombinasi state loading dari semua mutasi untuk trigger overlay di UI
+  const isProcessing = markAsRead.isPending || bulkMarkAsRead.isPending || bulkDelete.isPending;
 
   return {
-    notificationsData,
-    meta,
-
-    readNotification,
-    markNotificationsAsRead,
-    bulkDelete,
-
-    isLoadingData: isLoading,
-    isProcessing: isReading || isMarking || isDeleting,
-    isError,
-    error,
-    refetch,
+    notifications,
+    unreadCount,
+    isLoading,
+    isProcessing,
+    markAsRead: markAsRead.mutate,
+    bulkMarkAsRead: bulkMarkAsRead.mutate,
+    bulkDelete: bulkDelete.mutate,
   };
 };

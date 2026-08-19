@@ -1,6 +1,16 @@
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { Activity, CalendarClock, FunctionSquare, Info, Settings2, User, Zap } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  CalendarClock,
+  Database, // <-- Import icon Database
+  FunctionSquare,
+  Info,
+  Settings2,
+  User,
+  Zap,
+} from "lucide-react";
 import { useMemo } from "react";
 
 import { ErrorFetchData } from "@/common/components/ErrorFetchData";
@@ -14,6 +24,11 @@ import { StatCard } from "@/modules/Dashboard/components/resourceConsumptionSumm
 import { StatusIndicator } from "@/modules/NotificationCenter/components/notification-status";
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import { useMeterQuery } from "../hooks/useMeterQuery";
+
+interface ValidationRule {
+  rule: string;
+  error_message: string;
+}
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -57,6 +72,9 @@ export const MeterDetailSheet = ({ meterId }: { meterId: number }) => {
 
   if (!data) return null;
 
+  // Casting atau parse validations dari template jika ada
+  const validations = (data.calculation_template?.validations || []) as unknown as ValidationRule[];
+
   return (
     <motion.div
       variants={containerVariants}
@@ -96,7 +114,7 @@ export const MeterDetailSheet = ({ meterId }: { meterId: number }) => {
         <Separator />
       </motion.div>
 
-      {/* SECTION 2: DASHBOARD GRIDS - Sekarang menggunakan StatCard yang rapi */}
+      {/* SECTION 2: DASHBOARD GRIDS */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <StatCard
           icon={Zap}
@@ -175,10 +193,84 @@ export const MeterDetailSheet = ({ meterId }: { meterId: number }) => {
         </Card>
       </motion.div>
 
-      {/* SECTION 5: CALCULATION */}
+      {/* SECTION 4: TANK PROFILE (MUNUCL JIKA ADA DATA TANGKI) */}
+      <AnimatePresence>
+        {data.tank_profile && (
+          <motion.div variants={itemVariants} initial="hidden" animate="visible">
+            <Card className="border-orange-200 bg-orange-50/30 shadow-sm">
+              <CardHeader className="px-4 pt-4 pb-3">
+                <CardTitle className="flex items-center gap-2 text-base text-orange-800">
+                  <Database className="h-4 w-4" />
+                  Profil Tangki BBM
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                      Bentuk
+                    </span>
+                    <span className="text-sm font-semibold text-slate-800">
+                      {data.tank_profile.shape?.replace(/_/g, " ")}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                      Kapasitas
+                    </span>
+                    <span className="text-sm font-semibold text-slate-800">
+                      {data.tank_profile.capacity_liters} L
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                      Tinggi Max
+                    </span>
+                    <span className="text-sm font-semibold text-slate-800">
+                      {data.tank_profile.height_max_cm} cm
+                    </span>
+                  </div>
+                  {data.tank_profile.diameter_cm && (
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                        Diameter
+                      </span>
+                      <span className="text-sm font-semibold text-slate-800">
+                        {data.tank_profile.diameter_cm} cm
+                      </span>
+                    </div>
+                  )}
+                  {data.tank_profile.length_cm && (
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                        Panjang
+                      </span>
+                      <span className="text-sm font-semibold text-slate-800">
+                        {data.tank_profile.length_cm} cm
+                      </span>
+                    </div>
+                  )}
+                  {data.tank_profile.width_cm && (
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                        Lebar
+                      </span>
+                      <span className="text-sm font-semibold text-slate-800">
+                        {data.tank_profile.width_cm} cm
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* SECTION 5: CALCULATION & RULES */}
       <AnimatePresence>
         {data.calculation_template && (
-          <motion.div
+          <motion.div 
             variants={itemVariants}
             initial="hidden"
             animate="visible"
@@ -188,17 +280,18 @@ export const MeterDetailSheet = ({ meterId }: { meterId: number }) => {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
                 <FunctionSquare className="h-4 w-4" />
               </div>
-              <h3 className="text-sm font-bold">Logika Kalkulasi</h3>
+              <h3 className="text-sm font-bold">Logika Kalkulasi & Validasi</h3>
             </div>
 
             <Card className="border-muted overflow-hidden shadow-md">
               <Tabs
-                defaultValue={data.calculation_template.definitions[0]?.name}
+                defaultValue={data.calculation_template.definitions[0]?.name || "rules"}
                 className="w-full"
               >
                 <div className="bg-muted/30 border-b px-4 py-2">
                   <TabsList className="h-auto w-full justify-start gap-2 overflow-x-auto bg-transparent p-0">
-                    {data.calculation_template.definitions.map((def, idx: number) => (
+                    {/* Render Tab untuk Rumus-rumus */}
+                    {data.calculation_template.definitions.map((def: any, idx: number) => (
                       <TabsTrigger
                         key={idx}
                         value={def.name}
@@ -207,10 +300,19 @@ export const MeterDetailSheet = ({ meterId }: { meterId: number }) => {
                         {def.name}
                       </TabsTrigger>
                     ))}
+
+                    {/* Tab Khusus untuk Validasi / Rules */}
+                    <TabsTrigger
+                      value="rules"
+                      className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                    >
+                      Rules Validasi
+                    </TabsTrigger>
                   </TabsList>
                 </div>
 
-                {data.calculation_template.definitions.map((def, idx: number) => (
+                {/* Konten Tab Rumus */}
+                {data.calculation_template.definitions.map((def: any, idx: number) => (
                   <TabsContent
                     key={idx}
                     value={def.name}
@@ -229,7 +331,7 @@ export const MeterDetailSheet = ({ meterId }: { meterId: number }) => {
                       </div>
                       <div className="bg-muted/5 p-6 lg:col-span-2">
                         <div className="space-y-2">
-                          {def.formula_items?.variables?.map((v, vIdx: number) => (
+                          {def.formula_items?.variables?.map((v: any, vIdx: number) => (
                             <motion.div
                               whileHover={{ scale: 1.02 }}
                               key={vIdx}
@@ -241,7 +343,7 @@ export const MeterDetailSheet = ({ meterId }: { meterId: number }) => {
                                 />
                                 <span className="font-mono text-xs font-bold">{v.label}</span>
                               </div>
-                              {v.timeShift !== 0 && (
+                              {v.timeShift !== undefined && v.timeShift !== 0 && (
                                 <Badge className="h-4 text-[9px]">
                                   t{v.timeShift > 0 ? `+${v.timeShift}` : v.timeShift}
                                 </Badge>
@@ -253,6 +355,45 @@ export const MeterDetailSheet = ({ meterId }: { meterId: number }) => {
                     </div>
                   </TabsContent>
                 ))}
+
+                {/* KONTEN TAB RULES (VALIDASI) */}
+                <TabsContent value="rules" className="m-0 p-6 focus-visible:outline-none">
+                  {validations && validations.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {validations.map((item, rIdx: number) => (
+                        <div
+                          key={rIdx}
+                          className="bg-background flex flex-col justify-between rounded-lg border p-4 shadow-sm"
+                        >
+                          <div className="mb-2 flex items-center gap-2">
+                            <div className="rounded bg-amber-100 p-1 text-amber-600">
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                            </div>
+                            <span className="font-mono text-xs font-semibold text-slate-800">
+                              Aturan #{rIdx + 1}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="rounded bg-slate-950 p-2.5">
+                              <code className="font-mono text-xs font-bold text-amber-400">
+                                {item.rule}
+                              </code>
+                            </div>
+                            <p className="text-muted-foreground text-xs italic">
+                              "{item.error_message}"
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-muted-foreground flex flex-col items-center justify-center p-8 text-center text-xs">
+                      <Info className="mb-2 h-6 w-6 opacity-40" />
+                      Tidak ada aturan validasi khusus yang dikonfigurasi pada template ini.
+                    </div>
+                  )}
+                </TabsContent>
               </Tabs>
             </Card>
           </motion.div>

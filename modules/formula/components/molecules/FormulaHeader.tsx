@@ -1,7 +1,7 @@
 import { Button } from "@/common/components/ui/button";
 import { Calculator, PlayCircle, Save } from "lucide-react";
 
-export const FormulaHeader = () => {
+export const FormulaHeader = ({}) => {
   return (
     <header className="bg-card z-20 flex h-16 shrink-0 items-center justify-between border-b px-6 shadow-sm">
       <div className="flex items-center gap-3">

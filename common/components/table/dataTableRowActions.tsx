@@ -40,7 +40,7 @@ export function DataTableRowActions<TData>({
       {/* DropdownMenuContent otomatis menggunakan bg-popover/bg-card dari global css */}
       <DropdownMenuContent align="end" className="w-[160px]">
         {/* Tombol Edit */}
-        <DropdownMenuItem onClick={() => onEdit(row.original)}>
+        <DropdownMenuItem onClick={() => onEdit?.(row.original)}>
           <Pencil className="text-muted-foreground/70 mr-2 h-3.5 w-3.5" />
           Edit
         </DropdownMenuItem>
@@ -49,7 +49,7 @@ export function DataTableRowActions<TData>({
 
         {/* Tombol Hapus dengan Destructive Styling */}
         <DropdownMenuItem
-          onClick={() => onDelete(row.original)}
+          onClick={() => onDelete?.(row.original)}
           // Styling khusus delete: Teks Merah, dan saat hover background merah sangat tipis
           className="text-destructive focus:text-destructive focus:bg-destructive/10"
         >

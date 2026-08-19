@@ -34,3 +34,6 @@ export type UserResponse = {
   status: { code: number; message: string };
   data: UserProfileData;
 };
+
+// Alias for components that import `User` directly
+export type User = UserProfileData;

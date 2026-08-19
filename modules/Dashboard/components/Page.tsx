@@ -2,20 +2,15 @@
 
 import { useRealtimeNotification } from "@/modules/Dashboard/hooks/useRealtimeNotification";
 import { AnimatePresence, motion, Variants } from "framer-motion";
-import { Announcement } from "./Announcement";
+import { useQuery } from "@tanstack/react-query";
+import { getDashboardCardConfigApi } from "@/modules/Dashboard/service/visualizations.service";
+import { EnergyPaxCorrelationCard } from "./EnergyPaxCorrelationCard";
 import { Header } from "./Header";
+import { WelcomeBriefing } from "./WelcomeBriefing";
 import { AnalysisChart } from "./analysisChart";
 import { AnalysisYearlyChart } from "./analysisYearlyChart";
-import { BudgetBurnRateChart } from "./budgetBurnRateChart";
-import { DailyAveragePaxChart } from "./dailyAveragePaxChart";
-import { UnifiedEnergyComparisonChart } from "./dayTypeComparisonChart";
-import { EfficiencyRatioChart } from "./efficiencyRatioChart";
-import { MultiEnergyForecastCard } from "./energyForecastCard";
 import { FuelRefillAnalysis } from "./fuelRefillAnalysis/fuelRefillAnalysis";
-import { MeterEfficiencyRanking } from "./meterEfficiencyRanking";
-import { ModernBudgetAnalysis } from "./modernBudgetAnalysis";
 import { ModernEfficiencyDashboard } from "./modernEfficiencyDashboard";
-import { NotificationStyle } from "./notificationStyle";
 import { ResourceConsumptionSummary } from "./resourceConsumptionSummary";
 
 const containerVariants: Variants = {
@@ -42,10 +37,27 @@ const itemVariants: Variants = {
 export const Page = () => {
   useRealtimeNotification();
 
+  const { data: configResponse } = useQuery({
+    queryKey: ["dashboardCardConfig"],
+    queryFn: getDashboardCardConfigApi,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const visualConfig = configResponse?.data?.config as any;
+
+  const showHeatmap = visualConfig?.yearly_heatmap?.show !== false;
+  const showTrend = visualConfig?.trend_analysis?.show !== false;
+  const showFuel = visualConfig?.fuel_logistics?.show !== false;
+  const showSpending = visualConfig?.yearly_spending?.show !== false;
+  const showPax = visualConfig?.pax_correlation?.show !== false;
+
+  const isMiddleRowVisible = showHeatmap || showTrend || showFuel;
+  const isBottomRowVisible = showSpending || showPax;
+
   return (
     <main className="min-h-screen w-full space-y-8 p-1 pb-20">
       <Header />
-      <Announcement />
+      <WelcomeBriefing />
       <AnimatePresence mode="wait">
         <motion.div
           key="content"
@@ -54,62 +66,42 @@ export const Page = () => {
           animate="visible"
           className="space-y-6"
         >
-          <motion.div variants={itemVariants} layout>
-            <NotificationStyle />
-          </motion.div>
-
           <ResourceConsumptionSummary />
 
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <motion.div variants={itemVariants} className="flex flex-col gap-6">
-              <div className="min-h-0 flex-1">
-                <MeterEfficiencyRanking />
-              </div>
-            </motion.div>
+          {isMiddleRowVisible && (
+            <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-3">
+              {showHeatmap && (
+                <motion.div variants={itemVariants}>
+                  <ModernEfficiencyDashboard />
+                </motion.div>
+              )}
+              {showTrend && (
+                <motion.div variants={itemVariants}>
+                  <AnalysisChart />
+                </motion.div>
+              )}
+              {showFuel && (
+                <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
+                  <FuelRefillAnalysis />
+                </motion.div>
+              )}
+            </div>
+          )}
 
-            <motion.div variants={itemVariants} className="flex flex-col gap-6">
-              <div className="min-h-0">
-                <ModernEfficiencyDashboard />
-              </div>
-              <div className="min-h-0">
-                <MultiEnergyForecastCard />
-              </div>
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <ModernBudgetAnalysis />
-            </motion.div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <motion.div variants={itemVariants} className="w-full">
-              <AnalysisYearlyChart />
-            </motion.div>
-            <motion.div variants={itemVariants} className="w-full">
-              <EfficiencyRatioChart />
-            </motion.div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <motion.div variants={itemVariants}>
-              <AnalysisChart />
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <UnifiedEnergyComparisonChart />
-            </motion.div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-            <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
-              <DailyAveragePaxChart />
-            </motion.div>
-            <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
-              <BudgetBurnRateChart />
-            </motion.div>
-            <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
-              <FuelRefillAnalysis />
-            </motion.div>
-          </div>
+          {isBottomRowVisible && (
+            <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-2">
+              {showSpending && (
+                <motion.div variants={itemVariants} className="w-full">
+                  <AnalysisYearlyChart />
+                </motion.div>
+              )}
+              {showPax && (
+                <motion.div variants={itemVariants}>
+                  <EnergyPaxCorrelationCard />
+                </motion.div>
+              )}
+            </div>
+          )}
 
           <motion.footer variants={itemVariants} className="py-10 text-center opacity-40">
             <p className="font-mono text-[10px] tracking-widest uppercase italic">

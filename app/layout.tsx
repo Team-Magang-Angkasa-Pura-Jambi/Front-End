@@ -1,17 +1,16 @@
-import "./globals.css";
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import { QueryProvider } from "@/providers/QueryProvider";
 import { Toaster } from "@/common/components/ui/sonner";
-import { SocketProvider } from "@/providers/SocketProvider";
 import { cn } from "@/lib/utils";
-// 1. IMPORT Script DARI NEXT.JS
-import Script from "next/script";
+import { QueryProvider } from "@/providers/QueryProvider";
+import { SocketProvider } from "@/providers/SocketProvider";
+import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
+import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Konfigurasi Font Plus Jakarta Sans
+const fontJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
+  variable: "--font-jakarta",
 });
 
 const geistMono = Geist_Mono({
@@ -33,9 +32,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          geistSans.variable,
+          fontJakarta.variable,
           geistMono.variable,
-          "min-h-screen antialiased",
+          "min-h-screen font-sans antialiased", // Menambahkan font-sans agar langsung aktif
           "bg-background text-foreground",
           "selection:bg-primary/20 selection:text-primary",
           "[&::-webkit-scrollbar]:w-2",
@@ -45,43 +44,6 @@ export default function RootLayout({
           "[&::-webkit-scrollbar-thumb]:border-[1px] [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-clip-content"
         )}
       >
-        {/* 2. GUNAKAN KOMPONEN SCRIPT DI SINI */}
-        {/* strategy="afterInteractive" memastikan script load setelah halaman interaktif agar tidak bikin lemot */}
-        <Script
-          id="maze-snippet"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function (m, a, z, e) {
-                var s, t, u, v;
-                try {
-                  t = m.sessionStorage.getItem('maze-us');
-                } catch (err) {}
-              
-                if (!t) {
-                  t = new Date().getTime();
-                  try {
-                    m.sessionStorage.setItem('maze-us', t);
-                  } catch (err) {}
-                }
-              
-                u = document.currentScript || (function () {
-                  var w = document.getElementsByTagName('script');
-                  return w[w.length - 1];
-                })();
-                v = u && u.nonce;
-              
-                s = a.createElement('script');
-                s.src = z + '?apiKey=' + e;
-                s.async = true;
-                if (v) s.setAttribute('nonce', v);
-                a.getElementsByTagName('head')[0].appendChild(s);
-                m.mazeUniversalSnippetApiKey = e;
-              })(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'd09e62d0-cf10-4f62-a1cb-61f1c7fc87f1');
-            `,
-          }}
-        />
-
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

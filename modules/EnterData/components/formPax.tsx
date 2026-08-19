@@ -1,20 +1,14 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Resolver, useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarIcon, Users } from "lucide-react";
+import { Resolver, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { Button } from "@/common/components/ui/button";
-import { Input } from "@/common/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/common/components/ui/popover";
 import { Calendar } from "@/common/components/ui/calendar";
 import {
   Form,
@@ -24,10 +18,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/common/components/ui/form";
+import { Input } from "@/common/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/common/components/ui/popover";
 
+import { ApiErrorResponse } from "@/common/types/api";
 import { useAuthStore } from "@/stores/authStore";
 import { AxiosError } from "axios";
-import { ApiErrorResponse } from "@/common/types/api";
 import { PaxPayload, submitPaxApi } from "../services/pax.service";
 
 interface FormPaxProps {
@@ -35,8 +31,8 @@ interface FormPaxProps {
 }
 
 const formSchema = z.object({
-  data_date: z.date({ error: "Tanggal wajib diisi." }),
-  total_pax: z.coerce
+  date: z.date({ error: "Tanggal wajib diisi." }),
+  pax_count: z.coerce
     .number()
     .int("Jumlah pax harus bilangan bulat.")
     .positive({ message: "Jumlah pax harus positif." }),
@@ -46,22 +42,18 @@ type FormValues = z.infer<typeof formSchema>;
 
 export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
-  const canChangeDate = user?.role === "Admin" || user?.role === "SuperAdmin";
+  // const { user } = useAuthStore();
+  // const __canChangeDate = user?.role === "Admin" || user?.role === "SuperAdmin";
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
-      data_date: new Date(),
-      total_pax: 0,
+      date: new Date(),
+      pax_count: 0,
     },
   });
 
-  const { mutate, isPending } = useMutation<
-    unknown,
-    AxiosError<ApiErrorResponse>,
-    PaxPayload
-  >({
+  const { mutate, isPending } = useMutation<unknown, AxiosError<ApiErrorResponse>, PaxPayload>({
     mutationFn: (paxData) => submitPaxApi(paxData),
     onSuccess: () => {
       toast.success("Data Pax berhasil dikirim!");
@@ -70,23 +62,19 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
       onSuccess?.();
     },
     onError: (error) => {
-      const message =
-        error.response?.data?.status?.message ||
-        "Terjadi kesalahan tidak terduga.";
+      const message = error.response?.data?.status?.message || "Terjadi kesalahan tidak terduga.";
       toast.error(message);
     },
   });
 
   const onSubmit = (values: FormValues) => {
-    const date = values.data_date;
+    const date = values.date;
 
-    const dateInUTC = new Date(
-      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-    );
+    const dateInUTC = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
 
     const payload: PaxPayload = {
-      data_date: dateInUTC.toISOString(),
-      total_pax: values.total_pax,
+      date: dateInUTC.toISOString(),
+      pax_count: values.pax_count,
     };
     mutate(payload);
   };
@@ -97,7 +85,7 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
         <div className="grid gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
-            name="data_date"
+            name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Tanggal Data</FormLabel>
@@ -109,14 +97,10 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
                         className={`w-full justify-start text-left font-normal ${
                           !field.value && "text-muted-foreground"
                         }`}
-                        disabled={!canChangeDate}
+                        // disabled={!canChangeDate}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pilih tanggal</span>
-                        )}
+                        {field.value ? format(field.value, "PPP") : <span>Pilih tanggal</span>}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -137,13 +121,13 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
 
           <FormField
             control={form.control}
-            name="total_pax"
+            name="pax_count"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Jumlah Pax</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Users className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+                    <Users className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                     <Input
                       min={0}
                       type="number"

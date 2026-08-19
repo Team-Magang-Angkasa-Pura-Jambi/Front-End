@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { PlusCircle, Target } from "lucide-react";
+import { History, PlusCircle, Target } from "lucide-react";
+import { useState } from "react";
 
 import { Card, CardContent } from "@/common/components/ui/card";
 import { Skeleton } from "@/common/components/ui/skeleton";
@@ -11,9 +12,11 @@ import { TargetKPIListRow } from "../components/molecules/TargetKPIListRow";
 import { ConfirmDeleteDialog } from "../components/templates/ConfirmDeleteDialog";
 import { MasterDataDialog } from "../components/templates/MasterDataDialog";
 import { PageHeader } from "../components/templates/PageHeader";
+import { SentinelAuditLog } from "../schemas/SentinelAuditLog";
 import { useEfficiencyTargets } from "../hooks/useEfficiencyTargets";
 
 export const TargetEfficiencyManagement = () => {
+  const [isAuditOpen, setIsAuditOpen] = useState<boolean>(false);
   // --- Custom Hook (Logic Terpusat) ---
   const {
     data: targets,
@@ -41,7 +44,20 @@ export const TargetEfficiencyManagement = () => {
           iconClassName="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
         />
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <MasterDataDialog
+            isOpen={isAuditOpen}
+            onOpenChange={setIsAuditOpen}
+            triggerLabel="Riwayat"
+            triggerIcon={<History className="mr-1.5 h-4 w-4" />}
+            triggerClassName="bg-slate-800 hover:bg-slate-900 text-white transition-colors"
+            title="Audit Log Target Efisiensi"
+            description="Menampilkan jejak audit perubahan konfigurasi pada Target Efisiensi KPI Bandara."
+            maxWidth="3xl"
+          >
+            <SentinelAuditLog entityTable="EfficiencyTarget" height="h-[65vh]" />
+          </MasterDataDialog>
+
           <MasterDataDialog
             isOpen={isFormOpen}
             onOpenChange={(v) => {

@@ -3,16 +3,12 @@ import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 
-const auth = (req: Request) => ({ id: "fakeId" });
+const auth = (__req: Request) => ({ id: "fakeId" });
 
 export const ourFileRouter = {
   imageUploader: f({
     image: {
-      /**
-       * For full list of options and defaults, see the File Route API reference
-       * @see https://docs.uploadthing.com/file-routes#route-config
-       */
-      maxFileSize: "1MB",
+      maxFileSize: "4MB",
       maxFileCount: 1,
     },
   })

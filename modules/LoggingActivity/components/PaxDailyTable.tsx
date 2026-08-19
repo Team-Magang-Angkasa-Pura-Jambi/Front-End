@@ -1,10 +1,18 @@
 "use client";
 
-import React, { useMemo } from "react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { Users, Edit, CalendarDays, Trash2 } from "lucide-react";
+import { CalendarDays, Edit, Trash2, Users } from "lucide-react";
+import React from "react";
 
+import { Button } from "@/common/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/common/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,72 +21,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/common/components/ui/table";
-import { Button } from "@/common/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/common/components/ui/card";
-import { ReadingHistory } from "../services/reading.service";
 
+// 1. Sesuaikan interface dengan response JSON dari API
 export interface DailyPaxData {
-  totalPax: number;
-  firstSessionId: number;
-  paxId: number;
-  date: string;
+  pax_id: number;
+  date: string | Date; // API mengirimkan ISO string
+  pax_count: number;
+  location_id: number | null;
+  session_id: number | null;
+  created_at: string | Date;
 }
 
 interface PaxDailyTableProps {
-  data: ReadingHistory[];
+  data: DailyPaxData[]; // Langsung menerima array data Pax
   onEdit: (paxData: DailyPaxData) => void;
   onDelete: (paxData: DailyPaxData) => void;
 }
 
-export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
-  data,
-  onEdit,
-}) => {
-  const dailyPaxData = useMemo(() => {
-    const paxByDate: {
-      [key: string]: {
-        totalPax: number;
-        firstSessionId: number;
-        paxId: number | null;
-      };
-    } = {};
-
-    data.forEach((session) => {
-      const dateStr = format(new Date(session.reading_date), "yyyy-MM-dd");
-      if (!paxByDate[dateStr]) {
-        paxByDate[dateStr] = {
-          totalPax: 0,
-          firstSessionId: session.session_id,
-          paxId: null,
-        };
-      }
-
-      if (session.paxData?.pax !== null && session.paxData?.pax_id !== null) {
-        // Pastikan paxData ada sebelum melakukan assignment
-        if (session.paxData) {
-          paxByDate[dateStr].totalPax = session.paxData.pax;
-          paxByDate[dateStr].paxId = session.paxData.pax_id;
-        }
-      }
-    });
-
-    return Object.entries(paxByDate)
-      .map(([date, { totalPax, firstSessionId, paxId }]) => ({
-        date,
-        pax: totalPax,
-        session_id: firstSessionId,
-        paxId: paxId,
-      }))
-      .filter((item) => item.paxId !== null);
-  }, [data]);
-
-  if (dailyPaxData.length === 0) {
+export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({ data, onEdit, onDelete }) => {
+  // Jika tidak ada data, jangan render tabelnya
+  if (!data || data.length === 0) {
     return null;
   }
 
@@ -89,63 +51,52 @@ export const PaxDailyTable: React.FC<PaxDailyTableProps> = ({
           <Users className="h-5 w-5" /> Ringkasan Pax Harian
         </CardTitle>
         <CardDescription>
-          Tabel ini menampilkan total penumpang (Pax) per hari. Klik
-          &apos;Edit&apos; untuk memperbarui jumlah Pax pada hari tersebut.
+          Tabel ini menampilkan total penumpang (Pax) per hari. Klik ikon edit untuk memperbarui
+          jumlah Pax atau ikon hapus untuk menghapus data.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* PERBAIKAN: Mengganti placeholder dengan tabel data Pax yang fungsional */}
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Tanggal</TableHead>
                 <TableHead className="text-right">Jumlah Pax</TableHead>
-                <TableHead className="w-[100px] text-center">Aksi</TableHead>
+                <TableHead className="w-[120px] text-center">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dailyPaxData.map((paxData) => (
-                <TableRow key={paxData.date}>
+              {data.map((row) => (
+                // Gunakan pax_id sebagai key karena ini adalah primary key yang unik
+                <TableRow key={row.pax_id}>
                   <TableCell className="flex items-center gap-2 font-medium">
                     <CalendarDays className="text-muted-foreground h-4 w-4" />
-                    {format(new Date(paxData.date), "dd MMMM yyyy", {
+                    {format(new Date(row.date), "dd MMMM yyyy", {
                       locale: id,
                     })}
                   </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {new Intl.NumberFormat("id-ID").format(paxData.pax)}
+
+                  <TableCell className="text-right font-mono text-base">
+                    {new Intl.NumberFormat("id-ID").format(row.pax_count)}
                   </TableCell>
-                  {/* PERUBAHAN: Menambahkan tombol Hapus di samping Edit */}
+
                   <TableCell>
                     <div className="flex items-center justify-center gap-2">
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-8 w-8"
-                        onClick={() =>
-                          onEdit({
-                            totalPax: paxData.pax,
-                            firstSessionId: paxData.session_id,
-                            paxId: paxData.paxId!,
-                            date: paxData.date,
-                          })
-                        }
+                        className="hover:text-primary h-8 w-8"
+                        onClick={() => onEdit(row)} // Passing seluruh object row ke onEdit
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
+
                       <Button
                         variant="destructive"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() =>
-                          onEdit({
-                            totalPax: paxData.pax,
-                            firstSessionId: paxData.session_id,
-                            paxId: paxData.paxId!,
-                            date: paxData.date,
-                          })
-                        }
+                        // PERBAIKAN BUG: Gunakan onDelete, bukan onEdit
+                        onClick={() => onDelete(row)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

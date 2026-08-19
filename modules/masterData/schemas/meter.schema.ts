@@ -11,6 +11,13 @@ export enum TankShape {
   CYLINDER_HORIZONTAL = "CYLINDER_HORIZONTAL",
   BOX = "BOX",
 }
+export enum MeterCategory {
+  TERMINAL = "TERMINAL",
+  KANTOR = "KANTOR",
+  LAINNYA = "LAINNYA",
+}
+
+// 1. Pindahkan deklarasi MeterCategory ke atas agar bisa digunakan di dalam schema
 
 const profileBase = z.object({
   shape: z.nativeEnum(TankShape).optional().nullable(),
@@ -49,6 +56,13 @@ export const meterFormSchema = z
 
       location_id: z.coerce.number().optional().nullable(),
       tenant_id: z.coerce.number().optional().nullable(),
+
+      // 2. PERBAIKAN: Gunakan format key: value
+      category: z.nativeEnum(MeterCategory).default(MeterCategory.LAINNYA),
+
+      // 3. TAMBAHAN: Masukkan field untuk fitur baru di form Anda
+      calculation_template_id: z.string().uuid().optional().nullable(),
+      price_scheme_id: z.coerce.number().optional().nullable(),
     }),
 
     meter_profile: profileBase.optional(),
@@ -56,10 +70,7 @@ export const meterFormSchema = z
     reading_config: z.array(configBase).optional(),
   })
   .superRefine((data, ctx) => {
-    if (
-      data.meter.has_rollover &&
-      (!data.meter.rollover_limit || data.meter.rollover_limit <= 0)
-    ) {
+    if (data.meter.has_rollover && (!data.meter.rollover_limit || data.meter.rollover_limit <= 0)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Batas rollover wajib diisi",

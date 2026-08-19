@@ -1,32 +1,70 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { startOfMonth } from "date-fns";
 import { Card, CardContent } from "@/common/components/ui/card";
-import { Loader2, ListFilter, AlertTriangle } from "lucide-react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { startOfMonth } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertTriangle, ListFilter, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { getRecapDataApi } from "../services/recap.service";
+import { ConsumpFilter } from "../types/recap.type";
 import { createColumns } from "./ColumnTable";
 import { RecapHeader } from "./Header";
 import { RecapTable } from "./Table";
-import { ConsumpFilter } from "../types/recap.type";
-import { getRecapDataApi } from "../services/recap.service";
-import { motion, AnimatePresence } from "framer-motion";
 
 export const Page = () => {
-  const [filters, setFilters] = useState<ConsumpFilter>({
-    type: "Electricity",
-    date: { from: startOfMonth(new Date()), to: new Date() },
-    sortBy: "",
-    meterId: undefined,
+  const CONSUMP_STORAGE_KEY = "consump_filters_state";
+
+  const defaultFrom = startOfMonth(new Date());
+  const defaultTo = new Date();
+
+  const [filters, setFilters] = useState<ConsumpFilter>(() => {
+    if (typeof window === "undefined") {
+      return {
+        type: "Electricity",
+        date: { from: defaultFrom, to: defaultTo },
+        sortBy: "",
+        meterId: undefined,
+      };
+    }
+
+    const saved = localStorage.getItem(CONSUMP_STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+
+        return {
+          type: parsed.type || "Electricity",
+          sortBy: parsed.sortBy || "",
+          meterId: parsed.meterId,
+          date: {
+            from: parsed.date?.from ? new Date(parsed.date.from) : defaultFrom,
+            to: parsed.date?.to ? new Date(parsed.date.to) : defaultTo,
+          },
+        };
+      } catch (e) {
+        console.error("Gagal membaca filter pemakaian dari storage", e);
+      }
+    }
+
+    return {
+      type: "Electricity",
+      date: { from: defaultFrom, to: defaultTo },
+      sortBy: "",
+      meterId: undefined,
+    };
   });
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(CONSUMP_STORAGE_KEY, JSON.stringify(filters));
+    }
+  }, [filters]);
   const { type, date, sortBy, meterId } = filters;
 
   const formatToISO = (d: Date | undefined) => {
     if (!d) return new Date().toISOString();
-    return new Date(
-      Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())
-    ).toISOString();
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())).toISOString();
   };
 
   const {
@@ -53,10 +91,7 @@ export const Page = () => {
     refetchOnReconnect: false,
   });
 
-  const columns = useMemo(
-    () => createColumns(type, Number(meterId)),
-    [meterId, type]
-  );
+  const columns = useMemo(() => createColumns(type, Number(meterId)), [meterId, type]);
 
   const renderContent = () => {
     if (isLoading) {
@@ -107,17 +142,11 @@ export const Page = () => {
     const hasNoData = !queryData?.data || queryData.data.length === 0;
     if (hasNoData && !isFetching) {
       return (
-        <motion.div
-          key="empty"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
+        <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Card className="flex h-96 flex-col items-center justify-center text-center">
             <CardContent className="p-6">
               <ListFilter className="text-muted-foreground/50 mx-auto h-12 w-12" />
-              <h3 className="mt-4 text-lg font-semibold">
-                Data Tidak Ditemukan
-              </h3>
+              <h3 className="mt-4 text-lg font-semibold">Data Tidak Ditemukan</h3>
               <p className="text-muted-foreground mt-2 text-sm">
                 Coba sesuaikan rentang tanggal atau pilih meteran lain.
               </p>

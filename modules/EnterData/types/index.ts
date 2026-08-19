@@ -13,11 +13,13 @@ export interface CardInfo {
 export interface MasterMeter {
   meter_id: number;
   name: string;
+  meter_code?: string;
 }
 
 export interface MasterReadingType {
   reading_type_id: number;
   type_name: string;
+  unit: string;
 }
 
 export interface MasterEnergyData {

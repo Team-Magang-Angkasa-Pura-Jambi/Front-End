@@ -5,7 +5,7 @@ import { AxiosError } from "axios";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { AlertTriangle, BookLock, Loader2 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/common/components/ui/alert-dialog";
+import { Button } from "@/common/components/ui/button";
 import {
   Card,
   CardContent,
@@ -26,13 +27,17 @@ import {
   CardTitle,
 } from "@/common/components/ui/card";
 
-// --- Services & Components ---
-import { deletePaxApi } from "../services/pax.service";
+import { ApiErrorResponse } from "@/common/types/api";
 import {
   deleteReadingSessionApi,
   getReadingSessionsApi,
   ReadingHistory,
-} from "../services/reading.service";
+} from "@/modules/EnterData/services";
+import { getEnergyTypesApi } from "@/modules/masterData/services/energyType.service";
+
+import { deletePaxApi, getPaxApi } from "../services/pax.service";
+import { HistoryFilters } from "../types";
+
 import { createColumns } from "./ColumnTable";
 import { RecapHeader } from "./Header";
 import { ManagementDialog } from "./ManagementDialog";
@@ -41,85 +46,159 @@ import { PaxEditForm } from "./PaxEditForm";
 import { ReadingForm } from "./readingForm";
 import { DataTable } from "./Table";
 
-// --- Types ---
-import { Button } from "@/common/components/ui/button";
-import { ApiErrorResponse } from "@/common/types/api";
-import { EnergyTypeName } from "@/common/types/energy";
-import { HistoryFilters } from "../types";
-
 export const Page = () => {
   const queryClient = useQueryClient();
-  const now = new Date();
 
-  // Initialize Dates
+  const now = new Date();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const firstDayOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  // --- STATE ---
-  const [filters, setFilters] = useState<HistoryFilters>({
-    type: "Electricity", // Default start
-    date: {
-      from: firstDayOfMonth,
-      to: firstDayOfNextMonth,
-    },
-    sortBy: "reading_date",
-    sortOrder: "desc",
-    meterId: undefined,
+  const STORAGE_KEY = "history_filters_state";
+
+  const [filters, setFilters] = useState<
+    Omit<HistoryFilters, "meter_id"> & {
+      meter_id?: number;
+      type?: string;
+      energy_type_id?: number;
+    }
+  >(() => {
+    if (typeof window === "undefined") {
+      return {
+        date: { from: firstDayOfMonth, to: firstDayOfNextMonth },
+        meter_id: undefined,
+        type: "Energy",
+      };
+    }
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          meter_id: parsed.meter_id ? Number(parsed.meter_id) : undefined,
+          type: parsed.type || "Energy",
+          energy_type_id: parsed.energy_type_id ? Number(parsed.energy_type_id) : undefined,
+          date: {
+            from: parsed.date?.from ? new Date(parsed.date.from) : firstDayOfMonth,
+            to: parsed.date?.to ? new Date(parsed.date.to) : firstDayOfNextMonth,
+          },
+        };
+      } catch (e) {
+        console.error("Gagal membaca filter dari storage", e);
+      }
+    }
+
+    return {
+      date: { from: firstDayOfMonth, to: firstDayOfNextMonth },
+      meter_id: undefined,
+      type: "Energy",
+    };
   });
 
-  // State untuk Modal & Delete Actions
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ReadingHistory | null>(null);
   const [itemToDelete, setItemToDelete] = useState<ReadingHistory | null>(null);
 
-  // State Spesifik Pax
   const [isPaxModalOpen, setIsPaxModalOpen] = useState(false);
   const [editingPaxData, setEditingPaxData] = useState<DailyPaxData | null>(null);
   const [paxToDelete, setPaxToDelete] = useState<DailyPaxData | null>(null);
 
-  const { type, date, sortBy, sortOrder, meterId } = filters;
+  const { date, meter_id, type: activeType } = filters;
+  const isPaxTab = activeType === "Pax";
 
-  // --- QUERY DATA ---
+  const { data: typesEnergies } = useQuery({
+    queryKey: ["typesEnergies"],
+    queryFn: () => getEnergyTypesApi(),
+  });
+
+  useEffect(() => {
+    if (typesEnergies?.data && typesEnergies.data.length > 0 && !filters.meter_id && !isPaxTab) {
+      const firstEnergy = typesEnergies.data[0];
+      setFilters((prev) => ({
+        ...prev,
+        energy_type_id: prev.energy_type_id || firstEnergy.energy_type_id,
+      }));
+    }
+  }, [typesEnergies, filters.meter_id, isPaxTab]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+    }
+  }, [filters]);
+
+  // QUERY READING HISTORY (Aktif saat Tab Energy)
   const {
-    data: queryData,
-    isLoading,
-    isFetching,
-    isError,
+    data: readingQueryData,
+    isLoading: isLoadingReading,
+    isFetching: isFetchingReading,
+    isError: isErrorReading,
   } = useQuery({
-    // Tambahkan pagination page/limit ke queryKey jika nanti diimplementasikan
-    queryKey: [
-      "readingHistory",
-      type,
-      date?.from?.toISOString(),
-      date?.to?.toISOString(),
-      meterId,
-      sortBy,
-      sortOrder,
-    ],
+    queryKey: ["readingHistory", date?.from?.toISOString(), date?.to?.toISOString(), meter_id],
     queryFn: () =>
       getReadingSessionsApi({
-        energyTypeName: type as unknown as EnergyTypeName,
-        // Backend Zod Schema Expectation: String YYYY-MM-DD or ISO
-        // Menggunakan format date string agar tidak tergeser timezone saat dikirim ke BE
-        startDate: date?.from ? format(date.from, "yyyy-MM-dd") : undefined,
-        endDate: date?.to ? format(date.to, "yyyy-MM-dd") : undefined,
-        meterId,
-        sortBy,
-        sortOrder,
-        page: 1, // Default dari schema backend
-        limit: 100, // Ambil banyak dulu karena belum ada UI pagination
+        from_date: date?.from ? format(date?.from, "yyyy-MM-dd") : "",
+        to_date: date?.to ? format(date?.to, "yyyy-MM-dd") : "",
+        meter_id: meter_id as number,
       }),
-    enabled: !!date?.from && !!date?.to, // Hanya fetch jika tanggal lengkap
+    enabled: !isPaxTab && !!date?.from && !!date?.to && !!meter_id,
+    refetchOnWindowFocus: false,
+  });
+
+  // QUERY PAX (Aktif saat Tab Pax)
+  const {
+    data: paxQueryData,
+    isLoading: isLoadingPax,
+    isError: isErrorPax,
+  } = useQuery({
+    queryKey: ["paxHistory", date?.from?.toISOString(), date?.to?.toISOString()],
+    queryFn: () =>
+      getPaxApi({
+        start_date: date?.from ? format(date?.from, "yyyy-MM-dd") : "",
+        end_date: date?.to ? format(date?.to, "yyyy-MM-dd") : "",
+      }),
+    enabled: isPaxTab && !!date?.from && !!date?.to,
     refetchOnWindowFocus: false,
   });
 
   const historyData = useMemo(() => {
-    const data = queryData?.data;
-    // Handle response structure (terkadang dibungkus 'data' lagi tergantung backend response wrapper)
+    const data = readingQueryData?.data;
     return Array.isArray(data) ? data : [];
-  }, [queryData?.data]);
+  }, [readingQueryData?.data]);
 
-  // --- MUTATIONS ---
+  // PERBAIKAN: Penanganan ekstraksi response data Pax yang fleksibel & aman
+  const paxData = useMemo(() => {
+    if (!paxQueryData) return [];
+
+    // Kasus 1: paxQueryData.data.pax_data (Standar response API wrapper)
+    const nestedPaxData = (paxQueryData as { data?: { pax_data?: DailyPaxData[] } })?.data
+      ?.pax_data;
+    if (Array.isArray(nestedPaxData)) return nestedPaxData;
+
+    // Kasus 2: paxQueryData.pax_data
+    const directPaxData = (paxQueryData as { pax_data?: DailyPaxData[] })?.pax_data;
+    if (Array.isArray(directPaxData)) return directPaxData;
+
+    // Kasus 3: paxQueryData.data
+    const rawData = (paxQueryData as { data?: DailyPaxData[] })?.data;
+    if (Array.isArray(rawData)) return rawData;
+
+    return [];
+  }, [paxQueryData]);
+
+  const columns = useMemo(() => {
+    const handleOpenEdit = (item: ReadingHistory) => {
+      setEditingItem(item);
+      setIsModalOpen(true);
+    };
+
+    const handleDelete = (item: ReadingHistory) => {
+      setItemToDelete(item);
+    };
+
+    return createColumns(handleOpenEdit, handleDelete);
+  }, []);
+
   const { mutate: deleteSession, isPending: isDeleting } = useMutation<
     unknown,
     AxiosError<ApiErrorResponse>,
@@ -136,31 +215,22 @@ export const Page = () => {
     },
   });
 
+  // PERBAIKAN: Memasang pemicu hapus Pax dengan pax_id
   const { mutate: deletePax, isPending: isDeletingPax } = useMutation<
     unknown,
     AxiosError<ApiErrorResponse>,
     DailyPaxData
   >({
-    mutationFn: (item) => deletePaxApi(item.paxId), // Asumsi paxId adalah identifier
+    mutationFn: (item) => deletePaxApi(item.pax_id),
     onSuccess: () => {
       toast.success("Data Pax berhasil dihapus!");
-      queryClient.invalidateQueries({ queryKey: ["readingHistory"] }); // Asumsi pax juga menggunakan queryKey yg sama atau setara
+      queryClient.invalidateQueries({ queryKey: ["paxHistory"] });
       setPaxToDelete(null);
     },
     onError: (error) => {
       toast.error(error.response?.data?.status?.message || "Gagal menghapus data Pax.");
     },
   });
-
-  // --- HANDLERS ---
-  const handleOpenEdit = useCallback((item: ReadingHistory) => {
-    setEditingItem(item);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleDelete = useCallback((item: ReadingHistory) => {
-    setItemToDelete(item);
-  }, []);
 
   const handleOpenPaxEdit = useCallback((paxData: DailyPaxData) => {
     setEditingPaxData(paxData);
@@ -171,28 +241,26 @@ export const Page = () => {
     setPaxToDelete(paxData);
   }, []);
 
-  const columns = useMemo(
-    () => createColumns(handleOpenEdit, handleDelete),
-    [handleOpenEdit, handleDelete]
-  );
-
-  // --- RENDER CONTENT LOGIC ---
   const renderContent = () => {
-    if (isLoading) {
+    const activeIsLoading = isPaxTab ? isLoadingPax : isLoadingReading;
+    const activeIsError = isPaxTab ? isErrorPax : isErrorReading;
+    const activeDataLength = isPaxTab ? paxData.length : historyData.length;
+
+    if (activeIsLoading) {
       return (
         <Card className="flex h-96 flex-col items-center justify-center border-dashed text-center">
           <CardContent className="p-6">
             <Loader2 className="text-primary mx-auto h-12 w-12 animate-spin" />
             <h3 className="mt-4 text-lg font-semibold">Memuat Data...</h3>
             <p className="text-muted-foreground mt-2 text-sm">
-              Mengambil riwayat pencatatan terbaru.
+              Mengambil riwayat {isPaxTab ? "penumpang" : "pencatatan"} terbaru.
             </p>
           </CardContent>
         </Card>
       );
     }
 
-    if (isError) {
+    if (activeIsError) {
       return (
         <Card className="bg-destructive/5 border-destructive/20 flex h-96 flex-col items-center justify-center text-center">
           <CardContent className="p-6">
@@ -204,7 +272,11 @@ export const Page = () => {
             <Button
               variant="outline"
               className="mt-4"
-              onClick={() => queryClient.invalidateQueries({ queryKey: ["readingHistory"] })}
+              onClick={() =>
+                queryClient.invalidateQueries({
+                  queryKey: [isPaxTab ? "paxHistory" : "readingHistory"],
+                })
+              }
             >
               Coba Lagi
             </Button>
@@ -213,32 +285,23 @@ export const Page = () => {
       );
     }
 
-    if (historyData.length === 0) {
+    if (activeDataLength === 0) {
       return (
         <Card className="bg-muted/20 flex h-96 flex-col items-center justify-center border-dashed text-center">
           <CardContent className="p-6">
             <BookLock className="text-muted-foreground/50 mx-auto h-12 w-12" />
             <h3 className="mt-4 text-lg font-semibold">Data Tidak Ditemukan</h3>
             <p className="text-muted-foreground mx-auto mt-2 max-w-xs text-sm">
-              Tidak ada riwayat pencatatan untuk periode dan filter yang Anda pilih.
+              Tidak ada riwayat {isPaxTab ? "penumpang" : "pencatatan"} untuk periode yang Anda
+              pilih.
             </p>
           </CardContent>
         </Card>
       );
     }
 
-    // --- LOGIC PEMISAHAN TAMPILAN PAX VS ENERGY ---
-    // Jika tipe adalah "Pax", tampilkan tabel Pax.
-    // Jika tipe adalah Electricity/Water/Fuel, tampilkan tabel standar.
-
-    if (filters.type === "Pax") {
-      return (
-        <PaxDailyTable
-          data={historyData} // Cast ke any atau type Pax yang sesuai
-          onEdit={handleOpenPaxEdit}
-          onDelete={handleDeletePax}
-        />
-      );
+    if (isPaxTab) {
+      return <PaxDailyTable data={paxData} onEdit={handleOpenPaxEdit} onDelete={handleDeletePax} />;
     }
 
     return (
@@ -246,13 +309,13 @@ export const Page = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Tabel Riwayat {filters.type}</CardTitle>
+              <CardTitle>Tabel Riwayat Pencatatan</CardTitle>
               <CardDescription>Menampilkan detail angka stand meteran.</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={historyData} isLoading={isFetching} />
+          <DataTable columns={columns} data={historyData} isLoading={isFetchingReading} />
         </CardContent>
       </Card>
     );
@@ -260,7 +323,11 @@ export const Page = () => {
 
   return (
     <div className="space-y-6">
-      <RecapHeader filters={filters} setFilters={setFilters} />
+      <RecapHeader
+        filters={filters}
+        setFilters={setFilters}
+        typesEnergies={typesEnergies?.data || []}
+      />
 
       {renderContent()}
 
@@ -270,7 +337,7 @@ export const Page = () => {
           setIsModalOpen(false);
           setEditingItem(null);
         }}
-        title={editingItem ? "Edit Data Meteran" : "Input Data Baru"}
+        title="Edit Data Meteran"
       >
         <ReadingForm initialData={editingItem} onSuccess={() => setIsModalOpen(false)} />
       </ManagementDialog>
@@ -288,13 +355,15 @@ export const Page = () => {
         </ManagementDialog>
       )}
 
-      <AlertDialog open={!!itemToDelete} onOpenChange={() => setItemToDelete(null)}>
+      <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Data Pencatatan?</AlertDialogTitle>
             <AlertDialogDescription>
               Anda akan menghapus data meteran{" "}
-              <span className="text-foreground font-bold">{itemToDelete?.meter?.meter_code}</span>{" "}
+              <span className="text-foreground font-bold">
+                {itemToDelete?.meter?.meter_code || `ID ${itemToDelete?.meter_id}`}
+              </span>{" "}
               tanggal{" "}
               <span className="text-foreground font-bold">
                 {itemToDelete
@@ -319,7 +388,7 @@ export const Page = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!paxToDelete} onOpenChange={() => setPaxToDelete(null)}>
+      <AlertDialog open={!!paxToDelete} onOpenChange={(open) => !open && setPaxToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Data Pax?</AlertDialogTitle>
