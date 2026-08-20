@@ -16,6 +16,7 @@ import {
   Activity,
   ArrowRight,
   ClipboardList,
+  Heart,
   LayoutDashboard,
   Lightbulb,
   LineChart,
@@ -27,6 +28,7 @@ import {
   RefreshCw,
   Settings,
   ShieldCheck,
+  Users,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
@@ -49,6 +51,15 @@ const itemVariants: Variants = {
   },
 };
 
+const internshipTeam = [
+  "Insyra Inayah Putri",
+  "Nyimas Azzahra Nurssyidahnafisah",
+  "Yudriqul Aulia",
+  "Anna Febriane Angelica",
+  "Muhammad Nofriza",
+  "Elfira",
+];
+
 export default function SentinelLandingPage() {
   const { user } = useAuthStore();
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -70,7 +81,7 @@ export default function SentinelLandingPage() {
           <div className="pointer-events-none absolute right-[-5%] bottom-[-10%] h-[30%] w-[30%] rounded-full bg-[#E5802D]/5 blur-[100px]" />
 
           <motion.div
-            className="relative z-10 mx-auto w-full max-w-6xl space-y-6 pt-12 pb-24"
+            className="relative z-10 mx-auto w-full max-w-6xl space-y-6 pt-12 pb-12"
             variants={containerVariants}
             initial="hidden"
             animate="show"
@@ -98,7 +109,6 @@ export default function SentinelLandingPage() {
                         Sistem V2.0
                       </Badge>
                       {user ? (
-                        // Jika user SUDAH login
                         <Link href="/dashboard" passHref>
                           <Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20 ring-primary/5 hover:ring-primary/10 animate-in fade-in zoom-in gap-2 font-bold shadow-lg ring-4 transition-all duration-500 hover:scale-105">
                             <LayoutDashboard className="h-4 w-4" />
@@ -106,7 +116,6 @@ export default function SentinelLandingPage() {
                           </Button>
                         </Link>
                       ) : (
-                        // Jika user BELUM login
                         <Link href="/auth/login" passHref>
                           <Button className="bg-foreground text-background hover:bg-foreground/90 shadow-foreground/20 ring-foreground/5 hover:ring-foreground/10 animate-in fade-in zoom-in gap-2 font-bold shadow-lg ring-4 transition-all duration-500 hover:scale-105">
                             <LogIn className="h-4 w-4" />
@@ -142,7 +151,7 @@ export default function SentinelLandingPage() {
                 </Card>
               </motion.div>
 
-              {/* CELL 2: INFORMASI BANDARA & ANIMASI PESAWAT MOTION */}
+              {/* CELL 2: INFORMASI BANDARA & ANIMASI PESAWAT */}
               <motion.div variants={itemVariants}>
                 <Card className="bg-primary text-primary-foreground group relative flex h-full flex-col justify-between overflow-hidden border-none shadow-md">
                   <div className="border-primary-foreground/10 absolute -top-10 -right-10 h-40 w-40 rounded-full border-[16px]" />
@@ -318,7 +327,7 @@ export default function SentinelLandingPage() {
                       <h4 className="text-foreground text-sm font-bold">Sekarang (Sentinel)</h4>
                       <p className="text-muted-foreground mt-1 text-xs">
                         Input satu pintu terpusat. Sistem otomatis memproses data, menghasilkan
-                        rekap, dan menyajikan metrik *real-time* tanpa rekonsiliasi manual.
+                        rekap, dan menyajikan metrik <em>real-time</em> tanpa rekonsiliasi manual.
                       </p>
                     </div>
                   </div>
@@ -357,6 +366,46 @@ export default function SentinelLandingPage() {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* =========================================
+                SECTION 4: FOOTER & SPECIAL THANKS
+            ========================================= */}
+            <motion.footer variants={itemVariants} className="pt-8">
+              <Card className="bg-card/60 border-border overflow-hidden backdrop-blur-sm">
+                <CardContent className="p-6 sm:p-8">
+                  <div className="flex flex-col items-center justify-between gap-6 md:flex-row md:items-start">
+                    <div className="space-y-2 text-center md:text-left">
+                      <div className="flex items-center justify-center gap-2 font-bold tracking-tight md:justify-start">
+                        <Users className="text-primary h-4 w-4" />
+                        <span>Special Thanks & Contributors</span>
+                      </div>
+                      <p className="text-muted-foreground max-w-md text-xs">
+                        Dedikasi dan kontribusi dari <strong>Tim Magang Angkasa Pura Sultan Thaha Jambi 2025</strong> dalam pengembangan dan transformasi digital sistem Sentinel.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap justify-center gap-2 md:max-w-lg md:justify-end">
+                      {internshipTeam.map((member) => (
+                        <Badge
+                          key={member}
+                          variant="secondary"
+                          className="bg-secondary/80 hover:bg-secondary border-border text-foreground/90 font-medium transition-colors"
+                        >
+                          {member}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-border text-muted-foreground mt-6 flex flex-col items-center justify-between gap-2 border-t pt-4 text-[11px] sm:flex-row">
+                    <p>© 2025–2026 Sentinel V2. InJourney Airports Bandara Sultan Thaha Jambi.</p>
+                    <p className="flex items-center gap-1">
+                      Built with <Heart className="h-3 w-3 fill-red-500 text-red-500" /> for Operational Efficiency
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.footer>
           </motion.div>
         </div>
       </ScrollArea>
