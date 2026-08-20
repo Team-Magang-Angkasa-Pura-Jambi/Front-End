@@ -1,4 +1,4 @@
-# Gunakan image node alpine yang kecil
+# Gunakan image node alpine
 FROM node:18-alpine
 
 WORKDIR /app
@@ -12,10 +12,16 @@ RUN npm install --legacy-peer-deps
 # Copy sisa codingan
 COPY . .
 
-# LAKUKAN BUILD NEXT.JS (Ini yang sebelumnya kurang!)
+# --- ⚡ BAGIAN PENTING: TANGKAP VARIABEL DARI RAILWAY ---
+# Pastikan nama variabelnya sama persis dengan yang ada di menu Variables Railway
+ARG NEXT_PUBLIC_API_URL_PRODUCTION
+ENV NEXT_PUBLIC_API_URL_PRODUCTION=$NEXT_PUBLIC_API_URL_PRODUCTION
+# ---------------------------------------------------------
+
+# LAKUKAN BUILD NEXT.JS (Sekarang build akan membaca variabel di atas)
 RUN npm run build
 
 EXPOSE 3000
 
-# Jalankan mode production (bukan mode dev)
+# Jalankan mode production
 CMD ["npm", "run", "start"]
