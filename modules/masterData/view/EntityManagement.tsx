@@ -27,6 +27,7 @@ import { TenantForm } from "../components/organisms/TenantForm";
 import { MasterDataDialog } from "../components/templates/MasterDataDialog";
 import { useEntityManager } from "../hooks/useEntityManagement";
 import { SentinelAuditLog } from "../schemas/SentinelAuditLog";
+import { Location } from "@/common/types/location";
 
 export const EntityManagement = () => {
   const [isAuditOpen, setIsAuditOpen] = useState(false);

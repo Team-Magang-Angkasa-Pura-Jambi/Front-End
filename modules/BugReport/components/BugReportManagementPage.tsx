@@ -128,7 +128,7 @@ export const BugReportManagementPage = () => {
     if (!selectedReport) return;
     try {
       setIsSavingStatus(true);
-      const __updated = await updateBugReportStatusApi(selectedReport.report_id, {
+      await updateBugReportStatusApi(selectedReport.report_id, {
         status: updatingStatus,
         developer_response: devResponse.trim() ? devResponse.trim() : null,
       });

@@ -22,7 +22,6 @@ import { Input } from "@/common/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/common/components/ui/popover";
 
 import { ApiErrorResponse } from "@/common/types/api";
-import { useAuthStore } from "@/stores/authStore";
 import { AxiosError } from "axios";
 import { PaxPayload, submitPaxApi } from "../services/pax.service";
 
@@ -94,10 +93,9 @@ export const FormReadingPax = ({ onSuccess }: FormPaxProps) => {
                     <FormControl>
                       <Button
                         variant={"outline"}
-                        className={`w-full justify-start text-left font-normal ${
-                          !field.value && "text-muted-foreground"
-                        }`}
-                        // disabled={!canChangeDate}
+                        className={`w-full justify-start text-left font-normal ${!field.value && "text-muted-foreground"
+                          }`}
+                      // disabled={!canChangeDate}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {field.value ? format(field.value, "PPP") : <span>Pilih tanggal</span>}

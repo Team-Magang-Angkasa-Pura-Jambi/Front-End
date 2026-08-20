@@ -15,7 +15,7 @@ export interface ReadingPayload {
   };
 }
 
-export type UpdateReadingSessionBody = Partial<ReadingPayload["reading"]>;
+export type UpdateReadingSessionBody = Partial<ReadingPayload>;
 
 export interface RecalculatePayload {
   start_date: Date | string;

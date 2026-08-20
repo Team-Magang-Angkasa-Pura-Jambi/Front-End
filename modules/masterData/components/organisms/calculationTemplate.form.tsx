@@ -49,40 +49,40 @@ export const CalculationTemplateForm = ({
     initialData?.definitions && initialData.definitions.length > 0
       ? initialData.definitions
       : [
-          {
-            name: "Perhitungan Konsumsi Utama",
-            is_main: true,
-            formula_items: {
-              formula: "(STAND_NOW - STAND_PREV) * MULTIPLIER",
-              variables: [
-                {
-                  label: "STAND_NOW",
-                  type: "reading",
-                  readingTypeId: 1,
-                  timeShift: 0,
-                },
-                {
-                  label: "STAND_PREV",
-                  type: "reading",
-                  readingTypeId: 1,
-                  timeShift: -1,
-                },
-                {
-                  label: "MULTIPLIER",
-                  type: "spec",
-                  specField: "multiplier",
-                },
-              ],
-            },
+        {
+          name: "Perhitungan Konsumsi Utama",
+          is_main: true,
+          formula_items: {
+            formula: "(STAND_NOW - STAND_PREV) * MULTIPLIER",
+            variables: [
+              {
+                label: "STAND_NOW",
+                type: "reading",
+                readingTypeId: 1,
+                timeShift: 0,
+              },
+              {
+                label: "STAND_PREV",
+                type: "reading",
+                readingTypeId: 1,
+                timeShift: -1,
+              },
+              {
+                label: "MULTIPLIER",
+                type: "spec",
+                specField: "multiplier",
+              },
+            ],
           },
-        ]
+        },
+      ]
   );
 
   // Active definition tab
   const [activeDefIndex, setActiveDefIndex] = useState(0);
 
   // Fetch available variable specs & readings
-  const { data: availableVars, isLoading: isLoadingVars } = useQuery<AvailableVariablesResponse>({
+  const { data: availableVars, } = useQuery<AvailableVariablesResponse>({
     queryKey: ["availableVariables"],
     queryFn: getAvailableVariablesApi,
     staleTime: 1000 * 60 * 5,
@@ -95,7 +95,7 @@ export const CalculationTemplateForm = ({
   const [newTimeShift, setNewTimeShift] = useState<number>(0);
   const [newSpecField, setNewSpecField] = useState<string>("multiplier");
   const [newConstantVal, setNewConstantVal] = useState<number>(1);
-  const [newMeterId, setNewMeterId] = useState<number | undefined>(undefined);
+  const [newMeterId, __setNewMeterId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (initialData) {
@@ -624,7 +624,7 @@ export const CalculationTemplateForm = ({
               {/* Table of registered variables in this formula */}
               <div className="bg-muted/10 divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
                 {!activeDef.formula_items.variables ||
-                activeDef.formula_items.variables.length === 0 ? (
+                  activeDef.formula_items.variables.length === 0 ? (
                   <div className="text-muted-foreground p-4 text-center text-[11px] italic">
                     Belum ada variabel terdaftar. Tambahkan variabel dari form di bawah.
                   </div>

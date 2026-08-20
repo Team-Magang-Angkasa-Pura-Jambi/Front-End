@@ -115,7 +115,7 @@ export const AnalysisYearlyChart = () => {
 
   const isInitializing = isLoadingEnergies || (energies.length > 0 && energyId === null);
   const isLoading = isInitializing || isLoadingChart;
-  const __isDataEmpty = !chartData || chartData.length === 0;
+  // const __isDataEmpty = !chartData || chartData.length === 0;
 
   return (
     <Card ref={ref} className="flex h-full w-full flex-col border-slate-200 shadow-md">

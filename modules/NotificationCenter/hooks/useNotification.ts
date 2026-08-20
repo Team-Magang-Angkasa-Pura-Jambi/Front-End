@@ -90,7 +90,7 @@ export const useNotification = () => {
       }
       return { previousData };
     },
-    onError: (err, ids, context) => {
+    onError: (__err, __ids, context) => {
       queryClient.setQueryData(QUERY_KEY, context?.previousData);
       toast.error("Gagal menghapus notifikasi");
     },

@@ -112,7 +112,7 @@ export const MeterForm = ({
   // 3. Fetching Data Detail Meter
   const {
     data: meterDetailRes,
-    isLoading: loadingMeterDetail,
+    // isLoading: loadingMeterDetail,
     isSuccess: isDetailLoaded,
   } = useQuery({
     queryKey: ["meter", meterId],
@@ -158,7 +158,7 @@ export const MeterForm = ({
 
   const energyTypeId = form.watch("meter.energy_type_id");
   const hasRollover = form.watch("meter.has_rollover");
-  const tankShape = form.watch("meter_profile.shape");
+  // const __tankShape = form.watch("meter_profile.shape");
 
   useEffect(() => {
     if (meterId && isDetailLoaded && isEnergyLoaded && meterDetailRes?.data) {
@@ -184,13 +184,13 @@ export const MeterForm = ({
         },
         meter_profile: data.tank_profile
           ? {
-              shape: data.tank_profile.shape as TankShape,
-              capacity_liters: data.tank_profile.capacity_liters,
-              height_max_cm: data.tank_profile.height_max_cm,
-              diameter_cm: data.tank_profile.diameter_cm ?? undefined,
-              length_cm: data.tank_profile.length_cm ?? undefined,
-              width_cm: data.tank_profile.width_cm ?? undefined,
-            }
+            shape: data.tank_profile.shape as TankShape,
+            capacity_liters: data.tank_profile.capacity_liters,
+            height_max_cm: data.tank_profile.height_max_cm,
+            diameter_cm: data.tank_profile.diameter_cm ?? undefined,
+            length_cm: data.tank_profile.length_cm ?? undefined,
+            width_cm: data.tank_profile.width_cm ?? undefined,
+          }
           : undefined,
         reading_config:
           data.reading_configs?.map((rc) => ({
