@@ -51,8 +51,22 @@ export const Page = () => {
   const showSpending = visualConfig?.yearly_spending?.show !== false;
   const showPax = visualConfig?.pax_correlation?.show !== false;
 
-  const isMiddleRowVisible = showHeatmap || showTrend || showFuel;
-  const isBottomRowVisible = showSpending || showPax;
+  const middleVisibleCount = [showHeatmap, showTrend, showFuel].filter(Boolean).length;
+  const bottomVisibleCount = [showSpending, showPax].filter(Boolean).length;
+
+  const isMiddleRowVisible = middleVisibleCount > 0;
+  const isBottomRowVisible = bottomVisibleCount > 0;
+
+  const getMiddleGridClass = (count: number) => {
+    if (count === 3) return "xl:grid-cols-3";
+    if (count === 2) return "xl:grid-cols-2";
+    return "xl:grid-cols-1";
+  };
+
+  const getBottomGridClass = (count: number) => {
+    if (count === 2) return "xl:grid-cols-2";
+    return "xl:grid-cols-1";
+  };
 
   return (
     <main className="min-h-screen w-full space-y-8 p-1 pb-20">
@@ -69,19 +83,19 @@ export const Page = () => {
           <ResourceConsumptionSummary />
 
           {isMiddleRowVisible && (
-            <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-3">
+            <div className={`grid grid-cols-1 items-stretch gap-6 ${getMiddleGridClass(middleVisibleCount)}`}>
               {showHeatmap && (
-                <motion.div variants={itemVariants}>
+                <motion.div variants={itemVariants} className="w-full">
                   <ModernEfficiencyDashboard />
                 </motion.div>
               )}
               {showTrend && (
-                <motion.div variants={itemVariants}>
+                <motion.div variants={itemVariants} className="w-full">
                   <AnalysisChart />
                 </motion.div>
               )}
               {showFuel && (
-                <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
+                <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }} className="w-full">
                   <FuelRefillAnalysis />
                 </motion.div>
               )}
@@ -89,14 +103,14 @@ export const Page = () => {
           )}
 
           {isBottomRowVisible && (
-            <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-2">
+            <div className={`grid grid-cols-1 items-stretch gap-6 ${getBottomGridClass(bottomVisibleCount)}`}>
               {showSpending && (
                 <motion.div variants={itemVariants} className="w-full">
                   <AnalysisYearlyChart />
                 </motion.div>
               )}
               {showPax && (
-                <motion.div variants={itemVariants}>
+                <motion.div variants={itemVariants} className="w-full">
                   <EnergyPaxCorrelationCard />
                 </motion.div>
               )}

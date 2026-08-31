@@ -112,12 +112,12 @@ export const MeterForm = ({
   // 3. Fetching Data Detail Meter
   const {
     data: meterDetailRes,
-    // isLoading: loadingMeterDetail,
+    isLoading: loadingMeterDetail,
     isSuccess: isDetailLoaded,
   } = useQuery({
     queryKey: ["meter", meterId],
     queryFn: () => getMeterByIdApi(meterId!),
-    enabled: !!meterId,
+    enabled: !!meterId && isEnergyLoaded,
   });
 
   // Memoize Data Options
@@ -162,7 +162,7 @@ export const MeterForm = ({
 
   useEffect(() => {
     if (meterId && isDetailLoaded && isEnergyLoaded && meterDetailRes?.data) {
-      const data = meterDetailRes.data;
+      const data = meterDetailRes.data as any;
 
       form.reset({
         meter: {
@@ -193,7 +193,7 @@ export const MeterForm = ({
           }
           : undefined,
         reading_config:
-          data.reading_configs?.map((rc) => ({
+          data.reading_configs?.map((rc: any) => ({
             reading_type_id: rc.reading_type?.reading_type_id,
             is_active: rc.is_active,
             alarm_min_threshold: rc.alarm_min_threshold,
@@ -219,7 +219,7 @@ export const MeterForm = ({
 
   const formErrors = form.formState.errors;
 
-  if (meterId && isEnergyLoading) return <ComponentLoader />;
+  if (meterId && (isEnergyLoading || loadingMeterDetail)) return <ComponentLoader />;
 
   return (
     <Form {...form}>
@@ -374,7 +374,7 @@ export const MeterForm = ({
                     </FormLabel>
                     <Select
                       onValueChange={(val) =>
-                        field.onChange(val === "none" ? undefined : Number(val))
+                        field.onChange(val === "none" ? null : Number(val))
                       }
                       value={field.value?.toString() ?? "none"}
                     >
@@ -407,7 +407,7 @@ export const MeterForm = ({
                       <Calculator className="text-muted-foreground h-3.5 w-3.5" /> Formula Kalkulasi
                     </FormLabel>
                     <Select
-                      onValueChange={(val) => field.onChange(val === "none" ? undefined : val)}
+                      onValueChange={(val) => field.onChange(val === "none" ? null : val)}
                       value={field.value ?? "none"}
                     >
                       <FormControl>

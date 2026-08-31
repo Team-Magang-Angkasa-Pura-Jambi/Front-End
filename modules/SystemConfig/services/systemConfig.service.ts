@@ -28,6 +28,10 @@ export interface WeatherLocationConfig {
   openweather_api_key: string;
 }
 
+export interface AiIntegrationConfig {
+  google_generative_ai_api_key: string;
+}
+
 export interface DashboardCardMetersConfig {
   electricityMeterIds: number[];
   waterMeterIds: number[];
@@ -39,6 +43,7 @@ export interface FullSystemConfigPayload {
   security: SecurityTokenConfig;
   weather: WeatherLocationConfig;
   dashboardCards: DashboardCardMetersConfig;
+  ai: AiIntegrationConfig;
 }
 
 export interface MeterOptionItem {

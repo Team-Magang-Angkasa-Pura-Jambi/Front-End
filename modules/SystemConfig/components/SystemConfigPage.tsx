@@ -99,12 +99,16 @@ export const SystemConfigPage = () => {
       waterMeterIds: [],
       fuelMeterIds: [],
     },
+    ai: {
+      google_generative_ai_api_key: "",
+    },
   });
 
   const [showSecrets, setShowSecrets] = useState({
     jwt: false,
     uploadthingSecret: false,
     uploadthingToken: false,
+    ai: false,
   });
 
   // Package Export / Import Modal States
@@ -175,6 +179,9 @@ export const SystemConfigPage = () => {
           electricityMeterIds: initialConfig.dashboardCards?.electricityMeterIds || [],
           waterMeterIds: initialConfig.dashboardCards?.waterMeterIds || [],
           fuelMeterIds: initialConfig.dashboardCards?.fuelMeterIds || [],
+        },
+        ai: {
+          google_generative_ai_api_key: initialConfig.ai?.google_generative_ai_api_key || "",
         },
       });
     }
@@ -929,6 +936,41 @@ export const SystemConfigPage = () => {
               </div>
               <p className="text-muted-foreground text-[11px] font-normal">
                 Kunci rahasia internal untuk menandatangani token sesi login pengguna.
+              </p>
+            </div>
+
+            {/* FIELD 5: Google AI Studio API Key */}
+            <div className="border-border/40 bg-muted/10 space-y-2 rounded-xl border p-3.5">
+              <Label className="text-foreground/90 text-xs font-medium">
+                5. Google AI Studio API Key (Gemini)
+              </Label>
+              <div className="relative">
+                <Input
+                  type={showSecrets.ai ? "text" : "password"}
+                  value={formData.ai.google_generative_ai_api_key || ""}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      ai: { ...prev.ai, google_generative_ai_api_key: e.target.value },
+                    }))
+                  }
+                  placeholder="AIzaSy..."
+                  className="bg-background/80 border-border/50 h-8 rounded-lg pr-9 font-mono text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSecrets((p) => ({ ...p, ai: !p.ai }))}
+                  className="text-muted-foreground hover:text-foreground absolute top-2 right-2.5"
+                >
+                  {showSecrets.ai ? (
+                    <EyeOff className="h-3.5 w-3.5" />
+                  ) : (
+                    <Eye className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              </div>
+              <p className="text-muted-foreground text-[11px] font-normal">
+                Kunci API untuk integrasi agen AI (mis. Formula Copilot) menggunakan Google Gemini AI SDK.
               </p>
             </div>
           </Card>

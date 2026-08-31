@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/common/components/ui/button";
+import { MenuGuard } from "@/common/components/MenuGuard";
 import { Sidebar, SidebarBody, SidebarLink, useSidebar } from "@/common/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
@@ -16,6 +17,7 @@ import {
   FilePenLine,
   HelpCircle,
   LayoutDashboard,
+  LayoutList,
   LayoutTemplate,
   LogOut,
   Search,
@@ -138,6 +140,18 @@ const menuGroups: MenuGroup[] = [
         label: "Konfigurasi Sistem",
         href: "/system-config",
         icon: <SlidersHorizontal className="h-5 w-5 shrink-0" />,
+        allowedRoles: [Role.SuperAdmin],
+      },
+      {
+        label: "Manajemen Menu",
+        href: "/menu-management",
+        icon: <LayoutList className="h-5 w-5 shrink-0" />,
+        allowedRoles: [Role.SuperAdmin],
+      },
+      {
+        label: "Panduan Sistem",
+        href: "/guide-management",
+        icon: <BookText className="h-5 w-5 shrink-0" />,
         allowedRoles: [Role.SuperAdmin],
       },
     ],
@@ -479,7 +493,7 @@ export const AuthLayouts = ({ children }: { children: React.ReactNode }) => {
 
       <main className="relative flex-1 overflow-y-auto p-4">
         <TechDecorations />
-        <div className="relative z-10">{children}</div>
+        <div className="relative z-10"><MenuGuard>{children}</MenuGuard></div>
         <UniversalPageGuideModal />
       </main>
     </div>

@@ -5,14 +5,16 @@
     "plugin:tailwindcss/recommended",
     "prettier"
   ],
-  "plugins": ["simple-import-sort", "tailwindcss", "unused-imports"],
+  "plugins": [
+    "simple-import-sort",
+    "tailwindcss",
+    "unused-imports"
+  ],
   "rules": {
     // 1. Matikan rule bawaan agar tidak bentrok dengan plugin
     "@typescript-eslint/no-unused-vars": "off",
-
     // 2. Rule utama: Error ini yang memicu auto-fix penghapusan import
     "unused-imports/no-unused-imports": "error",
-
     // 3. Rule pengganti no-unused-vars (tetap warn, tapi lewat plugin)
     "unused-imports/no-unused-vars": [
       "warn",
@@ -23,30 +25,45 @@
         "argsIgnorePattern": "^_"
       }
     ],
-
     "@typescript-eslint/no-explicit-any": "warn",
-
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
-
     "tailwindcss/no-custom-classname": "off",
     "tailwindcss/classnames-order": "off"
   },
-
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx"],
+      "files": [
+        "*.ts",
+        "*.tsx"
+      ],
       "rules": {
         "simple-import-sort/imports": [
           "error",
           {
             "groups": [
-              ["^react", "^@?\\w"],
-              ["^(@|components)(/.*|$)"],
-              ["^\\u0000"],
-              ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
-              ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
-              ["^.+\\.?(css)$"]
+              [
+                "^react",
+                "^@?\\w"
+              ],
+              [
+                "^(@|components)(/.*|$)"
+              ],
+              [
+                "^\\u0000"
+              ],
+              [
+                "^\\.\\.(?!/?$)",
+                "^\\.\\./?$"
+              ],
+              [
+                "^\\./(?=.*/)(?!/?$)",
+                "^\\.(?!/?$)",
+                "^\\./?$"
+              ],
+              [
+                "^.+\\.?(css)$"
+              ]
             ]
           }
         ]

@@ -97,8 +97,8 @@ export const AuditLogPage = () => {
       }),
   });
 
-  const auditItems: AuditLogItem[] = data?.data?.data || [];
-  const meta = data?.data?.meta || { total: 0, page: 1, limit: 15, total_pages: 1 };
+  const auditItems: AuditLogItem[] = data?.data || [];
+  const meta = data?.meta || { total: 0, page: 1, limit: 15, total_pages: 1 };
 
   // Client-side search filtering if keyword exists
   const filteredItems = useMemo(() => {
@@ -516,7 +516,7 @@ export const AuditLogPage = () => {
 
       {/* VISUAL DIFF INSPECTOR MODAL */}
       <Dialog open={!!selectedAudit} onOpenChange={(open) => !open && setSelectedAudit(null)}>
-        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+        <DialogContent className="max-h-[95vh] overflow-y-auto" maxWidth="4xl">
           <DialogHeader>
             <div className="flex flex-wrap items-center gap-2">
               {selectedAudit && getActionBadge(selectedAudit.action)}
@@ -589,7 +589,7 @@ export const AuditLogPage = () => {
                   </div>
 
                   {selectedAudit.old_values ? (
-                    <pre className="max-h-80 overflow-x-auto rounded-lg bg-slate-950 p-3 font-mono text-[11px] text-amber-300">
+                    <pre className="max-h-[60vh] overflow-x-auto rounded-lg bg-slate-950 p-3 font-mono text-[11px] text-amber-300">
                       {JSON.stringify(selectedAudit.old_values, null, 2)}
                     </pre>
                   ) : (
@@ -624,7 +624,7 @@ export const AuditLogPage = () => {
                   </div>
 
                   {selectedAudit.new_values ? (
-                    <pre className="max-h-80 overflow-x-auto rounded-lg bg-slate-950 p-3 font-mono text-[11px] text-emerald-300">
+                    <pre className="max-h-[60vh] overflow-x-auto rounded-lg bg-slate-950 p-3 font-mono text-[11px] text-emerald-300">
                       {JSON.stringify(selectedAudit.new_values, null, 2)}
                     </pre>
                   ) : (

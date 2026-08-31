@@ -140,15 +140,10 @@ export const LoginIllustration = () => {
         </defs>
         <motion.path
           fill="url(#waveGradient)"
-          d="M0,50 C25,25 75,75 100,50 L100,100 L0,100 Z"
-          animate={{
-            d: [
-              "M0,50 C25,25 75,75 100,50 L100,100 L0,100 Z",
-              "M0,50 C25,75 75,25 100,50 L100,100 L0,100 Z",
-              "M0,50 C25,25 75,75 100,50 L100,100 L0,100 Z",
-            ],
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          d="M0,50 C25,25 75,75 100,50 C125,25 175,75 200,50 L200,100 L0,100 Z"
+          initial={{ x: 0 }}
+          animate={{ x: -100 }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
         />
       </svg>
 

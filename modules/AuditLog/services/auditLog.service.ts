@@ -29,15 +29,14 @@ export interface GetAuditLogsParams {
 }
 
 export interface AuditLogsResponse {
+  status: string;
   message: string;
-  data: {
-    data: AuditLogItem[];
-    meta: {
-      total: number;
-      page: number;
-      limit: number;
-      total_pages: number;
-    };
+  data: AuditLogItem[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
   };
 }
 

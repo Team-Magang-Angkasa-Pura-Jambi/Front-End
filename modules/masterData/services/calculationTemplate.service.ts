@@ -22,11 +22,16 @@ export interface FormulaDefinition {
   };
 }
 
+export interface DataValidation {
+  rule: string;
+  error_message: string;
+}
+
 export interface CalculationTemplate {
   template_id: string;
   name: string;
   description?: string | null;
-  validations?: any;
+  validations?: DataValidation[];
   created_at?: string;
   updated_at?: string;
   definitions?: FormulaDefinition[];
@@ -102,6 +107,7 @@ export const createCalculationTemplateApi = async (payload: {
   template: {
     name: string;
     description?: string;
+    validations?: DataValidation[];
     definitions: Array<{
       name: string;
       is_main?: boolean;
@@ -122,6 +128,7 @@ export const updateCalculationTemplateApi = async (
     template: {
       name?: string;
       description?: string;
+      validations?: DataValidation[];
       definitions?: Array<{
         name: string;
         is_main?: boolean;
@@ -140,4 +147,9 @@ export const updateCalculationTemplateApi = async (
 export const deleteCalculationTemplateApi = async (id: string) => {
   const response = await api.delete(`${prefix}/${id}`);
   return response.data;
+};
+
+export const generateFormulaViaAIApi = async (prompt: string) => {
+  const response = await api.post(`/ai-agent/generate-formula`, { prompt });
+  return response.data.data;
 };

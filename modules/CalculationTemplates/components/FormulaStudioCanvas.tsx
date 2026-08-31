@@ -27,6 +27,7 @@ import {
   FormulaDefinition,
   FormulaVariable,
   getAvailableVariablesApi,
+  generateFormulaViaAIApi,
 } from "@/modules/masterData/services/calculationTemplate.service";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -41,9 +42,11 @@ import {
   Sparkles,
   Trash2,
   Variable,
+  Bot,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/common/components/ui/dialog";
 
 interface FormulaStudioCanvasProps {
   initialData?: CalculationTemplate | null;
@@ -104,6 +107,10 @@ export const FormulaStudioCanvas = ({
         ]
   );
 
+  const [validations, setValidations] = useState<{ rule: string; error_message: string }[]>(
+    initialData?.validations || []
+  );
+
   const [activeDefIndex, setActiveDefIndex] = useState(0);
 
   // Fetch available variables dictionary
@@ -127,10 +134,40 @@ export const FormulaStudioCanvas = ({
   const [testResult, setTestResult] = useState<number | null>(null);
   const [testError, setTestError] = useState<string | null>(null);
 
+  // AI Copilot state
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerateAI = async () => {
+    if (!aiPrompt.trim()) return toast.error("Masukkan deskripsi rumus terlebih dahulu.");
+    try {
+      setIsGenerating(true);
+      const data = await generateFormulaViaAIApi(aiPrompt);
+      if (data && data.definitions && data.definitions.length > 0) {
+        const newDef: FormulaDefinition = {
+          name: data.definitions[0].name || "AI Generated Formula",
+          is_main: data.definitions[0].is_main ?? false,
+          formula_items: data.definitions[0].formula_items,
+        };
+        setDefinitions((prev) => [...prev, newDef]);
+        setActiveDefIndex(definitions.length); // will focus the newly added def
+        toast.success("Rumus berhasil digenerate oleh AI!");
+        setIsAiModalOpen(false);
+        setAiPrompt("");
+      }
+    } catch (error: any) {
+      toast.error("Gagal men-generate rumus: " + (error.response?.data?.message || error.message));
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || "");
       setDescription(initialData.description || "");
+      setValidations(initialData.validations || []);
       if (initialData.definitions && initialData.definitions.length > 0) {
         setDefinitions(initialData.definitions);
       }
@@ -429,10 +466,35 @@ export const FormulaStudioCanvas = ({
       }
     }
 
+    for (let i = 0; i < validations.length; i++) {
+      const val = validations[i];
+      if (!val.rule.trim() || !val.error_message.trim()) {
+        toast.error(`Aturan dan pesan error pada validasi ke-${i + 1} tidak boleh kosong.`);
+        return;
+      }
+    }
+
     onSave({
       name: name.trim(),
       description: description.trim(),
       definitions,
+      validations,
+    } as any);
+  };
+
+  const handleAddValidation = () => {
+    setValidations((prev) => [...prev, { rule: "RESULT > 0", error_message: "Hasil tidak boleh negatif" }]);
+  };
+
+  const handleRemoveValidation = (idx: number) => {
+    setValidations((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateValidation = (idx: number, field: "rule" | "error_message", value: string) => {
+    setValidations((prev) => {
+      const copy = [...prev];
+      copy[idx] = { ...copy[idx], [field]: value };
+      return copy;
     });
   };
 
@@ -533,6 +595,92 @@ export const FormulaStudioCanvas = ({
                   className="bg-background border-border/60 text-xs"
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 1.5: Data Validation */}
+          <Card className="border-border/60 bg-card shadow-xs">
+            <CardHeader className="border-border/40 border-b pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-foreground flex items-center gap-2 text-sm font-bold">
+                  Aturan Validasi Data
+                </CardTitle>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-6 px-2 text-[10px]"
+                  onClick={handleAddValidation}
+                >
+                  <Plus className="mr-1 h-3 w-3" /> Tambah
+                </Button>
+              </div>
+              <CardDescription className="text-muted-foreground text-[11px]">
+                Validasi hasil kalkulasi (Gunakan RESULT untuk merujuk hasil).
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 p-4">
+              {validations.length === 0 ? (
+                <div className="text-muted-foreground bg-muted/10 rounded-lg border border-dashed p-4 text-center text-[10px] italic">
+                  Belum ada aturan validasi.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {validations.map((val, idx) => (
+                    <div key={idx} className="bg-background border-border/60 relative space-y-2 rounded-lg border p-3">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-destructive absolute right-1 top-1 h-5 w-5"
+                        onClick={() => handleRemoveValidation(idx)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                      
+                      <div className="space-y-1 pr-6">
+                        <Label className="text-foreground text-[10px] font-bold">Aturan (Ekspresi)</Label>
+                        <Input
+                          value={val.rule}
+                          onChange={(e) => updateValidation(idx, "rule", e.target.value)}
+                          placeholder="Contoh: RESULT >= 0"
+                          className="bg-background border-border/60 h-7 font-mono text-[10px]"
+                        />
+                      </div>
+                      <div className="space-y-1 pr-6">
+                        <Label className="text-foreground text-[10px] font-bold">Pesan Error</Label>
+                        <Input
+                          value={val.error_message}
+                          onChange={(e) => updateValidation(idx, "error_message", e.target.value)}
+                          placeholder="Pesan saat validasi gagal"
+                          className="bg-background border-border/60 h-7 text-[10px]"
+                        />
+                      </div>
+
+                      <div className="flex flex-wrap gap-1 pr-6 pt-2">
+                        <span className="text-muted-foreground w-full text-[9px] font-medium">Sisip Cepat Variabel:</span>
+                        <button
+                          type="button"
+                          onClick={() => updateValidation(idx, "rule", (val.rule + " RESULT").trim())}
+                          className="bg-primary/10 text-primary hover:bg-primary/20 rounded px-1.5 py-0.5 font-mono text-[9px] font-bold transition-colors"
+                        >
+                          + RESULT
+                        </button>
+                        {Array.from(new Set(definitions.flatMap(d => d.formula_items.variables?.map(v => v.label) || []))).map((vLabel) => (
+                          <button
+                            key={vLabel}
+                            type="button"
+                            onClick={() => updateValidation(idx, "rule", (val.rule + " " + vLabel).trim())}
+                            className="bg-secondary text-secondary-foreground hover:bg-secondary/80 border-border/40 rounded border px-1.5 py-0.5 font-mono text-[9px] font-bold transition-colors"
+                          >
+                            + {vLabel}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -680,15 +828,26 @@ export const FormulaStudioCanvas = ({
                   </CardTitle>
                 </div>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="border-border/60 text-primary hover:bg-primary/10 h-8 gap-1 text-xs"
-                  onClick={handleAddDefinition}
-                >
-                  <Plus className="h-3.5 w-3.5" /> Tambah Sub-Kalkulasi
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-indigo-500/40 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300 h-8 gap-1 text-xs shadow-sm"
+                    onClick={() => setIsAiModalOpen(true)}
+                  >
+                    <Bot className="h-4 w-4" /> Tanya Sentinel AI ✨
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-border/60 text-primary hover:bg-primary/10 h-8 gap-1 text-xs"
+                    onClick={handleAddDefinition}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Tambah Sub-Kalkulasi
+                  </Button>
+                </div>
               </div>
 
               {/* Sub-formula Tabs Bar */}
@@ -1039,6 +1198,42 @@ export const FormulaStudioCanvas = ({
           </Card>
         </div>
       </div>
+
+      <Dialog open={isAiModalOpen} onOpenChange={setIsAiModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-indigo-500" /> Tanya Sentinel AI
+            </DialogTitle>
+            <DialogDescription>
+              Deskripsikan rumus matematika yang Anda butuhkan (contoh: "Hitung volume tangki kotak dibagi kapasitas") dan AI akan menerjemahkannya ke dalam formula.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <textarea
+              className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Tuliskan deskripsi rumusnya di sini..."
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsAiModalOpen(false)}>
+              Batal
+            </Button>
+            <Button
+              type="button"
+              className="bg-indigo-600 text-white hover:bg-indigo-700 gap-2"
+              onClick={handleGenerateAI}
+              disabled={isGenerating}
+            >
+              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {isGenerating ? "Menganalisis..." : "Generate Formula"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
