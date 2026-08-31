@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/common/compo
 import { Input } from "@/common/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/common/components/ui/tabs";
 import { BugReportModal } from "@/modules/BugReport/components/BugReportModal";
+import { FloatingActionGroup } from "@/modules/AiAgent/components/FloatingActionGroup";
 import {
   HelpCircle,
   Info,
@@ -99,13 +100,16 @@ export const UniversalPageGuideModal = () => {
 
   if (!currentGuide) {
     return (
-      <BugReportModal open={isBugModalOpen} onOpenChange={setIsBugModalOpen} />
+      <>
+        <FloatingActionGroup />
+        <BugReportModal open={isBugModalOpen} onOpenChange={setIsBugModalOpen} />
+      </>
     );
   }
 
   return (
     <>
-
+      <FloatingActionGroup />
       {/* BUG REPORT MODAL */}
       <BugReportModal open={isBugModalOpen} onOpenChange={setIsBugModalOpen} />
 
