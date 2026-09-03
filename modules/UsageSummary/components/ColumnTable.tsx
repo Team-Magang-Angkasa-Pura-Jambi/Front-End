@@ -218,180 +218,229 @@ export const createColumns = (
     },
   ];
 
-  const isElectricity = dataType === "Electricity";
-  const dynamicColumns: ColumnDef<RecapDataRow>[] = isElectricity
-    ? [
-        {
-          accessorKey: "target",
-          header: ({ column }) => <SortableHeader column={column} title="Target (kWh)" />,
-          cell: ({ row }) => (
-            <IconLabel icon={Target} label={formatNumber(row.getValue("target"))} />
-          ),
-        },
-        {
-          accessorKey: "pemakaian wbp",
-          header: ({ column }) => <SortableHeader column={column} title="WBP (kWh)" />,
-          cell: ({ row }) => (
-            <IconLabel icon={Zap} label={formatNumber(row.getValue("pemakaian wbp"))} />
-          ),
-        },
-        {
-          accessorKey: "pemakaian lwbp",
-          header: ({ column }) => <SortableHeader column={column} title="LWBP (kWh)" />,
-          cell: ({ row }) => (
-            <IconLabel icon={Zap} label={formatNumber(row.getValue("pemakaian lwbp"))} />
-          ),
-        },
-        {
-          accessorKey: "consumption",
-          header: ({ column }) => <SortableHeader column={column} title="Total Konsumsi (kWh)" />,
-          cell: ({ row }) => (
-            <span className="font-semibold">{formatNumber(row.getValue("consumption"))}</span>
-          ),
-        },
-        {
-          accessorKey: "pax",
-          header: ({ column }) => <SortableHeader column={column} title="Pax" />,
-          cell: ({ row }) => <IconLabel icon={Users} label={formatNumber(row.getValue("pax"))} />,
-        },
-        {
-          id: "suhu",
-          header: ({ column }) => <SortableHeader column={column} title="Suhu (°C)" />,
-          cell: ({ row }) => {
-            const rawAvg = row.original.suhu_rata_rata;
-            const rawMax = row.original.suhu_max;
+  let dynamicColumns: ColumnDef<RecapDataRow>[] = [];
 
-            if (
-              (rawAvg === null || rawAvg === undefined) &&
-              (rawMax === null || rawMax === undefined)
-            ) {
-              return <span className="text-muted-foreground">-</span>;
-            }
+  if (dataType === "Electricity") {
+    dynamicColumns = [
+      {
+        accessorKey: "target",
+        header: ({ column }) => <SortableHeader column={column} title="Target (kWh)" />,
+        cell: ({ row }) => <IconLabel icon={Target} label={formatNumber(row.getValue("target"))} />,
+      },
+      {
+        accessorKey: "pemakaian wbp",
+        header: ({ column }) => <SortableHeader column={column} title="WBP (kWh)" />,
+        cell: ({ row }) => <IconLabel icon={Zap} label={formatNumber(row.getValue("pemakaian wbp"))} />,
+      },
+      {
+        accessorKey: "pemakaian lwbp",
+        header: ({ column }) => <SortableHeader column={column} title="LWBP (kWh)" />,
+        cell: ({ row }) => <IconLabel icon={Zap} label={formatNumber(row.getValue("pemakaian lwbp"))} />,
+      },
+      {
+        accessorKey: "consumption",
+        header: ({ column }) => <SortableHeader column={column} title="Total Konsumsi (kWh)" />,
+        cell: ({ row }) => (
+          <span className="font-semibold">{formatNumber(row.getValue("consumption"))}</span>
+        ),
+      },
+      {
+        accessorKey: "pax",
+        header: ({ column }) => <SortableHeader column={column} title="Pax" />,
+        cell: ({ row }) => <IconLabel icon={Users} label={formatNumber(row.getValue("pax"))} />,
+      },
+      {
+        id: "suhu",
+        header: ({ column }) => <SortableHeader column={column} title="Suhu (°C)" />,
+        cell: ({ row }) => {
+          const rawAvg = row.original.suhu_rata_rata;
+          const rawMax = row.original.suhu_max;
 
-            const avgTemp = rawAvg !== null && rawAvg !== undefined ? Number(rawAvg) : null;
-            const maxTemp = rawMax !== null && rawMax !== undefined ? Number(rawMax) : null;
+          if (
+            (rawAvg === null || rawAvg === undefined) &&
+            (rawMax === null || rawMax === undefined)
+          ) {
+            return <span className="text-muted-foreground">-</span>;
+          }
 
-            return (
-              <div className="flex flex-col gap-1.5">
-                {avgTemp !== null && (
-                  <Badge
-                    variant={avgTemp > 30 ? "destructive" : "secondary"}
-                    className="w-fit text-[10px]"
-                    title="Suhu Rata-rata"
-                  >
-                    {avgTemp > 30 ? (
-                      <Flame className="mr-1 h-3 w-3" />
-                    ) : (
-                      <Thermometer className="mr-1 h-3 w-3" />
-                    )}
-                    Avg: {formatNumber(avgTemp)}
-                  </Badge>
-                )}
+          const avgTemp = rawAvg !== null && rawAvg !== undefined ? Number(rawAvg) : null;
+          const maxTemp = rawMax !== null && rawMax !== undefined ? Number(rawMax) : null;
 
-                {maxTemp !== null && (
-                  <Badge
-                    variant={maxTemp > 30 ? "destructive" : "secondary"}
-                    className="w-fit text-[10px]"
-                    title="Suhu Maksimal"
-                  >
-                    {maxTemp > 30 ? (
-                      <Flame className="mr-1 h-3 w-3" />
-                    ) : (
-                      <Thermometer className="mr-1 h-3 w-3" />
-                    )}
-                    Max: {formatNumber(maxTemp)}
-                  </Badge>
-                )}
-              </div>
-            );
-          },
-        },
-        {
-          accessorKey: "hari_kerja",
-          header: ({ column }) => <SortableHeader column={column} title="Hari Kerja" />,
-          cell: ({ row }) => {
-            const isWorkday = row.getValue("hari_kerja") === "Kerja";
-            return (
-              <IconLabel
-                icon={isWorkday ? Briefcase : Home}
-                label={isWorkday ? "Hari Kerja" : "Libur"}
-              />
-            );
-          },
-        },
-        {
-          accessorKey: "classification",
-          header: ({ column }) => <SortableHeader column={column} title="Nilai Deviasi" />,
-          cell: ({ row }) => {
-            const rawClass = row.original.classification;
-            const type = normalizeClassification(rawClass);
-            const score = row.original.confidence_score;
-
-            // Tampilkan tombol action JIKA klasifikasi belum ada atau UNKNOWN
-            if (!type || !CLASSIFICATION_MAP[type]) {
-              return <AiActionCell row={row} meterId={meterId} actionType="classify" />;
-            }
-
-            const config = CLASSIFICATION_MAP[type];
-            const TrendIcon = config.icon;
-
-            return (
-              <div className="flex flex-col items-center justify-center gap-2">
-                <Badge className={cn("w-20 justify-center shadow-sm", config.badge)}>
-                  {rawClass} {/* Tetap pertahankan format aslinya saat ditampilkan */}
-                </Badge>
-                <div
-                  className={cn("flex items-center gap-1 font-mono text-xs font-bold", config.text)}
+          return (
+            <div className="flex flex-col gap-1.5">
+              {avgTemp !== null && (
+                <Badge
+                  variant={avgTemp > 30 ? "destructive" : "secondary"}
+                  className="w-fit text-[10px]"
+                  title="Suhu Rata-rata"
                 >
-                  <TrendIcon className="h-3.5 w-3.5" />
-                  {score != null ? `${score.toFixed(1)}%` : "-"}
-                </div>
+                  {avgTemp > 30 ? (
+                    <Flame className="mr-1 h-3 w-3" />
+                  ) : (
+                    <Thermometer className="mr-1 h-3 w-3" />
+                  )}
+                  Avg: {formatNumber(avgTemp)}
+                </Badge>
+              )}
+
+              {maxTemp !== null && (
+                <Badge
+                  variant={maxTemp > 30 ? "destructive" : "secondary"}
+                  className="w-fit text-[10px]"
+                  title="Suhu Maksimal"
+                >
+                  {maxTemp > 30 ? (
+                    <Flame className="mr-1 h-3 w-3" />
+                  ) : (
+                    <Thermometer className="mr-1 h-3 w-3" />
+                  )}
+                  Max: {formatNumber(maxTemp)}
+                </Badge>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "hari_kerja",
+        header: ({ column }) => <SortableHeader column={column} title="Hari Kerja" />,
+        cell: ({ row }) => {
+          const isWorkday = row.getValue("hari_kerja") === "Kerja";
+          return (
+            <IconLabel
+              icon={isWorkday ? Briefcase : Home}
+              label={isWorkday ? "Hari Kerja" : "Libur"}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "classification",
+        header: ({ column }) => <SortableHeader column={column} title="Nilai Deviasi" />,
+        cell: ({ row }) => {
+          const rawClass = row.original.classification;
+          const type = normalizeClassification(rawClass);
+          const score = row.original.confidence_score;
+
+          if (!type || !CLASSIFICATION_MAP[type]) {
+            return <AiActionCell row={row} meterId={meterId} actionType="classify" />;
+          }
+
+          const config = CLASSIFICATION_MAP[type];
+          const TrendIcon = config.icon;
+
+          return (
+            <div className="flex flex-col items-center justify-center gap-2">
+              <Badge className={cn("w-20 justify-center shadow-sm", config.badge)}>
+                {rawClass}
+              </Badge>
+              <div
+                className={cn("flex items-center gap-1 font-mono text-xs font-bold", config.text)}
+              >
+                <TrendIcon className="h-3.5 w-3.5" />
+                {score != null ? `${score.toFixed(1)}%` : "-"}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "predict",
+        header: ({ column }) => <SortableHeader column={column} title="Prediksi" />,
+        cell: ({ row }) => {
+          const pred = row.original.prediction;
+
+          if (pred !== null && pred !== undefined) {
+            return (
+              <div className="text-primary text-center font-mono font-semibold">
+                {formatNumber(pred)}
               </div>
             );
-          },
-        },
-        {
-          accessorKey: "predict",
-          header: ({ column }) => <SortableHeader column={column} title="Prediksi" />,
-          cell: ({ row }) => {
-            const pred = row.original.prediction;
+          }
 
-            // PERBAIKAN 3: Validasi ketat untuk tipe data null dan undefined
-            if (pred !== null && pred !== undefined) {
-              return (
-                <div className="text-primary text-center font-mono font-semibold">
-                  {formatNumber(pred)}
-                </div>
-              );
-            }
-
-            // Jika kosong, tampilkan action button
-            return <AiActionCell row={row} meterId={meterId} actionType="predict" />;
-          },
+          return <AiActionCell row={row} meterId={meterId} actionType="predict" />;
         },
-      ]
-    : [
-        {
-          accessorKey: "target",
-          header: ({ column }) => <SortableHeader column={column} title="Target" />,
-          cell: ({ row }) => (
+      },
+    ];
+  } else if (dataType === "Fuel") {
+    // Kolom Statis Khusus Fuel / BBM Sesuai Response API Baru Anda
+    dynamicColumns = [
+      {
+        accessorKey: "pemakaian bbm harian (liter)",
+        header: ({ column }) => <SortableHeader column={column} title="Pemakaian BBM (L)" />,
+        cell: ({ row }) => (
+          <IconLabel
+            icon={Fuel}
+            label={`${formatNumber(row.getValue("pemakaian bbm harian (liter)"))} L`}
+          />
+        ),
+      },
+      {
+        accessorKey: "sisa stok ground tank (liter)",
+        header: ({ column }) => <SortableHeader column={column} title="Sisa Stok Ground (L)" />,
+        cell: ({ row }) => (
+          <span className="font-medium">
+            {formatNumber(row.getValue("sisa stok ground tank (liter)"))} L
+          </span>
+        ),
+      },
+      {
+        accessorKey: "total stok siap pakai (ground + daily)",
+        header: ({ column }) => <SortableHeader column={column} title="Total Stok (L)" />,
+        cell: ({ row }) => (
+          <span className="font-semibold">
+            {formatNumber(row.getValue("total stok siap pakai (ground + daily)"))} L
+          </span>
+        ),
+      },
+      {
+        accessorKey: "estimasi ketahanan menyala (jam)",
+        header: ({ column }) => <SortableHeader column={column} title="Estimasi Ketahanan (Jam)" />,
+        cell: ({ row }) => (
+          <span className="font-mono text-emerald-600 dark:text-emerald-400">
+            {formatNumber(row.getValue("estimasi ketahanan menyala (jam)"))} Jam
+          </span>
+        ),
+      },
+      {
+        accessorKey: "hari_kerja",
+        header: ({ column }) => <SortableHeader column={column} title="Hari Kerja" />,
+        cell: ({ row }) => {
+          const isWorkday = row.getValue("hari_kerja") === "Kerja";
+          return (
             <IconLabel
-              icon={Target}
-              label={`${formatNumber(row.getValue("target"))} ${dataType === "Water" ? "m³" : "L"}`}
+              icon={isWorkday ? Briefcase : Home}
+              label={isWorkday ? "Hari Kerja" : "Libur"}
             />
-          ),
+          );
         },
-        {
-          accessorKey: "consumption",
-          header: ({ column }) => <SortableHeader column={column} title="Pemakaian" />,
-          cell: ({ row }) => (
-            <IconLabel
-              icon={dataType === "Water" ? Droplets : Fuel}
-              label={`${formatNumber(row.getValue("consumption"))} ${dataType === "Water" ? "m³" : "L"}`}
-            />
-          ),
-        },
-      ];
+      },
+    ];
+  } else {
+    // Water Type Columns
+    dynamicColumns = [
+      {
+        accessorKey: "target",
+        header: ({ column }) => <SortableHeader column={column} title="Target" />,
+        cell: ({ row }) => (
+          <IconLabel
+            icon={Target}
+            label={`${formatNumber(row.getValue("target"))} m³`}
+          />
+        ),
+      },
+      {
+        accessorKey: "consumption",
+        header: ({ column }) => <SortableHeader column={column} title="Pemakaian" />,
+        cell: ({ row }) => (
+          <IconLabel
+            icon={Droplets}
+            label={`${formatNumber(row.getValue("consumption"))} m³`}
+          />
+        ),
+      },
+    ];
+  }
 
   const commonEndColumns: ColumnDef<RecapDataRow>[] = [
     {

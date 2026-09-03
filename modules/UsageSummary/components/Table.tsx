@@ -3,6 +3,12 @@
 import { Button } from "@/common/components/ui/button";
 import { Skeleton } from "@/common/components/ui/skeleton";
 import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/common/components/ui/dropdown-menu";
+import {
   Table,
   TableBody,
   TableCell,
@@ -14,6 +20,7 @@ import {
 import { EnergyTypeName } from "@/common/types/energy";
 import {
   ColumnDef,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
@@ -22,8 +29,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
+import { SlidersHorizontal } from "lucide-react";
 
-// Sesuaikan type dengan response backend baru (mendukung snake_case/camelCase)
 export interface RecapMeta {
   total_rows?: number;
   total_cost?: number;
@@ -49,6 +56,7 @@ export function RecapTable<TData, TValue>({
   meta,
 }: RecapTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
@@ -57,7 +65,11 @@ export function RecapTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    state: { sorting },
+    onColumnVisibilityChange: setColumnVisibility,
+    state: {
+      sorting,
+      columnVisibility,
+    },
   });
 
   const formatCurrency = (amount: number) =>
@@ -83,13 +95,44 @@ export function RecapTable<TData, TValue>({
     }).format(num);
   };
 
-  // Helper untuk mendapatkan nilai dari meta (menangani perbedaan snake_case dari backend dan camelCase dari axios interceptor jika ada)
   const totalCost = meta?.total_cost ?? meta?.totalCost ?? 0;
   const totalConsumption = meta?.total_consumption ?? meta?.totalConsumption ?? 0;
   const columnTotals = meta?.column_totals ?? meta?.columnTotals ?? {};
 
   return (
     <div className="space-y-4">
+      {/* Tombol Toggle Sembunyikan/Tampilkan Kolom */}
+      <div className="flex justify-end px-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="ml-auto flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4" />
+              Kelola Kolom
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {table
+              .getAllColumns()
+              .filter(
+                (column) =>
+                  typeof column.accessorFn !== "undefined" && column.getCanHide()
+              )
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize cursor-pointer"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       <div className="bg-card overflow-hidden rounded-md border">
         <div className="overflow-x-auto">
           <Table>
@@ -142,14 +185,14 @@ export function RecapTable<TData, TValue>({
               )}
             </TableBody>
 
-            {/* FOOTER DINAMIS: Sejajar dengan kolom di atasnya */}
+            {/* FOOTER DINAMIS: Menyesuaikan kolom statis/dinamis & visibilitas */}
             {!isLoading && data.length > 0 && (
               <TableFooter className="bg-muted/30">
                 <TableRow>
                   {table.getVisibleLeafColumns().map((column) => {
                     const colId = column.id;
 
-                    // Kolom Pertama (Tanggal)
+                    // Kolom Tanggal / Pertama
                     if (colId === "date") {
                       return (
                         <TableCell key={colId} className="font-bold tracking-wider uppercase">
@@ -176,17 +219,17 @@ export function RecapTable<TData, TValue>({
                       );
                     }
 
-                    // Kolom Dinamis (WBP, LWBP, Target)
-                    if (["target", "pemakaian wbp", "pemakaian lwbp"].includes(colId)) {
+                    // Kolom Berupa Angka / Total dari column_totals (Termasuk BBM, Sisa Stok, dll)
+                    if (columnTotals[colId] !== undefined) {
                       const val = columnTotals[colId];
                       return (
                         <TableCell key={colId} className="font-bold">
-                          {val ? formatDecimal(val) : "-"}
+                          {val !== null && val !== undefined ? formatDecimal(val) : "-"}
                         </TableCell>
                       );
                     }
 
-                    // Kolom Dinamis (Pax - Format Integer)
+                    // Kolom Pax (Format Integer)
                     if (colId === "pax") {
                       const val = columnTotals[colId];
                       return (
@@ -196,7 +239,7 @@ export function RecapTable<TData, TValue>({
                       );
                     }
 
-                    // Kolom yang tidak bisa dijumlahkan (Suhu, Hari Kerja, Klasifikasi, Prediksi)
+                    // Kolom Lainnya yang Tidak Perlu Akumulasi Total
                     return (
                       <TableCell key={colId} className="text-muted-foreground text-center">
                         -
