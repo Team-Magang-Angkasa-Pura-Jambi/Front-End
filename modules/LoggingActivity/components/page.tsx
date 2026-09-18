@@ -45,6 +45,10 @@ import { DailyPaxData, PaxDailyTable } from "./PaxDailyTable";
 import { PaxEditForm } from "./PaxEditForm";
 import { ReadingForm } from "./readingForm";
 import { DataTable } from "./Table";
+import { FileSpreadsheet } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
+import { ImportMeterModal } from "./ImportMeterModal";
+
 
 export const Page = () => {
   const queryClient = useQueryClient();
@@ -95,9 +99,12 @@ export const Page = () => {
     };
   });
 
+  const { user } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ReadingHistory | null>(null);
   const [itemToDelete, setItemToDelete] = useState<ReadingHistory | null>(null);
+
 
   const [isPaxModalOpen, setIsPaxModalOpen] = useState(false);
   const [editingPaxData, setEditingPaxData] = useState<DailyPaxData | null>(null);
@@ -307,11 +314,20 @@ export const Page = () => {
     return (
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>Tabel Riwayat Pencatatan</CardTitle>
               <CardDescription>Menampilkan detail angka stand meteran.</CardDescription>
             </div>
+            {user?.role === "SUPER_ADMIN" && (
+              <Button
+                onClick={() => setIsImportModalOpen(true)}
+                className="bg-gradient-to-r from-indigo-600 to-slate-800 hover:from-indigo-700 hover:to-slate-900 text-white font-semibold shadow-md transition-all flex items-center gap-2"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                Import Data Meteran
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -414,6 +430,16 @@ export const Page = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ImportMeterModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["readingHistory"] });
+        }}
+        typesEnergies={typesEnergies?.data || []}
+      />
     </div>
   );
 };
+
